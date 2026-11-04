@@ -19,7 +19,7 @@ Details:
 - **Shared UI:** `packages/ui` (shadcn, `radix-nova` preset) is created now, ahead of M0. It holds the theme (`styles.css`), the shadcn components and shared domain components such as `SnippetTabs`. The dashboard will import the same package and theme.
 - **Markup in `.tsx`, not `.astro`.** Sections are React components rendered to static HTML; only interactive parts hydrate (`client:visible`). `.astro` files only compose pages and layouts. Reasons: `@astrojs/check` supports TypeScript 5/6 only (we use 7), oxfmt skips `.astro` files, and oxlint reads only their frontmatter. In `.tsx` files, `tsc`, oxlint and `@shadcn/lint` check everything.
 - **Strict CSP without `'unsafe-inline'`.** Astro's `security.csp` hashes its own inline scripts and styles into a per-page `<meta>`. Code samples use Prism (class-based highlighting) because Shiki emits inline styles. A few style attributes Radix renders on the server are allowed by hash (`'unsafe-hashes'`). Directives a `<meta>` can't carry (`frame-ancestors`), HSTS and the other security headers are set in `apps/www/vercel.json`.
-- **Vercel setup lives in the repo** (`apps/www/vercel.json`): the install step pins Bun 1.4.4 (Vercel only guarantees "Bun ≥ 1.2" for `bun.lock`), the build runs through Turborepo, and `turbo-ignore` skips deploys when `apps/www` and its dependencies didn't change.
+- **Vercel setup lives in the repo** (`apps/www/vercel.json`): Vercel installs with its native Bun (detected from `bun.lock`, currently 1.4.4), Astro runs on the Bun runtime (`bun --bun`), the build runs through Turborepo, and `turbo-ignore` skips deploys when `apps/www` and its dependencies didn't change.
 - **Design-system linting:** `@shadcn/lint` runs as an oxlint JS plugin for all app code. The vendored components in `packages/ui/src/components` are exempt from `no-restyle` and `no-arbitrary-values` because they define the design system.
 
 ## Consequences
@@ -28,6 +28,7 @@ Details:
 - Vercel hosts only the public website. It's not part of the self-hosted product, so I14 (no proprietary cloud service in the core) is unaffected. Self-hosters never need Vercel.
 - `.astro` files are not typechecked or formatted. Keep them thin.
 - The Radix style hashes in `astro.config.ts` can go stale after a Radix update. The symptom is a CSP warning in the browser console (with the new hash) and a missing accordion animation, not broken content.
+- The Vercel project (`awinter-dev/backbricks`, Root Directory `apps/www`) serves `backbricks.app`; `www.backbricks.app` redirects to it (308).
 - Follow-ups:
   - M0: the dashboard imports `@backbricks/ui/styles.css`. dependency-cruiser gets a rule that `apps/www` may import only `packages/ui` (later also `packages/api-contract` types), never server code.
   - M5: add Starlight at `/docs`, plus `/errors/*`, `/schema/*` and the full `llms.txt` to `apps/www`.
