@@ -44,5 +44,10 @@ const ogImage = new URL('/og.png', Astro.site);
       <slot />
     </main>
     <SiteFooter year={new Date().getFullYear()} />
+    <script>
+      import { startAnalytics } from '../lib/analytics.ts';
+
+      startAnalytics();
+    </script>
   </body>
 </html>

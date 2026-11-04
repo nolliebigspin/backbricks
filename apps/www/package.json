@@ -16,6 +16,7 @@
     "@astrojs/sitemap": "3.7.4",
     "@backbricks/ui": "workspace:*",
     "@tailwindcss/vite": "4.3.4",
+    "@vercel/analytics": "2.0.1",
     "astro": "7.4.5",
     "lucide-react": "1.68.0",
     "prismjs": "1.30.0",
