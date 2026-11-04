@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "codegraph": {
+      "type": "stdio",
+      "command": "mise",
+      "args": ["exec", "--", "codegraph", "serve", "--mcp"],
+      "alwaysLoad": true
+    }
+  }
+}

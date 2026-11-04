@@ -1,0 +1,42 @@
+# Pinned tool versions and environment tasks. Run `mise install`, then `mise run setup`.
+# Code-level pipelines (build, test, lint, …) live in package.json/turbo.json; this file only
+# orchestrates the environment. Don't define the same command in both places.
+min_version = "2025.1.0"
+
+[tools]
+bun = "1.4.4"
+node = "24" # Playwright test runner + Node compatibility tests for published packages (SDK, CLI)
+lefthook = "2.2.2"
+gh = "2"
+"npm:@colbymchenry/codegraph" = "1.6.2"
+
+[env]
+_.path = ["./node_modules/.bin"]
+
+[tasks.setup]
+description = "Install dependencies, git hooks and build the local code graph"
+run = ["bun install", "lefthook install", "[ -d .codegraph ] || codegraph init"]
+
+[tasks.dev]
+description = "Run the full dev environment (infra + server, worker, web) in Docker Compose"
+run = "docker compose up --build"
+
+[tasks.infra]
+description = "Start infra services only (Postgres, Garage, Mailpit) for host-based runs and tests"
+run = "docker compose up -d --wait postgres garage mailpit"
+
+[tasks.down]
+description = "Stop the dev environment"
+run = "docker compose down"
+
+[tasks.reset]
+description = "Stop the dev environment and delete its volumes (database, storage)"
+run = "docker compose down --volumes"
+
+[tasks.codegraph]
+description = "Rebuild the local code graph from scratch"
+run = "codegraph init"
+
+[tasks."gh:milestones"]
+description = "Create/update GitHub milestones from .github/milestones.json"
+run = "bun scripts/github/sync-milestones.ts"

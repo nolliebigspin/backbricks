@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Build output and caches
+dist/
+.turbo/
+.vite/
+*.tsbuildinfo
+coverage/
+
+# Test artifacts
+playwright-report/
+test-results/
+blob-report/
+
+# Local code graph (rebuilt via `mise run setup`)
+.codegraph/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+
+# Local Claude Code settings (shared settings live in .claude/settings.json)
+.claude/settings.local.json
+CLAUDE.local.md
+
+# OS / editor
+.DS_Store
+.idea/
+*.log
