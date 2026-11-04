@@ -1,0 +1,16 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 100,
+  "singleQuote": true,
+  "semi": true,
+  "trailingComma": "all",
+  "sortImports": true,
+  "sortPackageJson": true,
+  "ignorePatterns": [
+    "**/*.md",
+    "LICENSE",
+    "bun.lock",
+    "packages/api-contract/src/generated/**",
+    "packages/db/migrations/**"
+  ]
+}

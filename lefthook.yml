@@ -1,0 +1,6 @@
+# Git hooks, installed by `mise run setup` (lefthook install).
+# The hook calls the same script CI uses, scoped to affected packages for speed.
+pre-push:
+  commands:
+    check:
+      run: bun run check:affected

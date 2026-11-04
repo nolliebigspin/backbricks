@@ -1,0 +1,46 @@
+[
+  {
+    "title": "M0 · Foundation",
+    "description": "Workspaces, tooling, Docker Compose dev environment, CI, skeletons. Details: docs/MILESTONES.md#m0--foundation"
+  },
+  {
+    "title": "M1 · Platform Core",
+    "description": "Auth, orgs, projects, keys, tenancy, module registry, services, worker, OpenAPI, dashboard shell. Details: docs/MILESTONES.md#m1--platform-core"
+  },
+  {
+    "title": "M2 · Forms (v0.1.0)",
+    "description": "Headless forms module end to end + developer preview release. Details: docs/MILESTONES.md#m2--forms--v010-developer-preview"
+  },
+  {
+    "title": "M3 · Uploads (v0.2.0)",
+    "description": "Direct-to-storage uploads with copy-then-scan, linked to forms. Details: docs/MILESTONES.md#m3--uploads--v020"
+  },
+  {
+    "title": "M4 · Reviews (v0.3.0)",
+    "description": "Collect, moderate and publish reviews. Details: docs/MILESTONES.md#m4--reviews--v030"
+  },
+  {
+    "title": "M5 · Agent-ready (v0.4.0)",
+    "description": "SDK, CLI, MCP server, agent skill, docs site, examples. Details: docs/MILESTONES.md#m5--agent-ready--v040"
+  },
+  {
+    "title": "M6 · Open Source 1.0 (v1.0.0)",
+    "description": "Production self-hosting, hardening, release engineering. Details: docs/MILESTONES.md#m6--open-source-10--v100"
+  },
+  {
+    "title": "Backlog · Post-1.0 OSS",
+    "description": "Unscheduled open-source improvements (webhooks, React hooks, multipart uploads, more modules). Details: docs/MILESTONES.md#backlog--post-10-oss"
+  },
+  {
+    "title": "C1 · Cloud Foundation",
+    "description": "Cloud mode, plans and metering, RLS, EU infrastructure with PITR. Starts after M6. Details: docs/MILESTONES.md#c1--cloud-foundation"
+  },
+  {
+    "title": "C2 · Cloud Beta",
+    "description": "Billing, operations, restore drill, legal drafts, closed beta. Details: docs/MILESTONES.md#c2--cloud-beta"
+  },
+  {
+    "title": "C3 · Cloud GA",
+    "description": "Legal sign-off, status page, public launch. Details: docs/MILESTONES.md#c3--cloud-ga"
+  }
+]

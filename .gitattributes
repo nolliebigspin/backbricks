@@ -1,0 +1,5 @@
+* text=auto eol=lf
+
+bun.lock linguist-generated=true -diff
+packages/api-contract/src/generated/** linguist-generated=true
+packages/db/migrations/** linguist-generated=true
