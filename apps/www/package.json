@@ -5,10 +5,10 @@
   "license": "AGPL-3.0-only",
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "typecheck": "astro sync && tsc -p tsconfig.json"
+    "dev": "bun --bun astro dev",
+    "build": "bun --bun astro build",
+    "preview": "bun --bun astro preview",
+    "typecheck": "bun --bun astro sync && tsc -p tsconfig.json"
   },
   "dependencies": {
     "@astrojs/prism": "4.1.2",
