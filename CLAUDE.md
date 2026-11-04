@@ -26,6 +26,7 @@ Backbricks is an open-source (AGPL-3.0) headless platform that gives websites ma
 
 ```
 apps/web ──────────────► packages/ui, @backbricks/sdk/admin (generated client)
+apps/www ──────────────► packages/ui only (static website; docs from M5, ADR-0001)
 apps/server ───────────► packages/modules/* ─► packages/core ◄─ packages/adapters
                 │                                   ▲
                 └──► packages/db, packages/auth ────┘

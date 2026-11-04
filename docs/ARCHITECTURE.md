@@ -77,7 +77,7 @@ One TypeScript codebase with clearly separated domain modules (`forms`, `uploads
 
 Module boundaries are enforced technically (C.3), which keeps a later extraction (e.g. the scan worker or the public API) possible without paying for it now.
 
-**Why not Next.js:** The dashboard needs no SSR/SEO. The public API needs precise control (per-project CORS, body limits, rate limits, streamed exports, problem-details errors), and the worker is a separate process anyway. Hono + Vite SPA gives **one** Bun process with clear separation. All React/TypeScript/Tailwind knowledge still applies. A marketing/docs site can use Astro separately.
+**Why not Next.js:** The dashboard needs no SSR/SEO. The public API needs precise control (per-project CORS, body limits, rate limits, streamed exports, problem-details errors), and the worker is a separate process anyway. Hono + Vite SPA gives **one** Bun process with clear separation. All React/TypeScript/Tailwind knowledge still applies. The marketing and docs site is a separate static Astro app (`apps/www`, see ADR-0001).
 
 ### A.2 System context
 
@@ -966,7 +966,7 @@ sequenceDiagram
 
 ### D.11 Documentation for humans and agents
 
-- `docs/` as Markdown in the repo (source), rendered with Astro Starlight
+- `docs/` as Markdown in the repo (source), rendered with Astro Starlight at `backbricks.app/docs` inside `apps/www` (ADR-0001)
 - `llms.txt` and `llms-full.txt` at the docs root
 - Agent skill `skills/backbricks/SKILL.md` (integration flow, rules like "never put secret keys in frontend code", error codes, per-framework examples)
 - `backbricks docs --agent` provides the same guide offline
@@ -1140,7 +1140,7 @@ backbricks/
 ├─ apps/
 │  ├─ server/                 # Hono app; entry: serve | worker | migrate | setup
 │  ├─ web/                    # dashboard SPA (Vite)
-│  └─ docs/                   # Astro Starlight (from M5)
+│  └─ www/                    # backbricks.app: marketing site (Astro, Vercel); docs via Starlight from M5 (ADR-0001)
 ├─ packages/
 │  ├─ core/                   # contracts, TenantContext, errors, service interfaces, AbuseGuard, IDs, config
 │  ├─ db/                     # Drizzle setup, core tables, withTenant, migrations, seeds
@@ -1150,7 +1150,7 @@ backbricks/
 │  ├─ api-contract/           # generated openapi.json + TS types (committed build artifact)
 │  ├─ sdk/                    # @backbricks/sdk (MIT)
 │  ├─ cli/                    # backbricks CLI + MCP (MIT)
-│  ├─ ui/                     # shared dashboard components (shadcn-based)
+│  ├─ ui/                     # shared theme + components for dashboard and website (shadcn-based)
 │  └─ tsconfig/               # shared tsconfig presets
 ├─ cloud/                     # cloud only: plans, billing adapter (added in C1; narrow)
 ├─ examples/{nextjs,astro,html}/   # MIT
@@ -1272,7 +1272,7 @@ The difference is wired at startup via `DEPLOYMENT_MODE` and dependency injectio
 | E2E tests | **Playwright** (runs on Node via mise) | Cypress | Cross-browser, reliable, also used for SDK browser tests |
 | Property tests | **fast-check** (validators, CSV escaping, config diff) | – | Catches edge cases in parsers and validators |
 | API docs | **Scalar** (from OpenAPI) | Redoc, Swagger UI | Modern, readable |
-| Docs site | **Astro Starlight** | Docusaurus | Markdown-first, `llms.txt` easy |
+| Website + docs | **Astro** (static, React islands) + **Starlight** at `/docs`, hosted on Vercel | Next.js, Docusaurus, separate docs app | Static, shares `packages/ui`, Markdown-first, `llms.txt` easy (ADR-0001) |
 | MCP | **official TypeScript MCP SDK** (stdio) | – | Standard |
 | Code intelligence | **CodeGraph** (local, MCP) | Serena, plain grep | Local semantic graph; agents find existing code and impact before writing new code |
 | CI | **GitHub Actions** (`jdx/mise-action`), GHCR images, npm provenance | – | Standard for OSS |

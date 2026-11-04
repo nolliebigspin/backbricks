@@ -154,7 +154,7 @@ Effort in person-days (PD); refine to hours per task in `PLAN.md`.
 | P5.4 | CLI commands `login`, `init` (framework detection for env var names, `.gitignore`, optional `AGENTS.md` section), `pull`, `diff`, `push` (two-step with `planHash`, `--allow-destructive`), `validate`, `codegen`, `test submit`, `keys list`, `docs` |
 | P5.5 | `backbricks doctor`: connectivity, origins, key validity, scan for `bb_sk_` in public env prefixes and build output |
 | P5.6 | `backbricks mcp`: stdio MCP server with the tools from §D.9, per-tool scope checks, no delete tools, plan/apply enforced, audit `actor_type='mcp'` |
-| P5.7 | Agent docs: `skills/backbricks/SKILL.md`, `llms.txt`/`llms-full.txt`, quickstarts (Next.js, Astro, Vue, HTML), generated error-code reference, Scalar API reference; docs site with Astro Starlight (`apps/docs`) |
+| P5.7 | Agent docs: `skills/backbricks/SKILL.md`, `llms.txt`/`llms-full.txt`, quickstarts (Next.js, Astro, Vue, HTML), generated error-code reference, Scalar API reference; docs site with Astro Starlight at `/docs` inside `apps/www` (ADR-0001), plus `/errors/*` and `/schema/*` pages |
 | P5.8 | Examples: `examples/nextjs` (App Router, custom UI, contact + CV upload + reviews, variant with server action and secret key on the server), `examples/astro`, complete `examples/html` |
 | P5.9 | Dashboard wizard "Connect an AI agent": preset key + copyable prompt block for Claude Code/Codex |
 | P5.10 | Scenario A E2E: script `init → extend config → push → codegen → build example → Playwright submits form/upload/review → admin API verifies` |

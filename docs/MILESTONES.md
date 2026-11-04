@@ -28,7 +28,7 @@ flowchart LR
 ### M0 · Foundation
 - **Phase:** P0 · **Effort:** 4–5 PD · **Release:** –
 - **Goal:** A runnable, tested skeleton every later phase builds on.
-- **Scope:** workspace packages, architecture rules (dependency-cruiser), Docker Compose dev environment (infra + app services), env config, server/worker/migrate entry points, Drizzle + migration runner, dashboard skeleton with shadcn/ui, production Dockerfile, CI completion, library spike on Bun/TS 7.
+- **Scope:** workspace packages, architecture rules (dependency-cruiser), Docker Compose dev environment (infra + app services), env config, server/worker/migrate entry points, Drizzle + migration runner, dashboard skeleton reusing `packages/ui` (shadcn theme and components, already created with the website, ADR-0001), dependency-cruiser rule that `apps/www` imports only `packages/ui`, production Dockerfile, CI completion, library spike on Bun/TS 7.
 - **Exit criteria:**
   - `mise run setup && mise run dev` starts infra, server, worker and dashboard
   - `bun run check` green locally and in CI on a PR against `main`
@@ -75,7 +75,7 @@ flowchart LR
 ### M5 · Agent-ready → `v0.4.0`
 - **Phase:** P5 · **Effort:** 12–15 PD
 - **Goal:** An AI coding agent can integrate all three modules without human help (scenario A).
-- **Scope:** full SDK (+ admin client), CLI (`init`, `pull`, `diff`, `push`, `validate`, `codegen`, `test`, `doctor`, `docs`), stdio MCP server, agent skill, `llms.txt`, docs site, examples (Next.js, Astro, HTML), "Connect an AI agent" wizard.
+- **Scope:** full SDK (+ admin client), CLI (`init`, `pull`, `diff`, `push`, `validate`, `codegen`, `test`, `doctor`, `docs`), stdio MCP server, agent skill, `llms.txt`, docs site (Starlight at `backbricks.app/docs` inside `apps/www`, plus `/errors/*` and `/schema/*`), examples (Next.js, Astro, HTML), "Connect an AI agent" wizard.
 - **Exit criteria:**
   - Scenario A E2E green in CI
   - MCP server works in Claude Code; `doctor` catches misplaced secret keys
