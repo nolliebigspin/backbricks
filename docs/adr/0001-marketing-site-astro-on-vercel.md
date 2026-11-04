@@ -30,6 +30,7 @@ Details:
 - `.astro` files are not typechecked or formatted. Keep them thin.
 - The Radix style hashes in `astro.config.ts` can go stale after a Radix update. The symptom is a CSP warning in the browser console (with the new hash) and a missing accordion animation, not broken content.
 - The Vercel project (`awinter-dev/backbricks`, Root Directory `apps/www`) serves `backbricks.app`; `www.backbricks.app` redirects to it (308).
+- Deploys run through Vercel's GitHub integration, not the CLI: every push to `main` deploys to production, other branches and PRs get preview deployments. `turbo-ignore` skips the build when a push doesn't affect `apps/www` or its dependencies.
 - Follow-ups:
   - M0: the dashboard imports `@backbricks/ui/styles.css`. dependency-cruiser gets a rule that `apps/www` may import only `packages/ui` (later also `packages/api-contract` types), never server code.
   - M5: add Starlight at `/docs`, plus `/errors/*`, `/schema/*` and the full `llms.txt` to `apps/www`.
