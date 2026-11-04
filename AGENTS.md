@@ -7,7 +7,8 @@ Backbricks is an open-source (AGPL-3.0) headless platform that gives websites ma
 - `docs/MILESTONES.md` says *where* we are going.
 - `PLAN.md` (after the planning run) lists the tasks; `docs/adr/` records decisions that deviate from or refine the architecture.
 - This file sets the rules for *how* we work. It applies to every session and every agent (Claude Code reads it via `CLAUDE.md`, Codex and others directly).
-- Reusable task prompts (plan, phase, resume, review, new module) live in `.claude/commands/*.md`. Agents without slash commands read the file and follow it, with `$ARGUMENTS` replaced by the user's input.
+- **Maintainer workflows** (`bb-plan`, `bb-phase`, `bb-resume`, `bb-review`, `bb-new-module`) live in `.claude/commands/bb-*.md`, together with `docs/PLANNING_PROMPT.md`. They drive the roadmap phase by phase from `PLAN.md`. Agents without slash commands read the file and follow it, with `$ARGUMENTS` replaced by the user's input. The `bb-` prefix keeps them from clashing with built-in or personal commands of the same name.
+- **Contributors** working from a GitHub issue don't need these workflows: follow this file and `CONTRIBUTING.md`.
 
 ---
 
@@ -162,14 +163,15 @@ Use it **before reading files or grepping**:
 
 - `main` is protected; all changes go through PRs against `main`. CI must be green.
 - Branches: `feat/…`, `fix/…`, `chore/…`, `docs/…`, optionally with the task ID (`feat/p2-4-public-submissions`).
-- **Conventional Commits** with the task ID: `feat(forms): public submission endpoint [P2.4]`.
-- **DCO sign-off on every commit:** `git commit -s` (CI checks `Signed-off-by`).
-- The `pre-push` hook (lefthook) runs format check, lint, typecheck and affected tests. Don't bypass it with `--no-verify`.
-- Agents: commit on a feature branch after each completed task. Don't push or open PRs unless asked. Never rewrite published history.
+- **Conventional Commits** with the task ID or issue reference: `feat(forms): public submission endpoint [P2.4]`, `fix(uploads): reject empty files (#123)`.
+- **DCO sign-off on every commit:** `git commit -s`. The `commit-msg` hook checks it locally, CI checks it again. The sign-off certifies the *human* behind the commit; an agent commits under that person's identity, so that person must have reviewed the change (`CONTRIBUTING.md`, "AI-assisted contributions").
+- The `pre-push` hook (lefthook) runs format check, lint, typecheck and affected tests. Don't bypass hooks with `--no-verify`.
+- Agents: commit on a feature branch after each completed task (or logical step of an issue). Don't push or open PRs unless asked. Never rewrite published history.
 
 ## 9. Definition of done
 
-**Task:** code + tests + `bun run check` green + docs updated where behavior changed + no new duplication (§2.3) + `PLAN.md` checkbox ticked + signed-off commit.
+**Change (every PR):** code + tests + `bun run check` green + docs updated where behavior changed + no new duplication (§2.3) + signed-off commits + PR linked to its issue or task ID.
+**Task (maintainer phase run):** the above + `PLAN.md` checkbox ticked.
 **Phase/milestone:** all tasks done, acceptance criteria demonstrated with commands, isolation suite and OpenAPI drift check green, report written to `docs/progress/phase-N.md`.
 
 ## 10. Don'ts

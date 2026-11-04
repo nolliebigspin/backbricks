@@ -30,7 +30,21 @@ Sign off every commit with:
 git commit -s -m "feat(forms): add honeypot field option"
 ```
 
-This adds `Signed-off-by: Your Name <you@example.com>` using your Git identity. CI rejects pull requests with unsigned commits. To fix the last commit: `git commit --amend -s --no-edit`. For several commits: `git rebase --signoff main`.
+This adds `Signed-off-by: Your Name <you@example.com>` using your Git identity. The `commit-msg` hook (installed by `mise run setup`) rejects unsigned commits locally, and CI rejects pull requests with unsigned commits. To fix the last commit: `git commit --amend -s --no-edit`. For several commits: `git rebase --signoff main`.
+
+## AI-assisted contributions
+
+AI coding agents are welcome. [AGENTS.md](AGENTS.md) is written for them, and most tools read it automatically (Claude Code via `CLAUDE.md`). The rules:
+
+- **You are the author.** Your `Signed-off-by` certifies the whole change, including what an agent wrote. Review and understand every line before you sign off, and be ready to explain it in review.
+- **Disclose it.** Tick the AI box in the pull request template and name the tool.
+- **No unattended agent PRs.** Pull requests that were clearly not reviewed by a human (wrong scope, invented APIs, ignored review comments) get closed.
+- **Keep the scope small.** One issue per PR, as AGENTS.md §1 says. Agents tend to "improve" nearby code; leave it out of the PR.
+- The `.claude/commands/bb-*` workflows and `docs/PLANNING_PROMPT.md` are for maintainers working through the roadmap. For an issue you don't need them.
+
+## Reviewing pull requests locally
+
+Some files run code on your machine or steer your agent: `.mcp.json`, `.claude/`, `AGENTS.md`, `CLAUDE.md`, `mise.toml`, `lefthook.yml`, `package.json` scripts, `scripts/` and `.github/workflows/`. Before you check out someone else's branch, read the diff to these files on GitHub. If the branch changes them, start your agent only after you've read the change. These paths are listed in [`.github/CODEOWNERS`](.github/CODEOWNERS) and need a maintainer's review.
 
 ## Licensing of contributions
 

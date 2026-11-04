@@ -1,5 +1,11 @@
 # Git hooks, installed by `mise run setup` (lefthook install).
-# The hook calls the same script CI uses, scoped to affected packages for speed.
+# The hooks call the same checks CI runs: sign-off and commit format on commit,
+# the quality checks (scoped to affected packages for speed) on push.
+commit-msg:
+  commands:
+    dco-and-format:
+      run: bun scripts/git/check-commit-msg.ts {1}
+
 pre-push:
   commands:
     check:

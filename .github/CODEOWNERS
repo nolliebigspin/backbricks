@@ -1,0 +1,27 @@
+# Changes to these paths need a maintainer's review (enable "Require review from Code Owners"
+# in the branch protection for `main`).
+#
+# Agent instructions, agent tool config, git hooks, tool tasks and CI run on contributors'
+# and reviewers' machines or steer their AI agents. A malicious change here can run code
+# locally or inject instructions, so it never merges without a maintainer.
+
+# Agent instructions and maintainer workflows
+/AGENTS.md                  @nolliebigspin
+/CLAUDE.md                  @nolliebigspin
+/.claude/                   @nolliebigspin
+/.mcp.json                  @nolliebigspin
+/docs/PLANNING_PROMPT.md    @nolliebigspin
+
+# Local tooling that runs code on checkout, setup, commit or push
+/mise.toml                  @nolliebigspin
+/lefthook.yml               @nolliebigspin
+/scripts/                   @nolliebigspin
+/package.json               @nolliebigspin
+
+# CI, repository automation and governance
+/.github/                   @nolliebigspin
+/docs/adr/                  @nolliebigspin
+/LICENSE                    @nolliebigspin
+/LICENSING.md               @nolliebigspin
+/TRADEMARKS.md              @nolliebigspin
+/SECURITY.md                @nolliebigspin

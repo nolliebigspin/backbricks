@@ -1,12 +1,14 @@
 # Planning & Execution Prompt – Backbricks
 
+**Maintainer workflow.** This file drives the roadmap phase by phase. Contributors working on a GitHub issue follow `AGENTS.md` and `CONTRIBUTING.md` instead.
+
 > **How to use this file**
 >
 > 1. Run `mise install && mise run setup` once in the repo.
-> 2. **Session 1 (planning run):** in Claude Code run `/plan`, or give any agent the block between `<<<PROMPT` and `PROMPT>>>`. Result: `PLAN.md`, ADRs and `OPEN_QUESTIONS.md`, with no application code.
+> 2. **Session 1 (planning run):** in Claude Code run `/bb-plan`, or give any agent the block between `<<<PROMPT` and `PROMPT>>>`. Result: `PLAN.md`, ADRs and `OPEN_QUESTIONS.md`, with no application code.
 > 3. Review `PLAN.md`, answer the open questions (directly in `OPEN_QUESTIONS.md`), approve the plan.
-> 4. **Following sessions (execution runs):** one fresh session per phase: `/phase P0`, `/phase P1`, … The agent stops after each phase with a report.
-> 5. Optional after each phase: `/review P<N>` in a fresh session (independent reviewer without implementation context).
+> 4. **Following sessions (execution runs):** one fresh session per phase: `/bb-phase P0`, `/bb-phase P1`, … The agent stops after each phase with a report.
+> 5. Optional after each phase: `/bb-review P<N>` in a fresh session (independent reviewer without implementation context).
 > 6. Other agents (Codex, Cursor): paste the content of the matching file in `.claude/commands/` instead of the slash command.
 
 ---

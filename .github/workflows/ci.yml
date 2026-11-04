@@ -51,7 +51,7 @@ jobs:
       - name: Start services
         if: hashFiles('compose.yaml') != ''
         run: docker compose up -d --wait postgres garage mailpit
-      - run: bunx turbo run test
+      - run: bun run test
       - name: Service logs
         if: failure() && hashFiles('compose.yaml') != ''
         run: docker compose logs --no-color

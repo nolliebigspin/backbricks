@@ -13,13 +13,14 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "typecheck": "tsc -p tsconfig.json && turbo run typecheck",
-    "test": "turbo run test",
+    "test": "turbo run test && bun run test:scripts",
+    "test:scripts": "bun test ./scripts",
     "test:e2e": "turbo run test:e2e",
     "lint": "oxlint",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
-    "check": "bun run format:check && bun run lint && bun run typecheck && turbo run test",
-    "check:affected": "bun run format:check && bun run lint && bun run typecheck && turbo run test --affected"
+    "check": "bun run format:check && bun run lint && bun run typecheck && bun run test",
+    "check:affected": "bun run format:check && bun run lint && bun run typecheck && turbo run test --affected && bun run test:scripts"
   },
   "devDependencies": {
     "@shadcn/lint": "0.2.5",

@@ -1,5 +1,5 @@
 ---
-description: Execution run – implement one phase from PLAN.md (e.g. /phase P2)
+description: Execution run – implement one phase from PLAN.md (e.g. /bb-phase P2)
 argument-hint: P<N> [task range]
 ---
 
