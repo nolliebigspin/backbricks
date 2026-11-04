@@ -1,0 +1,48 @@
+---
+import '../styles/global.css';
+
+import { SiteFooter } from '../components/site-footer.tsx';
+import { SiteHeader } from '../components/site-header.tsx';
+import { site } from '../content/site.ts';
+
+type Props = {
+  title?: string;
+  description?: string;
+  /** Keep a page out of search results (e.g. the 404 page). */
+  noindex?: boolean;
+};
+
+const { title, description = site.description, noindex = false } = Astro.props;
+const pageTitle = title ? `${title} · ${site.name}` : site.title;
+// Built pages are files (`build.format: 'file'`); public URLs are clean (`/privacy`, not `/privacy.html`).
+const canonical = new URL(Astro.url.pathname.replace(/(index)?\.html$/, ''), Astro.site);
+const ogImage = new URL('/og.png', Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body class="min-h-dvh antialiased">
+    <SiteHeader />
+    <main>
+      <slot />
+    </main>
+    <SiteFooter year={new Date().getFullYear()} />
+  </body>
+</html>

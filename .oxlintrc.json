@@ -37,7 +37,13 @@
     "shadcn/no-inline-styles": "error",
     "shadcn/no-unknown-classes": "error",
     "shadcn/require-static-classes": "error",
-    "react/react-in-jsx-scope": "off"
+    "react/react-in-jsx-scope": "off",
+    "import/no-unassigned-import": [
+      "error",
+      {
+        "allow": ["**/*.css"]
+      }
+    ]
   },
   "overrides": [
     {

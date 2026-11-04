@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://backbricks.app/sitemap-index.xml

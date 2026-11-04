@@ -1,0 +1,42 @@
+---
+import { Prism } from '@astrojs/prism';
+
+import { Bricks } from '../components/bricks.tsx';
+import { Faq } from '../components/faq.tsx';
+import { Hero } from '../components/hero.tsx';
+import { HowItWorks } from '../components/how-it-works.tsx';
+import { IntegrationExamples } from '../components/integration-examples.tsx';
+import { OpenSource } from '../components/open-source.tsx';
+import { SafeDefaults } from '../components/safe-defaults.tsx';
+import { Section } from '../components/section.tsx';
+import { integrationSamples } from '../content/snippets.ts';
+import BaseLayout from '../layouts/base-layout.astro';
+
+const tabs = integrationSamples.map(({ id, label }) => ({ id, label }));
+---
+
+<BaseLayout>
+  <Hero />
+  <Bricks />
+  <HowItWorks />
+  <Section
+    eyebrow="Integrate"
+    title="A few lines, any framework"
+    intro="Start with a plain HTML form, then move to the SDK when you want typed calls, uploads and reviews. Examples show the planned API."
+  >
+    <IntegrationExamples client:visible tabs={tabs}>
+      {
+        integrationSamples.map((sample) => (
+          <Prism slot={sample.id} class="code-block" lang={sample.lang} code={sample.code} />
+        ))
+      }
+    </IntegrationExamples>
+  </Section>
+  <SafeDefaults />
+  <OpenSource />
+  <Section id="faq" eyebrow="FAQ" title="Questions">
+    <div class="max-w-3xl">
+      <Faq client:visible />
+    </div>
+  </Section>
+</BaseLayout>

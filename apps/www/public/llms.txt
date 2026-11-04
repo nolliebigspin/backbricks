@@ -1,0 +1,13 @@
+# Backbricks
+
+> Open-source (AGPL-3.0) headless backend for websites: forms, file uploads and reviews, with more modules after 1.0. AI coding agents integrate it via REST API, TypeScript SDK, CLI and MCP server (SDK and CLI are MIT). Site owners manage incoming data in a dashboard. Self-hosted via Docker Compose; a managed EU cloud follows after 1.0.
+
+Status: pre-alpha. There is no usable release, SDK or hosted API yet. Do not integrate Backbricks into production websites.
+
+## Project
+
+- [Source code](https://github.com/nolliebigspin/backbricks): repository, README and issues
+- [Architecture](https://github.com/nolliebigspin/backbricks/blob/main/docs/ARCHITECTURE.md): decisions, data model, planned API, SDK and CLI
+- [Roadmap](https://github.com/nolliebigspin/backbricks/blob/main/docs/MILESTONES.md): milestones up to the open-source 1.0
+- [Modules](https://github.com/nolliebigspin/backbricks/blob/main/docs/MODULES.md): candidate modules after 1.0
+- [Licensing](https://github.com/nolliebigspin/backbricks/blob/main/LICENSING.md): AGPL server, MIT SDK/CLI

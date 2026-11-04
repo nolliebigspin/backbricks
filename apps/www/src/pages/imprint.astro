@@ -1,0 +1,22 @@
+---
+import { ProsePage } from '../components/prose-page.tsx';
+import BaseLayout from '../layouts/base-layout.astro';
+
+// TODO(before launch): replace the placeholders with the operator's details (§ 5 DDG).
+---
+
+<BaseLayout title="Imprint" description="Legal notice for backbricks.app.">
+  <ProsePage title="Imprint">
+    <p>Information according to § 5 DDG (German Digital Services Act).</p>
+    <p>
+      [Full name]<br />
+      [Street and number]<br />
+      [Postal code and city]<br />
+      Germany
+    </p>
+    <h2>Contact</h2>
+    <p>Email: [contact email]</p>
+    <h2>Responsible for content</h2>
+    <p>According to § 18 (2) MStV: [Full name], address as above.</p>
+  </ProsePage>
+</BaseLayout>

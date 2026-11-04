@@ -1,0 +1,35 @@
+@import '@backbricks/ui/styles.css';
+
+/* Site files (Astro pages and site-only React sections). */
+@source "../";
+
+/*
+ * Code highlighting for <Prism /> (class-based, so it works with the strict CSP).
+ * Token colors come from the shared theme, not from a Prism theme file.
+ */
+@layer components {
+  .code-block {
+    @apply overflow-x-auto rounded-xl bg-foreground p-4 font-mono text-sm leading-relaxed text-background;
+  }
+  .code-block .token.comment,
+  .code-block .token.prolog {
+    @apply text-muted-foreground;
+  }
+  .code-block .token.keyword,
+  .code-block .token.tag,
+  .code-block .token.selector {
+    @apply text-brand;
+  }
+  .code-block .token.string,
+  .code-block .token.attr-value {
+    @apply text-chart-1;
+  }
+  .code-block .token.function,
+  .code-block .token.attr-name {
+    @apply text-secondary;
+  }
+  .code-block .token.punctuation,
+  .code-block .token.operator {
+    @apply text-ring;
+  }
+}

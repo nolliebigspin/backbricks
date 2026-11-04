@@ -30,3 +30,7 @@ CLAUDE.local.md
 .DS_Store
 .idea/
 *.log
+
+# Astro and Vercel local state
+.astro/
+.vercel/

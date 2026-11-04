@@ -1,0 +1,32 @@
+{
+  "name": "@backbricks/www",
+  "version": "0.0.0",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "typecheck": "astro sync && tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@astrojs/prism": "4.1.2",
+    "@astrojs/react": "7.1.2",
+    "@astrojs/sitemap": "3.7.4",
+    "@backbricks/ui": "workspace:*",
+    "@tailwindcss/vite": "4.3.4",
+    "astro": "7.4.5",
+    "lucide-react": "1.68.0",
+    "prismjs": "1.30.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0"
+  },
+  "engines": {
+    "node": "24.x"
+  }
+}
