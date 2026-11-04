@@ -22,6 +22,7 @@
     "check:affected": "bun run format:check && bun run lint && bun run typecheck && turbo run test --affected"
   },
   "devDependencies": {
+    "@shadcn/lint": "0.2.5",
     "@types/bun": "1.4.4",
     "oxfmt": "0.76.0",
     "oxlint": "1.91.0",

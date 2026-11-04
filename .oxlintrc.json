@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["typescript", "unicorn", "oxc", "import", "promise", "react", "jsx-a11y"],
+  "jsPlugins": ["@shadcn/lint"],
   "options": {
     "typeAware": true,
     "denyWarnings": true,
@@ -24,7 +25,19 @@
     "import/no-cycle": "error",
     "import/no-default-export": "error",
     "react/no-danger": "error",
-    "react/jsx-no-target-blank": "error"
+    "react/jsx-no-target-blank": "error",
+    "shadcn/no-restyle": [
+      "error",
+      {
+        "allow": ["layout"]
+      }
+    ],
+    "shadcn/no-raw-colors": "error",
+    "shadcn/no-arbitrary-values": "error",
+    "shadcn/no-inline-styles": "error",
+    "shadcn/no-unknown-classes": "error",
+    "shadcn/require-static-classes": "error",
+    "react/react-in-jsx-scope": "off"
   },
   "overrides": [
     {
@@ -39,6 +52,13 @@
       "rules": {
         "typescript/no-explicit-any": "warn"
       }
+    },
+    {
+      "files": ["packages/ui/src/components/**"],
+      "rules": {
+        "shadcn/no-restyle": "off",
+        "shadcn/no-arbitrary-values": "off"
+      }
     }
   ],
   "ignorePatterns": [
@@ -48,5 +68,11 @@
     ".codegraph/**",
     "packages/api-contract/src/generated/**",
     "packages/db/migrations/**"
-  ]
+  ],
+  "settings": {
+    "shadcn": {
+      "ui": "@backbricks/ui",
+      "themeImports": ["^@backbricks/ui/"]
+    }
+  }
 }
