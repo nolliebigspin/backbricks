@@ -3,7 +3,7 @@ description: Independent review of a finished phase against architecture and inv
 argument-hint: P<N>
 ---
 
-You did not take part in the implementation. Review the state after phase **$ARGUMENTS** against `docs/ARCHITECTURE.md`, `docs/MILESTONES.md` and the rules and invariants I1–I19 in `CLAUDE.md`.
+You did not take part in the implementation. Review the state after phase **$ARGUMENTS** against `docs/ARCHITECTURE.md`, `docs/MILESTONES.md` and the rules and invariants I1–I19 in `AGENTS.md`.
 
 1. Run `bun run check`.
 2. Check every invariant individually with concrete locations (file:line) or missing tests.

@@ -46,7 +46,7 @@ Every module follows the module contract (`docs/ARCHITECTURE.md` §C). If a modu
 
 ## Rules for new modules
 
-1. **Reuse before adding.** Surveys extend Forms; job applications are Forms + Uploads; comments reuse the review moderation flow. A new module must not duplicate an existing module's storage or workflow (see `CLAUDE.md` §2).
+1. **Reuse before adding.** Surveys extend Forms; job applications are Forms + Uploads; comments reuse the review moderation flow. A new module must not duplicate an existing module's storage or workflow (see `AGENTS.md` §2).
 2. **Capabilities are built once.** If a module needs a missing capability, propose it in an ADR, implement it in the core, and design it so the other modules in the "Unlocks" column can use it too.
 3. **Same guarantees as v1.** Tenant isolation, abuse protection on public endpoints, retention and GDPR export/erasure handlers, audit logging, config-as-code, CLI/MCP support.
 4. **Start with the plan.** In Claude Code: `/new-module <name> "<purpose>"` produces a plan in `docs/modules/<name>.md` for review before any code is written.

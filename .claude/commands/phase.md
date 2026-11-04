@@ -3,7 +3,7 @@ description: Execution run – implement one phase from PLAN.md (e.g. /phase P2)
 argument-hint: P<N> [task range]
 ---
 
-Read `CLAUDE.md`, `docs/ARCHITECTURE.md`, `docs/MILESTONES.md`, `PLAN.md`, `OPEN_QUESTIONS.md`, all ADRs in `docs/adr/` and, if present, the latest report in `docs/progress/`.
+Read `AGENTS.md`, `docs/ARCHITECTURE.md`, `docs/MILESTONES.md`, `PLAN.md`, `OPEN_QUESTIONS.md`, all ADRs in `docs/adr/` and, if present, the latest report in `docs/progress/`.
 
 Then implement **$ARGUMENTS** following **mode B (execution run)** in `docs/PLANNING_PROMPT.md`:
 

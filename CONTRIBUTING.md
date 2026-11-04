@@ -1,6 +1,6 @@
 # Contributing to Backbricks
 
-Thanks for your interest! This project follows the rules in [CLAUDE.md](CLAUDE.md). They apply to human contributors and AI agents alike. The most important ones: think in the whole system, reuse before you write, one source of truth per concept, respect module boundaries.
+Thanks for your interest! This project follows the rules in [AGENTS.md](AGENTS.md). They apply to human contributors and AI agents alike. The most important ones: think in the whole system, reuse before you write, one source of truth per concept, respect module boundaries.
 
 ## Setup
 

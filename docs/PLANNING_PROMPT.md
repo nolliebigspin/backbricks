@@ -21,14 +21,14 @@ You work for an experienced solo developer (TypeScript, React, Next.js, Tailwind
 
 # Sources of truth (in this order)
 
-1. `CLAUDE.md`: engineering rules and **invariants I1–I19** (non-negotiable)
+1. `AGENTS.md`: engineering rules and **invariants I1–I19** (non-negotiable)
 2. `docs/ARCHITECTURE.md`: decisions, data model, API design, stack, roadmap
 3. `docs/MILESTONES.md`: milestone scope, exit criteria, release versions
 4. `docs/adr/*.md`: recorded deviations and refinements
 5. `PLAN.md`: detailed tasks (after approval)
 6. Current official documentation of the libraries used
 
-Read `CLAUDE.md`, `docs/ARCHITECTURE.md` and `docs/MILESTONES.md` **completely** before planning or writing anything.
+Read `AGENTS.md`, `docs/ARCHITECTURE.md` and `docs/MILESTONES.md` **completely** before planning or writing anything.
 
 # Modes
 
@@ -229,6 +229,6 @@ Effort in person-days (PD); refine to hours per task in `PLAN.md`.
 
 # Start
 
-Confirm in one sentence that you have read `CLAUDE.md`, `docs/ARCHITECTURE.md` and `docs/MILESTONES.md` completely, then start the **planning run (mode A)**. Write no application code.
+Confirm in one sentence that you have read `AGENTS.md`, `docs/ARCHITECTURE.md` and `docs/MILESTONES.md` completely, then start the **planning run (mode A)**. Write no application code.
 
 PROMPT>>>

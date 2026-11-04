@@ -3,7 +3,7 @@ description: Plan (and after approval implement) a new website module, e.g. /new
 argument-hint: <name> "<purpose>"
 ---
 
-Read `CLAUDE.md`, `docs/ARCHITECTURE.md` section C (especially C.5) and the existing modules in `packages/modules/`.
+Read `AGENTS.md`, `docs/ARCHITECTURE.md` section C (especially C.5) and the existing modules in `packages/modules/`.
 
 Plan the module described here: **$ARGUMENTS**
 

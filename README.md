@@ -44,7 +44,7 @@ Stack: Bun · TypeScript 7 · Turborepo · Hono · PostgreSQL + Drizzle · pg-bo
 - [Architecture](docs/ARCHITECTURE.md): decisions, data model, API, security, stack
 - [Milestones](docs/MILESTONES.md): roadmap (open source first, then cloud)
 - [Planning prompt](docs/PLANNING_PROMPT.md): how the MVP is planned and built with AI coding agents
-- [CLAUDE.md](CLAUDE.md): engineering rules and invariants for humans and agents
+- [AGENTS.md](AGENTS.md): engineering rules and invariants for humans and agents
 
 ## Contributing
 

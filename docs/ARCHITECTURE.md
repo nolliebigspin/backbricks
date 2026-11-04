@@ -6,7 +6,7 @@
 >
 > **Status:** Architecture v1 · November 2026
 > **Naming:** packages `@backbricks/*`, CLI `backbricks`, key prefixes `bb_pk_` / `bb_sk_`, config file `backbricks.config.json`. Project domain: `backbricks.app`.
-> **Authority:** This document is the source of truth for implementation. Deviations are recorded as ADRs in `docs/adr/`. Non-negotiable engineering rules and invariants live in `/CLAUDE.md`.
+> **Authority:** This document is the source of truth for implementation. Deviations are recorded as ADRs in `docs/adr/`. Non-negotiable engineering rules and invariants live in `/AGENTS.md`.
 
 ---
 
