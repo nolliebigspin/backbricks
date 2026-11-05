@@ -5,12 +5,10 @@
   "description": "HTTP server and worker (process roles: serve, worker, all, migrate)",
   "license": "AGPL-3.0-only",
   "type": "module",
-  "exports": {
-    ".": "./src/index.ts"
-  },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
-    "test": "bun test"
+    "test": "bun test",
+    "start": "bun src/main.ts"
   },
   "dependencies": {
     "@backbricks/core": "workspace:*",

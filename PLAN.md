@@ -195,15 +195,15 @@ Checked 2026-11-04 with `npm view <pkg> version` / `dist-tags` and the Docker Hu
 - **Tests:** `app.request()` tests for all of the above; a log-capture test proving redaction of an `Authorization: Bearer bb_sk_…` header and a `token` field.
 - **Risks/notes:** Don't add CORS or auth middleware yet (P1.3/P1.9). Done without 405: Hono doesn't distinguish a wrong method from a missing route, so unknown method/path combinations return 404 until the API routes exist (P1.11 can add 405 from the OpenAPI route table).
 
-### [ ] P0.5b – Process roles (est. 2 h)
+### [x] P0.5b – Process roles (est. 2 h)
 - **Description:** Entry point `apps/server/src/main.ts <role>`: `serve` (HTTP), `worker` (DB connection, ready log, idles until shutdown; pg-boss comes in P1.10), `all` (serve + worker in one process), `migrate` (runs P0.6's runner, exits). No `setup` role until P6.2 (DEV-7). Graceful shutdown on SIGTERM/SIGINT: stop accepting, drain in-flight requests (timeout), close the pool, exit 0. Unknown role → usage message and exit code 2.
 - **Files/packages:** `apps/server/src/main.ts`, `apps/server/src/roles/*`.
 - **Depends on:** P0.5a
 - **Reuses:** `createApp`, migration runner.
 - **Acceptance criteria:**
-  - [ ] Each role starts and stops cleanly on SIGTERM within the timeout
-  - [ ] `migrate` exits 0 on success and non-zero on failure
-  - [ ] compose `server`/`worker` services from P0.3b use these roles
+  - [x] Each role starts and stops cleanly on SIGTERM within the timeout
+  - [x] `migrate` exits 0 on success and non-zero on failure
+  - [x] compose `server`/`worker` services from P0.3b use these roles
 - **Tests:** spawn tests (`Bun.spawn`) per role: start, wait for the ready log line, send SIGTERM, assert exit code 0.
 - **Risks/notes:** Keep role wiring in the app (composition root); no business logic.
 
