@@ -21,4 +21,6 @@ export type AppDependencies = {
   log: Logger;
   ids: Ids;
   readinessChecks: readonly ReadinessCheck[];
+  /** Built dashboard to serve, or `null` (development: Vite serves it; API-only setups). */
+  dashboardDir: string | null;
 };

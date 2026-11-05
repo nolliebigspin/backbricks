@@ -106,6 +106,7 @@
     "**/.turbo/**",
     ".codegraph/**",
     "scripts/arch/fixtures/**",
+    "apps/web/src/routeTree.gen.ts",
     "packages/api-contract/src/generated/**",
     "packages/db/migrations/**"
   ],

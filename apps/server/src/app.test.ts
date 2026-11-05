@@ -10,7 +10,7 @@ import { createLogger } from './logger.ts';
 function setup(readinessChecks: ReadinessCheck[] = []) {
   const lines: string[] = [];
   const log = createLogger('debug', { write: (line) => lines.push(line) });
-  const app = createApp({ log, ids: createIds(systemClock), readinessChecks });
+  const app = createApp({ log, ids: createIds(systemClock), readinessChecks, dashboardDir: null });
   const logs = () => lines.map((line) => asRecord(JSON.parse(line)));
   return { app, logs, rawLogs: () => lines.join('') };
 }

@@ -1,0 +1,10 @@
+{
+  "app": {
+    "name": "Backbricks"
+  },
+  "home": {
+    "title": "Willkommen bei Backbricks",
+    "description": "Dein Dashboard wird gerade eingerichtet. Formulare, Dateien und Bewertungen erscheinen hier.",
+    "status": "Das Dashboard läuft."
+  }
+}

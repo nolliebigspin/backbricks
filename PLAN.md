@@ -207,15 +207,15 @@ Checked 2026-11-04 with `npm view <pkg> version` / `dist-tags` and the Docker Hu
 - **Tests:** spawn tests (`Bun.spawn`) per role: start, wait for the ready log line, send SIGTERM, assert exit code 0.
 - **Risks/notes:** Keep role wiring in the app (composition root); no business logic.
 
-### [ ] P0.7 – Dashboard skeleton (est. 5 h)
+### [x] P0.7 – Dashboard skeleton (est. 5 h)
 - **Description:** `apps/web`: Vite 8 + React 19 + TypeScript; Tailwind v4 via `@tailwindcss/vite`; imports `@backbricks/ui/styles.css` and components (shadcn is already initialized in `packages/ui` per ADR-0001, no re-init); TanStack Router (file-based routes via `@tanstack/router-plugin`) and TanStack Query; i18next with `en` and `de` resources and one placeholder page using `@backbricks/ui` components; Vite proxy for `/v1` and `/api` to the server (same-origin cookies later). The server serves the production build (`apps/web/dist`) with SPA fallback for GET requests outside `/v1` and `/api`; static assets get long-lived cache headers, `index.html` gets `no-cache`.
 - **Files/packages:** `apps/web/{index.html,vite.config.ts,src/**}`, `apps/web/src/i18n/{en,de}.json`, `apps/server/src/static.ts`.
 - **Depends on:** P0.1, P0.5a
 - **Reuses:** `@backbricks/ui` (theme, `Button`, `Card`, …), happy-dom test setup from `packages/ui/test/setup-dom.ts` (reference it instead of copying, or move it to a shared spot if both need it).
 - **Acceptance criteria:**
-  - [ ] `bun run build` produces `apps/web/dist`; the server serves `/` and deep links (`/projects/x`) with `index.html`
-  - [ ] `/v1/unknown` still returns a 404 problem+json, not the SPA
-  - [ ] All copy goes through i18n keys; `en` and `de` have the same keys
+  - [x] `bun run build` produces `apps/web/dist`; the server serves `/` and deep links (`/projects/x`) with `index.html`
+  - [x] `/v1/unknown` still returns a 404 problem+json, not the SPA
+  - [x] All copy goes through i18n keys; `en` and `de` have the same keys
 - **Tests:** component test of the placeholder page (happy-dom); a key-parity test for `en`/`de`; server tests for SPA fallback and the `/v1` exclusion.
 - **Risks/notes:** shadcn lint rules (`@shadcn/lint`) already apply to app code; use theme tokens, not raw colors.
 

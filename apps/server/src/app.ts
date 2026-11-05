@@ -3,6 +3,7 @@ import { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 
 import type { AppDependencies, AppEnv } from './context.ts';
+import { dashboardRoutes } from './dashboard.ts';
 import { handleError, handleNotFound } from './errors.ts';
 import { healthRoutes } from './health.ts';
 import { requestContext } from './middleware/request-context.ts';
@@ -27,6 +28,8 @@ export function createApp(deps: AppDependencies): Hono<AppEnv> {
   );
 
   app.route('/', healthRoutes(deps.readinessChecks));
+  // API routes are mounted above this line; the dashboard catches the remaining GETs.
+  if (deps.dashboardDir !== null) app.route('/', dashboardRoutes(deps.dashboardDir));
 
   app.onError(handleError);
   app.notFound(handleNotFound);
