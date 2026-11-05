@@ -233,15 +233,16 @@ Checked 2026-11-04 with `npm view <pkg> version` / `dist-tags` and the Docker Hu
 - **Done as:** no `HEALTHCHECK` in the image: it would apply to every role, and `worker`/`migrate` serve no HTTP; compose files define it per service. `BUN_RUNTIME_TRANSPILER_CACHE_PATH=0` keeps the root file system read-only. 248 MB.
 - **Risks/notes:** Distroless is re-evaluated in P6.6 (OPEN_QUESTIONS D1). Keep `apps/www` out of the image.
 
-### [ ] P0.8b – CI completion and Playwright scaffold (est. 3 h)
+### [x] P0.8b – CI completion and Playwright scaffold (est. 3 h)
 - **Description:** Extend `.github/workflows/ci.yml`: `lint:arch` in the quality job (if not added in P0.2), `docker build` with buildx cache (no push), an image smoke step (run `serve` against the compose Postgres, curl `/healthz` and `/`), migrations in the test job before `bun run test`, an `e2e` job with Playwright (browsers cached, Node via mise) running a smoke test (dashboard loads, `/healthz` 200). Playwright config and tests in `e2e/`; `bun run test:e2e` locally against `mise run dev`.
 - **Files/packages:** `.github/workflows/ci.yml`, `e2e/playwright.config.ts`, `e2e/smoke.spec.ts`, root `package.json` (`test:e2e`), `turbo.json` if needed.
 - **Depends on:** P0.8a
 - **Reuses:** `compose.yaml` services (no separate CI service definitions), `jdx/mise-action`.
 - **Acceptance criteria:**
-  - [ ] CI is green on a PR against `main` with all jobs (quality, test, e2e, image, DCO)
-  - [ ] `bun run test:e2e` passes locally
+  - [ ] CI is green on a PR against `main` with all jobs (quality, test, e2e, image, DCO) — open until the maintainer pushes
+  - [x] `bun run test:e2e` passes locally
 - **Tests:** `e2e/smoke.spec.ts`.
+- **Done as:** Playwright starts the real `serve` role with the built dashboard (`webServer`, port 3300) instead of testing against `mise run dev`, so CI and local runs are identical. No separate migration step in the test job: the tests run migrations themselves.
 - **Risks/notes:** Agents don't push; the maintainer opens the PR to demonstrate the CI criterion.
 
 ### Phase acceptance P0

@@ -15,7 +15,7 @@
     "typecheck": "tsc -p tsconfig.json && turbo run typecheck",
     "test": "turbo run test && bun run test:scripts",
     "test:scripts": "bun test ./scripts",
-    "test:e2e": "turbo run test:e2e",
+    "test:e2e": "playwright test --config e2e/playwright.config.ts",
     "lint": "oxlint",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "3.1161.0",
+    "@playwright/test": "1.64.1",
     "@shadcn/lint": "0.2.5",
     "@swc/core": "1.16.21",
     "@types/bun": "1.4.4",
