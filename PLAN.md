@@ -220,16 +220,17 @@ Checked 2026-11-04 with `npm view <pkg> version` / `dist-tags` and the Docker Hu
 - **Tests:** component test of the placeholder page (happy-dom); a key-parity test for `en`/`de`; server tests for SPA fallback and the `/v1` exclusion.
 - **Risks/notes:** shadcn lint rules (`@shadcn/lint`) already apply to app code; use theme tokens, not raw colors.
 
-### [ ] P0.8a – Production Dockerfile (est. 3 h)
+### [x] P0.8a – Production Dockerfile (est. 3 h)
 - **Description:** Multi-stage `Dockerfile` at the root: install production dependencies (`bun install --frozen-lockfile --production`), build the dashboard, runtime stage `oven/bun:1.4.4-slim` running as the non-root `bun` user, no writes outside `/tmp` (read-only-FS friendly), `ENTRYPOINT ["bun", "apps/server/src/main.ts"]` with the role as `CMD` (default `serve`), `HEALTHCHECK` against `/healthz`, OCI labels incl. license. One image for all roles. `.dockerignore` keeps out `node_modules`, `.git`, `.codegraph`, `.env*`.
 - **Files/packages:** `Dockerfile`, `.dockerignore`.
 - **Depends on:** P0.5b, P0.7
 - **Reuses:** the same lockfile and workspace layout as dev.
 - **Acceptance criteria:**
-  - [ ] `docker build -t backbricks/server:dev .` succeeds
-  - [ ] `docker run --read-only --tmpfs /tmp -e … backbricks/server:dev serve` → `/healthz` 200 and `/` serves the dashboard
-  - [ ] `docker run … migrate` applies migrations and exits 0; `id -u` in the container is not 0
+  - [x] `docker build -t backbricks/server:dev .` succeeds
+  - [x] `docker run --read-only --tmpfs /tmp -e … backbricks/server:dev serve` → `/healthz` 200 and `/` serves the dashboard
+  - [x] `docker run … migrate` applies migrations and exits 0; `id -u` in the container is not 0
 - **Tests:** covered by the CI image smoke step in P0.8b.
+- **Done as:** no `HEALTHCHECK` in the image: it would apply to every role, and `worker`/`migrate` serve no HTTP; compose files define it per service. `BUN_RUNTIME_TRANSPILER_CACHE_PATH=0` keeps the root file system read-only. 248 MB.
 - **Risks/notes:** Distroless is re-evaluated in P6.6 (OPEN_QUESTIONS D1). Keep `apps/www` out of the image.
 
 ### [ ] P0.8b – CI completion and Playwright scaffold (est. 3 h)
