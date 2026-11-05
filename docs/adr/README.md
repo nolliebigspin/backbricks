@@ -29,4 +29,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0017](0017-self-host-and-cloud-same-code.md) | Same code for self-hosted and cloud | accepted |
 | [0018](0018-open-source-first.md) | Open-source release first, managed cloud afterwards | accepted |
 | [0019](0019-optional-modules.md) | Every module is optional, enabled with BACKBRICKS_MODULES | accepted |
-| 0020 | Library compatibility on Bun and TypeScript 7 (reserved for PLAN P0.9b) | – |
+| [0020](0020-library-compatibility.md) | Library compatibility on Bun and TypeScript 7 | accepted |

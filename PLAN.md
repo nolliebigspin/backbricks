@@ -40,8 +40,8 @@ Checked 2026-11-04 with `npm view <pkg> version` / `dist-tags` and the Docker Hu
 | | zod | 4.6.7 | yes | |
 | | pino / pino-pretty | 10.4.0 / 13.2.0 | yes | pino-pretty dev only |
 | | typeid-js | 1.2.0 | yes | check license in P0.6; alternative: own encoder on `Bun.randomUUIDv7()` |
-| DB | drizzle-orm / drizzle-kit | 1.0.0-rc.5 / 1.0.0-rc.5 | to verify (P0.9a) | RC chosen (Q1, 2026-11-05); stable 0.45.4 / 0.31.11 is the fallback; upgrade to 1.0 GA when released |
-| | pg / @types/pg | 8.23.1 / 8.23.1 | to verify (P0.9a) | one driver shared with pg-boss |
+| DB | drizzle-orm / drizzle-kit | 1.0.0-rc.5 / 1.0.0-rc.5 | yes (ADR-0020) | RC chosen (Q1, 2026-11-05); stable 0.45.4 / 0.31.11 is the fallback; upgrade to 1.0 GA when released |
+| | pg / @types/pg | 8.23.1 / 8.23.1 | yes (ADR-0020) | one driver shared with pg-boss |
 | Web | vite / @vitejs/plugin-react | 8.3.5 / 6.2.1 | yes (`bun --bun vite`) | |
 | | react / react-dom | 19.3.1 | yes | in repo (`packages/ui`, `apps/www`) |
 | | @tanstack/react-router / router-plugin | 1.170.46 / 1.168.48 | yes | file-based routes |
@@ -53,15 +53,15 @@ Checked 2026-11-04 with `npm view <pkg> version` / `dist-tags` and the Docker Hu
 | | fast-check | 4.10.2 | yes | |
 | | happy-dom / @happy-dom/global-registrator | 21.0.4 | yes | in repo |
 | | @testing-library/react | 16.3.3 | yes | in repo |
-| Spiked in P0.9, used later | better-auth | 1.7.17 | to verify (P0.9a) | CLI moved to package `auth` 1.7.16 (`@better-auth/cli` is stale at 1.4.21); `auth` declares `node >=22.12` |
-| | pg-boss | 12.38.0 | to verify (P0.9a) | `engines: node >=22.12`; fallback: worker role on Node (ADR) |
-| | @aws-sdk/client-s3 / s3-request-presigner | 3.1161.0 | to verify (P0.9b) | signed Content-Length against Garage |
-| | altcha-lib | 2.8.0 | to verify (P0.9b) | |
-| | @modelcontextprotocol/sdk | 1.32.2 | to verify (P0.9b) | must also run on Node ≥ 20 (I18) |
+| Spiked in P0.9, used later | better-auth / `auth` CLI | 1.7.17 / 1.7.16 | yes, with notes (ADR-0020) | CLI via `bun run auth` (`bun auth` is reserved); generated schema needs `drizzle-orm/_relations` import with Drizzle 1.0 |
+| | pg-boss | 12.38.0 | yes (ADR-0020) | `fromDrizzle(tx, sql)` enqueues inside Drizzle transactions |
+| | @aws-sdk/client-s3 / s3-request-presigner | 3.1161.0 | yes, with setting (ADR-0020) | Garage enforces signed length/type; needs `requestChecksumCalculation: 'WHEN_REQUIRED'` |
+| | altcha-lib | 2.8.0 | yes (ADR-0020) | v2 API with `altcha-lib/algorithms/sha` |
+| | @modelcontextprotocol/sdk | 1.32.2 | yes, Bun and Node 24 (ADR-0020) | must also run on Node ≥ 20 (I18) |
 | | nodemailer | 10.3.1 | to verify (P1.8) | |
 | | file-type | 22.3.0 | to verify (P3.4) | |
 | | @hono/zod-openapi | 1.6.3 | yes | peer zod ^4, hono ≥4.10 |
-| | openapi-typescript | 7.13.0 | to verify (P0.9b) | peer `typescript ^5` → tool-local TS 5.9.3 in `api-contract` |
+| | openapi-typescript | 7.13.0 | yes, with fallback (ADR-0020) | fails on TS 7; works with `typescript@5.9.3` local to `api-contract` |
 | | openapi-fetch | 0.17.0 | yes | |
 | Images | postgres | 18.6-alpine | – | |
 | | dxflrs/garage | v2.5.0 | – | `FROM scratch`, no shell → init via Bun script |
@@ -136,25 +136,25 @@ Checked 2026-11-04 with `npm view <pkg> version` / `dist-tags` and the Docker Hu
 - **Tests:** `scripts/dev/compose-volumes.test.ts` parses `compose.yaml` and asserts there is a `node_modules` volume for every workspace (keeps the list from drifting as packages are added).
 - **Risks/notes:** File watching across the macOS bind mount can be unreliable; enable polling (`server.watch.usePolling` in Vite, `--watch` polling if needed) and document it. Server and web can't run until P0.5/P0.7; until then the services start a placeholder command, which those tasks replace.
 
-### [ ] P0.9a – Library spike: database libraries (est. 3 h)
+### [x] P0.9a – Library spike: database libraries (est. 3 h)
 - **Description:** Throwaway scripts (scratchpad, not committed) on Bun 1.4.4 against compose Postgres: Drizzle `1.0.0-rc.5` (Q1) with `pg` (pool, transaction, `select set_config(…, true)`, generate + migrate with the 1.0 migration folder format); pg-boss 12 (start, send, work, schedule, shutdown; sharing the `pg` pool or connection string); Better Auth 1.7 with the Drizzle adapter, organization plugin and `auth generate` for the schema.
 - **Files/packages:** none committed except the findings in `docs/adr/0020-library-compatibility.md` (written in P0.9b).
 - **Depends on:** P0.3a
 - **Reuses:** compose Postgres.
 - **Acceptance criteria:**
-  - [ ] Each library either works on Bun with the steps above, or has a documented fallback
-  - [ ] Drizzle 1.0 RC works with `pg` on Bun, or the fallback to 0.45.4 is documented with the reason
+  - [x] Each library either works on Bun with the steps above, or has a documented fallback
+  - [x] Drizzle 1.0 RC works with `pg` on Bun, or the fallback to 0.45.4 is documented with the reason
 - **Tests:** – (spike)
 - **Risks/notes:** pg-boss and `auth` declare `node >=22.12`; Bun reports a Node 24 compatible version, but check runtime behavior (timers, `pg` pool events, shutdown).
 
-### [ ] P0.9b – Library spike: storage, PoW, MCP, codegen; ADR (est. 3 h)
+### [x] P0.9b – Library spike: storage, PoW, MCP, codegen; ADR (est. 3 h)
 - **Description:** On Bun: AWS SDK v3 presigned PUT with signed `Content-Length`/`Content-Type` against Garage (an oversized or mismatched PUT must be rejected by storage), presigned GET with `response-content-disposition`, `CopyObject`, `HeadObject`; `altcha-lib` 2.x challenge create/verify; MCP SDK stdio server on Bun **and** Node 24; `openapi-typescript` with a tool-local TS 5.9.3 next to root TS 7 (does Bun's isolated linker resolve the local version for the tool?); Better Auth `auth generate` under TS 7; oxlint type-aware on the repo. **Second TypeScript 7 gate** (decision rule). Write ADR-0020 "Library compatibility on Bun and TypeScript 7" with commands, results, fallbacks and the TS 7/6 outcome; update the version list in this file.
 - **Files/packages:** `docs/adr/0020-library-compatibility.md`, `docs/adr/README.md`, `PLAN.md` (version list).
 - **Depends on:** P0.9a, P0.2 (first TS gate result)
 - **Reuses:** compose Garage + `garage-init` dev key.
 - **Acceptance criteria:**
-  - [ ] ADR-0020 lists each library: works / works with fallback / blocked, with the command that shows it
-  - [ ] The TS 7 decision is made (stay, tool-local fallbacks, or DEV-6) and recorded
+  - [x] ADR-0020 lists each library: works / works with fallback / blocked, with the command that shows it
+  - [x] The TS 7 decision is made (stay, tool-local fallbacks, or DEV-6) and recorded
 - **Tests:** – (spike; the storage contract suite in P3.10 turns the S3 findings into tests)
 - **Risks/notes:** If Garage doesn't enforce the signed `Content-Length`, that affects M3's acceptance; flag it in the risk register immediately.
 
@@ -257,17 +257,17 @@ Checked 2026-11-04 with `npm view <pkg> version` / `dist-tags` and the Docker Hu
 
 **Goal:** A multi-tenant platform with every contract in place, no domain modules yet. **Estimate:** 12–15 PD. **Refine with `/bb-plan P1` before execution** (incl. DEV-8).
 
-- [ ] P1.1 – Better Auth in `packages/auth` (email/password, verification, reset, organizations, invitations, cookie flags)
+- [ ] P1.1 – Better Auth in `packages/auth` (email/password, verification, reset, organizations, invitations, cookie flags). ADR-0020: generate with `bun run auth generate`, rewrite the `relations` import to `drizzle-orm/_relations`, set `telemetry: { enabled: false }`
 - [ ] P1.2 – Core schema per §B.3 (without module tables) incl. audit trigger
 - [ ] P1.3 – `TenantContext` + auth middleware, `requireRole` / `requireScope`, route declaration requirement (I3)
 - [ ] P1.4 – API keys (generation, hash storage, scopes/presets, revocation, `last_used_at`, exposure detection I6)
 - [ ] P1.5 – Projects API and organization endpoints
 - [ ] P1.6 – `ModuleDefinition`, `defineRegistry`, capabilities, `BACKBRICKS_MODULES`, `GET /v1/meta`, single-module boot tests
 - [ ] P1.7 – Generic instance service + config-as-code (`dryRun`, diff, `planHash`), JSON Schema export
-- [ ] P1.8 – Services and adapters (audit, events, mailer, storage/S3, rate limiter, usage, entitlements, clock, ids)
+- [ ] P1.8 – Services and adapters (audit, events, mailer, storage/S3, rate limiter, usage, entitlements, clock, ids). ADR-0020: S3 client with `requestChecksumCalculation: 'WHEN_REQUIRED'`, signed `content-length`/`content-type`
 - [ ] P1.9 – AbuseGuard pipeline, `GET /v1/public/challenge`, CORS for public routes
-- [ ] P1.10 – Worker: pg-boss, job registry, outbox dispatcher, cron jobs, graceful shutdown
-- [ ] P1.11 – OpenAPI pipeline, `api-contract`, drift and breaking-change checks
+- [ ] P1.10 – Worker: pg-boss, job registry, outbox dispatcher, cron jobs, graceful shutdown. ADR-0020: `fromDrizzle(tx, sql)` for transactional enqueue
+- [ ] P1.11 – OpenAPI pipeline, `api-contract`, drift and breaking-change checks. ADR-0020: `typescript@5.9.3` as devDependency of `api-contract` for openapi-typescript
 - [ ] P1.12 – Dashboard shell (auth pages, org/project switcher, projects, keys, members, activity log)
 - [ ] P1.13 – Tenant isolation suite over all management routes
 
@@ -361,12 +361,12 @@ Checked 2026-11-04 with `npm view <pkg> version` / `dist-tags` and the Docker Hu
 
 | # | Risk | Phase | Mitigation | Status |
 |---|---|---|---|---|
-| R1 | TS 7 has no JS compiler API; dependency-cruiser, openapi-typescript and the Better Auth CLI may fail | P0.2, P0.9b, P1.11 | Decision rule: tool-local fallback first, repo-wide TS 6.0.3 as last resort (DEV-6, ADR-0020) | open |
+| R1 | TS 7 has no JS compiler API; dependency-cruiser, openapi-typescript and the Better Auth CLI may fail | P0.2, P0.9b, P1.11 | Tool-local fallbacks work (swc parser, TS 5.9.3 in api-contract); TS 7 stays (ADR-0020) | resolved |
 | R2 | Bun's isolated linker + bind mount: per-package `node_modules`, darwin vs. Linux binaries | P0.3b | Named volume per workspace, in-container install (`deps`), volume sync test | open |
 | R3 | Garage image has no shell; admin API v2 details | P0.3a | Bun init script, pinned v2.5.0, idempotency test | open |
-| R4 | Better Auth (`auth` CLI) and pg-boss declare `node >=22.12`; runtime issues on Bun | P0.9a | Spike before use; fallback: run the worker role or CLI on Node (ADR) | open |
+| R4 | Better Auth (`auth` CLI) and pg-boss declare `node >=22.12`; runtime issues on Bun | P0.9a | Both work on Bun 1.4.4 (ADR-0020) | resolved |
 | R5 | Drizzle 1.0 RC: breaking changes between RCs or before GA | P0.6, P1.1 | Exact RC pin (Q1); spike in P0.9a; changelog review before upgrades; fallback 0.45.4 possible until the first real migration | open |
 | R6 | P0 over budget (~1 PD), tooling overhead (ARCHITECTURE J.1 #10) | P0 | DEV-4/DEV-7 keep P1 work out of P0; spike is time-boxed | open |
 | R7 | ClamAV: arm64 only in `-debian` images; 1.5–2 GB RAM | P0.3a, P3 | `-debian` tag, profile `scan` | open |
 | R8 | File watching across the macOS bind mount | P0.3b | Polling options, documented | open |
-| R9 | Garage may not enforce signed `Content-Length` on presigned PUTs | P0.9b, P3 | Verified in the spike; fallback design before P3 (ADR) | open |
+| R9 | Garage may not enforce signed `Content-Length` on presigned PUTs | P0.9b, P3 | Enforced (403 on mismatch); needs the checksum setting (ADR-0020); P3.10 keeps it under test | resolved |
