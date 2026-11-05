@@ -1,0 +1,116 @@
+{
+  "$schema": "https://raw.githubusercontent.com/sverweij/dependency-cruiser/main/src/schema/configuration.schema.json",
+  "forbidden": [
+    {
+      "name": "no-circular",
+      "comment": "Circular dependencies hide layering problems (AGENTS.md §2.1).",
+      "severity": "error",
+      "from": {},
+      "to": { "circular": true }
+    },
+    {
+      "name": "modules-only-core",
+      "comment": "I13: a module imports only @backbricks/core and its own files; collaboration goes through capabilities.",
+      "severity": "error",
+      "from": { "path": "^packages/modules/([^/]+)/" },
+      "to": {
+        "path": "^(apps|packages)/",
+        "pathNot": ["^packages/modules/$1/", "^packages/core/"]
+      }
+    },
+    {
+      "name": "core-no-internal-deps",
+      "comment": "core defines contracts and pure logic and depends on nothing internal (AGENTS.md §2.1).",
+      "severity": "error",
+      "from": { "path": "^packages/core/" },
+      "to": { "path": "^(apps|packages)/", "pathNot": "^packages/core/" }
+    },
+    {
+      "name": "leaf-packages-no-internal-deps",
+      "comment": "ui and api-contract are leaves: shared by apps and clients, so they import nothing internal.",
+      "severity": "error",
+      "from": { "path": "^packages/(ui|api-contract)/" },
+      "to": { "path": "^(apps|packages)/", "pathNot": "^packages/$1/" }
+    },
+    {
+      "name": "clients-only-contract",
+      "comment": "I18: the MIT packages sdk and cli never import AGPL code, only api-contract types (cli may use the sdk).",
+      "severity": "error",
+      "from": { "path": "^packages/(sdk|cli)/" },
+      "to": {
+        "path": "^(apps|packages)/",
+        "pathNot": ["^packages/$1/", "^packages/api-contract/", "^packages/sdk/"]
+      }
+    },
+    {
+      "name": "www-only-ui",
+      "comment": "ADR-0001: the website imports only packages/ui, never server code.",
+      "severity": "error",
+      "from": { "path": "^apps/www/" },
+      "to": { "path": "^(apps|packages)/", "pathNot": ["^apps/www/", "^packages/ui/"] }
+    },
+    {
+      "name": "web-only-ui-and-contract",
+      "comment": "The dashboard uses packages/ui and the API contract (later the generated admin client from the sdk), never server code.",
+      "severity": "error",
+      "from": { "path": "^apps/web/" },
+      "to": {
+        "path": "^(apps|packages)/",
+        "pathNot": ["^apps/web/", "^packages/(ui|api-contract|sdk)/"]
+      }
+    },
+    {
+      "name": "no-app-imports",
+      "comment": "Apps are composition roots; nothing imports from another app.",
+      "severity": "error",
+      "from": { "path": "^((apps|packages)/(modules/)?[^/]+)/" },
+      "to": { "path": "^apps/", "pathNot": "^$1/" }
+    },
+    {
+      "name": "no-relative-imports-across-packages",
+      "comment": "Other packages are imported by name through their exports, never via relative paths (AGENTS.md §2.4).",
+      "severity": "error",
+      "from": { "path": "^((apps|packages)/(modules/)?[^/]+)/" },
+      "to": { "dependencyTypes": ["local"], "path": "^(apps|packages)/", "pathNot": "^$1/" }
+    },
+    {
+      "name": "no-deep-imports",
+      "comment": "Public functions of a package are exported through its index.ts; deep imports are not allowed (AGENTS.md §2.4).",
+      "severity": "error",
+      "from": { "path": "^((apps|packages)/(modules/)?[^/]+)/" },
+      "to": {
+        "path": "^(apps|packages)/(modules/)?[^/]+/src/",
+        "pathNot": ["^$1/", "/src/index\\.tsx?$", "\\.css$"]
+      }
+    },
+    {
+      "name": "not-to-undeclared-deps",
+      "comment": "Every imported npm package must be declared in the importing package's package.json.",
+      "severity": "error",
+      "from": {},
+      "to": { "dependencyTypes": ["npm-no-pkg", "npm-unknown"] }
+    },
+    {
+      "name": "not-to-dev-deps",
+      "comment": "Production code must not import devDependencies (the image installs production dependencies only).",
+      "severity": "error",
+      "from": {
+        "path": "^(apps|packages)/(modules/)?[^/]+/src/",
+        "pathNot": ["\\.test\\.tsx?$", "/test/", "^apps/www/", "^apps/web/"]
+      },
+      "to": { "dependencyTypes": ["npm-dev"], "pathNot": "node_modules/@types/" }
+    }
+  ],
+  "options": {
+    "parser": "swc",
+    "doNotFollow": { "path": "node_modules" },
+    "exclude": { "path": "(^|/)(node_modules|dist|\\.turbo|\\.astro)/" },
+    "enhancedResolveOptions": {
+      "exportsFields": ["exports"],
+      "conditionNames": ["import", "bun", "module", "default"],
+      "mainFields": ["module", "main", "types"],
+      "extensions": [".ts", ".tsx", ".js", ".mjs", ".cjs", ".json", ".d.ts"]
+    },
+    "reporterOptions": { "text": { "highlightFocused": true } }
+  }
+}

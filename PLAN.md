@@ -35,7 +35,7 @@ Checked 2026-11-04 with `npm view <pkg> version` / `dist-tags` and the Docker Hu
 | | lefthook | 2.2.2 | – | mise |
 | | @types/bun | 1.4.4 | – | in repo |
 | | node | 24 | – | mise; Playwright + Node compat tests |
-| Arch rules | dependency-cruiser | 18.7.2 | to verify (P0.2) | `engines: node ^22‖^24‖>=26`; if it fails under Bun, run via mise's Node. TS parsing on TS 7 → `@swc/core` 1.16.21 parser |
+| Arch rules | dependency-cruiser + @swc/core | 18.7.2 + 1.16.21 | runs via its Node shebang (mise Node 24) | P0.2: no TS 7 support (`typescript <7`), so `.ts`/`.tsx` are parsed with `parser: "swc"`; type-only imports are still traced. `tsPreCompilationDeps` is off because it needs the TS compiler |
 | Server | hono | 4.13.16 | yes | native `Bun.serve` |
 | | zod | 4.6.7 | yes | |
 | | pino / pino-pretty | 10.4.0 / 13.2.0 | yes | pino-pretty dev only |
@@ -99,15 +99,15 @@ Checked 2026-11-04 with `npm view <pkg> version` / `dist-tags` and the Docker Hu
 - **Tests:** `scripts/workspace/workspaces.test.ts` (runs with `bun run test:scripts`): reads all workspace `package.json` files and asserts name prefix, license per path (MIT for sdk/cli/examples/skills, AGPL otherwise), presence of the MIT `LICENSE`, `type: module`, `private: true` except sdk/cli.
 - **Risks/notes:** Keep `src/index.ts` minimal (an `export {}` is fine); real content arrives with each task. Don't add dependencies the shells don't use.
 
-### [ ] P0.2 – Architecture rules (est. 4 h)
+### [x] P0.2 – Architecture rules (est. 4 h)
 - **Description:** Add dependency-cruiser with rules that mirror AGENTS.md §2.1: `packages/modules/*` → only `@backbricks/core` and their own files (I13); `packages/core` → no internal package; `packages/sdk`, `packages/cli` → only `@backbricks/api-contract` (I18); `apps/www` → only `@backbricks/ui` (ADR-0001 follow-up); `apps/web` → `@backbricks/ui`, `@backbricks/api-contract` (later `@backbricks/sdk/admin`), never server packages; no deep imports into another package's `src/`; no circular dependencies; no imports of `devDependencies` from production code. Script `bun run lint:arch`, added to `check`, `check:affected` and the CI quality job. Complete the oxlint rule set: `node/no-process-env` + `no-restricted-properties` (`Bun.env`) with overrides (DEV-5); `react/no-danger` already exists. **First TypeScript 7 gate** (decision rule): make dependency-cruiser parse `.ts`/`.tsx` including type-only imports.
 - **Files/packages:** `.dependency-cruiser.cjs`, root `package.json` (script + devDependency), `.oxlintrc.json`, `.github/workflows/ci.yml`, `scripts/arch/fixtures/**`, `scripts/arch/arch-rules.test.ts`.
 - **Depends on:** P0.1
 - **Reuses:** existing `check`/`check:affected` scripts, lefthook `pre-push` (runs `check:affected`, so no hook change needed), the CI quality job.
 - **Acceptance criteria:**
-  - [ ] `bun run lint:arch` passes on the repo and fails on each fixture violation (module → db, core → db, sdk → server, www → core, deep import)
-  - [ ] `process.env` / `Bun.env` outside the config package fails `bun run lint`
-  - [ ] `lint:arch` runs in `check`, in CI and (via `check:affected`) in pre-push
+  - [x] `bun run lint:arch` passes on the repo and fails on each fixture violation (module → db, core → db, sdk → server, www → core, deep import)
+  - [x] `process.env` / `Bun.env` outside the config package fails `bun run lint`
+  - [x] `lint:arch` runs in `check`, in CI and (via `check:affected`) in pre-push
 - **Tests:** `scripts/arch/arch-rules.test.ts` runs dependency-cruiser against small fixture trees and asserts one violation per fixture.
 - **Risks/notes:** dependency-cruiser declares `node ^22‖^24‖>=26`; if it fails under Bun, run it via mise's Node (`node node_modules/.bin/depcruise`). TS 7 parsing: try the default, then `parser: "swc"`, then the decision rule (step 3). Record the outcome in ADR-0020.
 
