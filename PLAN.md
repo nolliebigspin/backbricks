@@ -183,17 +183,17 @@ Checked 2026-11-04 with `npm view <pkg> version` / `dist-tags` and the Docker Hu
 - **Tests:** integration tests against compose Postgres (unique database or schema per test run); fast-check: TypeIDs round-trip and sort by creation time.
 - **Risks/notes:** Drizzle 1.0 RC (Q1): pin exactly, read the changelog before each RC upgrade, move to 1.0 GA when released. Keep `withTenant` free of repositories in P0 (P1.2/P1.3 add them).
 
-### [ ] P0.5a – Server application (est. 4 h)
+### [x] P0.5a – Server application (est. 4 h)
 - **Description:** `apps/server`: Hono app factory (`createApp(deps)`) on `Bun.serve`. Middleware: request ID (`req_` TypeID, honors and echoes `X-Request-Id`), pino logger (`ctx.log`) with redaction of `authorization`, `cookie`, `set-cookie`, `*token*`, `*key*`, `*secret*`, `*password*`; global body limit. `AppError` and the error code catalog in `packages/core/src/errors/codes.ts` with the first codes (`internal_error`, `not_found`, `method_not_allowed`, `validation_failed`, `payload_too_large`); RFC 9457 handler (`application/problem+json`, `type` URL `https://backbricks.app/errors/<code>`, `requestId`, no stack traces). `/healthz` (process up) and `/readyz` (pluggable checks; DB only in P0, DEV-4).
 - **Files/packages:** `apps/server/src/{app,server}.ts`, `apps/server/src/middleware/*`, `apps/server/src/health.ts`, `packages/core/src/errors/*`, `packages/core/src/logging/*` (logger type + redaction paths).
 - **Depends on:** P0.4, P0.6
 - **Reuses:** config (P0.4), db pool (P0.6), `ids` (P0.6).
 - **Acceptance criteria:**
-  - [ ] Unknown route → 404 problem+json with `code: not_found` and `requestId`
-  - [ ] Thrown non-`AppError` → 500 `internal_error`, no stack or message leak; full error in the log
-  - [ ] `/readyz` → 503 when Postgres is down, 200 when up
+  - [x] Unknown route → 404 problem+json with `code: not_found` and `requestId`
+  - [x] Thrown non-`AppError` → 500 `internal_error`, no stack or message leak; full error in the log
+  - [x] `/readyz` → 503 when Postgres is down, 200 when up
 - **Tests:** `app.request()` tests for all of the above; a log-capture test proving redaction of an `Authorization: Bearer bb_sk_…` header and a `token` field.
-- **Risks/notes:** Don't add CORS or auth middleware yet (P1.3/P1.9).
+- **Risks/notes:** Don't add CORS or auth middleware yet (P1.3/P1.9). Done without 405: Hono doesn't distinguish a wrong method from a missing route, so unknown method/path combinations return 404 until the API routes exist (P1.11 can add 405 from the OpenAPI route table).
 
 ### [ ] P0.5b – Process roles (est. 2 h)
 - **Description:** Entry point `apps/server/src/main.ts <role>`: `serve` (HTTP), `worker` (DB connection, ready log, idles until shutdown; pg-boss comes in P1.10), `all` (serve + worker in one process), `migrate` (runs P0.6's runner, exits). No `setup` role until P6.2 (DEV-7). Graceful shutdown on SIGTERM/SIGINT: stop accepting, drain in-flight requests (timeout), close the pool, exit 0. Unknown role → usage message and exit code 2.

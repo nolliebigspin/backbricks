@@ -1,0 +1,17 @@
+/**
+ * Error code catalog (ARCHITECTURE §D.3). Codes are part of the public API contract: add new
+ * ones freely, never rename or remove one. Each code has exactly one HTTP status.
+ */
+export const ERROR_CODES = {
+  internal_error: { status: 500, title: 'Internal server error' },
+  not_found: { status: 404, title: 'Not found' },
+  validation_failed: { status: 422, title: 'Validation failed' },
+  payload_too_large: { status: 413, title: 'Payload too large' },
+  service_unavailable: { status: 503, title: 'Service unavailable' },
+} as const satisfies Record<string, { status: number; title: string }>;
+
+export type ErrorCode = keyof typeof ERROR_CODES;
+export type ErrorStatus = (typeof ERROR_CODES)[ErrorCode]['status'];
+
+/** Problem `type` URLs resolve to the error reference on the website (`/errors/<code>`, M5). */
+export const ERROR_TYPE_BASE_URL = 'https://backbricks.app/errors/';

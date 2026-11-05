@@ -133,7 +133,7 @@ Scripts that don't exist yet are created in milestone M0. Add new scripts to the
 - Naming: files `kebab-case.ts`, types/components `PascalCase`, functions/variables `camelCase`, DB columns `snake_case`, env vars `UPPER_SNAKE_CASE`.
 - IDs: TypeIDs (`prj_`, `key_`, `mod_`, `rvn_`, `sub_`, `file_`, `rev_`, `evt_`, `aud_`, `ntf_`, `req_`), generated only via `ids`.
 - Time only via `clock`. No `Date.now()` in domain code (testability).
-- Errors: `AppError(code, status, { detail, errors, hint })` → RFC 9457 response.
+- Errors: `new AppError(code, { detail, errors, hint })` → RFC 9457 response. The HTTP status comes from the code catalog (`packages/core/src/errors/codes.ts`), one status per code.
 - Logging: pino via `ctx.log`, structured, never secrets or personal data. No `console.*` in app code.
 - Dashboard: all copy through i18n keys (en, de), non-technical wording (`docs/ARCHITECTURE.md` §E.1). shadcn/ui components live in `packages/ui`; add them with the shadcn CLI there, then customize.
 - Dependencies: add a runtime dependency only with a one-line justification in the commit body; prefer the platform (Bun/Web APIs) and existing deps.
