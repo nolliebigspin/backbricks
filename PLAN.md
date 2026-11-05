@@ -158,15 +158,15 @@ Checked 2026-11-04 with `npm view <pkg> version` / `dist-tags` and the Docker Hu
 - **Tests:** – (spike; the storage contract suite in P3.10 turns the S3 findings into tests)
 - **Risks/notes:** If Garage doesn't enforce the signed `Content-Length`, that affects M3's acceptance; flag it in the risk register immediately.
 
-### [ ] P0.4 – Config (est. 4 h)
+### [x] P0.4 – Config (est. 4 h)
 - **Description:** `packages/core/src/config`: a Zod-validated env config. Base part: `NODE_ENV`, `DEPLOYMENT_MODE` (`self_hosted|cloud`), `BACKBRICKS_MODULES` (comma list, default all), `DATABASE_URL`, `APP_SECRET`, `PUBLIC_URL`, `PORT`, `LOG_LEVEL`. Infrastructure parts: `storage` (S3 endpoint, region, bucket, keys, force path style), `scanner` (`SCANNER=none|clamav`, ClamAV host/port), `mailer` (SMTP, optional). `loadConfig(env, infra)` composes the base with the parts required by the enabled modules' `InfraRequirement[]`. Each module shell exports its `infrastructure` declaration now (`forms: []`, `uploads: ['storage', { scanner: 'optional' }]`, `reviews: []`); P1.6 moves it into `ModuleDefinition` without duplicating it. `*_FILE` variants (Docker secrets) win over plain values; setting both is an error. Invalid config → readable list of problems (variable name and reason, never the value) and `exit(1)`. Document every variable in `.env.example`.
 - **Files/packages:** `packages/core/src/config/*`, `packages/core/src/modules/infrastructure.ts` (the `InfraRequirement` type), `packages/modules/*/src/index.ts`, `.env.example`.
 - **Depends on:** P0.1, P0.2 (env rule)
 - **Reuses:** zod; the only allowed `process.env` read lives here (DEV-5).
 - **Acceptance criteria:**
-  - [ ] `BACKBRICKS_MODULES=forms` loads without any S3 variable; `uploads` requires them
-  - [ ] Unknown module names fail with the list of valid ones
-  - [ ] Error output never contains a value (I4)
+  - [x] `BACKBRICKS_MODULES=forms` loads without any S3 variable; `uploads` requires them
+  - [x] Unknown module names fail with the list of valid ones
+  - [x] Error output never contains a value (I4)
 - **Tests:** unit tests for composition, `*_FILE` handling (temp files), unknown modules, defaults; fast-check for the module list parser (whitespace, duplicates, case); snapshot of the error output for a broken env.
 - **Risks/notes:** Keep the module → infrastructure mapping in the module packages, not in core or apps (single source of truth).
 
