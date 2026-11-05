@@ -87,15 +87,15 @@ Checked 2026-11-04 with `npm view <pkg> version` / `dist-tags` and the Docker Hu
 **Depends on:** the existing bootstrap (`mise.toml`, root `package.json`, `turbo.json`, `tsconfig.base.json`, `.oxlintrc.json`, `.oxfmtrc.json`, `lefthook.yml`, `.github/workflows/ci.yml`, `packages/ui`, `apps/www`).
 **Milestone:** M0. **Estimate:** 47 h.
 
-### [ ] P0.1 – Workspace packages (est. 3 h)
+### [x] P0.1 – Workspace packages (est. 3 h)
 - **Description:** Create the package shells from `docs/ARCHITECTURE.md` §G.1: `apps/server`, `apps/web`, `packages/{core,db,auth,adapters,api-contract,sdk,cli}`, `packages/modules/{forms,uploads,reviews}`. Each gets `package.json`, `tsconfig.json` (extends the root `tsconfig.base.json`, DEV-1), `src/index.ts` and `typecheck` + `test` scripts; `build`/`dev` only where an artifact or process exists (DEV-2). Names: `@backbricks/<name>`, modules `@backbricks/module-<name>`, the CLI package `backbricks`. `license` field per `LICENSING.md`; MIT packages (`sdk`, `cli`) get their own `LICENSE`. MIT packages also declare `engines.node >=20` (I18). Remove `packages/tsconfig` from ARCHITECTURE §G.1 and LICENSING.md (DEV-1, accepted).
 - **Files/packages:** `apps/server/`, `apps/web/` (shell only; content in P0.5/P0.7), `packages/*/`, `packages/modules/*/`, `bun.lock`, `scripts/workspace/workspaces.test.ts`.
 - **Depends on:** –
 - **Reuses:** package layout of `packages/ui` (`exports` → `src/index.ts`, `typecheck` script), root `turbo.json` tasks, `tsconfig.base.json`.
 - **Acceptance criteria:**
-  - [ ] All packages from §G.1 exist and are listed by `bun pm ls` as workspaces
-  - [ ] License fields match `LICENSING.md`; `packages/sdk/LICENSE` and `packages/cli/LICENSE` contain the MIT text
-  - [ ] `bun run typecheck` and `bun run test` pass; Turborepo runs the new packages' tasks
+  - [x] All packages from §G.1 exist and are listed by `bun pm ls` as workspaces
+  - [x] License fields match `LICENSING.md`; `packages/sdk/LICENSE` and `packages/cli/LICENSE` contain the MIT text
+  - [x] `bun run typecheck` and `bun run test` pass; Turborepo runs the new packages' tasks
 - **Tests:** `scripts/workspace/workspaces.test.ts` (runs with `bun run test:scripts`): reads all workspace `package.json` files and asserts name prefix, license per path (MIT for sdk/cli/examples/skills, AGPL otherwise), presence of the MIT `LICENSE`, `type: module`, `private: true` except sdk/cli.
 - **Risks/notes:** Keep `src/index.ts` minimal (an `export {}` is fine); real content arrives with each task. Don't add dependencies the shells don't use.
 

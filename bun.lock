@@ -14,6 +14,14 @@
         "typescript": "7.0.2",
       },
     },
+    "apps/server": {
+      "name": "@backbricks/server",
+      "version": "0.0.0",
+    },
+    "apps/web": {
+      "name": "@backbricks/web",
+      "version": "0.0.0",
+    },
     "apps/www": {
       "name": "@backbricks/www",
       "version": "0.0.0",
@@ -34,6 +42,46 @@
         "@types/react": "19.3.0",
         "@types/react-dom": "19.3.0",
       },
+    },
+    "packages/adapters": {
+      "name": "@backbricks/adapters",
+      "version": "0.0.0",
+    },
+    "packages/api-contract": {
+      "name": "@backbricks/api-contract",
+      "version": "0.0.0",
+    },
+    "packages/auth": {
+      "name": "@backbricks/auth",
+      "version": "0.0.0",
+    },
+    "packages/cli": {
+      "name": "backbricks",
+      "version": "0.0.0",
+    },
+    "packages/core": {
+      "name": "@backbricks/core",
+      "version": "0.0.0",
+    },
+    "packages/db": {
+      "name": "@backbricks/db",
+      "version": "0.0.0",
+    },
+    "packages/modules/forms": {
+      "name": "@backbricks/module-forms",
+      "version": "0.0.0",
+    },
+    "packages/modules/reviews": {
+      "name": "@backbricks/module-reviews",
+      "version": "0.0.0",
+    },
+    "packages/modules/uploads": {
+      "name": "@backbricks/module-uploads",
+      "version": "0.0.0",
+    },
+    "packages/sdk": {
+      "name": "@backbricks/sdk",
+      "version": "0.0.0",
     },
     "packages/ui": {
       "name": "@backbricks/ui",
@@ -158,7 +206,29 @@
 
     "@babel/types": ["@babel/types@7.29.11", "", { "dependencies": { "@babel/helper-string-parser": "^7.29.11", "@babel/helper-validator-identifier": "^7.29.7" } }, "sha512-WCsemW40Cpc6gouC1SrY6PBaZ+oLRlEVY9XBvZBI7il/HyUrb2nJ505wE1MHEFyDZNnrWDEuy4jL50WVHfTTSQ=="],
 
+    "@backbricks/adapters": ["@backbricks/adapters@workspace:packages/adapters"],
+
+    "@backbricks/api-contract": ["@backbricks/api-contract@workspace:packages/api-contract"],
+
+    "@backbricks/auth": ["@backbricks/auth@workspace:packages/auth"],
+
+    "@backbricks/core": ["@backbricks/core@workspace:packages/core"],
+
+    "@backbricks/db": ["@backbricks/db@workspace:packages/db"],
+
+    "@backbricks/module-forms": ["@backbricks/module-forms@workspace:packages/modules/forms"],
+
+    "@backbricks/module-reviews": ["@backbricks/module-reviews@workspace:packages/modules/reviews"],
+
+    "@backbricks/module-uploads": ["@backbricks/module-uploads@workspace:packages/modules/uploads"],
+
+    "@backbricks/sdk": ["@backbricks/sdk@workspace:packages/sdk"],
+
+    "@backbricks/server": ["@backbricks/server@workspace:apps/server"],
+
     "@backbricks/ui": ["@backbricks/ui@workspace:packages/ui"],
+
+    "@backbricks/web": ["@backbricks/web@workspace:apps/web"],
 
     "@backbricks/www": ["@backbricks/www@workspace:apps/www"],
 
@@ -749,6 +819,8 @@
     "atomically": ["atomically@1.7.0", "", {}, "sha512-Xcz9l0z7y9yQ9rdDaxlmaI4uJHf/T8g9hOEzJcsEqX2SjCj4J20uK7+ldkDHMbpJDK76wF7xEIgxc/vSlsfw5w=="],
 
     "axobject-query": ["axobject-query@4.1.0", "", {}, "sha512-qIj0G9wZbMGNLjLmg1PT6v2mE9AH2zlnADJD/2tC6E00hgmhUOfEB6greHPAfLRSufHqROIUTkw6E+M3lH0PTQ=="],
+
+    "backbricks": ["backbricks@workspace:packages/cli"],
 
     "bail": ["bail@2.0.2", "", {}, "sha512-0xO6mYd7JB2YesxDKplafRpsiOzPt9V02ddPCLbY1xYGPOX24NTyN50qnUxgCPcSoYMhKpAuBTjQoRZCAkUDRw=="],
 

@@ -60,6 +60,16 @@
       }
     },
     {
+      "files": [
+        "apps/*/src/index.ts",
+        "packages/*/src/index.ts",
+        "packages/modules/*/src/index.ts"
+      ],
+      "rules": {
+        "unicorn/no-empty-file": "off"
+      }
+    },
+    {
       "files": ["packages/ui/src/components/**"],
       "rules": {
         "shadcn/no-restyle": "off",

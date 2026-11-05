@@ -4,7 +4,7 @@ Backbricks uses two licenses so that the platform stays open while integrating i
 
 | Part | Paths | License | SPDX |
 |---|---|---|---|
-| Server, dashboard, core, modules, adapters, cloud package | `apps/*`, `packages/{core,db,auth,adapters,modules,ui,api-contract,tsconfig}`, `cloud/`, everything not listed below | GNU Affero General Public License v3.0 only | `AGPL-3.0-only` |
+| Server, dashboard, core, modules, adapters, cloud package | `apps/*`, `packages/{core,db,auth,adapters,modules,ui,api-contract}`, `cloud/`, everything not listed below | GNU Affero General Public License v3.0 only | `AGPL-3.0-only` |
 | Client libraries and integration material | `packages/sdk`, `packages/cli`, `examples/*`, `skills/*` | MIT | `MIT` |
 
 The full AGPL text is in [`LICENSE`](LICENSE). Each MIT-licensed package contains its own `LICENSE` file. Source files carry an `SPDX-License-Identifier` header (added before `v1.0.0`).

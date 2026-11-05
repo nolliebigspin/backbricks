@@ -1,0 +1,14 @@
+{
+  "name": "@backbricks/server",
+  "version": "0.0.0",
+  "private": true,
+  "description": "HTTP server and worker (process roles: serve, worker, all, migrate)",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}
