@@ -19,19 +19,23 @@ run = ["bun install", "lefthook install", "[ -d .codegraph ] || codegraph init"]
 
 [tasks.dev]
 description = "Run the full dev environment (infra + server, worker, web) in Docker Compose"
-run = "docker compose up --build"
+run = "docker compose --profile storage up"
 
 [tasks.infra]
 description = "Start infra services only (Postgres, Garage, Mailpit) for host-based runs and tests"
-run = "docker compose up -d --wait postgres garage mailpit"
+# `up --wait` counts exited one-shot services as failures, so garage-init runs separately.
+run = [
+  "docker compose --profile storage up -d --wait postgres garage mailpit",
+  "docker compose --profile storage run --rm garage-init",
+]
 
 [tasks.down]
 description = "Stop the dev environment"
-run = "docker compose down"
+run = "docker compose --profile storage --profile scan down"
 
 [tasks.reset]
-description = "Stop the dev environment and delete its volumes (database, storage)"
-run = "docker compose down --volumes"
+description = "Stop the dev environment and delete its volumes (database, storage, dependencies)"
+run = "docker compose --profile storage --profile scan down --volumes"
 
 [tasks.codegraph]
 description = "Rebuild the local code graph from scratch"

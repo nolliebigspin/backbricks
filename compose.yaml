@@ -1,0 +1,135 @@
+# Local dev environment, also used by CI (ADR-0015). Production self-hosting uses deploy/compose/.
+#
+#   mise run infra   → Postgres, Garage (+ init), Mailpit for host-based runs and tests
+#   mise run dev     → everything, including the app services
+#
+# Profiles: `storage` (Garage, only needed by modules that store files), `scan` (ClamAV).
+# All credentials in this file are fixed dev values.
+
+name: backbricks
+
+x-bun: &bun
+  image: oven/bun:1.4.4
+  working_dir: /app
+  # Source is bind-mounted. Bun's isolated linker writes a node_modules folder per workspace,
+  # so each one gets its own volume; host binaries (macOS) never leak into the Linux containers.
+  # scripts/dev/compose-volumes.test.ts keeps this list in sync with the workspaces.
+  volumes:
+    - .:/app
+    - bun-cache:/root/.bun/install/cache
+    - nm-root:/app/node_modules
+    - nm-apps-server:/app/apps/server/node_modules
+    - nm-apps-web:/app/apps/web/node_modules
+    - nm-apps-www:/app/apps/www/node_modules
+    - nm-packages-adapters:/app/packages/adapters/node_modules
+    - nm-packages-api-contract:/app/packages/api-contract/node_modules
+    - nm-packages-auth:/app/packages/auth/node_modules
+    - nm-packages-cli:/app/packages/cli/node_modules
+    - nm-packages-core:/app/packages/core/node_modules
+    - nm-packages-db:/app/packages/db/node_modules
+    - nm-packages-sdk:/app/packages/sdk/node_modules
+    - nm-packages-ui:/app/packages/ui/node_modules
+    - nm-packages-modules-forms:/app/packages/modules/forms/node_modules
+    - nm-packages-modules-reviews:/app/packages/modules/reviews/node_modules
+    - nm-packages-modules-uploads:/app/packages/modules/uploads/node_modules
+
+services:
+  # Installs dependencies into the volumes above; app services and garage-init wait for it.
+  deps:
+    <<: *bun
+    command: ['bun', 'install', '--frozen-lockfile']
+
+  postgres:
+    image: postgres:18.6-alpine
+    environment:
+      POSTGRES_USER: backbricks
+      POSTGRES_PASSWORD: backbricks
+      POSTGRES_DB: backbricks
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U backbricks -d backbricks']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  garage:
+    image: dxflrs/garage:v2.5.0
+    profiles: [storage]
+    ports:
+      - '${GARAGE_S3_PORT:-3900}:3900'
+      - '${GARAGE_ADMIN_PORT:-3903}:3903'
+    volumes:
+      - ./docker/garage/garage.toml:/etc/garage.toml:ro
+      - garage-meta:/var/lib/garage/meta
+      - garage-data:/var/lib/garage/data
+    healthcheck:
+      # The image has no shell; `garage status` checks the daemon over RPC.
+      test: ['CMD', '/garage', 'status']
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  garage-init:
+    <<: *bun
+    profiles: [storage]
+    command: ['bun', 'scripts/dev/garage-init.ts']
+    environment:
+      GARAGE_ADMIN_URL: http://garage:3903
+      S3_ENDPOINT: http://garage:3900
+    depends_on:
+      deps:
+        condition: service_completed_successfully
+      garage:
+        condition: service_healthy
+
+  mailpit:
+    image: axllent/mailpit:v1.33.0
+    ports:
+      - '${MAILPIT_SMTP_PORT:-1025}:1025'
+      - '${MAILPIT_UI_PORT:-8025}:8025'
+    healthcheck:
+      test: ['CMD', '/mailpit', 'readyz']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  clamav:
+    # The -debian variant is the one with arm64 images.
+    image: clamav/clamav:1.5.4-debian
+    profiles: [scan]
+    ports:
+      - '${CLAMAV_PORT:-3310}:3310'
+    volumes:
+      - clamav-db:/var/lib/clamav
+    healthcheck:
+      test: ['CMD', 'clamdcheck.sh']
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      # The first start downloads the signature database.
+      start_period: 300s
+
+volumes:
+  bun-cache:
+  postgres-data:
+  garage-meta:
+  garage-data:
+  clamav-db:
+  nm-root:
+  nm-apps-server:
+  nm-apps-web:
+  nm-apps-www:
+  nm-packages-adapters:
+  nm-packages-api-contract:
+  nm-packages-auth:
+  nm-packages-cli:
+  nm-packages-core:
+  nm-packages-db:
+  nm-packages-sdk:
+  nm-packages-ui:
+  nm-packages-modules-forms:
+  nm-packages-modules-reviews:
+  nm-packages-modules-uploads:

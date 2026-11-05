@@ -111,16 +111,16 @@ Checked 2026-11-04 with `npm view <pkg> version` / `dist-tags` and the Docker Hu
 - **Tests:** `scripts/arch/arch-rules.test.ts` runs dependency-cruiser against small fixture trees and asserts one violation per fixture.
 - **Risks/notes:** dependency-cruiser declares `node ^22‖^24‖>=26`; if it fails under Bun, run it via mise's Node (`node node_modules/.bin/depcruise`). TS 7 parsing: try the default, then `parser: "swc"`, then the decision rule (step 3). Record the outcome in ADR-0020.
 
-### [ ] P0.3a – Compose: infrastructure services (est. 4 h)
+### [x] P0.3a – Compose: infrastructure services (est. 4 h)
 - **Description:** `compose.yaml` at the repo root with the infra services: `postgres` (`postgres:18.6-alpine`, `pg_isready` healthcheck, named volume), `garage` (`dxflrs/garage:v2.5.0`, profile `storage`, single-node `docker/garage/garage.toml`, healthcheck via the admin API), `garage-init` (one-shot, profile `storage`, runs `scripts/dev/garage-init.ts` from the dev image: apply layout, create bucket, import the fixed dev key, allow the key on the bucket, set CORS via S3 `PutBucketCors`; idempotent), `mailpit` (`axllent/mailpit:v1.33.0`, SMTP 1025, UI 8025), `clamav` (`clamav/clamav:1.5.4-debian`, profile `scan`, port 3310, long `start_period`). Ports per OPEN_QUESTIONS D6. Update `mise run infra` to start what CI needs (`postgres garage mailpit` with `--profile storage`).
 - **Files/packages:** `compose.yaml`, `docker/garage/garage.toml`, `scripts/dev/garage-init.ts`, `mise.toml`.
 - **Depends on:** P0.1
 - **Reuses:** the existing `mise` tasks `infra`/`down`/`reset`; the CI test job's `docker compose up -d --wait postgres garage mailpit`.
 - **Acceptance criteria:**
-  - [ ] `mise run infra` → `docker compose ps` shows postgres, garage, mailpit healthy and `garage-init` exited 0
-  - [ ] Running `garage-init` a second time exits 0 without changes
-  - [ ] `docker compose --profile scan up -d clamav` becomes healthy on arm64 and amd64
-  - [ ] `docker compose up -d postgres mailpit` works without the `storage` profile (forms-only footprint)
+  - [x] `mise run infra` → `docker compose ps` shows postgres, garage, mailpit healthy and `garage-init` exited 0
+  - [x] Running `garage-init` a second time exits 0 without changes
+  - [x] `docker compose --profile scan up -d clamav` becomes healthy on arm64 and amd64
+  - [x] `docker compose up -d postgres mailpit` works without the `storage` profile (forms-only footprint)
 - **Tests:** `scripts/dev/garage-init.test.ts` (integration, needs compose): after init, an S3 `HEAD bucket` with the dev key succeeds and a CORS preflight returns the configured origin.
 - **Risks/notes:** Garage's image has no shell, so `garage-init` can't use it; check the admin API v2 endpoints against the v2.5.0 docs. ClamAV needs ~1.5–2 GB RAM; it stays behind the `scan` profile.
 

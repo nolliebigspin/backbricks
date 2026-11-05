@@ -48,14 +48,13 @@ jobs:
           key: turbo-test-${{ runner.os }}-${{ github.sha }}
           restore-keys: turbo-test-${{ runner.os }}-
       - run: bun install --frozen-lockfile
-      # The dev environment is defined once in compose.yaml (created in M0) and reused here.
+      # The dev environment is defined once in compose.yaml and reused here (same as `mise run infra`).
       - name: Start services
-        if: hashFiles('compose.yaml') != ''
-        run: docker compose up -d --wait postgres garage mailpit
+        run: mise run infra
       - run: bun run test
       - name: Service logs
-        if: failure() && hashFiles('compose.yaml') != ''
-        run: docker compose logs --no-color
+        if: failure()
+        run: docker compose --profile storage logs --no-color
 
   dco:
     name: DCO sign-off
