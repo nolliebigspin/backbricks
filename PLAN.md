@@ -124,16 +124,17 @@ Checked 2026-11-04 with `npm view <pkg> version` / `dist-tags` and the Docker Hu
 - **Tests:** `scripts/dev/garage-init.test.ts` (integration, needs compose): after init, an S3 `HEAD bucket` with the dev key succeeds and a CORS preflight returns the configured origin.
 - **Risks/notes:** Garage's image has no shell, so `garage-init` can't use it; check the admin API v2 endpoints against the v2.5.0 docs. ClamAV needs ~1.5–2 GB RAM; it stays behind the `scan` profile.
 
-### [ ] P0.3b – Compose: app services and dev image (est. 4 h)
+### [x] P0.3b – Compose: app services and dev image (est. 4 h)
 - **Description:** `docker/dev.Dockerfile` (base `oven/bun:1.4.4`). Services: `deps` (one-shot `bun install --frozen-lockfile`), `server` (`bun --watch apps/server/src/main.ts serve`), `worker` (`… worker`), `web` (Vite dev server with HMR on 5173). Source is bind-mounted; `node_modules` live in named volumes, **one for the root and one per workspace**, because Bun's isolated linker writes per-package `node_modules` symlinks and the host's darwin binaries must not leak into the Linux container. `depends_on` with `service_healthy` / `service_completed_successfully`. `.env.example` with documented dev values (filled out further in P0.4). `mise run dev` keeps `docker compose up --build`. CI keeps using the same file.
 - **Files/packages:** `docker/dev.Dockerfile`, `compose.yaml`, `.env.example`, `.dockerignore`, `mise.toml`, `scripts/dev/compose-volumes.test.ts`.
 - **Depends on:** P0.3a
 - **Reuses:** the root `dev` script (`turbo run dev`) only on the host; compose runs each process directly so logs stay per service.
 - **Acceptance criteria:**
-  - [ ] `mise run setup && mise run dev` starts infra, `deps`, server, worker, web; a file change in `apps/server/src` restarts the server; a change in `apps/web/src` hot-reloads
-  - [ ] No `node_modules` written to the host by the containers
-  - [ ] The CI test job uses `compose.yaml` and no other service definitions
+  - [x] `mise run setup && mise run dev` starts infra, `deps`, server, worker, web; a file change in `apps/server/src` restarts the server; a change in `apps/web/src` hot-reloads
+  - [x] No `node_modules` written to the host by the containers
+  - [x] The CI test job uses `compose.yaml` and no other service definitions
 - **Tests:** `scripts/dev/compose-volumes.test.ts` parses `compose.yaml` and asserts there is a `node_modules` volume for every workspace (keeps the list from drifting as packages are added).
+- **Done as:** no `docker/dev.Dockerfile`; the services use `oven/bun:1.4.4` directly (nothing to add on top). A `migrate` one-shot runs before `server`/`worker`. Implemented after P0.7, once the apps existed, instead of with placeholder commands.
 - **Risks/notes:** File watching across the macOS bind mount can be unreliable; enable polling (`server.watch.usePolling` in Vite, `--watch` polling if needed) and document it. Server and web can't run until P0.5/P0.7; until then the services start a placeholder command, which those tasks replace.
 
 ### [x] P0.9a – Library spike: database libraries (est. 3 h)
