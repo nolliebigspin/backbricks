@@ -170,16 +170,16 @@ Checked 2026-11-04 with `npm view <pkg> version` / `dist-tags` and the Docker Hu
 - **Tests:** unit tests for composition, `*_FILE` handling (temp files), unknown modules, defaults; fast-check for the module list parser (whitespace, duplicates, case); snapshot of the error output for a broken env.
 - **Risks/notes:** Keep the module → infrastructure mapping in the module packages, not in core or apps (single source of truth).
 
-### [ ] P0.6 – Database package (est. 5 h)
+### [x] P0.6 – Database package (est. 5 h)
 - **Description:** `packages/db`: `pg` pool + Drizzle instance factory (config from P0.4), `drizzle.config.ts`, migrations folder `packages/db/migrations/` with an empty initial migration, migration runner that takes `pg_advisory_lock` around Drizzle's migrator (`bun run db:migrate`, `bun run db:generate` at the root). `withTenant(ctx, fn)` skeleton: opens a transaction, sets `app.org_id`/`app.project_id` with `select set_config($1, $2, true)` (bind parameters; `SET LOCAL` can't take them), passes the transaction to `fn`. TypeID helper `ids` (prefixes from AGENTS.md §5) and the `TenantContext`/`WithTenant` types in `packages/core` (DEV-3).
 - **Files/packages:** `packages/db/src/{client,migrate,with-tenant}.ts`, `packages/db/drizzle.config.ts`, `packages/db/migrations/`, `packages/core/src/ids/*`, `packages/core/src/tenancy/*`, root `package.json` scripts.
 - **Depends on:** P0.4, P0.9a
 - **Reuses:** config from P0.4; P0.9a findings.
 - **Acceptance criteria:**
-  - [ ] `bun run db:migrate` applies migrations against compose Postgres; a second run is a no-op
-  - [ ] Two concurrent migrate runs: one applies, the other waits and then finds nothing to do
-  - [ ] Inside `withTenant`, `current_setting('app.org_id')` returns the org; after the transaction it's empty
-  - [ ] `ids.generate('sub')` → `sub_…` (TypeID, UUIDv7, sortable); unknown prefixes are a type error
+  - [x] `bun run db:migrate` applies migrations against compose Postgres; a second run is a no-op
+  - [x] Two concurrent migrate runs: one applies, the other waits and then finds nothing to do
+  - [x] Inside `withTenant`, `current_setting('app.org_id')` returns the org; after the transaction it's empty
+  - [x] `ids.generate('sub')` → `sub_…` (TypeID, UUIDv7, sortable); unknown prefixes are a type error
 - **Tests:** integration tests against compose Postgres (unique database or schema per test run); fast-check: TypeIDs round-trip and sort by creation time.
 - **Risks/notes:** Drizzle 1.0 RC (Q1): pin exactly, read the changelog before each RC upgrade, move to 1.0 GA when released. Keep `withTenant` free of repositories in P0 (P1.2/P1.3 add them).
 

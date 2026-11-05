@@ -63,7 +63,14 @@
       }
     },
     {
-      "files": ["packages/core/src/config/**", "scripts/**", "**/*.config.ts", "**/*.config.js"],
+      "files": [
+        "packages/core/src/config/**",
+        "scripts/**",
+        "**/*.config.ts",
+        "**/*.config.js",
+        "**/*.test.ts",
+        "**/test/**"
+      ],
       "rules": {
         "node/no-process-env": "off",
         "no-restricted-properties": "off"
