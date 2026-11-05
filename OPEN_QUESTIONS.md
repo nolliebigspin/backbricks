@@ -37,3 +37,14 @@ Decisions the maintainer needs to make, from the planning run `/bb-plan P0` (202
 - **D4 – Spike code is throwaway:** only ADR-0020 (with commands and results) is committed.
 - **D5 – E2E smoke job on every PR:** it's cheap in P0; revisit if it gets slow.
 - **D6 – Dev ports:** server 3000, web 5173, Postgres 5432, Garage S3 3900 / admin 3903, Mailpit SMTP 1025 / UI 8025, ClamAV 3310.
+
+### Decided in the P0 execution run, please confirm
+
+Details: `docs/progress/phase-0.md` → "Deviations".
+
+- **D7 – No 405 yet:** unknown method/path combinations return 404 until the API routes exist; P1.11 can derive 405 from the OpenAPI route table.
+- **D8 – No `HEALTHCHECK` in the image:** it would apply to every role; compose defines it per service (`serve`: `/healthz`).
+- **D9 – Own TypeID encoder** instead of `typeid-js` (small, checked against the spec vectors, uses the injected clock).
+- **D10 – Integration tests skip locally when the compose services are down and fail in CI** (`CI=true`), so `bun run check` and pre-push work without Docker, while CI always runs them.
+- **D11 – `AppError` takes its HTTP status from the code catalog** (one status per code); AGENTS.md §5 is updated.
+- **D12 – JSON logs only** (no `pino-pretty` dependency); pipe through `bunx pino-pretty` locally.

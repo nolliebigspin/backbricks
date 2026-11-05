@@ -246,15 +246,15 @@ Checked 2026-11-04 with `npm view <pkg> version` / `dist-tags` and the Docker Hu
 - **Risks/notes:** Agents don't push; the maintainer opens the PR to demonstrate the CI criterion.
 
 ### Phase acceptance P0
-- [ ] `mise run setup && mise run dev` starts infra, server, worker and dashboard → `docker compose ps` (postgres/garage/mailpit healthy, `deps`/`garage-init` exited 0, server/worker/web running), `curl -fsS localhost:3000/healthz`, `curl -fsS localhost:5173`
-- [ ] `bun run check` green (incl. `lint:arch`) → `bun run check`
-- [ ] pre-push hook active → `lefthook run pre-push`
-- [ ] Docker image serves `/healthz` and the dashboard → `docker build -t backbricks/server:dev . && docker run --read-only --tmpfs /tmp … serve`, then `curl` both
-- [ ] CI green on a PR against `main` → PR link (maintainer pushes)
-- [ ] CodeGraph index builds → `codegraph init`
-- [ ] Forms-only footprint → `BACKBRICKS_MODULES=forms bun apps/server/src/main.ts serve` without S3 variables and without the `storage` profile
-- [ ] ADR-0020 written; TS 7 decision recorded
-- [ ] Report `docs/progress/phase-0.md`
+- [x] `mise run setup && mise run dev` starts infra, server, worker and dashboard → `docker compose ps` (postgres/garage/mailpit healthy, `deps`/`garage-init` exited 0, server/worker/web running), `curl -fsS localhost:3000/healthz`, `curl -fsS localhost:5173`
+- [x] `bun run check` green (incl. `lint:arch`) → `bun run check`
+- [x] pre-push hook active → `lefthook run pre-push`
+- [x] Docker image serves `/healthz` and the dashboard → `docker build -t backbricks/server:dev . && docker run --read-only --tmpfs /tmp … serve`, then `curl` both
+- [ ] CI green on a PR against `main` → PR link (maintainer pushes) — open, see docs/progress/phase-0.md
+- [x] CodeGraph index builds → `codegraph init`
+- [x] Forms-only footprint → `BACKBRICKS_MODULES=forms bun apps/server/src/main.ts serve` without S3 variables and without the `storage` profile
+- [x] ADR-0020 written; TS 7 decision recorded
+- [x] Report `docs/progress/phase-0.md`
 
 ## Phase P1 – Platform Core (M1) · stub
 
