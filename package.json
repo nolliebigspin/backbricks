@@ -10,6 +10,7 @@
   ],
   "type": "module",
   "scripts": {
+    "auth:generate": "bun scripts/auth/generate.ts",
     "build": "turbo run build",
     "dev": "turbo run dev",
     "typecheck": "tsc -p tsconfig.json && turbo run typecheck",

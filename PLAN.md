@@ -151,14 +151,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Deliberately undeclared route fails; validation/problem responses, body limits and SPA/API separation remain correct.
 - **Risks/notes:** ADR-0005; keep library-specific router types at the HTTP boundary. P1.11b/c finish codegen and CI, not route conversion.
 
-### [ ] P1.2a – Generate and migrate the auth schema (est. 4 h)
+### [x] P1.2a – Generate and migrate the auth schema (est. 4 h)
 - **Description:** Generate Better Auth tables for the selected configuration into db-owned schema and start the single migration history. Use a schema-generation config that does not import its own output or connect at import time.
 - **Files/packages:** `packages/db/src/schema/`, `packages/db/drizzle.config.ts`, migrations, auth generation config/script.
 - **Depends on:** P1.1a; Q8 privacy boundaries.
 - **Reuses:** P0 migration runner/advisory lock, package exports, exact version list.
 - **Acceptance criteria:**
-  - [ ] `bun run auth generate` through a package script plus deterministic normalization reproduces the schema; never manually edit generated output. Preserve required relations imports for the selected Drizzle version.
-  - [ ] Clean migrations and no-op reruns pass; db never imports auth runtime. Required auth tables/columns, indexes and expiry fields are reviewed.
+  - [x] `bun run auth:generate` runs the CLI with deterministic normalization and formatting; regeneration is byte-for-byte even with an unreachable DATABASE_URL. Generated files are never hand-edited; required relations imports are preserved.
+  - [x] Clean migrations and no-op reruns pass; db never imports auth runtime. Auth tables/indexes/expiry and identity→membership cascade are covered by real DB tests.
 - **Tests:** Auth schema generation repeatability; real migration concurrency and startup schema smoke tests.
 - **Risks/notes:** DEV-10; inspect current package exports. Root TS 7 stays; codegen fallback is local only.
 
@@ -580,7 +580,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.1a complete (ADR-0021). P1.11a complete: declared OpenAPI routes, runtime coverage guard, body limits and shared problem schema; HEAD authorization regression covered. `mise run infra` and `bun run check` passed with script integration tests running (83 pass, zero skips); package checks use Turbo where unchanged. Next task: P1.2a. Q8 was explicitly approved; apply the lifecycle clarification before schema generation. Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
+P1.1a/P1.11a/P1.2a complete. Q8's approved lifecycle clarification is in I11/ADR-0022. Auth CLI regeneration is deterministic without DB/env input; the generated auth migration and cascade/expiry tests pass on real Postgres (db: 10 pass). `bun run check` passed, including 84 script tests with zero skips; unchanged packages may use Turbo cache. Next task: P1.2b. Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 

@@ -1,1 +1,1 @@
-// Better Auth configuration for the dashboard.
+export { createAuthSchemaOptions } from './schema-options.ts';
