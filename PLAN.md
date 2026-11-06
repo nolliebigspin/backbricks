@@ -99,7 +99,7 @@ P0 versions checked 2026-11-04. New P1 dependencies rechecked 2026-11-06 with `n
 - [x] **DEV-7: No `setup` role stub in P0.** The first-run setup arrives with P6.2; a stub that only prints "not implemented" is dead code (AGENTS.md golden rule 6). P0 ships `serve | worker | all | migrate`. The P0 worker connects to the DB, logs ready, idles and shuts down cleanly (pg-boss comes in P1.10). *Recommendation:* accept.
 - [ ] **DEV-8: Bring the admin client forward to P1.11b.** Generate contract types in `api-contract`; the MIT `sdk/admin` entry point imports them as types only and wraps `openapi-fetch`. P5.2 finishes packaging/documentation. Add a specific architecture-rule fixture for this declared public subpath; do not relax deep-import rules generally. No server/auth runtime imports in the dashboard or SDK. *Impact:* §D.7, P1.12, P5.2; **Q5**.
 - [ ] **DEV-9: Test the M1 module framework with test-only modules.** There are no domain modules in M1, yet P1.6 asks for single-module boots. Exercise full definitions and all capability/infrastructure combinations with synthetic fixtures; retain the existing domain infrastructure declarations once, and replace them with full definitions in P2–P4. Do not invent production forms/upload/review schemas to fill the contract. Clearly distinguish shipped descriptors from operational modules in metadata. Real single-module acceptance is added as each domain module lands. *Impact:* §C.7, P1.6, P2–P4; **Q5**.
-- [ ] **DEV-10: Make the auth/schema/transaction boundary explicit.** Generated Better Auth tables are owned by `packages/db/src/schema`; `packages/auth` receives the database/schema and core services through its factory, with no db→auth runtime dependency. P1.1a must prove an integration that commits administrative auth changes and audit in one transaction, including raw plugin endpoints, before selecting it. Hooks alone are not proof of I12. Record the proven choice in a new ADR; no invariant waiver. *Impact:* §B.3, §F.6; P1.1a/P1.2a.
+- [x] **DEV-10: Make the auth/schema/transaction boundary explicit.** P1.1a proved the request-scoped outer transaction in [ADR-0021](docs/adr/0021-auth-transactions-and-schema-ownership.md), including negative control showing the stock adapter option alone is insufficient. Generated tables belong to db; auth receives schema/connection/services via injection. No I12 waiver; durable production integration remains P1.1c.
 - [ ] **DEV-11: Resolve privacy and deletion gaps before schema/API implementation.** §B.3's audit labels, recipients and cached idempotency responses do not all have explicit expiry; the idempotency table lacks `organization_id` despite I1. §F.4's hard deletion differs from P1.5's soft project deletion. Propose tenant/expiry constraints, minimized audit labels, and separate archive vs. erasure semantics; do not copy the SQL spec literally. *Impact:* §B.3, §F.4, I1/I11; **Q7/Q8**. Architecture text changes only with the accepted decision/ADR during execution.
 
 ## Phase P0 – Foundation (M0) · done
@@ -129,14 +129,14 @@ All tasks are done; the task details are in the git history of this file, the re
 
 **Sequential handoff:** The maintainer assigns either Claude or Codex; they use the same checkout and feature branch, never simultaneously. On entry inspect `git status`/`git diff`, read decisions and the first unticked task. Leave a short handoff in this phase's execution notes when stopping mid-task (task ID, changes, commands/results, next step); do not tick incomplete work. Human review precedes signed-off commits (AGENTS §8). Do not push or open a PR without instructions. No worktrees, agent coordinator or second task tracker are needed.
 
-### [ ] P1.1a – Prove the auth, schema and audit integration (est. 4 h)
+### [x] P1.1a – Prove the auth, schema and audit integration (est. 4 h)
 - **Description:** Inspect the pinned Better Auth adapter/organization implementation, enumerate exposed tenant endpoints, and run a disposable Postgres spike of member/invitation mutation + audit rollback. Select the boundary in DEV-10, including caller identity and connection ownership.
 - **Files/packages:** proposed ADR in `docs/adr/`, `OPEN_QUESTIONS.md`; throwaway spike outside production source.
 - **Depends on:** P0 complete; real Postgres available.
 - **Reuses:** ADR-0020, `createDatabase`, `createWithTenant`, migration test fixtures.
 - **Acceptance criteria:**
-  - [ ] Reproducible commands prove both successful atomic commit and rollback when audit fails; direct plugin endpoints cannot bypass the chosen mechanism.
-  - [ ] ADR defines schema ownership, transaction propagation, auth-table exception to scoped repositories, and endpoint coverage. If I12 cannot be met, stop dependent auth work and present options; do not approve an after-commit audit workaround.
+  - [x] Reproducible commands prove both successful atomic commit and rollback when audit fails; direct plugin endpoints cannot bypass the chosen mechanism.
+  - [x] ADR defines schema ownership, transaction propagation, auth-table exception to scoped repositories, and endpoint coverage. If I12 cannot be met, stop dependent auth work and present options; do not approve an after-commit audit workaround.
 - **Tests:** Real DB spike for member role change, invitation acceptance and org creation; recheck Better Auth/CLI patch and generated relations import.
 - **Risks/notes:** Time-box discovery. Public docs describe organization hooks but do not establish our same-transaction guarantee; unresolved findings get a new bounded task, not an assumed API.
 
@@ -580,7 +580,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-Implementation has not started. First task: P1.1a; decisions remain in OPEN_QUESTIONS Q5–Q9. Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
+P1.1a complete (ADR-0021): disposable real-Postgres HTTP spike passed commit/rollback assertions for organization creation, invitation acceptance and member role updates, including a failing stock-adapter control. `mise run infra` and `bun run check` passed. Next task: P1.11a. Q8 was explicitly approved; apply the lifecycle clarification before P1.2a. Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 
