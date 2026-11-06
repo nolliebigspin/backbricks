@@ -5,6 +5,7 @@ import {
   type TenantTransaction,
   publicWriteEnvelopeSchema,
   honeypotResponseSchema,
+  idempotencyKeySchema,
   publishableKeyTokenSchema,
   type PublicCredentialResolver,
 } from '@backbricks/core';
@@ -95,6 +96,9 @@ export function moduleRoutes(
         path,
         operationId: route.operationId,
         request: {
+          ...(!management && hasBody
+            ? { headers: z.object({ 'idempotency-key': idempotencyKeySchema.optional() }) }
+            : {}),
           params: management
             ? route.input.shape.params.extend({ projectId: z.string() })
             : route.input.shape.params,

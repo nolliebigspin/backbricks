@@ -39,6 +39,7 @@ export function createPublicExecutor(
     );
     const response = await guard({
       identity,
+      idempotencyKey: c.req.header('idempotency-key'),
       request,
       module,
       route,

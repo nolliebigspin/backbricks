@@ -4,6 +4,7 @@ import { DEFAULT_BODY_LIMIT_BYTES } from '../http/route-policy.ts';
 import { scopeNameSchema } from '../keys/protocol.ts';
 import { moduleInstanceSchema } from '../platform/models.ts';
 import { metricNameSchema } from '../services/usage.ts';
+import { idempotencyPolicySchema } from './idempotency.ts';
 import { rateLimitInputSchema } from './rate-limiter.ts';
 
 const field = z
@@ -18,6 +19,7 @@ export const publicAccessSchema = z.discriminatedUnion('kind', [
       kind: z.literal('write'),
       instanceParam: field.default('key'),
       secretScope: scopeNameSchema,
+      idempotency: idempotencyPolicySchema.optional(),
       quota: z
         .object({ metric: metricNameSchema, amountField: field.optional() })
         .strict()

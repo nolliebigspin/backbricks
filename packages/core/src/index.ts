@@ -378,3 +378,11 @@ export {
   type SelectedModules,
 } from './modules/catalog.ts';
 export { createAbuseGuard, assertPublicOrigin } from './abuse/guard.ts';
+
+export {
+  prepareIdempotentWrite,
+  idempotencyKeySchema,
+  idempotencyPolicySchema,
+  idempotencyResponseSchema,
+  IDEMPOTENCY_RETENTION_DAYS,
+} from './abuse/idempotency.ts';

@@ -427,14 +427,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Oversized/chunked bodies, denied/empty/null origins, honeypot, PoW skip scope, limiter/quota failures and full public response snapshots.
 - **Risks/notes:** Real domain writes arrive P2–P4; fixture route must not be mounted in production.
 
-### [ ] P1.9c – Add shared idempotent-write support (est. 4 h)
+### [x] P1.9c – Add shared idempotent-write support (est. 4 h)
 - **Description:** Implement tenant/project-bound request hashing, atomic idempotency claim/replay and safe response storage for public writes; expose through core, not module-specific copies.
 - **Files/packages:** core idempotency contract/helper, db repository, public-write fixture.
 - **Depends on:** P1.9b, P1.2b; Q8 retention.
 - **Reuses:** Tenant transaction, canonicalization primitives where semantics match, expiry and response schemas.
 - **Acceptance criteria:**
-  - [ ] Same key/body replays the approved result; changed body conflicts; concurrent duplicates persist event/usage/data once. No in-flight/failed transaction leaves a successful replay record.
-  - [ ] Cache is bounded by expiry and stores only allowlisted public response data, never input content or secret keys. Cross-project keys are independent.
+  - [x] Same key/body replays the approved result; changed body conflicts; concurrent duplicates persist event/usage/data once. No in-flight/failed transaction leaves a successful replay record.
+  - [x] Cache is bounded by expiry and stores only allowlisted public response data, never input content or secret keys. Cross-project keys are independent.
 - **Tests:** Real DB concurrent claim/rollback, request mismatch, expiry and no duplicate usage/outbox effects.
 - **Risks/notes:** Central support prepares P2.4; route-specific idempotency policy stays in the module contract.
 
@@ -686,3 +686,5 @@ P1.9a provider, atomic replay store and rate-limited challenge composition are i
 | R9 | Garage may not enforce signed `Content-Length` on presigned PUTs | P0.9b, P3 | Enforced (403 on mismatch); needs the checksum setting (ADR-0020); P3.10 keeps it under test | resolved |
 
 P1.9b implements the shared guard and public CORS (ADR-0046), verified through real HTTP/PG fixtures including quota/provider failure and atomic rollback. Production publishable bootstrap remains the separate Q11/P1.9a gate; no new unscoped lookup was introduced. JSON transport is in M1; HTML form adaptation stays M2.
+
+P1.9c is implemented with shared, acknowledgement-only transactional caching (ADR-0047). Real HTTP/PG tests prove twelve concurrent duplicates persist usage/outbox once, project separation, mismatch/expiry, spent-proof replay and rollback on both domain/cache failure. Full `bun run check` passes with no service skips.

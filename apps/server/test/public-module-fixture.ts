@@ -41,6 +41,7 @@ export function publicModule() {
           access: {
             kind: 'write',
             secretScope: 'publictest:submit',
+            idempotency: { status: 201 },
             quota: { metric: 'publictest.accepted' },
           },
         },

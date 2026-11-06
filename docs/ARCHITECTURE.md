@@ -513,6 +513,8 @@ Origin validation and exact matching live in [`origins.ts`](../packages/core/src
 
 The implemented [shared guard](../packages/core/src/abuse/guard.ts), [policy schemas](../packages/core/src/abuse/policy.ts) and [public host executor](../apps/server/src/public-executor.ts) follow [ADR-0046](adr/0046-public-write-guard-and-cors.md). JSON transport wraps module data in `{data, proof?, honeypot?}`; the module schema remains the sole domain payload contract.
 
+Public write routes can opt into the [shared idempotency helper](../packages/core/src/abuse/idempotency.ts), with one-day, tenant/project-bound acknowledgement caching in the domain transaction ([ADR-0047](adr/0047-atomic-public-idempotency.md)). Matching committed retries replay before proof consumption; changed requests conflict.
+
 **CORS:** public routes reflect `Origin` when it is in `allowed_origins` (if the list is empty: "all", with a warning in the dashboard). Management routes have **no** CORS.
 
 ### D.6 Upload flow

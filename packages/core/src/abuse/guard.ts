@@ -11,6 +11,7 @@ import type { Entitlements } from '../services/entitlements.ts';
 import type { CaptchaProvider } from '../services/providers.ts';
 import type { TenantContext, TenantTransaction, WithTenant } from '../tenancy/tenant-context.ts';
 import type { Clock } from '../time/clock.ts';
+import { prepareIdempotentWrite } from './idempotency.ts';
 import {
   honeypotResponseSchema,
   publicWriteEnvelopeSchema,
@@ -48,6 +49,7 @@ export function createAbuseGuard(deps: {
 }) {
   return async (input: {
     identity: unknown;
+    idempotencyKey?: string;
     request: CredentialRequest;
     module: RegisteredModule;
     route: RegisteredRoute;
@@ -153,6 +155,48 @@ export function createAbuseGuard(deps: {
       Reflect.deleteProperty(payload, prepared.policy.honeypotField);
     }
     if (trapped) return Response.json(honeypotResponseSchema.parse({ accepted: true }));
+    const recheck = async (tx: TenantTransaction) => {
+      const project = await tx.repositories.projects.get(identity.projectId, { lock: true });
+      assertPublicOrigin(identity.kind, project.allowedOrigins, request.origin);
+      const keyRecord = await tx.repositories.keys.get(identity.id, { lock: true });
+      if (
+        keyRecord.kind !== identity.kind ||
+        keyRecord.revokedAt ||
+        (keyRecord.expiresAt && keyRecord.expiresAt <= deps.clock.now())
+      )
+        throw new AppError('not_found');
+      if (identity.kind === 'secret' && !keyRecord.scopes.includes(access.secretScope))
+        throw new AppError('forbidden');
+      const current = await tx.repositories.instances.getByKey(module.type, key);
+      if (current.status !== 'active') throw new AppError('not_found');
+      if (current.configVersion !== prepared.instance.configVersion) throw new AppError('conflict');
+    };
+    if (input.idempotencyKey !== undefined && !access.idempotency)
+      throw new AppError('invalid_request');
+    const idempotent =
+      input.idempotencyKey === undefined || !access.idempotency
+        ? null
+        : prepareIdempotentWrite({
+            key: input.idempotencyKey,
+            status: access.idempotency.status,
+            clock: deps.clock,
+            request: {
+              operation: route.operationId,
+              instanceId: prepared.instance.id,
+              credentialId: identity.id,
+              params: input.params,
+              query: input.query,
+              data: payload,
+            },
+          });
+    if (idempotent) {
+      const replay = await deps.withTenant(tenant, async (tx) => {
+        await recheck(tx);
+        return idempotent.replay(tx);
+      });
+      if (replay) return replay;
+    }
+
     if (
       identity.kind === 'publishable' &&
       prepared.policy.proofOfWork &&
@@ -178,20 +222,9 @@ export function createAbuseGuard(deps: {
       spam: spamVerdict(parsed.data.body),
     };
     return deps.withTenant(tenant, async (tx) => {
-      const project = await tx.repositories.projects.get(identity.projectId, { lock: true });
-      assertPublicOrigin(identity.kind, project.allowedOrigins, request.origin);
-      const keyRecord = await tx.repositories.keys.get(identity.id, { lock: true });
-      if (
-        keyRecord.kind !== identity.kind ||
-        keyRecord.revokedAt ||
-        (keyRecord.expiresAt && keyRecord.expiresAt <= deps.clock.now())
-      )
-        throw new AppError('not_found');
-      if (identity.kind === 'secret' && !keyRecord.scopes.includes(access.secretScope))
-        throw new AppError('forbidden');
-      const current = await tx.repositories.instances.getByKey(module.type, key);
-      if (current.status !== 'active') throw new AppError('not_found');
-      if (current.configVersion !== prepared.instance.configVersion) throw new AppError('conflict');
+      await recheck(tx);
+      const replay = await idempotent?.replay(tx);
+      if (replay) return replay;
       if (access.quota) {
         let delta = 1n;
         if (access.quota.amountField) {
@@ -205,7 +238,9 @@ export function createAbuseGuard(deps: {
         if (!(await deps.entitlements.check(tx, { metric: access.quota.metric, delta })).allowed)
           throw new AppError('quota_exceeded');
       }
-      return input.run(tx, clean, context);
+      const response = await input.run(tx, clean, context);
+      await idempotent?.save(tx, response);
+      return response;
     });
   };
 }

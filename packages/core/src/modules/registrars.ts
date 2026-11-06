@@ -93,6 +93,14 @@ export function routeRegistrar<Runtime>(
       throw new AppError('invalid_request', {
         detail: 'The public credential query parameter is reserved.',
       });
+    if (
+      access?.kind === 'write' &&
+      access.idempotency &&
+      responses[access.idempotency.status]?.kind !== 'json'
+    )
+      throw new AppError('invalid_request', {
+        detail: 'Idempotency must select a declared JSON success response.',
+      });
     if (kind === 'public' && !access) throw new AppError('invalid_request');
     if (kind === 'public' && !['GET', 'POST'].includes(spec.method))
       throw new AppError('invalid_request');
