@@ -1,4 +1,4 @@
-import type { Ids } from '@backbricks/core';
+import type { createIpIdentity, Ids } from '@backbricks/core';
 
 import type { Logger } from './logger.ts';
 
@@ -6,6 +6,7 @@ import type { Logger } from './logger.ts';
 export type AppEnv = {
   Variables: {
     requestId: string;
+    ipHash?: string;
     log: Logger;
   };
 };
@@ -20,6 +21,8 @@ export type ReadinessCheck = {
 export type AppDependencies = {
   log: Logger;
   ids: Ids;
+  /** Omitted only by apps/tests that do not mount auth or public-write handlers. */
+  ipIdentity?: ReturnType<typeof createIpIdentity>;
   readinessChecks: readonly ReadinessCheck[];
   /** Built dashboard to serve, or `null` (development: Vite serves it; API-only setups). */
   dashboardDir: string | null;

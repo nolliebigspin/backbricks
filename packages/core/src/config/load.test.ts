@@ -30,6 +30,24 @@ function issuesOf(result: ReturnType<typeof loadConfig>) {
 }
 
 describe('loadConfig', () => {
+  test('forwarded addresses require explicitly configured literal proxy addresses', () => {
+    const defaults = loadConfig({ ...base, BACKBRICKS_MODULES: 'forms' }, modules);
+    if (!defaults.ok) throw new Error(formatConfigIssues(defaults.issues));
+    expect(defaults.config.trustedProxies).toEqual([]);
+    const configured = loadConfig(
+      { ...base, BACKBRICKS_MODULES: 'forms', TRUSTED_PROXIES: '127.0.0.1, ::1' },
+      modules,
+    );
+    if (!configured.ok) throw new Error(formatConfigIssues(configured.issues));
+    expect(configured.config.trustedProxies).toEqual(['127.0.0.1', '::1']);
+    for (const invalid of ['proxy.local', '0.0.0.0/0', '*']) {
+      expect(
+        issuesOf(
+          loadConfig({ ...base, BACKBRICKS_MODULES: 'forms', TRUSTED_PROXIES: invalid }, modules),
+        ),
+      ).toMatchObject([{ variable: 'TRUSTED_PROXIES' }]);
+    }
+  });
   test('applies defaults and enables every module when BACKBRICKS_MODULES is unset', () => {
     const result = loadConfig({ ...base, ...storage }, modules);
     if (!result.ok) throw new Error(formatConfigIssues(result.issues));

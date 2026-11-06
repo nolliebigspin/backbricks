@@ -1,4 +1,4 @@
-import { type Config, createIds, systemClock } from '@backbricks/core';
+import { type Config, createIds, createIpIdentity, systemClock } from '@backbricks/core';
 import { createDatabase, runMigrations } from '@backbricks/db';
 
 import { createApp } from './app.ts';
@@ -22,6 +22,11 @@ export function startServe(config: Config, log: Logger): RunningRole {
   const app = createApp({
     log,
     ids: createIds(systemClock),
+    ipIdentity: createIpIdentity({
+      appSecret: config.appSecret,
+      clock: systemClock,
+      trustedProxies: config.trustedProxies,
+    }),
     readinessChecks: [{ name: 'database', check: database.ping }],
     dashboardDir,
   });

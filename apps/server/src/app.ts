@@ -7,6 +7,7 @@ import { dashboardRoutes } from './dashboard.ts';
 import { handleError, handleNotFound } from './errors.ts';
 import { healthRoutes } from './health.ts';
 import { ApiRoutes, type ApiAuthorization, createOpenApiApp } from './http/api-routes.ts';
+import { clientIdentity } from './middleware/client-identity.ts';
 import { requestContext } from './middleware/request-context.ts';
 
 /** The HTTP app. Wiring only: routes and services come from the composition root. */
@@ -18,6 +19,7 @@ export function createApp(
   const app = createOpenApiApp();
 
   app.use(requestContext(deps.log, deps.ids));
+  if (deps.ipIdentity) app.use(clientIdentity(deps.ipIdentity));
   app.use(
     bodyLimit({
       maxSize: DEFAULT_BODY_LIMIT_BYTES,

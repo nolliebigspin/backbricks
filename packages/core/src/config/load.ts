@@ -33,6 +33,7 @@ export type Config = {
   databaseUrl: string;
   appSecret: string;
   publicUrl: string;
+  trustedProxies: readonly string[];
   port: number;
   logLevel: 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'silent';
   mailer: { smtpUrl: string; from: string } | null;
@@ -164,6 +165,7 @@ export function loadConfig(env: Env, modules: AvailableModules, readFile?: ReadF
       databaseUrl: base.DATABASE_URL,
       appSecret: base.APP_SECRET,
       publicUrl: base.PUBLIC_URL,
+      trustedProxies: base.TRUSTED_PROXIES,
       port: base.PORT,
       logLevel: base.LOG_LEVEL,
       mailer:

@@ -31,6 +31,17 @@ export * from './tenancy/repositories.ts';
 export * from './platform/models.ts';
 export { MAX_PAGE_SIZE } from './http/pagination.ts';
 export { API_KEY_PREFIXES } from './keys/constants.ts';
+export { canonicalIp, resolveClientIp, createIpIdentity } from './privacy/ip-identity.ts';
+export {
+  createRateLimiter,
+  rateLimitInputSchema,
+  MAX_RATE_LIMIT_COUNT,
+  type RateLimitInput,
+  type RateLimitResult,
+  type RateLimitBucket,
+  type RateLimitStore,
+  type RateLimiter,
+} from './abuse/rate-limiter.ts';
 export {
   MAIL_BODY_LIMIT,
   mailMessageSchema,

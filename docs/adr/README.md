@@ -34,3 +34,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0022](0022-personal-data-lifecycles.md) | Personal data lifecycles | accepted |
 | [0023](0023-platform-schema-integrity.md) | Platform schema integrity | accepted |
 | [0024](0024-tenant-repository-boundary.md) | Tenant repository boundary | accepted |
+| [0025](0025-abuse-identity-and-rate-limits.md) | Private abuse identity and shared rate limits | accepted |

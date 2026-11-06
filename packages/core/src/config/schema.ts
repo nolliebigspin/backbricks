@@ -5,6 +5,8 @@
  */
 import { z } from 'zod';
 
+import { canonicalIp } from '../privacy/ip-identity.ts';
+
 const postgresUrl = z
   .string({ error: 'is required' })
   .refine((value) => /^postgres(ql)?:\/\/.+/.test(value), 'must be a postgres:// URL');
@@ -25,6 +27,25 @@ export const baseEnvSchema = z.object({
     .string({ error: 'is required' })
     .min(32, 'must be at least 32 characters (e.g. `openssl rand -hex 32`)'),
   PUBLIC_URL: httpUrl.default('http://localhost:3000'),
+  TRUSTED_PROXIES: z
+    .string()
+    .default('')
+    .transform((value) =>
+      value
+        .split(',')
+        .map((address) => address.trim())
+        .filter(Boolean),
+    )
+    .pipe(
+      z.array(
+        z
+          .string()
+          .refine(
+            (address) => canonicalIp(address) !== null,
+            'must contain only literal proxy IP addresses (no CIDR ranges or hostnames)',
+          ),
+      ),
+    ),
   PORT: z.coerce
     .number({ error: 'must be a port number' })
     .int('must be a port number')

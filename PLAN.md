@@ -206,14 +206,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Mailpit delivery with hostile display names, template escaping properties, SMTP failure and missing-SMTP behavior.
 - **Risks/notes:** Provider delivery happens after commit; do not send an email for a transaction that later rolls back. Durable retries arrive in P1.10b.
 
-### [ ] P1.8c – Add shared rate limits and private IP identity (est. 4 h)
+### [x] P1.8c – Add shared rate limits and private IP identity (est. 4 h)
 - **Description:** Implement Postgres and memory rate limiters with the same contract; centralize rotating IP HMAC and trusted proxy address resolution for auth/public endpoints.
 - **Files/packages:** core contracts/pure helpers, adapter rate limiter, server request context, config.
 - **Depends on:** P1.2b.
 - **Reuses:** `clock`, `APP_SECRET`, `rate_limit_buckets`, config validation and HTTP connection info.
 - **Acceptance criteria:**
-  - [ ] Atomic counters enforce concurrent fixed-window limits and report retry time; memory implementation is for tests/single-process use, not the production multi-process default.
-  - [ ] Clear IPs never persist/log; forwarded headers are trusted only under explicit proxy configuration. Auth and public traffic use distinct bucket namespaces.
+  - [x] Atomic counters enforce concurrent fixed-window limits and report retry time; memory implementation is for tests/single-process use. Postgres remains the production store; container binding is P1.8d.
+  - [x] Socket addresses are canonicalized and immediately hashed in request context; no clear IP is persisted/logged by this flow. Exact-IP proxy allowlist defaults empty. Bucket schemas require separate auth/public/management namespaces and digest identities; auth uses the helper in P1.1b.
 - **Tests:** Concurrent Postgres increments, window boundaries, daily HMAC rotation, forged forwarding headers and no raw IP leakage.
 - **Risks/notes:** I11; no Redis. Bucket cleanup is P1.10c.
 
@@ -581,7 +581,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.1a/P1.11a/P1.2a/P1.2b/P1.3a/P1.8a/b complete. ADRs 0021–0024 record transaction, privacy, schema and repository boundaries. Real DB tests: 28 pass across 6 files; audit/outbox constraint failures prove atomic rollback. SMTP/template tests: 7 pass, including real Mailpit delivery. `bun run check` passed with services running and zero skips; unchanged packages may use Turbo cache. Next task: P1.8c (shared rate limits and private IP identity). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
+P1.1a/P1.11a/P1.2a/P1.2b/P1.3a/P1.8a/b/c complete. ADRs 0021–0025 record transaction, privacy, schema, repository and abuse boundaries. Real DB tests: 30 pass across 7 files; atomic rate limits are proven across two pools. SMTP/template tests pass against Mailpit; Bun socket identity/log tests pass. `bun run check` passed with services running and zero skips; unchanged packages may use Turbo cache. Next task: P1.1b (dashboard authentication). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 

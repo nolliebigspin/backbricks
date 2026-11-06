@@ -132,7 +132,7 @@ flowchart LR
 3. **Module-specific tables** instead of a universal `records` table. User-defined fields live as `jsonb` inside module tables; fixed semantics (rating, moderation status, file status) are real columns with indexes.
 4. **Personal data is hard-deleted** (no soft delete). Soft delete only for configuration objects (projects) where restore makes sense.
 5. **`expires_at`** on personal records and audit, derived from retention; transient auth/delivery records use bounded expiry (the library's equivalent field where applicable). Active identities/memberships and notification recipients follow their removal/erasure lifecycle rather than arbitrary account expiry. Daily maintenance hard-deletes expired records; lifecycle categories are defined in [ADR-0022](adr/0022-personal-data-lifecycles.md).
-6. **IP addresses are never stored in clear text**, only as `HMAC-SHA256(ip, daily rotating key)` for rate limiting and abuse detection.
+6. **IP addresses are never stored in clear text**, only as `HMAC-SHA256(ip, daily rotating key)` for rate limiting and abuse detection. Implementation and trusted-proxy rules: [ADR-0025](adr/0025-abuse-identity-and-rate-limits.md); `TRUSTED_PROXIES` is empty by default.
 7. **Configuration is versioned** (`config_version`); every change creates a revision. Submissions record the version they were validated against.
 
 ### B.2 Entities and relationships
