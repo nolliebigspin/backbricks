@@ -62,3 +62,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0050](0050-bounded-worker-maintenance.md) | Bounded worker maintenance | accepted |
 | [0051](0051-offline-contract-and-admin-client.md) | Offline contract and admin client | accepted |
 | [0052](0052-contract-gates-and-method-handling.md) | Contract gates and method handling | accepted |
+| [0053](0053-dashboard-account-boundary.md) | Dashboard account boundary | accepted |

@@ -13,7 +13,8 @@ export default defineConfig({
   use: { baseURL, locale: 'en-US', trace: 'retain-on-failure' },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    command: 'bun --no-env-file apps/server/src/main.ts serve',
+    command:
+      'bun --no-env-file apps/server/src/main.ts migrate && bun --no-env-file apps/server/src/main.ts all',
     cwd: '..',
     url: `${baseURL}/healthz`,
     reuseExistingServer: !process.env['CI'],
@@ -28,6 +29,9 @@ export default defineConfig({
       APP_SECRET: 'e2e-secret-e2e-secret-e2e-secret-000000',
       BACKBRICKS_MODULES: 'forms',
       LOG_LEVEL: 'warn',
+      SIGNUP_POLICY: 'open',
+      SMTP_URL: process.env['TEST_SMTP_URL'] ?? 'smtp://127.0.0.1:1025',
+      MAIL_FROM: 'e2e@backbricks.test',
     },
   },
 });

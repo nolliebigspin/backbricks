@@ -414,3 +414,9 @@ export {
 export { PLATFORM_JOB_DEFINITIONS, createPlatformJobHandlers } from './jobs/platform.ts';
 
 export { PLATFORM_JOBS } from './jobs/platform-names.ts';
+
+export {
+  AUTH_MIN_PASSWORD_LENGTH,
+  authCapabilitiesSchema,
+  authCapabilities,
+} from './identity/auth-settings.ts';

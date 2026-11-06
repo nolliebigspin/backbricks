@@ -1,3 +1,5 @@
+import { setTimeout } from 'node:timers/promises';
+
 import { z } from 'zod';
 
 export const TEST_SMTP_URL = process.env['TEST_SMTP_URL'] ?? 'smtp://127.0.0.1:1025';
@@ -45,7 +47,7 @@ export async function receivedMail(
       await (await fetch(`${baseUrl}/api/v1/message/${encodeURIComponent(id)}`)).json(),
     );
   if (attempt >= 20) throw new Error('Expected test mail was not received.');
-  await Bun.sleep(50);
+  await setTimeout(50);
   return receivedMail(recipient, attempt + 1, subject);
 }
 

@@ -27,7 +27,7 @@ export function platformRoutes(
       .map((module) => module.type),
   );
   platformReadRoutes(api, services);
-  metaRoutes(api, services.modules);
+  metaRoutes(api, services.modules, services.authCapabilities);
   instanceRoutes(api, services);
   configurationRoutes(api, services);
   challengeRoutes(api, {

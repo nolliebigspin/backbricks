@@ -493,14 +493,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Fixture additive change passes, removal/type change fails, generated drift fails and missing-base behavior is explicit.
 - **Risks/notes:** No hosted spec upload. Library auth routes are inventoried/tested separately; don't pretend they use the `/v1` OpenAPI contract.
 
-### [ ] P1.12a – Build dashboard auth flows (est. 6 h)
+### [x] P1.12a – Build dashboard auth flows (est. 6 h)
 - **Description:** Add login, signup, verification, reset and invitation-acceptance screens using the approved public Better Auth client and en/de translations.
 - **Files/packages:** web routes/auth client/i18n, UI primitives added through shadcn CLI in `packages/ui` as needed.
 - **Depends on:** P1.1c, P1.11b; Q6.
 - **Reuses:** Existing TanStack Router/Query, shared theme/Card/Button, i18next and Happy DOM/Testing Library.
 - **Acceptance criteria:**
-  - [ ] All flows handle loading, expiry, errors and signup policy with accessible labels; redirect targets stay same-origin and signed-out users cannot view protected pages.
-  - [ ] Verification/reset tokens do not enter analytics/logs or persistent client storage; no server-package imports or hand-written API payload types.
+  - [x] All flows handle loading, expiry, errors and signup policy with accessible labels; redirect targets stay same-origin and signed-out users cannot view protected pages.
+  - [x] Verification/reset tokens do not enter analytics/logs or persistent client storage; no server-package imports or hand-written API payload types.
 - **Tests:** Component behavior/translation parity and Playwright verification/reset via Mailpit; malicious redirect and invalid invitation cases.
 - **Risks/notes:** React Hook Form/resolver patch verified with Zod 4. No M6 first-run setup UI.
 

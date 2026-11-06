@@ -1,5 +1,6 @@
 import { createSmtpMailer, createS3Storage, createAltchaProvider } from '@backbricks/adapters';
 import {
+  authCapabilities,
   createAuditService,
   createPlatformJobHandlers,
   PLATFORM_JOB_DEFINITIONS,
@@ -79,6 +80,7 @@ export function createServerServices(
   });
   return Object.freeze({
     container,
+    authCapabilities: authCapabilities(config),
     captcha,
     readinessChecks: storage ? [{ name: 'storage', check: () => storage.check() }] : [],
     modules,

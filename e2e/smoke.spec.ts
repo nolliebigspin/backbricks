@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test('the dashboard loads', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveTitle('Backbricks');
-  await expect(page.getByText('Welcome to Backbricks')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
 });
 
@@ -16,7 +16,7 @@ test('German browsers get the German dashboard', async ({ browser }) => {
   const context = await browser.newContext({ locale: 'de-DE' });
   const page = await context.newPage();
   await page.goto('/');
-  await expect(page.getByText('Willkommen bei Backbricks')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Anmelden' })).toBeVisible();
   await context.close();
 });
 

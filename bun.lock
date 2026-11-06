@@ -49,6 +49,7 @@
         "@backbricks/ui": "workspace:*",
         "@tanstack/react-query": "5.105.3",
         "@tanstack/react-router": "1.170.46",
+        "better-auth": "1.7.18",
         "i18next": "26.7.1",
         "react": "19.3.1",
         "react-dom": "19.3.1",

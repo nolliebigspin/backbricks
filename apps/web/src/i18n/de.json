@@ -6,5 +6,66 @@
     "title": "Willkommen bei Backbricks",
     "description": "Dein Dashboard wird gerade eingerichtet. Formulare, Dateien und Bewertungen erscheinen hier.",
     "status": "Das Dashboard läuft."
+  },
+  "common": {
+    "loading": "Wird geladen…",
+    "working": "Wird bearbeitet…",
+    "signOut": "Abmelden",
+    "language": "Sprache"
+  },
+  "auth": {
+    "name": "Dein Name",
+    "email": "E-Mail-Adresse",
+    "password": "Passwort",
+    "passwordHint": "Verwende mindestens {{count}} Zeichen.",
+    "navigation": "Kontooptionen",
+    "login": {
+      "title": "Anmelden",
+      "description": "Verwalte deine Websites mit Backbricks.",
+      "submit": "Anmelden",
+      "success": "Du bist angemeldet."
+    },
+    "signup": {
+      "title": "Konto erstellen",
+      "description": "Beginne mit deiner E-Mail-Adresse.",
+      "submit": "Konto erstellen",
+      "success": "Öffne den Bestätigungslink in deiner E-Mail und melde dich danach an."
+    },
+    "checkEmail": {
+      "title": "E-Mail bestätigen",
+      "description": "Fordere einen neuen Bestätigungslink an, wenn der bisherige abgelaufen ist.",
+      "submit": "Bestätigungslink senden",
+      "success": "Wenn die Adresse bestätigt werden kann, ist ein Link unterwegs. Prüfe deinen Posteingang."
+    },
+    "forgot": {
+      "title": "Passwort vergessen?",
+      "description": "Wir senden dir einen Link, um ein neues Passwort zu wählen.",
+      "submit": "Link senden",
+      "success": "Wenn die Adresse zu einem Konto gehört, ist ein Link zum Zurücksetzen unterwegs."
+    },
+    "reset": {
+      "title": "Neues Passwort wählen",
+      "description": "Dieser Link kann einmal verwendet werden.",
+      "submit": "Passwort speichern",
+      "success": "Dein Passwort wurde geändert. Melde dich mit dem neuen Passwort an."
+    },
+    "invitation": {
+      "title": "Team beitreten",
+      "description": "Melde dich mit der eingeladenen E-Mail-Adresse an oder erstelle hier dein Konto.",
+      "submit": "Team beitreten",
+      "success": "Du bist dem Team beigetreten.",
+      "account": "Diese Einladung als {{email}} annehmen."
+    },
+    "errors": {
+      "generic": "Die Anfrage konnte nicht abgeschlossen werden. Bitte versuche es erneut.",
+      "unverified": "Bestätige vor der Anmeldung deine E-Mail. Du kannst unten einen neuen Link anfordern.",
+      "inviteOnly": "Für ein neues Konto brauchst du eine Einladung. Bitte dein Team um einen Link.",
+      "noEmail": "E-Mail ist in dieser Installation nicht verfügbar. Wende dich an die Administration.",
+      "rateLimit": "Zu viele Versuche. Bitte warte eine Minute und versuche es erneut.",
+      "expired": "Dieser Link ist ungültig, abgelaufen oder gehört zu einem anderen Konto. Fordere einen neuen Link an.",
+      "lastOwner": "Ein Team braucht mindestens einen Inhaber. Sorge vor dem Entfernen dieser Rolle für einen weiteren Inhaber.",
+      "session": "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
+      "credentials": "Prüfe deine E-Mail-Adresse und dein Passwort und versuche es erneut."
+    }
   }
 }

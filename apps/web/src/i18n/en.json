@@ -6,5 +6,66 @@
     "title": "Welcome to Backbricks",
     "description": "Your dashboard is being set up. Forms, files and reviews will show up here.",
     "status": "The dashboard is running."
+  },
+  "common": {
+    "loading": "Loading…",
+    "working": "Working…",
+    "signOut": "Sign out",
+    "language": "Language"
+  },
+  "auth": {
+    "name": "Your name",
+    "email": "Email address",
+    "password": "Password",
+    "passwordHint": "Use at least {{count}} characters.",
+    "navigation": "Account options",
+    "login": {
+      "title": "Sign in",
+      "description": "Manage your websites with Backbricks.",
+      "submit": "Sign in",
+      "success": "You are signed in."
+    },
+    "signup": {
+      "title": "Create an account",
+      "description": "Start with your email address.",
+      "submit": "Create account",
+      "success": "Check your email for a verification link, then sign in."
+    },
+    "checkEmail": {
+      "title": "Verify your email",
+      "description": "Request a new verification link if the previous one expired.",
+      "submit": "Send verification link",
+      "success": "If the address can be verified, a link is on its way. Check your inbox."
+    },
+    "forgot": {
+      "title": "Forgot password?",
+      "description": "We will email you a link to choose a new password.",
+      "submit": "Send reset link",
+      "success": "If the address belongs to an account, a reset link is on its way."
+    },
+    "reset": {
+      "title": "Choose a new password",
+      "description": "This link can be used once.",
+      "submit": "Save password",
+      "success": "Your password has been changed. Sign in with your new password."
+    },
+    "invitation": {
+      "title": "Join your team",
+      "description": "Sign in with the invited email address, or create your account here.",
+      "submit": "Join team",
+      "success": "You have joined the team.",
+      "account": "Accept this invitation as {{email}}."
+    },
+    "errors": {
+      "generic": "We could not complete this request. Please try again.",
+      "unverified": "Verify your email before signing in. You can request a new link below.",
+      "inviteOnly": "Account creation requires an invitation. Ask your team for a link.",
+      "noEmail": "Email is unavailable on this installation. Contact the administrator.",
+      "rateLimit": "Too many attempts. Please wait a minute and try again.",
+      "expired": "This link is invalid, expired, or belongs to a different account. Request a new link.",
+      "lastOwner": "A team must have at least one owner. Keep another owner before removing this role.",
+      "session": "Your session has expired. Please sign in again.",
+      "credentials": "Check your email address and password and try again."
+    }
   }
 }

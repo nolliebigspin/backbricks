@@ -6,4 +6,4 @@ export const AUTH_REQUEST_LIMIT = 100;
 export const AUTH_CREDENTIAL_LIMIT = 10;
 export const AUTH_RESPONSE_FLOOR_MS = 500;
 export const AUTH_MAX_TOKEN_LENGTH = 4096;
-export const AUTH_MIN_PASSWORD_LENGTH = 12;
+export { AUTH_MIN_PASSWORD_LENGTH } from '@backbricks/core';

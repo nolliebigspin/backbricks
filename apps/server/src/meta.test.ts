@@ -1,6 +1,12 @@
 import { expect, test } from 'bun:test';
 
-import { createIds, defineModuleCatalog, platformMetaSchema, systemClock } from '@backbricks/core';
+import {
+  createIds,
+  defineModuleCatalog,
+  platformMetaSchema,
+  systemClock,
+  authCapabilities,
+} from '@backbricks/core';
 import { formsDescriptor } from '@backbricks/module-forms';
 
 import { createApp } from './app.ts';
@@ -17,7 +23,8 @@ function application(modules = moduleCatalog.select(['forms'])) {
       readinessChecks: [],
       dashboardDir: null,
     },
-    (api) => metaRoutes(api, modules),
+    (api) =>
+      metaRoutes(api, modules, authCapabilities({ signupPolicy: 'invite_only', mailer: null })),
   );
 }
 
@@ -84,4 +91,15 @@ test('known disabled and unimplemented namespaces return only installation-wide 
   }
   const unknown = await app.request('/v1/projects/foreign/unknown/key');
   expect(await unknown.json()).toMatchObject({ code: 'not_found' });
+});
+
+test('account capabilities expose only safe installation availability', async () => {
+  const response = await application().request('/v1/auth/capabilities');
+  expect(response.status).toBe(200);
+  expect(response.headers.get('cache-control')).toBe('no-store');
+  expect(await response.json()).toEqual({
+    signupPolicy: 'invite_only',
+    emailAvailable: false,
+    passwordMinLength: 12,
+  });
 });

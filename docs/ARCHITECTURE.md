@@ -640,6 +640,8 @@ The P5 end-to-end test automates this scenario.
 
 ## E. Dashboard
 
+Account screens use the [public Better Auth client](../apps/web/src/auth/client.ts) and generated admin client with same-origin cookies/CSRF, safe redirects, ephemeral reset tokens and en/de copy ([ADR-0053](adr/0053-dashboard-account-boundary.md)). Public [account capabilities](../apps/server/src/routes/meta.ts) derive from the guarded server configuration; they expose availability only.
+
 ### E.1 Information architecture
 
 ```

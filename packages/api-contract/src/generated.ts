@@ -1,5 +1,21 @@
 /** Generated from openapi.json. Run bun run api:generate; do not edit. */
 export interface paths {
+  '/v1/auth/capabilities': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getAuthCapabilities'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/meta': {
     parameters: {
       query?: never;
@@ -236,6 +252,57 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+  getAuthCapabilities: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Public account-flow availability. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            emailAvailable: boolean;
+            /** @enum {number} */
+            passwordMinLength: 12;
+            /** @enum {string} */
+            signupPolicy: 'open' | 'invite_only';
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
   getPlatformMeta: {
     parameters: {
       query?: never;
