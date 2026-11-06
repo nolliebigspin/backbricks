@@ -7,7 +7,13 @@ import {
   type InfraService,
   requiredInfrastructure,
 } from '../modules/infrastructure.ts';
-import { baseEnvSchema, CONFIG_VARIABLES, scannerEnvSchema, storageEnvSchema } from './schema.ts';
+import {
+  baseEnvSchema,
+  CONFIG_VARIABLES,
+  scannerEnvSchema,
+  storageEnvSchema,
+  type signupPolicySchema,
+} from './schema.ts';
 
 export type Env = Readonly<Record<string, string | undefined>>;
 
@@ -33,6 +39,7 @@ export type Config = {
   databaseUrl: string;
   appSecret: string;
   publicUrl: string;
+  signupPolicy: z.infer<typeof signupPolicySchema>;
   trustedProxies: readonly string[];
   port: number;
   logLevel: 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'silent';
@@ -165,6 +172,7 @@ export function loadConfig(env: Env, modules: AvailableModules, readFile?: ReadF
       databaseUrl: base.DATABASE_URL,
       appSecret: base.APP_SECRET,
       publicUrl: base.PUBLIC_URL,
+      signupPolicy: base.SIGNUP_POLICY,
       trustedProxies: base.TRUSTED_PROXIES,
       port: base.PORT,
       logLevel: base.LOG_LEVEL,

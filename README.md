@@ -4,7 +4,7 @@
 
 Your AI agent builds the frontend. Backbricks handles the functionality behind it: data processing, storage, security and a dashboard where non-technical site owners manage what comes in. No database, backend or storage to configure. Bring your own UI; Backbricks ships no widgets, iframes or CSS.
 
-> **Status: pre-alpha.** Milestone M0 (foundation) is done; M1 (platform core) is next. See [`docs/MILESTONES.md`](docs/MILESTONES.md).
+> **Status: pre-alpha.** Milestone M0 (foundation) is done; M1 (platform core) is in progress. See [`docs/MILESTONES.md`](docs/MILESTONES.md).
 
 ## What it does (v1 scope)
 
@@ -37,6 +37,8 @@ bun run check       # everything CI checks
 ```
 
 Stack: Bun · TypeScript 7 · Turborepo · Hono · PostgreSQL + Drizzle · pg-boss · Better Auth · React + Vite + TanStack + shadcn/ui · oxlint/oxfmt · Playwright. Details and rationale: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
+Development uses the dashboard's Vite URL (`http://localhost:5173`) as `PUBLIC_URL`, with API requests proxied to the server. Update `PUBLIC_URL` when changing the browser-facing address. Production authentication requires HTTPS. Signup defaults to `invite_only`; Compose and `.env.example` explicitly enable `open` for development with Mailpit. Verification is required before login. Production first-admin setup arrives in M6; the auth dashboard screens are still part of M1 work. Runtime policy and the current auth surface are documented in [ADR-0026](docs/adr/0026-dashboard-auth-runtime.md).
 
 ## Documentation
 

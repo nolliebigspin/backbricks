@@ -1,3 +1,4 @@
+import type { createDashboardAuth } from '@backbricks/auth';
 import type { createIpIdentity, Ids } from '@backbricks/core';
 
 import type { Logger } from './logger.ts';
@@ -23,6 +24,7 @@ export type AppDependencies = {
   ids: Ids;
   /** Omitted only by apps/tests that do not mount auth or public-write handlers. */
   ipIdentity?: ReturnType<typeof createIpIdentity>;
+  auth?: Pick<ReturnType<typeof createDashboardAuth>, 'handle'>;
   readinessChecks: readonly ReadinessCheck[];
   /** Built dashboard to serve, or `null` (development: Vite serves it; API-only setups). */
   dashboardDir: string | null;

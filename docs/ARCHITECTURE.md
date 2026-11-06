@@ -121,6 +121,8 @@ flowchart LR
 | Reverse proxy/TLS | Recommended | Caddy | Caddy |
 | Redis, CDN | No | – | only with measured need (§J.3) |
 
+Dashboard authentication runtime, endpoint policy, signup and missing-SMTP behavior: [ADR-0026](adr/0026-dashboard-auth-runtime.md), with its linked code as the source of truth. Development's public URL points to Vite, which proxies the API; production auth requires HTTPS.
+
 ---
 
 ## B. Data model

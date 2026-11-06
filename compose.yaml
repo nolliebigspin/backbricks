@@ -42,7 +42,8 @@ x-app-env: &app-env
   BACKBRICKS_MODULES: ${BACKBRICKS_MODULES:-}
   DATABASE_URL: postgres://backbricks:backbricks@postgres:5432/backbricks
   APP_SECRET: dev-only-app-secret-change-me-0000000000
-  PUBLIC_URL: http://localhost:3000
+  PUBLIC_URL: ${PUBLIC_URL:-http://localhost:5173}
+  SIGNUP_POLICY: open # Development only; production config defaults to invite_only.
   SMTP_URL: smtp://mailpit:1025
   MAIL_FROM: noreply@backbricks.localhost
   S3_ENDPOINT: http://garage:3900

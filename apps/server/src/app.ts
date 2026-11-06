@@ -32,6 +32,14 @@ export function createApp(
   );
 
   app.route('/', healthRoutes(deps.readinessChecks));
+  if (deps.auth) {
+    const auth = deps.auth;
+    app.all('/api/auth/*', (c) => {
+      const ipHash = c.get('ipHash');
+      if (!ipHash) throw new AppError('service_unavailable');
+      return auth.handle(c.req.raw, ipHash);
+    });
+  }
   const api = new ApiRoutes(app, authorize);
   api.register(
     createRoute({

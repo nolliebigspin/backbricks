@@ -58,6 +58,18 @@ export const powChallengesUsed = pgTable(
   (table) => [index('pow_challenges_used_expiry_idx').on(table.expiresAt)],
 );
 
+export const authTokenReplays = pgTable(
+  'auth_token_replays',
+  {
+    digest: text('digest').primaryKey(),
+    expiresAt: timestampColumn('expires_at').notNull(),
+  },
+  (table) => [
+    index('auth_token_replays_expiry_idx').on(table.expiresAt),
+    check('auth_token_replays_digest', sql`${table.digest} ~ '^[a-f0-9]{64}$'`),
+  ],
+);
+
 export const systemSettings = pgTable('system_settings', {
   key: text('key').primaryKey(),
   value: jsonb('value').$type<unknown>().notNull(),

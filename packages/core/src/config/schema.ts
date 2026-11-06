@@ -12,6 +12,9 @@ const postgresUrl = z
   .refine((value) => /^postgres(ql)?:\/\/.+/.test(value), 'must be a postgres:// URL');
 
 const httpUrl = z.url({ protocol: /^https?$/, error: 'must be an http(s) URL' });
+export const signupPolicySchema = z.enum(['open', 'invite_only'], {
+  error: 'must be open or invite_only',
+});
 
 export const baseEnvSchema = z.object({
   NODE_ENV: z
@@ -27,6 +30,7 @@ export const baseEnvSchema = z.object({
     .string({ error: 'is required' })
     .min(32, 'must be at least 32 characters (e.g. `openssl rand -hex 32`)'),
   PUBLIC_URL: httpUrl.default('http://localhost:3000'),
+  SIGNUP_POLICY: signupPolicySchema.default('invite_only'),
   TRUSTED_PROXIES: z
     .string()
     .default('')

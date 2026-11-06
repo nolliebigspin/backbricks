@@ -97,6 +97,7 @@ jobs:
       - name: Smoke test
         run: |
           env=(-e DATABASE_URL=postgres://backbricks:backbricks@postgres:5432/backbricks
+               -e PUBLIC_URL=https://ci.backbricks.invalid
                -e APP_SECRET=ci-secret-ci-secret-ci-secret-ci-secret-0
                -e BACKBRICKS_MODULES=forms)
           docker run --rm --read-only --tmpfs /tmp --network backbricks_default "${env[@]}" backbricks/server:ci migrate

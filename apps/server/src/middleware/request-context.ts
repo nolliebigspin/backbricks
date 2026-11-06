@@ -1,3 +1,4 @@
+import { authLogPath } from '@backbricks/auth';
 import type { Ids } from '@backbricks/core';
 import type { MiddlewareHandler } from 'hono';
 
@@ -27,7 +28,7 @@ export function requestContext(log: Logger, ids: Ids): MiddlewareHandler<AppEnv>
     requestLog.info(
       {
         method: c.req.method,
-        path: c.req.path,
+        path: authLogPath(c.req.path),
         status: c.res.status,
         durationMs: Math.round(performance.now() - started),
       },

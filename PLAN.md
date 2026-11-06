@@ -217,14 +217,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Concurrent Postgres increments, window boundaries, daily HMAC rotation, forged forwarding headers and no raw IP leakage.
 - **Risks/notes:** I11; no Redis. Bucket cleanup is P1.10c.
 
-### [ ] P1.1b – Implement dashboard authentication (est. 6 h)
+### [x] P1.1b – Implement dashboard authentication (est. 6 h)
 - **Description:** Wire email/password, verification, reset, session lifecycle, signup policy and telemetry-off configuration; mount the approved `/api/auth/*` surface with limits.
 - **Files/packages:** `packages/auth/`, core config, server composition/auth routes, `.env.example`.
 - **Depends on:** P1.2a, P1.8a/b/c, P1.11a; Q6/Q8.
 - **Reuses:** Better Auth built-in auth flows, mailer and endpoint inventory from P1.1a.
 - **Acceptance criteria:**
-  - [ ] Signup policy is injected; invite-only cannot be bypassed through raw signup endpoints. Verification/reset are expiring and single-use, with generic anti-enumeration responses.
-  - [ ] Production cookies are Secure/HttpOnly/SameSite=Lax; HTTP development exception is explicit. Trusted origins, CSRF, body limits and login throttling cover the entire mounted handler.
+  - [x] Signup policy is injected into library and handler; invite-only cannot be bypassed. Verification/reset are expiring and single-use; email actions return generic responses, avoid SMTP latency and apply a response floor. D18/ADR-0026 record the Q6 execution baseline.
+  - [x] Production cookies are Secure/HttpOnly/SameSite=Lax; HTTP development exception is explicit. Trusted origins/callbacks, CSRF, bounded streams and shared throttling cover the mounted allowlist. Unknown plugin routes fail closed; session metadata stores only the daily digest and no full UA.
 - **Tests:** Real HTTP/DB signup/login/logout/reset/verification, invalid/expired tokens, cross-origin mutations, cookie flags and no token logging.
 - **Risks/notes:** Do not build the M6 setup wizard. Auth error bodies may follow Better Auth's contract; `/v1` errors remain RFC 9457.
 
@@ -461,7 +461,7 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Risks/notes:** External SMTP delivery cannot be made exactly-once by a DB transaction; document possible duplicate delivery and limit repeat alerts.
 
 ### [ ] P1.10c – Add bounded cleanup schedules (est. 4 h)
-- **Description:** Register replay/idempotency/rate-bucket cleanup, audit retention and expired auth/job housekeeping, using the approved maintenance boundary.
+- **Description:** Register replay/idempotency/rate-bucket cleanup (including email-verification `auth_token_replays`), audit retention and expired auth/job housekeeping, using the approved maintenance boundary.
 - **Files/packages:** worker core schedules/handlers, db maintenance repositories.
 - **Depends on:** P1.10b, P1.9c; Q8.
 - **Reuses:** `clock`, expiry indexes, module retention hooks and pg-boss cron.
@@ -581,7 +581,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.1a/P1.11a/P1.2a/P1.2b/P1.3a/P1.8a/b/c complete. ADRs 0021–0025 record transaction, privacy, schema, repository and abuse boundaries. Real DB tests: 30 pass across 7 files; atomic rate limits are proven across two pools. SMTP/template tests pass against Mailpit; Bun socket identity/log tests pass. `bun run check` passed with services running and zero skips; unchanged packages may use Turbo cache. Next task: P1.1b (dashboard authentication). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
+P1.1a/b, P1.11a, P1.2a/b, P1.3a and P1.8a/b/c complete. ADRs 0021–0026 record the implemented boundaries. Real DB suite: 30 pass across 7 files; auth HTTP/DB/Mailpit suite: 7 scenarios including commit/verification rollback. Full checks, build and existing browser smoke pass with services running; complete dashboard flows remain P1.12/P1.13. Next task: P1.1c (organizations, members and invitations). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 

@@ -2,6 +2,7 @@ import { type Config, createIds, createIpIdentity, systemClock } from '@backbric
 import { createDatabase, runMigrations } from '@backbricks/db';
 
 import { createApp } from './app.ts';
+import { createServerAuth } from './auth.ts';
 import { findDashboard } from './dashboard.ts';
 import type { Logger } from './logger.ts';
 
@@ -19,6 +20,7 @@ export function isRole(value: string | undefined): value is Role {
 export function startServe(config: Config, log: Logger): RunningRole {
   const database = createDatabase(config.databaseUrl, { applicationName: 'backbricks-serve' });
   const dashboardDir = findDashboard();
+  const auth = createServerAuth(config, database.db, log);
   const app = createApp({
     log,
     ids: createIds(systemClock),
@@ -29,6 +31,7 @@ export function startServe(config: Config, log: Logger): RunningRole {
     }),
     readinessChecks: [{ name: 'database', check: database.ping }],
     dashboardDir,
+    auth,
   });
   const server = Bun.serve({ port: config.port, fetch: app.fetch, development: false });
   log.info(
@@ -38,6 +41,7 @@ export function startServe(config: Config, log: Logger): RunningRole {
   return {
     async stop() {
       await server.stop(); // stops accepting, waits for in-flight requests
+      await auth.close();
       await database.close();
     },
   };

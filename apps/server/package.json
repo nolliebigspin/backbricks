@@ -11,6 +11,8 @@
     "start": "bun src/main.ts"
   },
   "dependencies": {
+    "@backbricks/adapters": "workspace:*",
+    "@backbricks/auth": "workspace:*",
     "@backbricks/core": "workspace:*",
     "@backbricks/db": "workspace:*",
     "@backbricks/module-forms": "workspace:*",
