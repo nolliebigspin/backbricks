@@ -1,5 +1,6 @@
+import { redactSecrets } from '../logging/redact.ts';
 import { ERROR_CODES, ERROR_TYPE_BASE_URL, type ErrorCode, type ErrorStatus } from './codes.ts';
-import type { FieldError, ProblemDetails } from './schema.ts';
+import { problemDetailsSchema, type FieldError, type ProblemDetails } from './schema.ts';
 
 export type { FieldError, ProblemDetails } from './schema.ts';
 
@@ -31,14 +32,16 @@ export class AppError extends Error {
 }
 
 export function toProblemDetails(error: AppError, requestId: string): ProblemDetails {
-  return {
-    type: `${ERROR_TYPE_BASE_URL}${error.code}`,
-    title: ERROR_CODES[error.code].title,
-    status: error.status,
-    code: error.code,
-    ...(error.detail === undefined ? {} : { detail: error.detail }),
-    ...(error.errors === undefined ? {} : { errors: error.errors }),
-    ...(error.hint === undefined ? {} : { hint: error.hint }),
-    requestId,
-  };
+  return problemDetailsSchema.parse(
+    redactSecrets({
+      type: `${ERROR_TYPE_BASE_URL}${error.code}`,
+      title: ERROR_CODES[error.code].title,
+      status: error.status,
+      code: error.code,
+      ...(error.detail === undefined ? {} : { detail: error.detail }),
+      ...(error.errors === undefined ? {} : { errors: error.errors }),
+      ...(error.hint === undefined ? {} : { hint: error.hint }),
+      requestId,
+    }),
+  );
 }

@@ -768,7 +768,7 @@ Beyond the invariants in AGENTS.md §3:
 |---|---|
 | Transport | TLS 1.2+ via Caddy, HSTS, no clear-text ports exposed |
 | Storage | Provider disk encryption; object storage server-side encryption; encrypted backups |
-| Secrets | SHA-256 only (high-entropy tokens need no slow hash); env-based app secrets; pino redaction for `authorization`, `cookie`, `*token*`, `*key*` |
+| Secrets | SHA-256 only (high-entropy tokens need no slow hash); env-based app secrets; credential field/value masking at the final JSON log boundary; request IDs, route templates and problem serialization prevent diagnostic leaks (ADR-0033) |
 | Sessions | Better Auth, `HttpOnly`/`Secure`/`SameSite=Lax`, CSRF header required for mutating dashboard requests, login rate limits |
 | Output | CSV injection protection: prefix `'` before `= + - @ \t \r` |
 | Exfiltration | Export only for owner/admin, audited and rate limited; `data:read` not in the agent preset; page size max 100 |

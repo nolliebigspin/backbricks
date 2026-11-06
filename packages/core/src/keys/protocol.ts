@@ -1,8 +1,9 @@
 import { z } from 'zod';
 
-import { API_KEY_PREFIXES } from './constants.ts';
+import { API_KEY_PREFIXES, API_KEY_ALPHABET, API_KEY_TOKEN_LENGTH } from './constants.ts';
+export { API_KEY_TOKEN_LENGTH } from './constants.ts';
 
-export const API_KEY_TOKEN_LENGTH = 32;
+const tokenCharacters = new RegExp(`^[${API_KEY_ALPHABET}]+$`);
 /** Scope syntax is shared by policies, persisted credentials and safe audit metadata. */
 export const scopeNameSchema = z
   .string()
@@ -12,9 +13,7 @@ export const scopeNameSchema = z
 function matchesKey(value: string, prefix: string): boolean {
   const token = value.slice(prefix.length);
   return (
-    value.startsWith(prefix) &&
-    token.length === API_KEY_TOKEN_LENGTH &&
-    /^[A-Za-z0-9]+$/.test(token)
+    value.startsWith(prefix) && token.length === API_KEY_TOKEN_LENGTH && tokenCharacters.test(token)
   );
 }
 export const secretKeyTokenSchema = z

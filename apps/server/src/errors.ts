@@ -13,7 +13,7 @@ export function problemResponse(c: Context<AppEnv>, error: AppError): Response {
 
 /**
  * Every error leaves the API as RFC 9457 problem details (ARCHITECTURE §D.3). Unexpected
- * errors are logged in full and answered with a generic 500: no message, no stack.
+ * errors retain redacted diagnostics and receive a generic 500: no message, no stack.
  */
 export const handleError: ErrorHandler<AppEnv> = (error, c) => {
   if (error instanceof AppError) return problemResponse(c, error);
@@ -28,7 +28,4 @@ export const handleError: ErrorHandler<AppEnv> = (error, c) => {
 };
 
 export const handleNotFound: NotFoundHandler<AppEnv> = (c) =>
-  problemResponse(
-    c,
-    new AppError('not_found', { detail: `No route for ${c.req.method} ${c.req.path}.` }),
-  );
+  problemResponse(c, new AppError('not_found', { detail: 'No route matches this request.' }));

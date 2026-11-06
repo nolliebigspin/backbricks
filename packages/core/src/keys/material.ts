@@ -2,10 +2,8 @@ import type { z } from 'zod';
 
 import type { ApiKeyRecord } from '../platform/models.ts';
 import type { apiKeyKindSchema } from '../platform/values.ts';
-import { API_KEY_PREFIXES } from './constants.ts';
-import { API_KEY_TOKEN_LENGTH } from './protocol.ts';
+import { API_KEY_PREFIXES, API_KEY_ALPHABET, API_KEY_TOKEN_LENGTH } from './constants.ts';
 
-export const API_KEY_ALPHABET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 export const API_KEY_DISPLAY_TOKEN_LENGTH = 8;
 const RANDOM_BYTE_RANGE = 256;
 const UNBIASED_BYTE_BOUND =

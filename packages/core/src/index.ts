@@ -43,7 +43,7 @@ export {
   pageResult,
 } from './http/pagination.ts';
 export { AUTH_BASE_PATH } from './http/auth-path.ts';
-export { API_KEY_PREFIXES } from './keys/constants.ts';
+export { API_KEY_PREFIXES, API_KEY_ALPHABET } from './keys/constants.ts';
 export {
   API_KEY_TOKEN_LENGTH,
   scopeNameSchema,
@@ -121,7 +121,13 @@ export {
   type ErrorCode,
   type ErrorStatus,
 } from './errors/codes.ts';
-export { isSecretField, REDACTED, redactFields, redactSecrets } from './logging/redact.ts';
+export {
+  isSecretField,
+  REDACTED,
+  redactFields,
+  redactSecrets,
+  redactSecretText,
+} from './logging/redact.ts';
 export { fieldErrorSchema, problemDetailsSchema } from './errors/schema.ts';
 export {
   actorTypeSchema,
@@ -168,7 +174,6 @@ export {
   type KeyScope,
 } from './keys/scopes.ts';
 export {
-  API_KEY_ALPHABET,
   API_KEY_DISPLAY_TOKEN_LENGTH,
   generateApiKey,
   hashApiKey,
