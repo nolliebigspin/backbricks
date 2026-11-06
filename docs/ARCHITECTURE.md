@@ -587,42 +587,7 @@ const { data, nextCursor } = await backbricks.reviews.list('testimonials', { sor
 | `backbricks mcp` | Start the MCP server over stdio |
 | `backbricks keys list` | List keys (metadata only) |
 
-**Config-as-code** (`backbricks.config.json`). Notification recipients are deliberately **not** included: they are personal data and environment-specific.
-
-```json
-{
-  "$schema": "https://backbricks.app/schema/config.v1.json",
-  "project": "prj_01jc8x2…",
-  "forms": {
-    "contact": {
-      "name": "Contact form",
-      "fields": [
-        { "key": "name", "type": "text", "label": "Name", "required": true, "maxLength": 120 },
-        { "key": "email", "type": "email", "label": "Email", "required": true, "identifiesSubject": true },
-        { "key": "message", "type": "textarea", "label": "Message", "required": true, "maxLength": 5000 },
-        { "key": "cv", "type": "file", "label": "CV", "uploadZone": "cv", "maxFiles": 1 },
-        { "key": "privacy", "type": "consent", "required": true, "consentText": "I have read the privacy policy.", "consentVersion": "2026-11" }
-      ],
-      "spamProtection": { "honeypotField": "_gotcha", "proofOfWork": true },
-      "htmlForm": { "successRedirect": "https://example.com/thanks", "errorRedirect": "https://example.com/error" },
-      "retentionDays": 180
-    }
-  },
-  "uploadZones": {
-    "cv": { "name": "CVs", "allowedTypes": ["pdf", "docx"], "maxSizeMb": 10, "retentionDays": 180 }
-  },
-  "reviewCollections": {
-    "testimonials": {
-      "name": "Testimonials",
-      "rating": { "max": 5 },
-      "fields": { "title": "optional", "body": "required", "authorEmail": "optional" },
-      "publicFields": [{ "key": "company", "label": "Company", "maxLength": 80 }],
-      "moderation": "manual",
-      "authorNameDisplay": "first_name_last_initial"
-    }
-  }
-}
-```
+**Config-as-code** (`backbricks.config.json`) uses the implemented [document schema](../packages/core/src/configuration/schemas.ts) and [pure planner](../packages/core/src/configuration/planner.ts), following ADR-0042. Root fields are `$schema`, `project` and `modules`; sections use each module's declared plural resource name. Every instance has an explicit name/status/module-version/config-version envelope around its module-owned `config`. Existing instances require the current config-version precondition. Notification recipients, credentials and personal records are excluded. Omitted sections preserve state; explicit empty sections request destructive configuration archival. No production domain configuration is implemented in M1.
 
 **Field types in the MVP:** `text`, `textarea`, `email`, `phone`, `number`, `url`, `select`, `multiselect`, `checkbox`, `date`, `hidden`, `file`, `consent`. Validations: `required`, `minLength`/`maxLength`, `min`/`max`, `options`. **No custom regex** (ReDoS risk, I10).
 

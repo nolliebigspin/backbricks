@@ -372,14 +372,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Old-config fixture migration, failed migration, rollback after schema changes and concurrent config update.
 - **Risks/notes:** Define lazy read vs. persisted migration explicitly in the module ADR; background migration hooks are registered in P1.10b.
 
-### [ ] P1.7c – Plan config-as-code changes (est. 6 h)
+### [x] P1.7c – Plan config-as-code changes (est. 6 h)
 - **Description:** Build registry-derived config documents and a pure diff/normalization planner, with strict project/module/config version validation and destructive warnings.
 - **Files/packages:** core config-as-code schemas/planner, server GET/config dry-run route.
 - **Depends on:** P1.7b; Q5 config contract refinements.
 - **Reuses:** Module config schemas, instance services, scope policies and config-change classifier.
 - **Acceptance criteria:**
-  - [ ] Read/dry-run require config:read; planning makes no writes. Config exports omit keys, recipients and personal records; config sections map to module resource names without hand-written per-module branches.
-  - [ ] Define planHash binding to organization/project, principal, normalized desired config, current versions, registry/schema versions and expiry; tampered/cross-tenant plans cannot be accepted.
+  - [x] Read/dry-run require config:read; planning makes no writes. Config exports omit keys, recipients and personal records; config sections map to module resource names without hand-written per-module branches.
+  - [x] Define planHash binding to organization/project, principal, normalized desired config, current versions, registry/schema versions and expiry; tampered/cross-tenant plans cannot be accepted.
 - **Tests:** Property tests for deterministic ordering/no-op diffs, removed instances/fields and normalized equivalents; no side effects on dry run.
 - **Risks/notes:** §D.8 lacks an explicit per-instance module_version serialization field; settle it in the module/config ADR, not a second hand-written config schema.
 
@@ -581,7 +581,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.7b complete; ADR-0041 and the task commit contain evidence. Next: P1.7c (config-as-code planning). M1 remains in progress.
+P1.7c complete; see ADR-0042 and its task commit. Next: P1.7d (atomic config apply and schema/types exports). M1 remains in progress.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 

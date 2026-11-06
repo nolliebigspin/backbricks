@@ -6,6 +6,7 @@ import { available, scenario } from '../test/auth-fixture.ts';
 import { instanceCatalog } from '../test/instance-fixture.ts';
 import { apiIsolationCases } from '../test/isolation/api-cases.ts';
 import { authIsolationCases } from '../test/isolation/auth-cases.ts';
+import { configurationIsolationCases } from '../test/isolation/config-cases.ts';
 import { instanceIsolationCases } from '../test/isolation/instance-cases.ts';
 import { keyIsolationCases } from '../test/isolation/key-cases.ts';
 import { platformReadIsolationCases } from '../test/isolation/platform-read-cases.ts';
@@ -65,6 +66,7 @@ test.skipIf(!available)(
           ...apiIsolationCases(f),
           ...authIsolationCases(f),
           ...projectIsolationCases(f),
+          ...configurationIsolationCases(f),
           ...(await keyIsolationCases(f)),
           ...(await platformReadIsolationCases(f)),
         };

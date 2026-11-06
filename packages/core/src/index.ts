@@ -167,6 +167,18 @@ export { createProjectService, type ProjectService } from './projects/service.ts
 export { createInstanceService, type InstanceService } from './instances/service.ts';
 export { revisionResponseSchema, instancePreconditionSchema } from './instances/schemas.ts';
 export {
+  configDocumentSchema,
+  configEntrySchema,
+  configPlanResponseSchema,
+  configWriteSchema,
+  CONFIG_SCHEMA_ID,
+  CONFIG_PLAN_TTL_MS,
+  type ConfigDocument,
+  type ConfigWrite,
+} from './configuration/schemas.ts';
+export { planConfiguration } from './configuration/planner.ts';
+export { createConfigurationService, type ConfigurationService } from './configuration/service.ts';
+export {
   CONFIG_ACCESS,
   CONFIG_DESTRUCTIVE_SCOPE,
   requireConfigAccess,

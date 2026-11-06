@@ -21,6 +21,7 @@ import { createLogger } from '../src/logger.ts';
 import { createApiAuthorization } from '../src/middleware/authorization.ts';
 import { moduleCatalog } from '../src/modules.ts';
 import { registerProjects } from '../src/projects.ts';
+import { configurationRoutes } from '../src/routes/configuration.ts';
 import { instanceRoutes } from '../src/routes/instances.ts';
 import { metaRoutes } from '../src/routes/meta.ts';
 import { moduleRoutes, type ModulePublicAuthorization } from '../src/routes/modules.ts';
@@ -125,6 +126,7 @@ export async function scenario(
           platformReadRoutes(api, runtime);
           metaRoutes(api, runtime.modules);
           instanceRoutes(api, runtime);
+          configurationRoutes(api, runtime);
           moduleRoutes(api, runtime, apiOptions.authorizePublic);
           apiOptions.configure?.(api, handle.db);
         },
