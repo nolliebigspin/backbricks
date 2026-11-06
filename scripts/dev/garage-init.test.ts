@@ -6,22 +6,10 @@ import { describe, expect, test } from 'bun:test';
 
 import { HeadBucketCommand, S3Client } from '@aws-sdk/client-s3';
 
+import { garageAvailable, garageTestSettings as settings } from '../test/garage.ts';
 import { initGarage } from './garage-init.ts';
-import { garageDevSettings } from './garage-settings.ts';
 
-const settings = garageDevSettings(process.env);
-
-async function garageRunning(): Promise<boolean> {
-  try {
-    await fetch(`${settings.adminUrl}/health`, { signal: AbortSignal.timeout(1000) });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-const available = await garageRunning();
-if (!available && process.env['CI']) throw new Error('Garage is not running (mise run infra)');
+const available = await garageAvailable();
 
 describe.skipIf(!available)('garage-init (needs mise run infra)', () => {
   test('is idempotent', async () => {

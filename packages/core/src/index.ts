@@ -179,6 +179,15 @@ export {
 export { planConfiguration } from './configuration/planner.ts';
 export { createConfigurationService, type ConfigurationService } from './configuration/service.ts';
 export { configurationJsonSchema } from './configuration/schema-export.ts';
+export {
+  MAX_SIGNED_PUT_TTL_SECONDS,
+  MAX_SIGNED_GET_TTL_SECONDS,
+  storageKeySchema,
+  storagePutSchema,
+  storageGetSchema,
+  storageObjectSchema,
+  inlineImageTypeSchema,
+} from './storage/schemas.ts';
 export { configApplyResponseSchema } from './configuration/schemas.ts';
 export {
   CONFIG_ACCESS,

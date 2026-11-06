@@ -394,14 +394,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Concurrent apply, replay after state change, cross-principal/tenant reuse, injected mid-apply failure and fixture schema/types generation.
 - **Risks/notes:** Recheck canonical plan under the write lock; never trust a client-supplied diff or destructive flag.
 
-### [ ] P1.8e – Implement private S3 storage (est. 6 h)
+### [x] P1.8e – Implement private S3 storage (est. 6 h)
 - **Description:** Add StorageAdapter and S3 implementation for signed PUT, safe GET, HEAD/COPY/DELETE/stream. Separate internal endpoint from browser-facing signing endpoint in validated config.
 - **Files/packages:** core storage contract, `packages/adapters/src/storage/`, core config/`.env.example`, server composition/readiness.
 - **Depends on:** P1.8d, P1.6b.
 - **Reuses:** Garage compose/init/CORS, existing AWS SDK dependency, ADR-0020 settings.
 - **Acceptance criteria:**
-  - [ ] PUT signs length/type; GET defaults to short-lived attachment/octet-stream. Endpoint split works from server containers and the host browser; no public ACLs or original names in object keys.
-  - [ ] Checksums use WHEN_REQUIRED as spiked; optional storage is not constructed/probed for storage-free installations.
+  - [x] PUT signs length/type; GET defaults to short-lived attachment/octet-stream. Endpoint split works from server containers and the host browser; no public ACLs or original names in object keys.
+  - [x] Checksums use WHEN_REQUIRED as spiked; optional storage is not constructed/probed for storage-free installations.
 - **Tests:** Garage signed size/type rejection, GET disposition/expiry, HEAD/COPY/DELETE/stream and server-vs-browser endpoint smoke; retain tests for P3.10 expansion.
 - **Risks/notes:** No uploads API, scanner implementation or proxy upload mode here. Recheck the paired AWS patch before adoption.
 
@@ -581,7 +581,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.7d complete; see ADR-0043 and its task commit. Next: P1.8e (private S3 adapter). M1 remains in progress.
+P1.8e complete; see ADR-0044 and its task commit. Next: P1.9a (PoW provider/replay/challenge). Public publishable-key bootstrap awaits an explicit I1 clarification; provider/replay work can proceed independently. M1 remains in progress.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 

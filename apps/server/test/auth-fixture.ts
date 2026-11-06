@@ -113,7 +113,7 @@ export async function scenario(
           ids: runtime.container.core.ids,
           modules: runtime.modules,
           dashboardDir: null,
-          readinessChecks: [],
+          readinessChecks: runtime.readinessChecks,
           ipIdentity: createIpIdentity({
             appSecret: config.appSecret,
             clock: runtime.container.core.clock,

@@ -22,6 +22,7 @@ export type ConfigIssue = { variable: string; message: string };
 
 export type StorageConfig = {
   endpoint: string;
+  publicEndpoint?: string;
   region: string;
   bucket: string;
   accessKeyId: string;
@@ -182,6 +183,7 @@ export function loadConfig(env: Env, modules: AvailableModules, readFile?: ReadF
           : null,
       storage: storage && {
         endpoint: storage.S3_ENDPOINT,
+        publicEndpoint: storage.S3_PUBLIC_ENDPOINT ?? storage.S3_ENDPOINT,
         region: storage.S3_REGION,
         bucket: storage.S3_BUCKET,
         accessKeyId: storage.S3_ACCESS_KEY_ID,

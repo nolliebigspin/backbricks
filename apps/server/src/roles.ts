@@ -43,7 +43,7 @@ export function startServe(config: Config, log: Logger): RunningRole {
         clock: services.container.core.clock,
         trustedProxies: config.trustedProxies,
       }),
-      readinessChecks: [{ name: 'database', check: database.ping }],
+      readinessChecks: [{ name: 'database', check: database.ping }, ...services.readinessChecks],
       dashboardDir,
       auth,
     },

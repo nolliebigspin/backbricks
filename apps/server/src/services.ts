@@ -1,4 +1,4 @@
-import { createSmtpMailer } from '@backbricks/adapters';
+import { createSmtpMailer, createS3Storage } from '@backbricks/adapters';
 import {
   createAuditService,
   createEventService,
@@ -41,6 +41,7 @@ export function createServerServices(
   const ids = createIds(clock);
   const activity = { clock, ids };
   const mailer = config.mailer ? createSmtpMailer(config.mailer) : null;
+  const storage = config.storage ? createS3Storage(config.storage, clock) : null;
   const container = createServiceContainer(
     {
       ...activity,
@@ -50,7 +51,7 @@ export function createServerServices(
       entitlements: options.entitlements ?? createUnlimitedEntitlements(),
       rateLimiter: createRateLimiter(createPostgresRateLimitStore(db), clock),
     },
-    { mailer },
+    { mailer, storage },
   );
   const withTenant = createWithTenant(db, options.moduleRepositories);
   const moduleRuntime = modules.registry.bind(container);
@@ -61,6 +62,7 @@ export function createServerServices(
   });
   return Object.freeze({
     container,
+    readinessChecks: storage ? [{ name: 'storage', check: () => storage.check() }] : [],
     modules,
     scopeCatalog,
     moduleRuntime,
@@ -78,6 +80,7 @@ export function createServerServices(
     queries: createPlatformQueries({ ...container.core, publicUrl: config.publicUrl, modules }),
     keys: createKeyService({ ...container.core, enabledModules: config.modules, scopeCatalog }),
     async close() {
+      storage?.close();
       await mailer?.close();
     },
   });

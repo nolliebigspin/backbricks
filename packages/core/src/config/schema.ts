@@ -69,8 +69,13 @@ export const baseEnvSchema = z.object({
   MAIL_FROM: z.email('must be an email address').optional(),
 });
 
+const storageEndpoint = httpUrl.refine((value) => {
+  const url = new URL(value);
+  return !url.username && !url.password && !url.search && !url.hash;
+}, 'must not contain credentials, query parameters or fragments');
 export const storageEnvSchema = z.object({
-  S3_ENDPOINT: httpUrl,
+  S3_ENDPOINT: storageEndpoint,
+  S3_PUBLIC_ENDPOINT: storageEndpoint.optional(),
   S3_REGION: z.string({ error: 'is required' }).min(1, 'is required'),
   S3_BUCKET: z.string({ error: 'is required' }).min(1, 'is required'),
   S3_ACCESS_KEY_ID: z.string({ error: 'is required' }).min(1, 'is required'),

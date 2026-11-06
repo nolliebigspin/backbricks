@@ -1,10 +1,15 @@
 import type { z } from 'zod';
 
+import type {
+  signedStorageRequestSchema,
+  storageObjectSchema,
+  inlineImageTypeSchema,
+} from '../storage/schemas.ts';
 import type { TenantTransaction } from '../tenancy/tenant-context.ts';
 
-export type SignedStorageRequest = { url: string; headers: Readonly<Record<string, string>> };
-export type StorageObject = { size: number; contentType: string | null };
-export type InlineImageType = 'image/png' | 'image/jpeg' | 'image/webp' | 'image/gif';
+export type SignedStorageRequest = z.infer<typeof signedStorageRequestSchema>;
+export type StorageObject = z.infer<typeof storageObjectSchema>;
+export type InlineImageType = z.infer<typeof inlineImageTypeSchema>;
 
 /** Private object storage. Implementations validate TTL/headers and default downloads to attachment. */
 export interface StorageAdapter {
