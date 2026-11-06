@@ -31,3 +31,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0019](0019-optional-modules.md) | Every module is optional, enabled with BACKBRICKS_MODULES | accepted |
 | [0020](0020-library-compatibility.md) | Library compatibility on Bun and TypeScript 7 | accepted |
 | [0021](0021-auth-transactions-and-schema-ownership.md) | Auth transactions and schema ownership | accepted |
+| [0022](0022-personal-data-lifecycles.md) | Personal data lifecycles | accepted |
