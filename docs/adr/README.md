@@ -60,3 +60,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0048](0048-transactional-postgres-jobs.md) | Transactional PostgreSQL jobs | accepted |
 | [0049](0049-outbox-and-restricted-delivery.md) | Outbox dispatch and restricted delivery | accepted |
 | [0050](0050-bounded-worker-maintenance.md) | Bounded worker maintenance | accepted |
+| [0051](0051-offline-contract-and-admin-client.md) | Offline contract and admin client | accepted |

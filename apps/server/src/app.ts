@@ -8,6 +8,7 @@ import { dashboardRoutes } from './dashboard.ts';
 import { handleError, handleNotFound, moduleAwareNotFound } from './errors.ts';
 import { healthRoutes } from './health.ts';
 import { ApiRoutes, type ApiAuthorization, createOpenApiApp } from './http/api-routes.ts';
+import { apiDocument } from './http/openapi-document.ts';
 import { clientIdentity } from './middleware/client-identity.ts';
 import { requestContext } from './middleware/request-context.ts';
 
@@ -64,14 +65,7 @@ export function createApp(
       },
     }),
     { kind: 'public', bodyLimitBytes: DEFAULT_BODY_LIMIT_BYTES },
-    (c) =>
-      c.json(
-        app.getOpenAPI31Document({
-          openapi: '3.1.0',
-          info: { title: 'Backbricks API', version: '0.0.0' },
-        }),
-        200,
-      ),
+    (c) => c.json(apiDocument(app), 200),
   );
   configureApi(api);
   // API routes are mounted above this line; the dashboard catches the remaining GETs.

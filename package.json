@@ -24,7 +24,8 @@
     "check:affected": "bun run format:check && bun run lint && bun run lint:arch && bun run typecheck && turbo run test --affected && bun run test:scripts",
     "lint:arch": "depcruise apps packages --config .dependency-cruiser.json",
     "db:generate": "bun run --cwd packages/db generate",
-    "db:migrate": "bun apps/server/src/main.ts migrate"
+    "db:migrate": "bun apps/server/src/main.ts migrate",
+    "api:generate": "bun scripts/api/generate.ts"
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "3.1163.0",

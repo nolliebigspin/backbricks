@@ -471,14 +471,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Fixed-clock boundary data, repeated/parallel cleanup, failed-purge rollback and job retention of personal auth mail payloads.
 - **Risks/notes:** Module personal-record erasure is implemented with the domain modules; no fake GDPR endpoint with incomplete deletion.
 
-### [ ] P1.11b – Generate contract types and the admin client (est. 4 h)
+### [x] P1.11b – Generate contract types and the admin client (est. 4 h)
 - **Description:** Export deterministic OpenAPI/TS types and add the MIT `@backbricks/sdk/admin` public entry point for the dashboard.
 - **Files/packages:** server contract exporter, `packages/api-contract/`, `packages/sdk/`, root scripts, architecture fixtures.
 - **Depends on:** P1.7d, P1.5b, P1.9b; Q5 (DEV-8).
 - **Reuses:** Route schemas/manifest, openapi-typescript/openapi-fetch and ADR-0020 local TS fallback.
 - **Acceptance criteria:**
-  - [ ] `bun run api:generate` is reproducible without live DB/network services; generated files are committed, never hand-edited. Generating package resolves TS 5.9.3 locally; root typecheck stays TS 7.
-  - [ ] Admin client imports AGPL contract types only, forwards session CSRF safely, never embeds secrets in generated output, and adds no dependency to the SDK root browser entry point.
+  - [x] `bun run api:generate` is reproducible without live DB/network services; generated files are committed, never hand-edited. Generating package resolves TS 5.9.3 locally; root typecheck stays TS 7.
+  - [x] Admin client imports AGPL contract types only, forwards session CSRF safely, never embeds secrets in generated output, and adds no dependency to the SDK root browser entry point.
 - **Tests:** Repeat generation, type-level request/response checks, declared admin subpath architecture fixture and Node 20/Bun import smoke.
 - **Risks/notes:** Better Auth's client is configured in web from its public library types; do not import the server auth instance for type inference. Resolve exports through public package entries.
 
@@ -694,3 +694,5 @@ P1.10a replaces the idle worker with pg-boss 12.38.1 (ADR-0048). One-connection 
 P1.10b implements locked transactional outbox dispatch, stable selected consumers, restricted durable auth/security delivery and worker-bound migration/retention/module-erasure hooks (ADR-0049). Real PG/Mailpit tests prove parallel claims, failure rollback, SMTP outage/restart recovery, no mail after deferred commit failure, no personal audit fields and system migration atomicity. Full `bun run check` passes with real services. P1.10c adds the absolute-expiry housekeeping and scheduled fan-out.
 
 P1.10c adds bounded, locked expiry batches, transaction-local audit purge, absolute job payload deletion and durable scheduled org/project/instance fan-out (ADR-0050). Real services prove concurrent cleanup, exact boundaries, archive/tenant isolation, failure rollback, nonleaking audit settings, failed-mail expiry, cursor pages beyond 100 projects/instances and retry deduplication. Full `bun run check` passes without service skips.
+
+P1.11b commits offline deterministic OpenAPI/types and the separate MIT admin client entry (ADR-0051). The generator resolves local TypeScript 5.9.3; root/application checks remain TS7. Bun/Node HTTP client tests, compile-time selector/body checks and real scoped project/key integration pass. Full `bun run check` is green, with a fresh SDK build/Node smoke check after final build-output cleanup.

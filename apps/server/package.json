@@ -23,6 +23,7 @@
     "pino": "10.4.0"
   },
   "devDependencies": {
+    "@backbricks/sdk": "workspace:*",
     "altcha-lib": "2.8.0"
   }
 }

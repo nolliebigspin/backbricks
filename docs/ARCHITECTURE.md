@@ -409,6 +409,8 @@ Every module can be switched on or off per installation. A self-hoster who only 
 
 ## D. API, SDK, CLI and MCP
 
+The [committed contract](../packages/api-contract/openapi.json) and [generated types](../packages/api-contract/src/generated.ts) come from the shared [runtime registrations](../apps/server/src/routes/platform.ts). `bun run api:generate` runs offline; the [MIT admin entry](../packages/sdk/admin/index.ts) imports only contract types ([ADR-0051](adr/0051-offline-contract-and-admin-client.md)).
+
 ### D.1 Authentication model
 
 | Credential | Format | Used in | May | May not |

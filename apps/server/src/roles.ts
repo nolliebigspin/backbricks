@@ -1,26 +1,18 @@
-import { type Config, createIpIdentity, createChallengeService } from '@backbricks/core';
+import { type Config, createIpIdentity } from '@backbricks/core';
 import { createDatabase, createPostgresQueue, runMigrations } from '@backbricks/db';
 
 import { createApp } from './app.ts';
 import { createServerAuth } from './auth.ts';
 import { findDashboard } from './dashboard.ts';
 import { createServerKeyAuth } from './key-auth.ts';
-import { registerKeys } from './keys.ts';
 import type { Logger } from './logger.ts';
 import { createServerMaintenance } from './maintenance.ts';
 import { createApiAuthorization } from './middleware/authorization.ts';
 import { moduleJobDefinitions } from './module-jobs.ts';
 import { moduleCatalog } from './modules.ts';
 import { createServerOutbox } from './outbox.ts';
-import { registerProjects } from './projects.ts';
 import { createPublicCredentialResolver } from './public-auth.ts';
-import { createPublicExecutor } from './public-executor.ts';
-import { challengeRoutes } from './routes/challenge.ts';
-import { configurationRoutes } from './routes/configuration.ts';
-import { instanceRoutes } from './routes/instances.ts';
-import { metaRoutes } from './routes/meta.ts';
-import { moduleRoutes } from './routes/modules.ts';
-import { platformReadRoutes } from './routes/platform-reads.ts';
+import { platformRoutes } from './routes/platform.ts';
 import { createServerServices } from './services.ts';
 
 /** A started role; `stop` drains it for a graceful shutdown. */
@@ -75,13 +67,6 @@ async function startRuntime(
         withTenant: runtime.withTenant,
         resolveSecret: keys.resolveKey,
       });
-      const issueChallenge = createChallengeService({
-        clock: runtime.container.core.clock,
-        captcha: runtime.captcha,
-        limiter: runtime.container.core.rateLimiter,
-        withTenant: runtime.withTenant,
-        resolve: resolvePublic,
-      });
       const app = createApp(
         {
           log,
@@ -96,21 +81,7 @@ async function startRuntime(
           dashboardDir,
           auth: dashboardAuth,
         },
-        (api) => {
-          registerProjects(api, runtime);
-          registerKeys(api, runtime, config.modules);
-          platformReadRoutes(api, runtime);
-          metaRoutes(api, modules);
-          instanceRoutes(api, runtime);
-          configurationRoutes(api, runtime);
-          challengeRoutes(api, {
-            captcha: runtime.captcha,
-            issue: issueChallenge,
-            resolve: resolvePublic,
-            withTenant: runtime.withTenant,
-          });
-          moduleRoutes(api, runtime, createPublicExecutor(runtime, resolvePublic), resolvePublic);
-        },
+        (api) => platformRoutes(api, runtime, { resolvePublic }),
         createApiAuthorization({
           config,
           db: database.db,

@@ -6,7 +6,6 @@ import {
   type Clock,
   type SecretKeyResolver,
   type SecretKeyLookup,
-  createChallengeService,
   type defineModuleCatalog,
 } from '@backbricks/core';
 import { createDatabase, createPostgresQueue, runMigrations } from '@backbricks/db';
@@ -18,21 +17,14 @@ import { createApp } from '../src/app.ts';
 import { createServerAuth } from '../src/auth.ts';
 import type { ApiRoutes } from '../src/http/api-routes.ts';
 import { createServerKeyAuth } from '../src/key-auth.ts';
-import { registerKeys } from '../src/keys.ts';
 import { createLogger } from '../src/logger.ts';
 import { createApiAuthorization } from '../src/middleware/authorization.ts';
 import { moduleJobDefinitions } from '../src/module-jobs.ts';
 import { moduleCatalog } from '../src/modules.ts';
 import { createServerOutbox } from '../src/outbox.ts';
-import { registerProjects } from '../src/projects.ts';
 import { createPublicCredentialResolver } from '../src/public-auth.ts';
-import { createPublicExecutor } from '../src/public-executor.ts';
-import { challengeRoutes } from '../src/routes/challenge.ts';
-import { configurationRoutes } from '../src/routes/configuration.ts';
-import { instanceRoutes } from '../src/routes/instances.ts';
-import { metaRoutes } from '../src/routes/meta.ts';
-import { moduleRoutes, type ModulePublicExecutor } from '../src/routes/modules.ts';
-import { platformReadRoutes } from '../src/routes/platform-reads.ts';
+import type { ModulePublicExecutor } from '../src/routes/modules.ts';
+import { platformRoutes } from '../src/routes/platform.ts';
 import { createServerServices } from '../src/services.ts';
 
 export const available = (await postgresAvailable()) && (await mailpitAvailable());
@@ -144,13 +136,6 @@ export async function scenario(
         resolveSecret: keyAuth.resolveKey,
         lookupPublishable: apiOptions.lookupPublishable,
       });
-      const issueChallenge = createChallengeService({
-        clock: runtime.container.core.clock,
-        captcha: runtime.captcha,
-        limiter: runtime.container.core.rateLimiter,
-        withTenant: runtime.withTenant,
-        resolve: resolvePublic,
-      });
       app = createApp(
         {
           log,
@@ -166,24 +151,7 @@ export async function scenario(
           }),
         },
         (api) => {
-          registerProjects(api, runtime);
-          registerKeys(api, runtime, config.modules);
-          platformReadRoutes(api, runtime);
-          metaRoutes(api, runtime.modules);
-          instanceRoutes(api, runtime);
-          configurationRoutes(api, runtime);
-          challengeRoutes(api, {
-            captcha: runtime.captcha,
-            issue: issueChallenge,
-            resolve: resolvePublic,
-            withTenant: runtime.withTenant,
-          });
-          moduleRoutes(
-            api,
-            runtime,
-            apiOptions.executePublic ?? createPublicExecutor(runtime, resolvePublic),
-            resolvePublic,
-          );
+          platformRoutes(api, runtime, { resolvePublic, executePublic: apiOptions.executePublic });
           apiOptions.configure?.(api, handle.db);
         },
         createApiAuthorization({
