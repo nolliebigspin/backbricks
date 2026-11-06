@@ -307,44 +307,13 @@ CREATE INDEX reviews_queue_idx  ON reviews (instance_id, moderation_status, crea
 
 ### C.1 Module contract
 
-Each module exports a `ModuleDefinition`. The core knows modules only through this contract.
+The implemented contract is [`ModuleDefinition`](../packages/core/src/modules/contract.ts), normalized by [`defineModule`](../packages/core/src/modules/define-module.ts); see [ADR-0037](adr/0037-static-module-contracts.md) for the refinements to the initial sketch. It owns typed configuration/defaults/templates/migrations/change classification, localized metadata, resource names, scopes/events/metrics, declared infrastructure/services/capabilities, route/job registration, retention/privacy and codegen hooks. Schemas must have representable JSON output. Changed configurations without a classifier are conservatively destructive.
 
-```ts
-// packages/core/src/modules/contract.ts
-export interface ModuleDefinition<TConfig = unknown> {
-  type: string;                                  // 'forms'
-  moduleVersion: number;                         // version of the config format
-  displayName: { en: string; de: string };
-  resourceName: { singular: string; plural: string }; // 'form'/'forms' → URL segments
-
-  configSchema: z.ZodType<TConfig>;              // validation + JSON Schema for CLI/editors
-  defaultConfig(): TConfig;
-  templates?: Record<string, { name: string; config: TConfig }>; // "Contact form", "Job application"
-  migrateConfig?(fromVersion: number, config: unknown): TConfig;
-  validateConfigChange?(prev: TConfig, next: TConfig): ConfigChangeReport; // detects destructive changes
-
-  publicRoutes?(router: PublicRouter): void;     // mounted at /v1/public/{plural}/{key}/…
-  adminRoutes?(router: AdminRouter): void;       // mounted at /v1/projects/{projectId}/{plural}/…
-
-  scopes: ScopeDefinition[];                     // e.g. 'forms:submit'
-  events: EventDefinition[];                     // e.g. 'forms.submission.created'
-  jobs?: JobDefinition[];                        // pg-boss handlers + cron
-  provides?: Partial<CapabilityMap>;             // e.g. uploads provides 'files'
-  requires?: (keyof CapabilityMap)[];            // hard dependencies on other modules' capabilities
-  optional?: (keyof CapabilityMap)[];            // e.g. forms uses 'files' only if uploads is enabled
-  infrastructure: InfraRequirement[];            // e.g. uploads: ['storage', { scanner: 'optional' }]; forms: []
-
-  retention: RetentionHandler;                   // purgeExpired(ctx, now), recomputeExpiry(instance)
-  privacy: PrivacyHandler;                       // exportSubject(ctx, email), deleteSubject(ctx, email)
-  usageMetrics: MetricDefinition[];
-  mcpTools?: McpToolDefinition[];                // optional module-specific agent tools
-  codegen?(instance: ModuleInstance<TConfig>): TypeScriptDeclaration; // types for SDK/CLI
-}
-```
+Routes use the framework-neutral [router contract](../packages/core/src/modules/routes.ts), with Zod inputs, response allowlists, explicit policies/body limits and public read/write classification. [Jobs](../packages/core/src/modules/jobs.ts) declare a typed payload, retries and bounded retention. The server owns HTTP/auth/OpenAPI/worker wiring; module code imports only the public core contract and its own files. M1 proves complete definitions with [test-only modules](../packages/db/test/module-fixtures.ts); forms/uploads/reviews become operational in M2–M4.
 
 ### C.2 Registration
 
-Static, no runtime plugins. `apps/server/src/modules.ts` lists the modules; `defineRegistry` validates at startup: unique types and scopes, satisfied `requires`, no event collisions. The dashboard has a parallel static registry (`apps/web/src/modules/registry.ts`) with nav entries, routes and icons per module.
+Static, no runtime plugins. `apps/server/src/modules.ts` lists the modules. [`defineRegistry`](../packages/core/src/modules/registry.ts) validates unique types/resources/scopes/events/metrics/providers/routes/jobs, satisfied required capabilities, dependency cycles and module namespaces, and orders providers before consumers. Required infrastructure/services fail during binding; absent optional providers are null. The dashboard has a parallel static registry (`apps/web/src/modules/registry.ts`) with nav entries, routes and icons per module.
 
 **Generic features the core provides for every module** (no module code needed):
 
@@ -359,16 +328,16 @@ Static, no runtime plugins. `apps/server/src/modules.ts` lists the modules; `def
 ### C.3 Module boundaries and data isolation
 
 - A module imports **only** `@backbricks/core` and its own files (enforced by dependency-cruiser).
-- A module reads/writes **only its own tables**, plus the generic core tables through core services, never directly.
+- A module receives only its own scoped repository and an opaque `TenantHandle`. It reads/writes **only its own tables**, plus generic core tables through bound core services; it never receives platform repositories or the full transaction.
 - **Cross-module collaboration happens via capabilities.** Example: `forms` needs files; `uploads` provides the `files` capability:
   ```ts
   interface FilesCapability {
-    claim(tx: TenantTx, input: { refs: FileRef[]; zoneKey: string; owner: { type: string; id: string }; maxFiles: number }): Promise<ClaimedFile[]>;
-    listByOwner(tx: TenantTx, owner: { type: string; id: string }): Promise<FileSummary[]>;
-    deleteByOwner(tx: TenantTx, owner: { type: string; id: string }): Promise<void>;
+    claim(tx: TenantHandle, input: { refs: FileRef[]; zoneKey: string; owner: { type: string; id: string }; maxFiles: number }): Promise<ClaimedFile[]>;
+    listByOwner(tx: TenantHandle, owner: { type: string; id: string }): Promise<FileSummary[]>;
+    deleteByOwner(tx: TenantHandle, owner: { type: string; id: string }): Promise<void>;
   }
   ```
-  `forms` calls `ctx.capabilities.files?.claim(…)` in **the same transaction** that stores the submission.
+  `forms` calls `ctx.capabilities.optional('files')?.claim(ctx.tx, …)` in **the same transaction** that stores the submission.
 
 ### C.4 Shared services (injected by the core)
 

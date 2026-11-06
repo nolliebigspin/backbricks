@@ -30,6 +30,7 @@ export type {
   TenantContext,
   AuthenticatedTenantContext,
   TenantTransaction,
+  TenantHandle,
   WithTenant,
 } from './tenancy/tenant-context.ts';
 export * from './tenancy/repositories.ts';
@@ -250,3 +251,53 @@ export {
   integrationResponseSchema,
 } from './queries/schemas.ts';
 export { createPlatformQueries, type PlatformQueries } from './queries/platform.ts';
+
+export {
+  bindCapability,
+  capabilityView,
+  type CapabilityMap,
+  type CapabilityName,
+  type Capability,
+  type CapabilityLookup,
+  type CapabilityFactories,
+} from './modules/capabilities.ts';
+export {
+  jsonValueSchema,
+  canonicalJson,
+  moduleNameSchema,
+  localizedNameSchema,
+  scopeDefinitionSchema,
+  eventDefinitionSchema,
+  metricDefinitionSchema,
+  configChangeReportSchema,
+  type JsonValue,
+  type ScopeDefinition,
+  type EventDefinition,
+  type MetricDefinition,
+  type ConfigChangeReport,
+} from './modules/values.ts';
+export type {
+  ModuleDefinition,
+  ModuleRuntime,
+  ModuleServices,
+  ModuleExecution,
+  ConfiguredInstance,
+} from './modules/contract.ts';
+export type {
+  ModuleInputSchema,
+  ModuleResponseDefinition,
+  ModuleRouteSpec,
+  ModuleAdminRouter,
+  ModulePublicRouter,
+} from './modules/routes.ts';
+export {
+  MAX_JOB_RETENTION_SECONDS,
+  type ModuleJobSpec,
+  type ModuleJobRegistrar,
+} from './modules/jobs.ts';
+
+export { defineModule } from './modules/define-module.ts';
+export { defineRegistry, type ModuleRegistry } from './modules/registry.ts';
+export type { RegisteredModule, RegisteredRoute, RegisteredJob } from './modules/registered.ts';
+
+export { CORE_EVENTS } from './services/event-types.ts';

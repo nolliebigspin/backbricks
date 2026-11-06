@@ -53,6 +53,7 @@ export function createWithTenant(
           Object.freeze({
             context,
             identity: Symbol('tenant transaction'),
+            assertActive,
             repositories,
             modules: Object.freeze(createModuleRepositories?.(tx, context, assertActive) ?? {}),
           }),

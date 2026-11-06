@@ -1,0 +1,16 @@
+/** Platform-owned events; module registration reserves these exact names. */
+export const CORE_EVENTS = {
+  projectCreated: 'project.created',
+  projectUpdated: 'project.updated',
+  projectArchived: 'project.archived',
+  keyCreated: 'key.created',
+  keyRevoked: 'key.revoked',
+  secretKeyExposed: 'security.secret_key_exposed',
+  organizationCreated: 'organization.created',
+  invitationCreated: 'invitation.created',
+  invitationResent: 'invitation.resent',
+  invitationCanceled: 'invitation.canceled',
+  membershipCreated: 'membership.created',
+  membershipRemoved: 'membership.removed',
+  membershipRoleChanged: 'membership.role_changed',
+} as const;

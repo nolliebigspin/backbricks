@@ -21,10 +21,16 @@ export type WithTenant<Tx = TenantTransaction> = <T>(
   fn: (tx: Tx) => Promise<T>,
 ) => Promise<T>;
 
-/** Request-scoped identity and repositories. The driver remains inside repository factories. */
-export type TenantTransaction = Readonly<{
+/** A module may pass this identity to bound services, but cannot reach other repositories. */
+export type TenantHandle = Readonly<{
   context: TenantContext;
   identity: symbol;
-  repositories: TenantRepositories;
-  modules: Readonly<Partial<ModuleRepositories>>;
+  assertActive: () => void;
 }>;
+
+/** Request-scoped identity and repositories. The driver remains inside repository factories. */
+export type TenantTransaction = TenantHandle &
+  Readonly<{
+    repositories: TenantRepositories;
+    modules: Readonly<Partial<ModuleRepositories>>;
+  }>;

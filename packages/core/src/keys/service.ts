@@ -3,6 +3,7 @@ import { pageResult } from '../http/pagination.ts';
 import { meetsOrganizationRole } from '../http/route-policy.ts';
 import type { Ids } from '../ids/type-id.ts';
 import { principalActor, type AuditService, type EventService } from '../services/activity.ts';
+import { CORE_EVENTS } from '../services/event-types.ts';
 import type { RepositoryPage } from '../tenancy/repositories.ts';
 import type { TenantTransaction } from '../tenancy/tenant-context.ts';
 import type { Clock } from '../time/clock.ts';
@@ -69,14 +70,14 @@ export function createKeyService(deps: {
       };
       await deps.audit.record(tx, {
         ...principalActor(principal),
-        action: 'key.created',
+        action: CORE_EVENTS.keyCreated,
         targetType: 'key',
         targetId: key.id,
         changes,
         requestId,
       });
       await deps.events.publish(tx, {
-        type: 'key.created',
+        type: CORE_EVENTS.keyCreated,
         subjectType: 'key',
         subjectId: key.id,
         payload: changes,
@@ -90,14 +91,14 @@ export function createKeyService(deps: {
       await tx.repositories.keys.revoke(id, deps.clock.now());
       await deps.audit.record(tx, {
         ...principalActor(principal),
-        action: 'key.revoked',
+        action: CORE_EVENTS.keyRevoked,
         targetType: 'key',
         targetId: id,
         changes: { changedFields: ['revokedAt'] },
         requestId,
       });
       await deps.events.publish(tx, {
-        type: 'key.revoked',
+        type: CORE_EVENTS.keyRevoked,
         subjectType: 'key',
         subjectId: id,
         payload: { changedFields: ['revokedAt'] },

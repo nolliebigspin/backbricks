@@ -2,6 +2,7 @@ import { AppError } from '../errors/app-error.ts';
 import type { Ids } from '../ids/type-id.ts';
 import type { Project } from '../platform/models.ts';
 import { principalActor, type AuditService, type EventService } from '../services/activity.ts';
+import { CORE_EVENTS } from '../services/event-types.ts';
 import type { TenantTransaction } from '../tenancy/tenant-context.ts';
 import type { Clock } from '../time/clock.ts';
 import {
@@ -58,7 +59,7 @@ export function createProjectService(deps: {
         updatedAt: now,
         deletedAt: null,
       });
-      await record(tx, 'project.created', project, Object.keys(data), requestId);
+      await record(tx, CORE_EVENTS.projectCreated, project, Object.keys(data), requestId);
       return project;
     },
     async update(
@@ -80,14 +81,14 @@ export function createProjectService(deps: {
         ...data,
         updatedAt: deps.clock.now(),
       });
-      await record(tx, 'project.updated', project, changedFields, requestId);
+      await record(tx, CORE_EVENTS.projectUpdated, project, changedFields, requestId);
       return project;
     },
     async archive(tx: TenantTransaction, id: string, requestId?: string): Promise<void> {
       await tx.repositories.projects.get(id, { lock: true });
       const now = deps.clock.now();
       const project = await tx.repositories.projects.update(id, { deletedAt: now, updatedAt: now });
-      await record(tx, 'project.archived', project, ['deletedAt'], requestId);
+      await record(tx, CORE_EVENTS.projectArchived, project, ['deletedAt'], requestId);
     },
   };
 }

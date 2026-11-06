@@ -328,14 +328,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Foreign cursor/filter tampering, role/scope matrix, public-safe integration response and audit redaction snapshots.
 - **Risks/notes:** No billing UI, notification CRUD or personal-data export endpoints in this task.
 
-### [ ] P1.6a – Define modules and capabilities (est. 6 h)
+### [x] P1.6a – Define modules and capabilities (est. 6 h)
 - **Description:** Implement §C.1's typed ModuleDefinition, defineRegistry, capabilities, router/service/job/retention/privacy/codegen contracts and module configuration version rules. Record contract refinements in an ADR.
 - **Files/packages:** `packages/core/src/modules/`, module test fixtures, ADR/index.
 - **Depends on:** P1.8d, P1.11a, P1.3a; Q5 (DEV-9).
 - **Reuses:** InfraRequirement/requiredInfrastructure, service container, declared routes and scope/event catalogs.
 - **Acceptance criteria:**
-  - [ ] Duplicate types/resource names/scopes/events/capability providers and missing requirements fail startup; optional capabilities are typed and unavailable use fails clearly.
-  - [ ] A test module performs a capability write in its tenant transaction, registers routes/jobs and supplies config schema, retention/privacy and schema/codegen hooks without a forbidden import.
+  - [x] Duplicate types/resource names/scopes/events/capability providers and missing requirements fail startup; optional capabilities are typed and unavailable use fails clearly.
+  - [x] A test module performs a capability write in its tenant transaction, registers routes/jobs and supplies config schema, retention/privacy and schema/codegen hooks without a forbidden import.
 - **Tests:** Valid and invalid registries, dependency/provider ordering, disabled providers and cross-module rollback fixture.
 - **Risks/notes:** No `any`, generic plugin loader or domain schemas. Zod config/JSON Schema must have representable public output.
 
@@ -581,7 +581,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.1a/b/c, P1.11a, P1.2a/b, P1.3a/b, P1.8a/b/c/d, P1.13a, P1.5a/b and P1.4a/b/c complete. ADRs 0021–0036 record implemented boundaries. Q5–Q10 are explicitly approved; I1 now states the sole exact-hash/ID authentication bootstrap exception. `bun run check` passes with no skipped tests (78 server tests, 34 real DB tests). Production key resolution, exposure audit/notification intent and owner/admin SMTP delivery pass real HTTP/Postgres/Mailpit tests, including failure rollback of notification throttling. Durable worker retries remain P1.10b; complete dashboard flows remain P1.12/P1.13. Shared provider lifetimes, restricted module service views, usage and UnlimitedEntitlements are implemented and tested. Activity/usage/integration reads are scoped, covered by isolation cases and privacy/expiry/precision tests; build and 4 browser smoke tests pass. Next: P1.6a (module definitions/capabilities). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
+P1.1a/b/c, P1.11a, P1.2a/b, P1.3a/b, P1.8a/b/c/d, P1.13a, P1.5a/b, P1.4a/b/c and P1.6a complete. ADRs 0021–0037 record implemented boundaries. Q5–Q10 are explicitly approved; I1 now states the sole exact-hash/ID authentication bootstrap exception. `bun run check` passes with no skipped tests (78 server tests, 36 real DB tests). Production key resolution, exposure audit/notification intent and owner/admin SMTP delivery pass real HTTP/Postgres/Mailpit tests, including failure rollback of notification throttling. Durable worker retries remain P1.10b; complete dashboard flows remain P1.12/P1.13. Shared provider lifetimes, restricted module service views, usage and UnlimitedEntitlements are implemented and tested. Activity/usage/integration reads are scoped, covered by isolation cases and privacy/expiry/precision tests; build and 4 browser smoke tests pass. Static module contracts and exact-handle capability/service binding pass real cross-module rollback tests, including public output snapshots, expired/foreign handle rejection and prototype/content-type regressions. Next: P1.6b (module selection/metadata/wiring). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 

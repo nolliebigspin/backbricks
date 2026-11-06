@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import {
+  CORE_EVENTS,
   meetsOrganizationRole,
   organizationRoleSchema,
   type AuthInvitation,
@@ -99,12 +100,12 @@ export async function prepareOrganizationOperation(
       if (endpoint === '/organization/create') {
         organizationId = resultSchema.parse(await response.clone().json()).id;
         targetId = organizationId;
-        action = 'organization.created';
+        action = CORE_EVENTS.organizationCreated;
       } else if (endpoint === '/organization/invite-member') {
         const invitationId = resultSchema.parse(await response.clone().json()).id;
         targetId = invitationDigest(invitationId);
         targetType = 'invitation';
-        action = data['resend'] ? 'invitation.resent' : 'invitation.created';
+        action = data['resend'] ? CORE_EVENTS.invitationResent : CORE_EVENTS.invitationCreated;
         if (!options.mailer) {
           const body = z.record(z.string(), z.unknown()).parse(await response.clone().json());
           const link = new URL('/accept-invitation', options.config.publicUrl);
@@ -115,19 +116,19 @@ export async function prepareOrganizationOperation(
           );
         }
       } else if (endpoint === '/organization/cancel-invitation' && invitation) {
-        action = 'invitation.canceled';
+        action = CORE_EVENTS.invitationCanceled;
         targetType = 'invitation';
         targetId = invitationDigest(invitation.id);
       } else if (endpoint === '/organization/accept-invitation') {
         const body = z.object({ member: resultSchema }).parse(await response.clone().json());
-        action = 'membership.created';
+        action = CORE_EVENTS.membershipCreated;
         targetType = 'membership';
         targetId = body.member.id;
       } else if (target) {
         action =
           endpoint === '/organization/remove-member'
-            ? 'membership.removed'
-            : 'membership.role_changed';
+            ? CORE_EVENTS.membershipRemoved
+            : CORE_EVENTS.membershipRoleChanged;
         targetType = 'membership';
         targetId = target.id;
       }

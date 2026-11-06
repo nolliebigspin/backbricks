@@ -4,6 +4,7 @@ import type { RateLimiter } from '../abuse/rate-limiter.ts';
 import { AppError } from '../errors/app-error.ts';
 import { secretKeyIdentitySchema, type SecretKeyResolver } from '../identity/principal.ts';
 import type { AuditService, EventService } from '../services/activity.ts';
+import { CORE_EVENTS } from '../services/event-types.ts';
 import type { TenantContext, TenantTransaction } from '../tenancy/tenant-context.ts';
 import type { Clock } from '../time/clock.ts';
 import { hashApiKey } from './material.ts';
@@ -70,7 +71,7 @@ export function createSecretKeyResolver(deps: {
             });
             const eventId = notification.allowed
               ? await deps.events.publish(tx, {
-                  type: 'security.secret_key_exposed',
+                  type: CORE_EVENTS.secretKeyExposed,
                   subjectType: 'key',
                   subjectId: key.id,
                   payload: { reason: 'foreign_origin' },
