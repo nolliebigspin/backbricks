@@ -1,1 +1,1 @@
-// Implementations of core interfaces (storage, mailer, scanner, rate limiter).
+export { createSmtpMailer } from './mail/smtp.ts';

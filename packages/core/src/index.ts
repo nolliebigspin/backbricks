@@ -31,6 +31,13 @@ export * from './tenancy/repositories.ts';
 export * from './platform/models.ts';
 export { MAX_PAGE_SIZE } from './http/pagination.ts';
 export { API_KEY_PREFIXES } from './keys/constants.ts';
+export {
+  MAIL_BODY_LIMIT,
+  mailMessageSchema,
+  type MailMessage,
+  type Mailer,
+} from './mail/contract.ts';
+export { escapeHtml, renderAuthMail, type AuthMailInput } from './mail/templates.ts';
 export { expiresAfterDays, MILLISECONDS_PER_DAY } from './time/retention.ts';
 export {
   activityMetadataSchema,

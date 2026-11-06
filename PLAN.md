@@ -75,7 +75,7 @@ P0 versions checked 2026-11-04. New P1 dependencies rechecked 2026-11-06 with `n
 | | @aws-sdk/client-s3 / @aws-sdk/s3-request-presigner | 3.1163.0 (P1 target) | paired upgrade verified in P1.8e | client-s3 3.1161.0 already installed at root; latest of both is 3.1163.0. Align versions when adding presigner; no unrelated upgrade. Preserve checksum settings and signed length/type tests from ADR-0020 |
 | | altcha-lib | 2.8.0 | yes (ADR-0020) | v2 API with `altcha-lib/algorithms/sha` |
 | | @modelcontextprotocol/sdk | 1.32.2 | yes, Bun and Node 24 (ADR-0020) | must also run on Node ≥ 20 (I18) |
-| | nodemailer / @types/nodemailer | 10.3.1 / 8.0.2 | to verify (P1.8b) | Types' major differs from runtime; verify the used SMTP API with typecheck and Mailpit |
+| | nodemailer / @types/nodemailer | 10.3.1 / 8.0.2 | yes (P1.8b) | Bun Mailpit delivery and safe failure tests pass; Node delivery probe passes; used API typechecks despite types' older major |
 | | file-type | 22.3.0 | to verify (P3.4) | |
 | | @hono/zod-openapi | 1.6.3 | yes | peer zod ^4, hono ≥4.10 |
 | | openapi-typescript | 7.13.0 | yes, with fallback (ADR-0020) | fails on TS 7; works with `typescript@5.9.3` local to `api-contract` |
@@ -195,14 +195,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Force audit/outbox failure and assert no mutation survives; malicious config/key payloads never enter audit diffs or logs.
 - **Risks/notes:** I4/I11/I12; secret exposure uses a committed security-event transaction before returning the rejection.
 
-### [ ] P1.8b – Add the SMTP mailer and safe templates (est. 4 h)
+### [x] P1.8b – Add the SMTP mailer and safe templates (est. 4 h)
 - **Description:** Define mailer contracts, SMTP implementation and verification/reset/invitation/exposure templates; make SMTP absence an explicit capability with the Q6 behavior.
 - **Files/packages:** core mail contracts, `packages/adapters/src/mail/`, server composition.
 - **Depends on:** P1.8a; Q6 signup/no-SMTP policy.
 - **Reuses:** `Config.mailer`, `PUBLIC_URL`, Mailpit compose service, existing redaction.
 - **Acceptance criteria:**
-  - [ ] URLs are built from trusted base URL and validated paths; HTML/text escape user values; SMTP errors/logs contain no password or bearer link.
-  - [ ] Owner/admin-only invitation link fallback works as approved; reset/verification tokens are never returned by anonymous endpoints.
+  - [x] URLs are built from trusted base URL and validated paths; HTML escapes user values and plain text treats them literally. SMTP errors expose no recipients, credentials or bearer links; provider diagnostics and external resource access are disabled.
+  - [x] SMTP absence remains the explicit nullable config capability. Permission-gated invitation fallback and anonymous token non-disclosure are verified with the actual auth routes in P1.1b/c; runtime composition is P1.8d.
 - **Tests:** Mailpit delivery with hostile display names, template escaping properties, SMTP failure and missing-SMTP behavior.
 - **Risks/notes:** Provider delivery happens after commit; do not send an email for a transaction that later rolls back. Durable retries arrive in P1.10b.
 
@@ -236,6 +236,7 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Acceptance criteria:**
   - [ ] Create org, select membership, invite/accept/cancel, remove member and change role work; admins cannot change owners, last-owner removal/demotion is rejected, removed members lose access immediately.
   - [ ] Every administrative mutation audits atomically; direct `/api/auth/organization/*` calls obey the same rules or are disabled. Invitation identity/expiry/replay checks prevent joining a foreign organization.
+  - [ ] Without SMTP, invitation links are available only to the inviting owner/admin; anonymous verification/reset endpoints never disclose tokens (P1.8b dependency correction).
 - **Tests:** Real DB rollback injection, concurrent last-owner changes, role matrix and raw-plugin bypass attempts.
 - **Risks/notes:** Organization deletion/ownership transfer exposure follows Q7; disabled endpoints must reject direct calls, not merely disappear from the UI.
 
@@ -580,7 +581,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.1a/P1.11a/P1.2a/P1.2b/P1.3a/P1.8a complete. ADRs 0021–0024 record transaction, privacy, schema and repository boundaries. Real DB tests: 28 pass across 6 files; audit/outbox constraint failures prove atomic rollback. `bun run check` passed with services running and zero skips; unchanged packages may use Turbo cache. Next task: P1.8b (SMTP and safe templates). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
+P1.1a/P1.11a/P1.2a/P1.2b/P1.3a/P1.8a/b complete. ADRs 0021–0024 record transaction, privacy, schema and repository boundaries. Real DB tests: 28 pass across 6 files; audit/outbox constraint failures prove atomic rollback. SMTP/template tests: 7 pass, including real Mailpit delivery. `bun run check` passed with services running and zero skips; unchanged packages may use Turbo cache. Next task: P1.8c (shared rate limits and private IP identity). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 
