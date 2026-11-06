@@ -99,3 +99,5 @@ Details: `docs/progress/phase-0.md` → "Deviations".
 - **D22 – Isolation and cache coverage:** ADR-0029 requires concrete matching probes for registered management operations, inventories Better Auth organization endpoints and disables test caching for live-service state. Dependency/shared-script hashes now invalidate typechecks. No new production endpoint or permission is introduced.
 
 - **D23 – Initial project settings and pagination:** ADR-0030 reserves project settings as a strict empty object until typed feature fields exist and introduces shared keyset pagination with the first real collection route. Q7/Q9 are explicitly approved above; configuration archive is distinct from personal-data erasure.
+
+- **D24 – Key protocol/catalog:** ADR-0031 uses unbiased base62 sampling, SHA-256 over the complete credential, eight-character token display excerpts and an enabled-module-aware v1 scope catalog. Unknown/disabled explicit grants fail; preset results expose their effective enabled grants. No new permission or production route is added by P1.4a.

@@ -451,19 +451,7 @@ Every module can be switched on or off per installation. A self-hoster who only 
 
 Implemented management principal/selector/permission behavior: [ADR-0028](adr/0028-management-principals-and-permissions.md), with linked core schemas and server composition as the source of truth. Key discovery and audited exposure handling are completed in P1.4c.
 
-| Scope | Meaning | Preset "AI agent / CLI" | Preset "Server integration" | Preset "Data access" |
-|---|---|---|---|---|
-| `integration:read` | Project info, publishable key, snippets | ✔ | | |
-| `config:read` | Read module configs, generate types | ✔ | | |
-| `config:write` | Create/change instances (non-destructive) | ✔ | | |
-| `config:destructive` | Remove fields/instances that affect data | | | |
-| `project:write` | Allowed origins, project settings | | | |
-| `test:write` | Test submissions (`is_test=true`) | ✔ | | |
-| `stats:read` | Counts without personal data | ✔ | | ✔ |
-| `forms:submit`, `uploads:create`, `reviews:submit` | Server-side public operations | | ✔ | |
-| `data:read` | Read submissions, files, reviews | | | ✔ |
-| `data:write` | Change status, moderate | | | ✔ |
-| `data:delete` | Delete records | | | |
+The implemented [scope catalog and presets](../packages/core/src/keys/scopes.ts) are the source of truth (ADR-0031). Issuance rejects unknown/disabled-module grants. The agent preset excludes personal-data and destructive/deletion rights. [Key material](../packages/core/src/keys/material.ts) separates the one-time credential from hashed secret persistence; [management metadata](../packages/core/src/keys/metadata.ts) never redisplays a secret.
 
 Keys are created exclusively in the dashboard (session). No key can create keys.
 

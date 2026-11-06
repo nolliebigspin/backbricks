@@ -44,7 +44,12 @@ export {
 } from './http/pagination.ts';
 export { AUTH_BASE_PATH } from './http/auth-path.ts';
 export { API_KEY_PREFIXES } from './keys/constants.ts';
-export { API_KEY_TOKEN_LENGTH, scopeNameSchema, secretKeyTokenSchema } from './keys/protocol.ts';
+export {
+  API_KEY_TOKEN_LENGTH,
+  scopeNameSchema,
+  secretKeyTokenSchema,
+  publishableKeyTokenSchema,
+} from './keys/protocol.ts';
 export {
   principalSchema,
   sessionIdentitySchema,
@@ -152,3 +157,23 @@ export {
 } from './projects/schemas.ts';
 
 export { createProjectService, type ProjectService } from './projects/service.ts';
+
+export {
+  KEY_SCOPES,
+  KEY_SCOPE_PRESETS,
+  keyScopeSchema,
+  keyScopesSchema,
+  keyPresetSchema,
+  keyPresetScopes,
+  type KeyScope,
+} from './keys/scopes.ts';
+export {
+  API_KEY_ALPHABET,
+  API_KEY_DISPLAY_TOKEN_LENGTH,
+  generateApiKey,
+  hashApiKey,
+  createApiKeyMaterial,
+  isApiKeyActive,
+} from './keys/material.ts';
+
+export { apiKeyMetadataSchema, apiKeyMetadata } from './keys/metadata.ts';

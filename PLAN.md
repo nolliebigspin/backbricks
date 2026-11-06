@@ -273,14 +273,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Role/isolation matrix, duplicate slug, deceptive origin suffix/ports, deleted-project reads and all mutations' rollback.
 - **Risks/notes:** No personal-data soft deletion by accident; apply the accepted Q7 semantics.
 
-### [ ] P1.4a – Implement key primitives and scope presets (est. 4 h)
+### [x] P1.4a – Implement key primitives and scope presets (est. 4 h)
 - **Description:** Generate 32-character base62 CSPRNG tokens without modulo bias; derive hashes, display prefixes, scope schemas and named presets from one catalog.
 - **Files/packages:** core key/scopes contracts and pure helpers, db key repository.
 - **Depends on:** P1.3a; Q9 scope decisions.
 - **Reuses:** `ids`, Web Crypto, AppError catalog, §D.1 presets.
 - **Acceptance criteria:**
-  - [ ] Secret plaintext is returned only at creation; persistence stores SHA-256 and display metadata. Publishable plaintext is allowed only for publishable rows.
-  - [ ] Unknown scopes fail validation; agent preset excludes personal data/deletion/destructive rights; disabled module scopes cannot silently grant rights.
+  - [x] Secret plaintext is returned only at creation; persistence stores SHA-256 and display metadata. Publishable plaintext is allowed only for publishable rows.
+  - [x] Unknown scopes fail validation; agent preset excludes personal data/deletion/destructive rights; disabled module scopes cannot silently grant rights.
 - **Tests:** Format/property tests, rejected scopes, expiry/revocation lookup and serialization/log snapshots excluding secrets.
 - **Risks/notes:** Own website/agent keys remain separate from Better Auth sessions; do not add a second key plugin.
 
@@ -581,7 +581,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.1a/b/c, P1.11a, P1.2a/b, P1.3a/b, P1.8a/b/c, P1.13a and P1.5a complete. ADRs 0021–0030 record the implemented boundaries. `bun run check`, build and 4 Playwright smoke tests pass; all package test tasks rerun uncached with no skips (68 server tests, 30 real DB tests). Q7/Q9 are explicitly approved. Production project routes are mounted, audited and covered by isolation cases; archive closes project-bound access. Key resolution remains an interface until P1.4c; complete dashboard flows remain P1.12/P1.13. Next: P1.4a (key primitives/scopes). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
+P1.1a/b/c, P1.11a, P1.2a/b, P1.3a/b, P1.8a/b/c, P1.13a, P1.5a and P1.4a complete. ADRs 0021–0031 record the implemented boundaries. `bun run check`, build and 4 Playwright smoke tests pass; all package test tasks rerun uncached with no skips (68 server tests, 31 real DB tests). Q7/Q9 are explicitly approved. Production project routes are mounted, audited and covered by isolation cases; archive closes project-bound access. Key resolution remains an interface until P1.4c; complete dashboard flows remain P1.12/P1.13. P1.4a key primitives/scopes pass the full checks; metadata omits secret/hash material, and active hash lookup requires injected time. Next: P1.4b (session-only key management). Q5/Q6 confirmation requested ahead of the module/client tasks. Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 

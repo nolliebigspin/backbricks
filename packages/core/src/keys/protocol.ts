@@ -9,11 +9,17 @@ export const scopeNameSchema = z
   .max(128)
   .regex(/^[a-z][a-z0-9_-]*:[a-z][a-z0-9_-]*$/)
   .refine((value) => !value.includes(API_KEY_PREFIXES.secret));
-export const secretKeyTokenSchema = z.string().refine((value) => {
-  const token = value.slice(API_KEY_PREFIXES.secret.length);
+function matchesKey(value: string, prefix: string): boolean {
+  const token = value.slice(prefix.length);
   return (
-    value.startsWith(API_KEY_PREFIXES.secret) &&
+    value.startsWith(prefix) &&
     token.length === API_KEY_TOKEN_LENGTH &&
     /^[A-Za-z0-9]+$/.test(token)
   );
-});
+}
+export const secretKeyTokenSchema = z
+  .string()
+  .refine((value) => matchesKey(value, API_KEY_PREFIXES.secret));
+export const publishableKeyTokenSchema = z
+  .string()
+  .refine((value) => matchesKey(value, API_KEY_PREFIXES.publishable));

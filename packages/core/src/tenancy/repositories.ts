@@ -30,7 +30,7 @@ export interface ProjectRepository {
 export interface KeyRepository {
   list(page: RepositoryPage): Promise<ApiKeyRecord[]>;
   get(id: string): Promise<ApiKeyRecord>;
-  findByHash(hash: Uint8Array): Promise<ApiKeyRecord | null>;
+  findByHash(hash: Uint8Array, now: Date): Promise<ApiKeyRecord | null>;
   insert(input: ProjectChild<ApiKeyRecord>): Promise<ApiKeyRecord>;
   revoke(id: string, now: Date): Promise<void>;
   touch(id: string, now: Date, before: Date): Promise<void>;
