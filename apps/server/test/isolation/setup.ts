@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-import { apiKeyMetadata, monthlyUsagePeriod } from '@backbricks/core';
+import { apiKeyMetadata, monthlyUsagePeriod, type TenantTransaction } from '@backbricks/core';
 import { authSchema, createWithTenant } from '@backbricks/db';
 
 import { createVerifiedUser, idResponseSchema, type AuthFixture } from '../auth-fixture.ts';
@@ -8,6 +8,16 @@ import { insertProjectFixture } from '../management-fixture.ts';
 
 const sorted = <T extends { id: string }>(rows: T[]) =>
   rows.toSorted((a, b) => a.id.localeCompare(b.id));
+
+async function instanceSnapshot(repositories: TenantTransaction['repositories']) {
+  const result = [];
+  for (const instance of await repositories.instances.list({ limit: 100 })) {
+    // oxlint-disable-next-line no-await-in-loop -- One tenant transaction owns one physical connection.
+    const revisions = await repositories.revisions.list(instance.id, { limit: 100 });
+    result.push({ instance, revisions });
+  }
+  return result;
+}
 
 /** Two organizations, two projects each, all roles and separate live invitation targets. */
 export async function prepareIsolationFixture(fixture: AuthFixture) {
@@ -81,12 +91,7 @@ export async function prepareIsolationFixture(fixture: AuthFixture) {
             async ({ repositories }) => ({
               keys: (await repositories.keys.list({ limit: 100 })).map(apiKeyMetadata),
               usage: await repositories.usage.list(monthlyUsagePeriod(fixture.now())),
-              instances: await Promise.all(
-                (await repositories.instances.list({ limit: 100 })).map(async (instance) => ({
-                  instance,
-                  revisions: await repositories.revisions.list(instance.id, { limit: 100 }),
-                })),
-              ),
+              instances: await instanceSnapshot(repositories),
             }),
           ),
         ),

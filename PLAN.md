@@ -537,14 +537,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Role matrix, invite accept/expiry/resend/cancel and audit display after actions; translation key parity.
 - **Risks/notes:** UI hiding is never the permission boundary; direct API tests remain mandatory.
 
-### [ ] P1.13b – Complete the management isolation/security matrix (est. 4 h)
+### [x] P1.13b – Complete the management isolation/security matrix (est. 4 h)
 - **Description:** Audit runtime route coverage against every exposed management operation, including library routes, generated generic fixture routes and each credential kind.
 - **Files/packages:** server isolation tests/fixtures, auth security tests, architecture fixtures.
 - **Depends on:** All preceding API/worker tasks, P1.13a.
 - **Reuses:** Automatic suite and route metadata; no parallel manually maintained list as the source of truth.
 - **Acceptance criteria:**
-  - [ ] Coverage is 100% for registered/exposed management methods; missing declaration/fixture fails. Test foreign orgs, project-bound keys against sibling projects, mismatched nested resource IDs, roles, scopes, revocation and denied-write side effects. Organization-wide sessions may legitimately access both own-org projects.
-  - [ ] Public snapshot coverage proves no private fields; key/member/config actions prove atomic audit; unmounted test routes and raw auth bypasses are checked.
+  - [x] Coverage is 100% for registered/exposed management methods; missing declaration/fixture fails. Test foreign orgs, project-bound keys against sibling projects, mismatched nested resource IDs, roles, scopes, revocation and denied-write side effects. Organization-wide sessions may legitimately access both own-org projects.
+  - [x] Public snapshot coverage proves no private fields; key/member/config actions prove atomic audit; unmounted test routes and raw auth bypasses are checked.
 - **Tests:** `CI=true bunx turbo run test --force` with compose services; full matrix must run fresh with zero service-related skips.
 - **Risks/notes:** Collection/list/create semantics use P1.13a's non-disclosure assertions; never weaken foreign-resource 404 to match a library default.
 
