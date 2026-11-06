@@ -669,6 +669,8 @@ Modules add themselves to the navigation through the web registry. Wording is de
 
 The [Embed screen](../apps/web/src/dashboard/embed.tsx) submits generated key contracts directly, outside mutation/query caches, and clears the creation token on dismissal or navigation. Only owner/admin sessions render key management; member integration reads remain safe. [Shared dialogs](../packages/ui/src/components/key-reveal-dialog.tsx) take translated copy and handle clipboard failure without logging values.
 
+[Members](../apps/web/src/dashboard/members.tsx) uses only the guarded public organization client, with owner/admin gates, explicit role/removal confirmation and translated last-owner errors. The no-SMTP fallback is rendered only from an authorized creation response, validates the local invitation URL and is cleared on dismissal. [Activity](../apps/web/src/dashboard/activity.tsx) paginates the scoped audit API and renders structural event/role data only.
+
 ### E.2 Module dashboards
 
 | Module | Main view | Detail | Actions |

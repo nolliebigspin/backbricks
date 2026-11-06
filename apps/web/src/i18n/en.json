@@ -143,5 +143,64 @@
         "description": "Explicitly grants reading and editing personal records plus usage reads. No deletion or key management. Share only with a trusted private integration."
       }
     }
+  },
+  "roles": {
+    "owner": "Owner",
+    "admin": "Administrator",
+    "member": "Member"
+  },
+  "members": {
+    "total": "{{count}} team members",
+    "role": "Role",
+    "remove": "Remove member",
+    "invite": "Invite member",
+    "invitations": "Invitations",
+    "roleHint": "Members can view project settings and integration details. Administrators can also manage projects, keys, team members and activity. Ownership transfer is unavailable.",
+    "resend": "Resend invitation",
+    "cancel": "Cancel invitation",
+    "expired": "Expired",
+    "status": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "canceled": "Canceled"
+    },
+    "changeTitle": "Change this role?",
+    "changeDescription": "The new permissions take effect immediately. A team must keep at least one owner.",
+    "removeTitle": "Remove this member?",
+    "removeDescription": "This person will immediately lose access to this organization. Their account and access to other organizations remain available.",
+    "linkTitle": "Share invitation link",
+    "linkDescription": "Email is unavailable. Share this link privately with the invited person. It only works with their matching email address and expires.",
+    "copyLink": "Copy invitation link",
+    "copyError": "Copying was blocked. Select the invitation link and copy it manually."
+  },
+  "activity": {
+    "description": "Administrative actions from the last year. Names, personal records and secret keys are never included.",
+    "empty": "No activity yet.",
+    "actor": {
+      "user": "Team member",
+      "api_key": "Private integration",
+      "mcp": "Coding agent",
+      "system": "Background service"
+    },
+    "actions": {
+      "organizationCreated": "Organization created",
+      "projectCreated": "Project created",
+      "projectUpdated": "Project settings changed",
+      "projectArchived": "Project archived",
+      "keyCreated": "Key created",
+      "keyRevoked": "Key revoked",
+      "secretExposed": "Secret key exposure blocked",
+      "invitationCreated": "Invitation created",
+      "invitationResent": "Invitation resent",
+      "invitationCanceled": "Invitation canceled",
+      "memberJoined": "Member joined",
+      "memberRemoved": "Member removed",
+      "roleChanged": "Member role changed",
+      "featureCreated": "Website feature created",
+      "featureUpdated": "Website feature configuration changed",
+      "featureArchived": "Website feature archived",
+      "generic": "Administrative change"
+    }
   }
 }

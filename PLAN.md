@@ -526,14 +526,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Reveal lifecycle, clipboard error, revoke confirmation, session expiry and no secret in caches/DOM after close.
 - **Risks/notes:** M5's agent connection wizard/snippets are not built here.
 
-### [ ] P1.12d – Build members and activity views (est. 4 h)
+### [x] P1.12d – Build members and activity views (est. 4 h)
 - **Description:** Add invitation, member-role/removal and paginated organization activity screens.
 - **Files/packages:** web organization/member/activity routes, i18n, reused shared UI.
 - **Depends on:** P1.12b, P1.1c, P1.5b.
 - **Reuses:** Better Auth client, generated activity client, role policy and shared confirmation/error patterns.
 - **Acceptance criteria:**
-  - [ ] Owner/admin/member capabilities match server rules, last-owner errors are understandable, and approved no-SMTP invitation fallback is restricted to authorized users.
-  - [ ] Key/member actions appear with safe audit fields; no secrets/personal payloads render in activity or translations.
+  - [x] Owner/admin/member capabilities match server rules, last-owner errors are understandable, and approved no-SMTP invitation fallback is restricted to authorized users.
+  - [x] Key/member actions appear with safe audit fields; no secrets/personal payloads render in activity or translations.
 - **Tests:** Role matrix, invite accept/expiry/resend/cancel and audit display after actions; translation key parity.
 - **Risks/notes:** UI hiding is never the permission boundary; direct API tests remain mandatory.
 
@@ -580,6 +580,8 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 - Versioned primary references to inspect at implementation time: [Better Auth Drizzle adapter](https://better-auth.com/docs/adapters/drizzle), [organization hooks/endpoints](https://better-auth.com/docs/plugins/organization), [database/schema generation](https://better-auth.com/docs/concepts/database), [oasdiff CLI](https://www.oasdiff.com/docs/getting-started), [oasdiff 1.35.0 release](https://github.com/oasdiff/oasdiff/releases/tag/v1.35.0). Current docs may differ from pinned runtime; installed source/types and a real DB test decide compatibility.
 
 ### Execution notes
+
+P1.13c follow-up: the key list currently labels unrevoked expired keys as active; expiry is enforced by the API. Use the shared display clock and add an expiry-label regression before final acceptance.
 
 P1.9a provider, atomic replay store and rate-limited challenge composition are implemented and verified (ADR-0045). P1.9a remains unticked: production publishable-key bootstrap is deliberately absent pending Q11 approval. Fixture lookup is followed by real scoped DB validation; the production port fails closed. Continue independent AbuseGuard/CORS work through the injected port while awaiting the answer, then finish the public-auth gate before milestone acceptance.
 

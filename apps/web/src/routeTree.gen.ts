@@ -17,6 +17,8 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as DashboardIndexRouteImport } from './routes/_dashboard.index'
+import { Route as DashboardActivityRouteImport } from './routes/_dashboard.activity'
+import { Route as DashboardMembersRouteImport } from './routes/_dashboard.members'
 import { Route as DashboardOrganizationsNewRouteImport } from './routes/_dashboard.organizations.new'
 import { Route as DashboardProjectsProjectIdRouteImport } from './routes/_dashboard.projects.$projectId'
 import { Route as DashboardProjectsProjectIdIndexRouteImport } from './routes/_dashboard.projects.$projectId.index'
@@ -62,6 +64,16 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardActivityRoute = DashboardActivityRouteImport.update({
+  id: '/activity',
+  path: '/activity',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardMembersRoute = DashboardMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardOrganizationsNewRoute =
   DashboardOrganizationsNewRouteImport.update({
     id: '/organizations/new',
@@ -101,6 +113,8 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/activity': typeof DashboardActivityRoute
+  '/members': typeof DashboardMembersRoute
   '/organizations/new': typeof DashboardOrganizationsNewRoute
   '/projects/$projectId': typeof DashboardProjectsProjectIdRouteWithChildren
   '/projects/$projectId/embed': typeof DashboardProjectsProjectIdEmbedRoute
@@ -114,6 +128,8 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/activity': typeof DashboardActivityRoute
+  '/members': typeof DashboardMembersRoute
   '/': typeof DashboardIndexRoute
   '/organizations/new': typeof DashboardOrganizationsNewRoute
   '/projects/$projectId/embed': typeof DashboardProjectsProjectIdEmbedRoute
@@ -129,6 +145,8 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/_dashboard/activity': typeof DashboardActivityRoute
+  '/_dashboard/members': typeof DashboardMembersRoute
   '/_dashboard/': typeof DashboardIndexRoute
   '/_dashboard/organizations/new': typeof DashboardOrganizationsNewRoute
   '/_dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRouteWithChildren
@@ -146,6 +164,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/reset-password'
     | '/signup'
+    | '/activity'
+    | '/members'
     | '/organizations/new'
     | '/projects/$projectId'
     | '/projects/$projectId/embed'
@@ -159,6 +179,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/reset-password'
     | '/signup'
+    | '/activity'
+    | '/members'
     | '/'
     | '/organizations/new'
     | '/projects/$projectId/embed'
@@ -173,6 +195,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/reset-password'
     | '/signup'
+    | '/_dashboard/activity'
+    | '/_dashboard/members'
     | '/_dashboard/'
     | '/_dashboard/organizations/new'
     | '/_dashboard/projects/$projectId'
@@ -249,6 +273,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/_dashboard/activity': {
+      id: '/_dashboard/activity'
+      path: '/activity'
+      fullPath: '/activity'
+      preLoaderRoute: typeof DashboardActivityRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/members': {
+      id: '/_dashboard/members'
+      path: '/members'
+      fullPath: '/members'
+      preLoaderRoute: typeof DashboardMembersRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/_dashboard/organizations/new': {
       id: '/_dashboard/organizations/new'
       path: '/organizations/new'
@@ -307,12 +345,16 @@ const DashboardProjectsProjectIdRouteWithChildren =
   )
 
 interface DashboardRouteChildren {
+  DashboardActivityRoute: typeof DashboardActivityRoute
+  DashboardMembersRoute: typeof DashboardMembersRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
   DashboardOrganizationsNewRoute: typeof DashboardOrganizationsNewRoute
   DashboardProjectsProjectIdRoute: typeof DashboardProjectsProjectIdRouteWithChildren
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardActivityRoute: DashboardActivityRoute,
+  DashboardMembersRoute: DashboardMembersRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardOrganizationsNewRoute: DashboardOrganizationsNewRoute,
   DashboardProjectsProjectIdRoute: DashboardProjectsProjectIdRouteWithChildren,

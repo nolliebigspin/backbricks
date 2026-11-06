@@ -143,5 +143,64 @@
         "description": "Erlaubt ausdrücklich das Lesen und Bearbeiten persönlicher Datensätze sowie das Lesen der Nutzung. Kein Löschen oder Schlüsselverwaltung. Nur an vertrauenswürdige private Einbindungen weitergeben."
       }
     }
+  },
+  "roles": {
+    "owner": "Inhaber",
+    "admin": "Administrator",
+    "member": "Mitglied"
+  },
+  "members": {
+    "total": "{{count}} Teammitglieder",
+    "role": "Rolle",
+    "remove": "Mitglied entfernen",
+    "invite": "Mitglied einladen",
+    "invitations": "Einladungen",
+    "roleHint": "Mitglieder können Projekteinstellungen und Einbindungsdaten ansehen. Administratoren können auch Projekte, Schlüssel, Teammitglieder und Aktivitäten verwalten. Eine Übertragung der Inhaberschaft ist nicht verfügbar.",
+    "resend": "Einladung erneut senden",
+    "cancel": "Einladung zurückziehen",
+    "expired": "Abgelaufen",
+    "status": {
+      "pending": "Ausstehend",
+      "accepted": "Angenommen",
+      "rejected": "Abgelehnt",
+      "canceled": "Zurückgezogen"
+    },
+    "changeTitle": "Diese Rolle ändern?",
+    "changeDescription": "Die neuen Berechtigungen gelten sofort. Ein Team muss mindestens einen Inhaber behalten.",
+    "removeTitle": "Dieses Mitglied entfernen?",
+    "removeDescription": "Diese Person verliert sofort den Zugriff auf diese Organisation. Ihr Konto und der Zugriff auf andere Organisationen bleiben bestehen.",
+    "linkTitle": "Einladungslink teilen",
+    "linkDescription": "E-Mail ist nicht verfügbar. Teile diesen Link privat mit der eingeladenen Person. Er funktioniert nur mit ihrer passenden E-Mail-Adresse und läuft ab.",
+    "copyLink": "Einladungslink kopieren",
+    "copyError": "Kopieren wurde blockiert. Wähle den Einladungslink aus und kopiere ihn manuell."
+  },
+  "activity": {
+    "description": "Verwaltungsaktionen des letzten Jahres. Namen, persönliche Datensätze und geheime Schlüssel werden nie angezeigt.",
+    "empty": "Noch keine Aktivitäten.",
+    "actor": {
+      "user": "Teammitglied",
+      "api_key": "Private Einbindung",
+      "mcp": "Coding-Agent",
+      "system": "Hintergrunddienst"
+    },
+    "actions": {
+      "organizationCreated": "Organisation erstellt",
+      "projectCreated": "Projekt erstellt",
+      "projectUpdated": "Projekteinstellungen geändert",
+      "projectArchived": "Projekt archiviert",
+      "keyCreated": "Schlüssel erstellt",
+      "keyRevoked": "Schlüssel widerrufen",
+      "secretExposed": "Offenlegung eines geheimen Schlüssels blockiert",
+      "invitationCreated": "Einladung erstellt",
+      "invitationResent": "Einladung erneut gesendet",
+      "invitationCanceled": "Einladung zurückgezogen",
+      "memberJoined": "Mitglied beigetreten",
+      "memberRemoved": "Mitglied entfernt",
+      "roleChanged": "Mitgliedsrolle geändert",
+      "featureCreated": "Website-Funktion erstellt",
+      "featureUpdated": "Konfiguration einer Website-Funktion geändert",
+      "featureArchived": "Website-Funktion archiviert",
+      "generic": "Verwaltungsänderung"
+    }
   }
 }
