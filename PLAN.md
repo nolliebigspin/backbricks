@@ -383,14 +383,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Property tests for deterministic ordering/no-op diffs, removed instances/fields and normalized equivalents; no side effects on dry run.
 - **Risks/notes:** §D.8 lacks an explicit per-instance module_version serialization field; settle it in the module/config ADR, not a second hand-written config schema.
 
-### [ ] P1.7d – Apply config atomically and export schemas (est. 6 h)
+### [x] P1.7d – Apply config atomically and export schemas (est. 6 h)
 - **Description:** Add planHash verification and apply under a project-level lock; expose registry-derived JSON Schema and types hook for later CLI use.
 - **Files/packages:** core config apply service, db locking/repositories, server config/schema/types routes.
 - **Depends on:** P1.7c.
 - **Reuses:** Generic mutations, audit/events and same-transaction capabilities.
 - **Acceptance criteria:**
-  - [ ] Missing/expired/stale/tampered plans fail without partial writes; concurrent plans from the same base cannot overwrite changes. Apply requires config:write and config:destructive when needed; session roles map explicitly.
-  - [ ] Disabled/omitted sections cannot silently delete data. Whole-document apply locks and rechecks state, creates revisions/audit/events atomically, and produces no revisions on a no-op.
+  - [x] Missing/expired/stale/tampered plans fail without partial writes; concurrent plans from the same base cannot overwrite changes. Apply requires config:write and config:destructive when needed; session roles map explicitly.
+  - [x] Disabled/omitted sections cannot silently delete data. Whole-document apply locks and rechecks state, creates revisions/audit/events atomically, and produces no revisions on a no-op.
 - **Tests:** Concurrent apply, replay after state change, cross-principal/tenant reuse, injected mid-apply failure and fixture schema/types generation.
 - **Risks/notes:** Recheck canonical plan under the write lock; never trust a client-supplied diff or destructive flag.
 
@@ -581,7 +581,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.7c complete; see ADR-0042 and its task commit. Next: P1.7d (atomic config apply and schema/types exports). M1 remains in progress.
+P1.7d complete; see ADR-0043 and its task commit. Next: P1.8e (private S3 adapter). M1 remains in progress.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 

@@ -52,3 +52,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0040](0040-generic-instance-lifecycle.md) | Generic instance lifecycle | accepted |
 | [0041](0041-revisions-and-config-migrations.md) | Revisions and configuration migrations | accepted |
 | [0042](0042-config-documents-and-bound-plans.md) | Configuration documents and bound plans | accepted |
+| [0043](0043-atomic-config-apply-and-exports.md) | Atomic configuration apply and exports | accepted |

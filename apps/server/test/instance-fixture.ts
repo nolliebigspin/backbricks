@@ -24,6 +24,8 @@ export function instanceCatalog(classify = true, moduleVersion = 1) {
       infrastructure: [],
       configSchema: sampleConfig,
       defaultConfig: () => sampleConfig.parse({}),
+      codegen: (instance) =>
+        `export type Sample_${instance.key.replaceAll('-', '_')} = { title: string };`,
       migrateConfig(fromVersion, input) {
         if (fromVersion !== 1) throw new Error('Unsupported fixture format');
         const old = z.object({ legacyTitle: z.string() }).strict().parse(input);

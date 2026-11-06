@@ -17,8 +17,10 @@ import {
 import {
   instanceCreateSchema,
   instancePatchSchema,
+  instanceReplaceSchema,
   type InstanceCreate,
   type InstancePatch,
+  type InstanceReplace,
 } from './schemas.ts';
 
 /** Registry-driven lifecycle; all writes enlist in the caller's transaction. */
@@ -92,6 +94,25 @@ export function createInstanceService(deps: InstanceDependencies) {
         module,
         previous,
         { config, name: data.name, status: data.status },
+        requestId,
+      );
+    },
+    async replace(
+      tx: TenantTransaction,
+      type: string,
+      key: string,
+      input: InstanceReplace,
+      requestId?: string,
+    ) {
+      const module = await moduleFor(tx, type, 'write');
+      const data = instanceReplaceSchema.parse(input);
+      const previous = await activeInstance(tx, type, key);
+      checkInstanceVersion(previous, data.configVersion);
+      return save(
+        tx,
+        module,
+        previous,
+        { config: validatedConfig(module, data.config), name: data.name, status: data.status },
         requestId,
       );
     },

@@ -54,6 +54,11 @@ export function createServerServices(
   );
   const withTenant = createWithTenant(db, options.moduleRepositories);
   const moduleRuntime = modules.registry.bind(container);
+  const instances = createInstanceService({
+    ...container.core,
+    registry: modules.registry,
+    runtime: moduleRuntime,
+  });
   return Object.freeze({
     container,
     modules,
@@ -62,16 +67,13 @@ export function createServerServices(
     jobs: moduleJobs(modules, moduleRuntime, withTenant),
     withTenant,
     projects: createProjectService(container.core),
-    instances: createInstanceService({
-      ...container.core,
-      registry: modules.registry,
-      runtime: moduleRuntime,
-    }),
+    instances,
     configuration: createConfigurationService({
       ...container.core,
       registry: modules.registry,
       runtime: moduleRuntime,
       appSecret: config.appSecret,
+      instances,
     }),
     queries: createPlatformQueries({ ...container.core, publicUrl: config.publicUrl, modules }),
     keys: createKeyService({ ...container.core, enabledModules: config.modules, scopeCatalog }),

@@ -44,6 +44,12 @@ export const instancePatchSchema = z
   );
 export type InstanceCreate = z.input<typeof instanceCreateSchema>;
 export type InstancePatch = z.infer<typeof instancePatchSchema>;
+export const instanceReplaceSchema = instanceCreateSchema
+  .omit({ key: true })
+  .partial({ name: true, status: true })
+  .required({ config: true })
+  .extend({ configVersion: instanceVersionSchema });
+export type InstanceReplace = z.input<typeof instanceReplaceSchema>;
 
 /** Authorized management projection; config is never included in public metadata. */
 export const instanceResponseSchema = moduleInstanceSchema.extend({

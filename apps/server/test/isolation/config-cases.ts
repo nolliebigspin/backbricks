@@ -9,6 +9,11 @@ export function configurationIsolationCases(f: IsolationFixture): Cases {
   const foreign = `/v1/projects/${f.b1.id}/config`;
   let before: Awaited<ReturnType<typeof f.snapshot>> | undefined;
   return {
+    'config.types': {
+      kind: 'resource',
+      own: { path: `/v1/projects/${f.a1.id}/types?lang=ts`, cookie: f.member.cookie },
+      foreign: { path: `/v1/projects/${f.b1.id}/types?lang=ts`, cookie: f.owner.cookie },
+    },
     'config.read': {
       kind: 'resource',
       own: { path, cookie: f.member.cookie },

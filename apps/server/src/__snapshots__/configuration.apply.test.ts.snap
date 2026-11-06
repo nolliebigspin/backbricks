@@ -1,0 +1,118 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`config apply rejects invalid bindings and atomically serializes revisions, retention, audit and events 1`] = `
+{
+  "$id": "https://backbricks.app/schema/config.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "const": "https://backbricks.app/schema/config.v1.json",
+      "default": "https://backbricks.app/schema/config.v1.json",
+      "type": "string",
+    },
+    "modules": {
+      "additionalProperties": false,
+      "properties": {
+        "samples": {
+          "additionalProperties": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "config": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "additionalProperties": false,
+                "properties": {
+                  "fields": {
+                    "default": [
+                      "email",
+                    ],
+                    "items": {
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "options": {
+                    "additionalProperties": false,
+                    "default": {
+                      "enabled": true,
+                    },
+                    "properties": {
+                      "caption": {
+                        "type": "string",
+                      },
+                      "enabled": {
+                        "type": "boolean",
+                      },
+                    },
+                    "required": [
+                      "enabled",
+                    ],
+                    "type": "object",
+                  },
+                  "title": {
+                    "default": "Default title",
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "title",
+                  "fields",
+                  "options",
+                ],
+                "type": "object",
+              },
+              "configVersion": {
+                "exclusiveMinimum": 0,
+                "maximum": 2147483647,
+                "type": "integer",
+              },
+              "moduleVersion": {
+                "const": 1,
+              },
+              "name": {
+                "maxLength": 120,
+                "minLength": 1,
+                "type": "string",
+              },
+              "status": {
+                "default": "active",
+                "enum": [
+                  "active",
+                  "paused",
+                ],
+                "type": "string",
+              },
+            },
+            "required": [
+              "name",
+              "status",
+              "config",
+              "moduleVersion",
+            ],
+            "type": "object",
+          },
+          "propertyNames": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "maxLength": 63,
+            "minLength": 1,
+            "pattern": "^[a-z0-9][a-z0-9-]*$",
+            "type": "string",
+          },
+          "type": "object",
+        },
+      },
+      "type": "object",
+    },
+    "project": {
+      "type": "string",
+    },
+  },
+  "required": [
+    "$schema",
+    "project",
+    "modules",
+  ],
+  "type": "object",
+}
+`;

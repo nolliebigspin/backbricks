@@ -178,6 +178,8 @@ export {
 } from './configuration/schemas.ts';
 export { planConfiguration } from './configuration/planner.ts';
 export { createConfigurationService, type ConfigurationService } from './configuration/service.ts';
+export { configurationJsonSchema } from './configuration/schema-export.ts';
+export { configApplyResponseSchema } from './configuration/schemas.ts';
 export {
   CONFIG_ACCESS,
   CONFIG_DESTRUCTIVE_SCOPE,

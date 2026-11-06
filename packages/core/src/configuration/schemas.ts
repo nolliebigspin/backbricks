@@ -49,3 +49,10 @@ export const configWriteSchema = z
   .object({ config: configDocumentSchema, planHash: z.string().max(1024).optional() })
   .strict();
 export type ConfigWrite = z.infer<typeof configWriteSchema>;
+export const configApplyResponseSchema = z
+  .object({
+    applied: z.literal(true),
+    changes: z.array(configChangeSchema),
+    warnings: z.array(z.string()),
+  })
+  .strict();
