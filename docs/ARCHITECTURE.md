@@ -132,7 +132,7 @@ Dashboard authentication runtime: [ADR-0026](adr/0026-dashboard-auth-runtime.md)
 1. **Every tenant table** has `organization_id` and, if project-scoped, `project_id`. Exceptions: Better Auth tables and global system tables.
 2. **IDs** are TypeIDs stored as `text` (prefix + UUIDv7 in base32, e.g. `sub_01jc9…`): sortable by time, self-describing in logs, and agents notice immediately when they pass the wrong kind of ID. Generated in the application.
 3. **Module-specific tables** instead of a universal `records` table. User-defined fields live as `jsonb` inside module tables; fixed semantics (rating, moderation status, file status) are real columns with indexes.
-4. **Personal data is hard-deleted** (no soft delete). Soft delete only for configuration objects (projects) where restore makes sense.
+4. **Personal data is hard-deleted** (no soft delete). Configuration objects may be archived. M1 project removal archives configuration and disables access; personal-data erasure is a separate workflow required before M2 release (ADR-0030).
 5. **`expires_at`** on personal records and audit, derived from retention; transient auth/delivery records use bounded expiry (the library's equivalent field where applicable). Active identities/memberships and notification recipients follow their removal/erasure lifecycle rather than arbitrary account expiry. Daily maintenance hard-deletes expired records; lifecycle categories are defined in [ADR-0022](adr/0022-personal-data-lifecycles.md).
 6. **IP addresses are never stored in clear text**, only as `HMAC-SHA256(ip, daily rotating key)` for rate limiting and abuse detection. Implementation and trusted-proxy rules: [ADR-0025](adr/0025-abuse-identity-and-rate-limits.md); `TRUSTED_PROXIES` is empty by default.
 7. **Configuration is versioned** (`config_version`); every change creates a revision. Submissions record the version they were validated against.
@@ -548,7 +548,7 @@ Assumption: an attacker knows the publishable key and every form key and can sen
 9. Quotas/entitlements (cloud): monthly limit, storage limit → `402 quota_exceeded`
 10. Persist + event + usage in one transaction
 
-Origin validation and exact matching live in [`origins.ts`](../packages/core/src/http/origins.ts). Project write payloads use [`project schemas`](../packages/core/src/projects/schemas.ts); settings currently accept only the empty reserved object until typed settings are introduced. Project API routes are still pending P1.5a.
+Origin validation and exact matching live in [`origins.ts`](../packages/core/src/http/origins.ts). Project write payloads use [`project schemas`](../packages/core/src/projects/schemas.ts); settings currently accept only the empty reserved object until typed settings are introduced. Management routes and their permissions live in [`project routes`](../apps/server/src/routes/projects.ts); lifecycle/audit logic lives in the [core service](../packages/core/src/projects/service.ts) (ADR-0030).
 
 **CORS:** public routes reflect `Origin` when it is in `allowed_origins` (if the list is empty: "all", with a warning in the dashboard). Management routes have **no** CORS.
 
@@ -809,7 +809,8 @@ See §B.6 and invariants I1–I3.
 | Erasure (Art. 17 GDPR) | `privacy.deleteSubject` across modules incl. files, audited (without content) |
 | Minimization | IP only as rotating HMAC; user agent only as family; notifications without content by default; no tracking cookies |
 | Consent | `consent` field type stores text version and timestamp |
-| Deleting projects/organizations | Hard, cascading, objects via job; confirmation by typing the name |
+| Removing projects | Configuration archive disables access immediately; separate hard-erasure workflow required before M2 release (ADR-0030). No restore endpoint in M1 |
+| Deleting organizations | Disabled until the complete audited hard-erasure lifecycle exists; hard, cascading, objects via job; confirmation by typing the name |
 | Backups | Deleted data disappears when backup rotation expires (30 days), disclosed in the privacy documentation |
 
 ### F.5 Backup and restore (self-host)

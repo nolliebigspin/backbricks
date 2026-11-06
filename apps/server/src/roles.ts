@@ -6,6 +6,7 @@ import { createServerAuth } from './auth.ts';
 import { findDashboard } from './dashboard.ts';
 import type { Logger } from './logger.ts';
 import { createApiAuthorization } from './middleware/authorization.ts';
+import { registerProjects } from './projects.ts';
 
 /** A started role; `stop` drains it for a graceful shutdown. */
 export type RunningRole = { stop: () => Promise<void> };
@@ -35,7 +36,7 @@ export function startServe(config: Config, log: Logger): RunningRole {
       dashboardDir,
       auth,
     },
-    undefined,
+    (api) => registerProjects(api, database.db),
     createApiAuthorization({ config, db: database.db, auth }),
   );
   const server = Bun.serve({ port: config.port, fetch: app.fetch, development: false });

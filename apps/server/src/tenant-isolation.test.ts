@@ -5,6 +5,7 @@ import { organizationRouteManifest } from '@backbricks/auth';
 import { available, scenario } from '../test/auth-fixture.ts';
 import { apiIsolationCases } from '../test/isolation/api-cases.ts';
 import { authIsolationCases } from '../test/isolation/auth-cases.ts';
+import { projectIsolationCases } from '../test/isolation/project-cases.ts';
 import { prepareIsolationFixture } from '../test/isolation/setup.ts';
 import { assertIsolationCoverage, exerciseIsolation } from '../test/isolation/suite.ts';
 import { managementFixtureRoutes } from '../test/management-fixture.ts';
@@ -25,7 +26,11 @@ test.skipIf(!available)(
             ),
           ...organizationRouteManifest,
         ];
-        const cases = { ...apiIsolationCases(f), ...authIsolationCases(f) };
+        const cases = {
+          ...apiIsolationCases(f),
+          ...authIsolationCases(f),
+          ...projectIsolationCases(f),
+        };
         assertIsolationCoverage(operations, cases);
         const missing = Object.fromEntries(
           Object.entries(cases).filter(([id]) => id !== 'fixture.principal'),
@@ -89,7 +94,7 @@ test.skipIf(!available)(
         if (!entry) throw new Error('Expected collection case');
         const failure = await exerciseIsolation(base, entry, () => f.snapshot(), {
           method: 'GET',
-          path: '/v1/projects',
+          path: '/v1/principal-fixture/projects',
           isolationCase: 'fixture.projects',
         }).catch((error: unknown) => error);
         expect(failure).toBeInstanceOf(Error);

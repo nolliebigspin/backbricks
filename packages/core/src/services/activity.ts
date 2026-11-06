@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { AppError } from '../errors/app-error.ts';
 import { organizationRoleSchema } from '../http/route-policy.ts';
+import type { Principal } from '../identity/principal.ts';
 import type { Ids, TypeId } from '../ids/type-id.ts';
 import { API_KEY_PREFIXES } from '../keys/constants.ts';
 import { scopeNameSchema } from '../keys/protocol.ts';
@@ -152,4 +153,9 @@ export function createEventService({ clock, ids }: Dependencies): EventService {
       return id;
     },
   };
+}
+
+/** Minimal attributable actor projection; never copies session/key credential material. */
+export function principalActor(principal: Principal): Pick<AuditMutation, 'actorType' | 'actorId'> {
+  return { actorType: principal.kind === 'session' ? 'user' : 'api_key', actorId: principal.id };
 }

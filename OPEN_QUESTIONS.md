@@ -97,3 +97,5 @@ Details: `docs/progress/phase-0.md` → "Deviations".
 - **D21 – Management credential precedence:** ADR-0028 selects an explicit Authorization credential ahead of cookies with no fallback; session membership is rechecked and route parents determine project scope. Q9's conservative session-only organization/key-management baseline applies. Production key lookup and audited exposure handling remain P1.4c; the new resolver interface fails closed until wired.
 
 - **D22 – Isolation and cache coverage:** ADR-0029 requires concrete matching probes for registered management operations, inventories Better Auth organization endpoints and disables test caching for live-service state. Dependency/shared-script hashes now invalidate typechecks. No new production endpoint or permission is introduced.
+
+- **D23 – Initial project settings and pagination:** ADR-0030 reserves project settings as a strict empty object until typed feature fields exist and introduces shared keyset pagination with the first real collection route. Q7/Q9 are explicitly approved above; configuration archive is distinct from personal-data erasure.

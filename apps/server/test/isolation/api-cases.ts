@@ -17,7 +17,7 @@ export function apiIsolationCases(f: IsolationFixture): Cases {
     },
     'fixture.projects': {
       kind: 'collection',
-      read: { path: '/v1/projects', cookie: f.owner.cookie },
+      read: { path: '/v1/principal-fixture/projects', cookie: f.owner.cookie },
       present: [f.a1.id, f.a2.id],
       absent: [f.b1.id, f.b2.id],
     },

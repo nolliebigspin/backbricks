@@ -39,3 +39,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0027](0027-organization-policy-and-invitations.md) | Organization policy and invitations | accepted |
 | [0028](0028-management-principals-and-permissions.md) | Management principals and permissions | accepted |
 | [0029](0029-automatic-isolation-coverage.md) | Automatic isolation coverage | accepted |
+| [0030](0030-project-lifecycle-and-management.md) | Project lifecycle and management | accepted |

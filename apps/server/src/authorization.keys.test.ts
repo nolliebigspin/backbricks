@@ -113,9 +113,10 @@ test.skipIf(!available)(
             })
           ).status,
         ).toBe(404);
-        expect((await request('/v1/projects', undefined, owner.cookie, readHeaders)).status).toBe(
-          403,
-        );
+        expect(
+          (await request('/v1/principal-fixture/projects', undefined, owner.cookie, readHeaders))
+            .status,
+        ).toBe(403);
         expect(
           (await request(path, { name: 'No cookie escalation' }, owner.cookie, readHeaders)).status,
         ).toBe(403);

@@ -262,14 +262,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Deliberately omit one route and deliberately un-scope a fixture repository to prove the suite detects both failures; no DB mocks.
 - **Risks/notes:** Every later route task adds cases here before completion. Test runtime inspection guards against a manifest that omits mounted routes. Correct Turbo dependency/shared-script inputs and avoid caching service-unavailable skips; P1.3b verification uses `TURBO_FORCE=true` until this is addressed.
 
-### [ ] P1.5a – Implement projects and origins (est. 4 h)
+### [x] P1.5a – Implement projects and origins (est. 4 h)
 - **Description:** Add project list/create/detail/update/delete behavior and normalized allowed origins under the Q7/Q9 policy.
 - **Files/packages:** core project service/schemas, db repositories, server project routes.
 - **Depends on:** P1.13a, P1.8a; Q7/Q9.
 - **Reuses:** Tenant repositories, route declarations, Zod, audit/events and pagination contract.
 - **Acceptance criteria:**
-  - [ ] Names/slugs/settings and HTTP(S) origins validate; origins have no credentials/path/query or permissive wildcard matching. Empty origin allowlist has the documented meaning.
-  - [ ] Project deletion/archive is explicit and audited; inactive projects reject their keys/public access. Referenced foreign project IDs cannot move records across tenants.
+  - [x] Names/slugs/settings and HTTP(S) origins validate; origins have no credentials/path/query or permissive wildcard matching. Empty origin allowlist has the documented meaning.
+  - [x] Project deletion/archive is explicit and audited; inactive projects reject their keys/public access. Referenced foreign project IDs cannot move records across tenants.
 - **Tests:** Role/isolation matrix, duplicate slug, deceptive origin suffix/ports, deleted-project reads and all mutations' rollback.
 - **Risks/notes:** No personal-data soft deletion by accident; apply the accepted Q7 semantics.
 
@@ -581,11 +581,13 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.1a/b/c, P1.11a, P1.2a/b, P1.3a/b, P1.8a/b/c and P1.13a complete. ADRs 0021–0029 record the implemented boundaries. `bun run check` passes; all six package test tasks rerun uncached, including 65 server tests and 30 real DB tests, with no skips. Key resolution is an interface until P1.4c; complete dashboard flows remain P1.12/P1.13. P1.5a in progress: origin normalization/matching and strict project input/response schemas are implemented with property/boundary tests. No project HTTP routes or archive behavior mounted yet. Q7/Q9 approved explicitly in the execution session; implementing routes and archive next. Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
+P1.1a/b/c, P1.11a, P1.2a/b, P1.3a/b, P1.8a/b/c, P1.13a and P1.5a complete. ADRs 0021–0030 record the implemented boundaries. `bun run check`, build and 4 Playwright smoke tests pass; all package test tasks rerun uncached with no skips (68 server tests, 30 real DB tests). Q7/Q9 are explicitly approved. Production project routes are mounted, audited and covered by isolation cases; archive closes project-bound access. Key resolution remains an interface until P1.4c; complete dashboard flows remain P1.12/P1.13. Next: P1.4a (key primitives/scopes). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 
 **Goal:** The first module end to end. **Estimate:** 9–11 PD.
+
+**Release gate from Q7 / ADR-0030:** Define and implement personal-data hard erasure separately from project configuration archive before the M2 release, including DB records, objects, queued jobs and retained audit lifecycle.
 
 - [ ] P2.1 – `packages/modules/forms`: config schema (field types and rules per §D.8, honeypot, PoW, HTML redirects, `retentionDays`, `identifiesSubject`), templates (contact, quote request, job application, event sign-up), `validateConfigChange` (field removed / type changed = destructive)
 - [ ] P2.2 – Runtime validator: config → Zod; normalization (trim, lowercase email); unknown fields rejected; field errors as problem details

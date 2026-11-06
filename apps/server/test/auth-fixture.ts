@@ -17,6 +17,7 @@ import { createServerAuth } from '../src/auth.ts';
 import type { ApiRoutes } from '../src/http/api-routes.ts';
 import { createLogger } from '../src/logger.ts';
 import { createApiAuthorization } from '../src/middleware/authorization.ts';
+import { registerProjects } from '../src/projects.ts';
 
 export const available = (await postgresAvailable()) && (await mailpitAvailable());
 export const AUTH_TEST_SECRET = 'auth-test-only-not-a-real-secret-000000000000';
@@ -29,6 +30,7 @@ export async function scenario(
       body?: unknown,
       cookie?: string,
       headers?: NonNullable<RequestInit['headers']>,
+      method?: string,
     ) => Promise<Response>;
     db: ReturnType<typeof createDatabase>['db'];
     logs: string[];
@@ -88,7 +90,10 @@ export async function scenario(
             trustedProxies: [],
           }),
         },
-        (api) => apiOptions.configure?.(api, handle.db),
+        (api) => {
+          registerProjects(api, handle.db);
+          apiOptions.configure?.(api, handle.db);
+        },
         createApiAuthorization({
           config,
           db: handle.db,
@@ -114,17 +119,17 @@ export async function scenario(
         await auth?.close();
         mount({ ...result.config, ...values });
       },
-      request: (path, body, cookie, extraHeaders) => {
+      request: (path, body, cookie, extraHeaders, method = body === undefined ? 'GET' : 'POST') => {
         const headers = new Headers(extraHeaders);
-        if (body !== undefined) {
+        if (!['GET', 'HEAD'].includes(method)) {
           if (!headers.has('origin'))
             headers.set('origin', new URL(result.config.publicUrl).origin);
           if (!headers.has('x-backbricks-csrf')) headers.set('x-backbricks-csrf', '1');
-          headers.set('content-type', 'application/json');
+          if (body !== undefined) headers.set('content-type', 'application/json');
         }
         if (cookie) headers.set('cookie', cookie);
         return fetch(`${origin}${path.startsWith('/v1/') ? path : `/api/auth${path}`}`, {
-          method: body === undefined ? 'GET' : 'POST',
+          method,
           headers,
           body: body === undefined ? undefined : JSON.stringify(body),
           redirect: 'manual',

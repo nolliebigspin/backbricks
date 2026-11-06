@@ -2,6 +2,7 @@ import {
   createAuditService,
   createIds,
   principalSchema,
+  principalActor,
   secretKeyIdentitySchema,
   systemClock,
   type SecretKeyIdentity,
@@ -93,8 +94,7 @@ export function managementFixtureRoutes(
           name: c.req.valid('json').name,
         });
         await audit.record(tx, {
-          actorType: context.principal.kind === 'session' ? 'user' : 'api_key',
-          actorId: context.principal.id,
+          ...principalActor(context.principal),
           action: 'fixture.project_updated',
           targetType: 'project',
           targetId: project.id,
@@ -107,7 +107,7 @@ export function managementFixtureRoutes(
   api.register(
     createRoute({
       method: 'get',
-      path: '/v1/projects',
+      path: '/v1/principal-fixture/projects',
       responses: {
         200: {
           description: 'Filtered collection.',

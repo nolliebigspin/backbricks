@@ -12,7 +12,12 @@ import type {
 import type { instanceUpdateSchema, projectUpdateSchema } from '../platform/models.ts';
 
 /** A bounded page query; API-specific cursors are decoded before entering repositories. */
-export type RepositoryPage = { limit: number; before?: { createdAt: Date; id: string } };
+export type RepositoryPage = {
+  limit: number;
+  /** Internal look-ahead for determining nextCursor; never a client-provided limit override. */
+  lookAhead?: boolean;
+  before?: { createdAt: Date; id: string };
+};
 type ProjectChild<T> = Omit<T, 'organizationId' | 'projectId'>;
 
 export interface ProjectRepository {

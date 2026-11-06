@@ -51,7 +51,9 @@ test.skipIf(!available)(
           (await request(`/v1/organizations/${foreignId}/audit-fixture`, undefined, owner.cookie))
             .status,
         ).toBe(404);
-        const list = await (await request('/v1/projects', undefined, owner.cookie)).text();
+        const list = await (
+          await request('/v1/principal-fixture/projects', undefined, owner.cookie)
+        ).text();
         expect(list).toContain(first.id);
         expect(list).toContain(sibling.id);
         expect(list).not.toContain(foreign.id);

@@ -34,7 +34,14 @@ export type {
 } from './tenancy/tenant-context.ts';
 export * from './tenancy/repositories.ts';
 export * from './platform/models.ts';
-export { MAX_PAGE_SIZE } from './http/pagination.ts';
+export {
+  MAX_PAGE_SIZE,
+  DEFAULT_PAGE_SIZE,
+  pageQuerySchema,
+  repositoryPage,
+  encodePageCursor,
+  pageResult,
+} from './http/pagination.ts';
 export { AUTH_BASE_PATH } from './http/auth-path.ts';
 export { API_KEY_PREFIXES } from './keys/constants.ts';
 export { API_KEY_TOKEN_LENGTH, scopeNameSchema, secretKeyTokenSchema } from './keys/protocol.ts';
@@ -82,6 +89,7 @@ export {
 export { escapeHtml, renderAuthMail, type AuthMailInput } from './mail/templates.ts';
 export { expiresAfterDays, MILLISECONDS_PER_DAY } from './time/retention.ts';
 export {
+  principalActor,
   activityMetadataSchema,
   AUDIT_RETENTION_DAYS,
   EVENT_RETENTION_DAYS,
@@ -142,3 +150,5 @@ export {
   type ProjectCreate,
   type ProjectPatch,
 } from './projects/schemas.ts';
+
+export { createProjectService, type ProjectService } from './projects/service.ts';

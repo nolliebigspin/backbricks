@@ -26,7 +26,7 @@ export function createRepositoryScope(context: TenantContext, assertActive: () =
       if (!Number.isInteger(page.limit) || page.limit < 1 || page.limit > MAX_PAGE_SIZE) {
         throw new Error('Repository pages must contain between 1 and 100 records.');
       }
-      return page.limit;
+      return page.limit + (page.lookAhead ? 1 : 0);
     },
   };
 }
