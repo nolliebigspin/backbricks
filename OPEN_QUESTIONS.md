@@ -1,6 +1,6 @@
 # Open questions
 
-Decisions the maintainer needs to make, from the P0 planning run (2026-11-04). Answer inline under each question. Each lists a recommendation and the latest task by which the answer is needed. Later runs add questions here; execution runs add their own choices under "Decided, please confirm".
+Decisions for the maintainer, started in P0 planning (2026-11-04), extended for P1 on 2026-11-06. Answer inline under each question. Each lists a recommendation and the latest task by which the answer is needed. Recommendations are not approvals. Execution runs add invariant-preserving implementation decisions under "Decided, please confirm".
 
 ## Open
 
@@ -28,6 +28,38 @@ Decisions the maintainer needs to make, from the P0 planning run (2026-11-04). A
 - **Needed by:** start of P0.
 - **Answer (2026-11-05):** Accepted: DEV-1, DEV-2, DEV-3, DEV-4, DEV-5, DEV-7.
 
+## P1 planning: open decisions
+
+### Q5 – Accept the earlier admin client and the M1 module test boundary?
+- **Context:** DEV-8 avoids hand-written dashboard fetch/types by bringing `sdk/admin` forward from P5.2. DEV-9 reconciles M1's "no domain modules" with registry/instance/subset acceptance. The MIT SDK may import generated API-contract types, but no AGPL runtime code. The declared `/admin` export also needs a specific architecture-rule fixture because the current rule permits only root `index.ts` entries.
+- **Recommendation:** Accept DEV-8/DEV-9. Generate the admin client in P1.11b, keep the browser SDK root dependency-free, and test generic module behavior with synthetic definitions that are never mounted in production. Existing domain infrastructure declarations remain the single source until their full definitions land in P2–P4. Metadata distinguishes declared/shipped modules from working APIs; real-domain subset proofs follow each module's milestone. Do not fill the contract with fake production domain schemas.
+- **Needed by:** P1.6a (fixture/contract boundary); P1.11b (admin export).
+- **Answer:** Pending.
+
+### Q6 – How should sign-up and missing SMTP work before the M6 setup wizard?
+- **Context:** M1 must demonstrate sign-up, while self-host defaults are invite-only and the first-admin setup arrives in P6. SMTP is optional, with a promised copyable invitation fallback, but verification/reset cannot expose bearer tokens through anonymous responses. Current config has no `SIGNUP_POLICY` setting yet.
+- **Recommendation:** Add injected `SIGNUP_POLICY=open|invite_only`, default `invite_only`; explicitly select `open` for the M1 dev/E2E environment with Mailpit and document that production bootstrap is not finished until P6. Require verification before open-signup accounts gain platform access. Without SMTP, offer copyable invitations only to authenticated owner/admin sessions, never reset/verification links to anonymous callers. Define invitation acceptance for a new account as a constrained invite-bound signup flow, not general open registration; prove matching identity/token checks. If no verified delivery method exists, reset/verification-dependent actions fail clearly rather than silently disabling verification. Existing authenticated members can continue working without SMTP.
+- **Needed by:** P1.8b and P1.1b; permission to keep M1 bootstrap explicitly development-only.
+- **Answer:** Pending.
+
+### Q7 – Is project DELETE an archive or irreversible erasure?
+- **Context:** P1.5 specifies soft-deleted projects and §B.1 allows soft deletion of configuration, but §F.4 says project/organization deletion is hard and cascading. Soft deletion must not become indefinite retention of personal records. Raw Better Auth organization deletion is also an exposed route unless explicitly disabled.
+- **Recommendation:** Treat project removal in M1 as an explicit archive of configuration, immediately disabling keys/public access, without claiming personal-data erasure. Keep module-instance configuration deletion distinct from personal-record deletion and require destructive permission where it can affect data. Disable organization deletion/ownership-transfer endpoints until their complete audited lifecycle is implemented. Before M2 release, define the separate hard-erasure workflow (DB, objects, jobs and audit retention); record the decision in an ADR and update the affected architecture/API wording together. If the maintainer instead wants DELETE to mean hard erasure in M1, replace P1.5a's archive behavior and re-estimate it before implementation.
+- **Needed by:** P1.2b (constraints/cascades), P1.1c/P1.5a (route exposure and semantics).
+- **Answer:** Pending. Any incomplete erasure path must remain inaccessible, including through raw library routes.
+
+### Q8 – Clarify personal-data expiry for platform/auth records?
+- **Context:** I11 says every personal-data record has `expires_at`, while generated auth identities/memberships and persistent notification recipients have different lifecycles. §B.3 audit rows have personal `actor_label` but no expiry; notification recipients and cached idempotency responses also need a retention decision. Queued verification/reset/invitation emails can contain recipients and bearer links. Better Auth table exceptions in §B.1 concern tenancy, not an explicit I11 exception.
+- **Recommendation:** Omit emails and user-entered key names from audit labels; use opaque actor IDs/key kind/display prefix and keep the stated one-year audit retention with indexed expiry. Actor IDs remain potentially personal, even without a readable label. Give transient idempotency/verification/replay records and completed mail jobs bounded expiry; minimize payloads and purge failed jobs containing tokens at a defined bound. Add `organization_id` to project-scoped idempotency and enforce parent consistency. For active auth identities/memberships and recipient configuration, approve an explicit lifecycle clarification to I11 (retained while needed, hard-deleted on removal/account erasure; expiring sessions/invitations remain bounded), rather than silently inventing an exception or expiring active user accounts. Define each category in the ADR before schema generation. Do not retain bearer secrets in general outbox/audit payloads; use a restricted expiring delivery mechanism.
+- **Needed by:** P1.2a/P1.2b; P1.10b/c applies the same decision to queued mail/cleanup.
+- **Answer:** Pending. This touches an invariant and needs explicit maintainer approval before the proposed lifecycle exception can be implemented. Alternatives must satisfy the unchanged I11 literally.
+
+### Q9 – Confirm the M1 management permission matrix?
+- **Context:** §D.1 defines project-bound key scopes, but project list/create/delete permissions are not explicit. §D.2 marks keys session-only while §D.8 promises CLI `keys list`; that is a future contract conflict, not a reason to accidentally allow key creation. Integration/usage reads and member/activity data also need explicit policy.
+- **Recommendation:** Organization/member/activity management and organization-wide project listing/creation/deletion stay session-only (owner/admin mutations, member reads only where §E.4 allows). Keys can read their bound project's safe integration metadata with `integration:read`, change approved bound-project settings/origins with `project:write`, and access usage aggregates with `stats:read`; no cross-project enumeration or project creation. Keep all key-management endpoints session-only in M1 and leave CLI `keys list` for an explicit scope decision in P5 (do not silently add it to the agent preset). Config reads/plans use `config:read`; writes need `config:write`, and destructive changes additionally need `config:destructive`. Sessions use owner/admin for configuration/key changes, with normal member activity access per the accepted role matrix. API handlers, OpenAPI metadata and tests derive from one policy catalog.
+- **Needed by:** P1.3b/P1.4a, before project/key routes.
+- **Answer:** Pending.
+
 ## Decided in planning, please confirm
 
 - **D0 – TypeScript:** stay on TypeScript 7 if it works; TypeScript 6.0.3 is an acceptable fallback (maintainer guidance in the planning session). The decision rule in `PLAN.md` applies: tool-local fallback first, repo-wide TS 6 only as a last resort, recorded in ADR-0020.
@@ -48,3 +80,7 @@ Details: `docs/progress/phase-0.md` → "Deviations".
 - **D10 – Integration tests skip locally when the compose services are down and fail in CI** (`CI=true`), so `bun run check` and pre-push work without Docker, while CI always runs them.
 - **D11 – `AppError` takes its HTTP status from the code catalog** (one status per code); AGENTS.md §5 is updated.
 - **D12 – JSON logs only** (no `pino-pretty` dependency); pipe through `bunx pino-pretty` locally.
+
+### Agreed for sequential Claude/Codex handoffs (2026-11-06)
+
+- **D13 – One checkout, one active agent:** the maintainer assigns work to either Claude or Codex sequentially. Use the existing checkout and feature branch; separate worktrees and concurrent-agent coordination are unnecessary. Inspect status/diff and the first unticked plan task at handoff; preserve unfinished work and record its tests/next step in the plan's execution notes. This reflects the maintainer's instruction in the planning conversation, not a pending permission request.

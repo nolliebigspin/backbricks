@@ -1,7 +1,7 @@
 # PLAN – Backbricks
 
 > The only task list. Milestones, scope and exit criteria: [`docs/MILESTONES.md`](docs/MILESTONES.md). Decisions for the maintainer: [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md). Key decisions: [`docs/adr/`](docs/adr/). How phases are planned and executed: `AGENTS.md` §9.
-> **State:** P0 done (report: [`docs/progress/phase-0.md`](docs/progress/phase-0.md)). P1–P6 and C1–C3 are stubs with task IDs; refine each phase into tasks in the format below before executing it.
+> **State:** P0 done (report: [`docs/progress/phase-0.md`](docs/progress/phase-0.md)). P1 planned on 2026-11-06; resolve its decision gates in `OPEN_QUESTIONS.md` before the affected tasks. P2–P6 and C1–C3 remain stubs.
 
 ## Task format
 
@@ -23,7 +23,7 @@ Each phase ends with a **Phase acceptance** checklist: the milestone's exit crit
 
 ## Overview
 
-- **Total estimate:** P0 **47 h ≈ 5.9 PD** (detailed). P1–P6 use the MILESTONES.md ranges until refined: 53–68 PD. **OSS track ≈ 59–74 PD.** Cloud track (C1–C3) **15–21 PD**.
+- **Total estimate:** P0 **47 h ≈ 5.9 PD**; P1 **182 h ≈ 22.8 PD**, plus a **36 h (~20%) reserve**, giving **218 h ≈ 27.3 PD** as the planning envelope. P2–P6 retain their milestone ranges (**41–53 PD**). **OSS track ≈ 70–82 PD before the P1 reserve, 74–86 PD including it.** Cloud track (C1–C3): **15–21 PD**. P1's detailed estimate is a proposed revision to its original 12–15 PD allowance, not an approved budget increase or scope change.
 - P0 is about 1 PD over the planned 4–5 PD. The extra comes from the library spike, the Garage init (the Garage image has no shell) and the Docker setup for Bun's isolated linker. DEV-4 and DEV-7 keep P1 work out of P0.
 - **Milestones:** see [`docs/MILESTONES.md`](docs/MILESTONES.md) (M0–M6, C1–C3). Phase P*n* → milestone M*n*.
 - **P0 execution order** (IDs unchanged): P0.1 → P0.2 → P0.3a → P0.3b → **P0.9a → P0.9b** → P0.4 → P0.6 → P0.5a → P0.5b → P0.7 → P0.8a → P0.8b. The spike runs early because it needs the compose services (Postgres, Garage), and its findings feed P0.2, P0.5 and P0.6.
@@ -40,7 +40,7 @@ Each phase ends with a **Phase acceptance** checklist: the milestone's exit crit
 
 ### Version list
 
-Checked 2026-11-04 with `npm view <pkg> version` / `dist-tags` and the Docker Hub API. Pin exactly when adding.
+P0 versions checked 2026-11-04. New P1 dependencies rechecked 2026-11-06 with `npm view <pkg> version` / `dist-tags`; changed candidates are identified below. Pin exactly when adding. A newer candidate is not evidence of Bun compatibility: repeat the relevant ADR-0020 smoke checks before adopting it. Existing installed dependencies stay pinned unless the task needs an upgrade.
 
 | Area | Package | Version | Bun-compatible | Notes / fallback |
 |---|---|---|---|---|
@@ -65,21 +65,22 @@ Checked 2026-11-04 with `npm view <pkg> version` / `dist-tags` and the Docker Hu
 | | @tanstack/react-query | 5.105.3 | yes | |
 | | i18next / react-i18next | 26.7.1 / 17.1.12 | yes | |
 | | tailwindcss / @tailwindcss/vite | 4.3.4 | yes | in repo |
-| | react-hook-form / @hookform/resolvers | 7.91.0 / 7.0.2 | yes | P1.12 |
+| | react-hook-form / @hookform/resolvers | 7.91.0 / 7.0.3 | verify together in P1.12a | Resolvers patch updated in the 2026-11-06 check |
 | Tests | @playwright/test | 1.64.1 | Node via mise | |
 | | fast-check | 4.10.2 | yes | |
 | | happy-dom / @happy-dom/global-registrator | 21.0.4 | yes | in repo |
 | | @testing-library/react | 16.3.3 | yes | in repo |
-| Spiked in P0.9, used later | better-auth / `auth` CLI | 1.7.17 / 1.7.16 | yes, with notes (ADR-0020) | CLI via `bun run auth` (`bun auth` is reserved); generated schema needs `drizzle-orm/_relations` import with Drizzle 1.0 |
-| | pg-boss | 12.38.0 | yes (ADR-0020) | `fromDrizzle(tx, sql)` enqueues inside Drizzle transactions |
-| | @aws-sdk/client-s3 / s3-request-presigner | 3.1161.0 | yes, with setting (ADR-0020) | Garage enforces signed length/type; needs `requestChecksumCalculation: 'WHEN_REQUIRED'` |
+| Spiked in P0.9, used later | better-auth / `auth` CLI / @better-auth/drizzle-adapter | 1.7.18 / 1.7.18 / 1.7.18 | P1.1a must verify this patch | Current P1 targets; P0 spike used 1.7.17 / 1.7.16. Match runtime, adapter and CLI; inspect pinned exports rather than copying newer docs. CLI via `bun run auth`; deterministic schema-generation normalization if the relations import still needs it |
+| | pg-boss | 12.38.1 | P1.10a must verify this patch | P0 used 12.38.0; recheck `fromDrizzle(tx, sql)` commit/rollback and shutdown |
+| | @aws-sdk/client-s3 / @aws-sdk/s3-request-presigner | 3.1163.0 (P1 target) | paired upgrade verified in P1.8e | client-s3 3.1161.0 already installed at root; latest of both is 3.1163.0. Align versions when adding presigner; no unrelated upgrade. Preserve checksum settings and signed length/type tests from ADR-0020 |
 | | altcha-lib | 2.8.0 | yes (ADR-0020) | v2 API with `altcha-lib/algorithms/sha` |
 | | @modelcontextprotocol/sdk | 1.32.2 | yes, Bun and Node 24 (ADR-0020) | must also run on Node ≥ 20 (I18) |
-| | nodemailer | 10.3.1 | to verify (P1.8) | |
+| | nodemailer / @types/nodemailer | 10.3.1 / 8.0.2 | to verify (P1.8b) | Types' major differs from runtime; verify the used SMTP API with typecheck and Mailpit |
 | | file-type | 22.3.0 | to verify (P3.4) | |
 | | @hono/zod-openapi | 1.6.3 | yes | peer zod ^4, hono ≥4.10 |
 | | openapi-typescript | 7.13.0 | yes, with fallback (ADR-0020) | fails on TS 7; works with `typescript@5.9.3` local to `api-contract` |
-| | openapi-fetch | 0.17.0 | yes | |
+| | openapi-fetch | 0.17.0 | to verify in P1.11b | Separate admin export keeps this dependency out of the browser SDK entry point |
+| API comparison | oasdiff | 1.35.0 | native binary | Latest GitHub release checked 2026-11-06; add exact tool pin only in `mise.toml` in P1.11c, use local CLI in CI; no hosted spec upload |
 | Images | postgres | 18.6-alpine | – | |
 | | dxflrs/garage | v2.5.0 | – | `FROM scratch`, no shell → init via Bun script |
 | | axllent/mailpit | v1.33.0 | – | |
@@ -96,7 +97,10 @@ Checked 2026-11-04 with `npm view <pkg> version` / `dist-tags` and the Docker Hu
 - [x] **DEV-5: Env access is banned with `node/no-process-env` and `no-restricted-properties` (`Bun.env`, `import.meta.env` outside apps/web).** The originally planned `no-restricted-imports` can't catch property access. Overrides: `packages/core/src/config/**`, `scripts/**`, `*.config.ts`. *Recommendation:* accept.
 - [ ] **DEV-6 (only if triggered): repo-wide TypeScript 6.0.3.** Step 3 of the TypeScript 7 decision rule. Changes key decision #2, recorded in ADR-0020 with the doc updates listed above.
 - [x] **DEV-7: No `setup` role stub in P0.** The first-run setup arrives with P6.2; a stub that only prints "not implemented" is dead code (AGENTS.md golden rule 6). P0 ships `serve | worker | all | migrate`. The P0 worker connects to the DB, logs ready, idles and shuts down cleanly (pg-boss comes in P1.10). *Recommendation:* accept.
-- [ ] **DEV-8 (affects P1; decide when planning P1): Generate the admin client in P1.11.** The P1.12 dashboard shell needs a typed management client, but `@backbricks/sdk/admin` only arrives in P5.2. Without a change, P1.12 would hand-write fetch calls or types (against AGENTS.md §2.2). Proposal: generate the `openapi-fetch` client together with the contract in P1.11; P5.2 then only packages and documents it.
+- [ ] **DEV-8: Bring the admin client forward to P1.11b.** Generate contract types in `api-contract`; the MIT `sdk/admin` entry point imports them as types only and wraps `openapi-fetch`. P5.2 finishes packaging/documentation. Add a specific architecture-rule fixture for this declared public subpath; do not relax deep-import rules generally. No server/auth runtime imports in the dashboard or SDK. *Impact:* §D.7, P1.12, P5.2; **Q5**.
+- [ ] **DEV-9: Test the M1 module framework with test-only modules.** There are no domain modules in M1, yet P1.6 asks for single-module boots. Exercise full definitions and all capability/infrastructure combinations with synthetic fixtures; retain the existing domain infrastructure declarations once, and replace them with full definitions in P2–P4. Do not invent production forms/upload/review schemas to fill the contract. Clearly distinguish shipped descriptors from operational modules in metadata. Real single-module acceptance is added as each domain module lands. *Impact:* §C.7, P1.6, P2–P4; **Q5**.
+- [ ] **DEV-10: Make the auth/schema/transaction boundary explicit.** Generated Better Auth tables are owned by `packages/db/src/schema`; `packages/auth` receives the database/schema and core services through its factory, with no db→auth runtime dependency. P1.1a must prove an integration that commits administrative auth changes and audit in one transaction, including raw plugin endpoints, before selecting it. Hooks alone are not proof of I12. Record the proven choice in a new ADR; no invariant waiver. *Impact:* §B.3, §F.6; P1.1a/P1.2a.
+- [ ] **DEV-11: Resolve privacy and deletion gaps before schema/API implementation.** §B.3's audit labels, recipients and cached idempotency responses do not all have explicit expiry; the idempotency table lacks `organization_id` despite I1. §F.4's hard deletion differs from P1.5's soft project deletion. Propose tenant/expiry constraints, minimized audit labels, and separate archive vs. erasure semantics; do not copy the SQL spec literally. *Impact:* §B.3, §F.4, I1/I11; **Q7/Q8**. Architecture text changes only with the accepted decision/ADR during execution.
 
 ## Phase P0 – Foundation (M0) · done
 
@@ -115,25 +119,468 @@ All tasks are done; the task details are in the git history of this file, the re
 - [x] P0.7 – Dashboard skeleton
 - [x] P0.8a – Production Dockerfile
 - [x] P0.8b – CI completion and Playwright scaffold
-- [ ] **Open:** CI green on a PR against `main` (needs a push by the maintainer)
+- [x] CI green on a PR against `main`: [PR #4](https://github.com/nolliebigspin/backbricks/pull/4), merged 2026-11-06; quality, tests, E2E, image and DCO checks succeeded (rechecked during P1 planning).
 
-## Phase P1 – Platform Core (M1) · stub
+## Phase P1 – Platform Core (M1) · planned 2026-11-06
 
-**Goal:** A multi-tenant platform with every contract in place, no domain modules yet. **Estimate:** 12–15 PD. Decide DEV-8 when planning.
+**Goal:** A multi-tenant platform with all M1 contracts and owner workflows, no domain modules. **39 tasks, 182 h ≈ 22.8 PD; reserve 36 h; envelope 218 h ≈ 27.3 PD.** Original allowance: 12–15 PD. This detailed estimate includes tests and task review; the reserve covers auth/transaction and RC/tooling uncertainty. Estimates assume Docker is running and P0's pinned tools are installed. At 15–20 h/week, base effort is roughly 9–12 weeks, or 11–15 weeks including reserve; agents work sequentially.
 
-- [ ] P1.1 – Better Auth in `packages/auth`: email/password, email verification, password reset, organization plugin with roles `owner/admin/member`, invitations via the mailer; mounted at `/api/auth/*`; cookie flags per ARCHITECTURE §F.1; Better Auth tables committed in the migration history. ADR-0020: generate with `bun run auth generate`, rewrite the `relations` import to `drizzle-orm/_relations`, set `telemetry: { enabled: false }`
-- [ ] P1.2 – Core schema per §B.3 (without module tables) incl. audit trigger; generate and review the migration; replace the core SQL in §B.3 with a link to the schema
-- [ ] P1.3 – `TenantContext` + auth middleware: principal from session, secret key or publishable key; `requireRole` / `requireScope`; route declaration requirement (I3) with test
-- [ ] P1.4 – API keys: generation (`bb_pk_` / `bb_sk_` + 32 chars base62 from CSPRNG), hash storage, display prefix, scopes and presets per §D.1, revocation, throttled `last_used_at`, secret-key exposure detection (I6)
-- [ ] P1.5 – Projects API (CRUD, validated `allowed_origins`, soft delete) and organization endpoints for the dashboard
-- [ ] P1.6 – Module contract `ModuleDefinition` + `defineRegistry` (checks per §C.2), capability mechanism (`requires`/`optional`), `infrastructure` declarations, module enablement via `BACKBRICKS_MODULES` with startup validation, `module_not_enabled` responses and `GET /v1/meta` (§C.7), mount conventions for public/admin routes; tests that boot the app with every single-module subset
-- [ ] P1.7 – Generic instance service + routes: CRUD with config validation, revisions, rollback, audit, event; config-as-code `GET/PUT /v1/projects/{id}/config` with `dryRun`, diff, destructive-change detection (`validateConfigChange`) and `planHash`; JSON Schema export
-- [ ] P1.8 – Services and adapters: AuditService, EventService (outbox), Mailer (SMTP, TS templates with escaping), `StorageAdapter` + S3 adapter (presign PUT with signed length/type, presign GET with disposition, HEAD, COPY, DELETE, stream; separate internal and browser-facing endpoints, see phase-0 report), RateLimiter (Postgres + memory), UsageMeter, Entitlements (`unlimited`), Clock, Ids. ADR-0020: S3 client with `requestChecksumCalculation: 'WHEN_REQUIRED'`
-- [ ] P1.9 – AbuseGuard pipeline per §D.5: body limits, rate limits, origin check, honeypot, PoW (ALTCHA protocol via `altcha-lib`, replay protection), heuristics hooks, quota hook; `GET /v1/public/challenge`; CORS for public routes
-- [ ] P1.10 – Worker: pg-boss setup, job registry from modules, outbox dispatcher, cron jobs (PoW replay, idempotency and rate-limit cleanup), graceful shutdown. ADR-0020: `fromDrizzle(tx, sql)` for transactional enqueue
-- [ ] P1.11 – OpenAPI pipeline: `@hono/zod-openapi`, `/v1/openapi.json`, export to `packages/api-contract`, TS types via `openapi-typescript`, `bun run api:check` drift check in CI, breaking-change check (`oasdiff`). ADR-0020: `typescript@5.9.3` as devDependency of `api-contract`
-- [ ] P1.12 – Dashboard shell: login, sign-up, verification, password reset, accept invitation; org and project switcher; navigation from the web module registry; pages: projects, project settings (name, domains), Embed (create key with preset / reveal once / revoke), members (invite, roles), activity log
-- [ ] P1.13 – Tenant isolation suite: fixtures 2 orgs × 2 projects × roles; automatic iteration over all registered management routes (foreign credentials → 404); part of `bun run test`
+**Execution:** Tasks appear in dependency order, deliberately retaining the original P1.1–P1.13 IDs with suffixes. Complete them top to bottom. Resolve Q5–Q9 by their stated gates; P1.1a can investigate before those answers. Refer to ARCHITECTURE §B/§C/§D/§E/§F and ADRs 0005–0014, 0019, 0020. Paths below describe intended owners, not files that already exist.
+
+**Sequential handoff:** The maintainer assigns either Claude or Codex; they use the same checkout and feature branch, never simultaneously. On entry inspect `git status`/`git diff`, read decisions and the first unticked task. Leave a short handoff in this phase's execution notes when stopping mid-task (task ID, changes, commands/results, next step); do not tick incomplete work. Human review precedes signed-off commits (AGENTS §8). Do not push or open a PR without instructions. No worktrees, agent coordinator or second task tracker are needed.
+
+### [ ] P1.1a – Prove the auth, schema and audit integration (est. 4 h)
+- **Description:** Inspect the pinned Better Auth adapter/organization implementation, enumerate exposed tenant endpoints, and run a disposable Postgres spike of member/invitation mutation + audit rollback. Select the boundary in DEV-10, including caller identity and connection ownership.
+- **Files/packages:** proposed ADR in `docs/adr/`, `OPEN_QUESTIONS.md`; throwaway spike outside production source.
+- **Depends on:** P0 complete; real Postgres available.
+- **Reuses:** ADR-0020, `createDatabase`, `createWithTenant`, migration test fixtures.
+- **Acceptance criteria:**
+  - [ ] Reproducible commands prove both successful atomic commit and rollback when audit fails; direct plugin endpoints cannot bypass the chosen mechanism.
+  - [ ] ADR defines schema ownership, transaction propagation, auth-table exception to scoped repositories, and endpoint coverage. If I12 cannot be met, stop dependent auth work and present options; do not approve an after-commit audit workaround.
+- **Tests:** Real DB spike for member role change, invitation acceptance and org creation; recheck Better Auth/CLI patch and generated relations import.
+- **Risks/notes:** Time-box discovery. Public docs describe organization hooks but do not establish our same-transaction guarantee; unresolved findings get a new bounded task, not an assumed API.
+
+### [ ] P1.11a – Establish declared OpenAPI routes (est. 4 h)
+- **Description:** Add OpenAPI routing and one route-registration contract carrying credential policy, role/scope requirements, body limit and isolation fixture metadata. Keep business policies in core and HTTP wiring in server.
+- **Files/packages:** `packages/core/src/http/`, `apps/server/src/routes/`, app/context/error wiring.
+- **Depends on:** P1.1a endpoint inventory.
+- **Reuses:** `createApp`, `AppError` catalog, request context, health/dashboard routing.
+- **Acceptance criteria:**
+  - [ ] The first management route must declare access policy; raw registrations are detected by a coverage test, not silently omitted from the manifest.
+  - [ ] Inputs use Zod, responses have explicit public/management shapes, and `/v1/openapi.json` excludes secrets and internal schema details. Document narrow exemptions for health/auth/static routes.
+- **Tests:** Deliberately undeclared route fails; validation/problem responses, body limits and SPA/API separation remain correct.
+- **Risks/notes:** ADR-0005; keep library-specific router types at the HTTP boundary. P1.11b/c finish codegen and CI, not route conversion.
+
+### [ ] P1.2a – Generate and migrate the auth schema (est. 4 h)
+- **Description:** Generate Better Auth tables for the selected configuration into db-owned schema and start the single migration history. Use a schema-generation config that does not import its own output or connect at import time.
+- **Files/packages:** `packages/db/src/schema/`, `packages/db/drizzle.config.ts`, migrations, auth generation config/script.
+- **Depends on:** P1.1a; Q8 privacy boundaries.
+- **Reuses:** P0 migration runner/advisory lock, package exports, exact version list.
+- **Acceptance criteria:**
+  - [ ] `bun run auth generate` through a package script plus deterministic normalization reproduces the schema; never manually edit generated output. Preserve required relations imports for the selected Drizzle version.
+  - [ ] Clean migrations and no-op reruns pass; db never imports auth runtime. Required auth tables/columns, indexes and expiry fields are reviewed.
+- **Tests:** Auth schema generation repeatability; real migration concurrency and startup schema smoke tests.
+- **Risks/notes:** DEV-10; inspect current package exports. Root TS 7 stays; codegen fallback is local only.
+
+### [ ] P1.2b – Migrate the platform schema and constraints (est. 6 h)
+- **Description:** Implement §B.3 core/helper tables without domain tables, resolving DEV-11 before copying the SQL. Add tenant-consistent foreign keys, unique constraints, retention columns and the append-only audit trigger.
+- **Files/packages:** `packages/db/src/schema/`, migrations; link implemented core tables from ARCHITECTURE §B.3.
+- **Depends on:** P1.2a; Q7/Q8 decisions.
+- **Reuses:** IDs in core, generated auth organization/user references, migration runner.
+- **Acceptance criteria:**
+  - [ ] Projects, keys, instances/revisions, events, audit, notification rules, usage and technical tables exist; project-scoped idempotency also carries `organization_id`. Global tables are explicitly classified.
+  - [ ] Cross-org parent/child references fail at the DB boundary; audit update/delete fails except the bounded purge path; privacy expiry/index choices match the accepted decision.
+- **Tests:** Real DB constraints, cascade behavior, append-only protection, clean migration and second-run no-op.
+- **Risks/notes:** Notification CRUD belongs to P2.6. No forms/files/reviews tables, silent audit-retention exception or speculative cloud tables.
+
+### [ ] P1.3a – Implement tenant-bound repositories (est. 6 h)
+- **Description:** Extend core tenancy contracts with scoped repository interfaces and an opaque transaction identity; implement them in db. Domain consumers never receive an unrestricted Drizzle handle. Define module repository/capability transaction extension without importing db into core/modules.
+- **Files/packages:** `packages/core/src/tenancy/`, `packages/db/src/with-tenant.ts`, `packages/db/src/repositories/`, architecture fixtures.
+- **Depends on:** P1.2b, P1.1a boundary decision.
+- **Reuses:** `TenantContext`, `WithTenant`, `createWithTenant`, parameterized `set_config`.
+- **Acceptance criteria:**
+  - [ ] Every tenant operation scopes organization and optional project, rejects mismatched parents and returns not-found for foreign resource lookup.
+  - [ ] Audit/events/capabilities can share the same transaction; a negative architecture fixture rejects direct tenant-table imports outside their repositories. Document the narrow auth and maintenance boundaries.
+- **Tests:** Real transactions across 2 orgs × 2 projects; empty/reused context, rollback and transaction-local setting isolation; capability fixture writes roll back together.
+- **Risks/notes:** I1–I3/I13. RLS remains deferred; transaction settings alone do not scope a SQL query.
+
+### [ ] P1.8a – Add transactional audit and events (est. 4 h)
+- **Description:** Add core AuditService/EventService and db implementations that require the caller's transaction. Restrict audit diffs and event payloads to safe metadata.
+- **Files/packages:** core service contracts, db repositories, server dependency wiring.
+- **Depends on:** P1.3a.
+- **Reuses:** Clock, Ids, tenant repositories, append-only trigger, redaction utilities.
+- **Acceptance criteria:**
+  - [ ] Mutation, audit and outbox insert commit or roll back together; neither service silently creates a second transaction.
+  - [ ] Actor/request/tenant metadata is recorded without tokens, submission content or unapproved personal labels; unknown errors do not serialize input values.
+- **Tests:** Force audit/outbox failure and assert no mutation survives; malicious config/key payloads never enter audit diffs or logs.
+- **Risks/notes:** I4/I11/I12; secret exposure uses a committed security-event transaction before returning the rejection.
+
+### [ ] P1.8b – Add the SMTP mailer and safe templates (est. 4 h)
+- **Description:** Define mailer contracts, SMTP implementation and verification/reset/invitation/exposure templates; make SMTP absence an explicit capability with the Q6 behavior.
+- **Files/packages:** core mail contracts, `packages/adapters/src/mail/`, server composition.
+- **Depends on:** P1.8a; Q6 signup/no-SMTP policy.
+- **Reuses:** `Config.mailer`, `PUBLIC_URL`, Mailpit compose service, existing redaction.
+- **Acceptance criteria:**
+  - [ ] URLs are built from trusted base URL and validated paths; HTML/text escape user values; SMTP errors/logs contain no password or bearer link.
+  - [ ] Owner/admin-only invitation link fallback works as approved; reset/verification tokens are never returned by anonymous endpoints.
+- **Tests:** Mailpit delivery with hostile display names, template escaping properties, SMTP failure and missing-SMTP behavior.
+- **Risks/notes:** Provider delivery happens after commit; do not send an email for a transaction that later rolls back. Durable retries arrive in P1.10b.
+
+### [ ] P1.8c – Add shared rate limits and private IP identity (est. 4 h)
+- **Description:** Implement Postgres and memory rate limiters with the same contract; centralize rotating IP HMAC and trusted proxy address resolution for auth/public endpoints.
+- **Files/packages:** core contracts/pure helpers, adapter rate limiter, server request context, config.
+- **Depends on:** P1.2b.
+- **Reuses:** `clock`, `APP_SECRET`, `rate_limit_buckets`, config validation and HTTP connection info.
+- **Acceptance criteria:**
+  - [ ] Atomic counters enforce concurrent fixed-window limits and report retry time; memory implementation is for tests/single-process use, not the production multi-process default.
+  - [ ] Clear IPs never persist/log; forwarded headers are trusted only under explicit proxy configuration. Auth and public traffic use distinct bucket namespaces.
+- **Tests:** Concurrent Postgres increments, window boundaries, daily HMAC rotation, forged forwarding headers and no raw IP leakage.
+- **Risks/notes:** I11; no Redis. Bucket cleanup is P1.10c.
+
+### [ ] P1.1b – Implement dashboard authentication (est. 6 h)
+- **Description:** Wire email/password, verification, reset, session lifecycle, signup policy and telemetry-off configuration; mount the approved `/api/auth/*` surface with limits.
+- **Files/packages:** `packages/auth/`, core config, server composition/auth routes, `.env.example`.
+- **Depends on:** P1.2a, P1.8a/b/c, P1.11a; Q6/Q8.
+- **Reuses:** Better Auth built-in auth flows, mailer and endpoint inventory from P1.1a.
+- **Acceptance criteria:**
+  - [ ] Signup policy is injected; invite-only cannot be bypassed through raw signup endpoints. Verification/reset are expiring and single-use, with generic anti-enumeration responses.
+  - [ ] Production cookies are Secure/HttpOnly/SameSite=Lax; HTTP development exception is explicit. Trusted origins, CSRF, body limits and login throttling cover the entire mounted handler.
+- **Tests:** Real HTTP/DB signup/login/logout/reset/verification, invalid/expired tokens, cross-origin mutations, cookie flags and no token logging.
+- **Risks/notes:** Do not build the M6 setup wizard. Auth error bodies may follow Better Auth's contract; `/v1` errors remain RFC 9457.
+
+### [ ] P1.1c – Implement organizations, members and invitations (est. 6 h)
+- **Description:** Expose the approved organization lifecycle/member/invitation surface with owner/admin/member policy and transactional auditing, using Better Auth rather than parallel membership tables.
+- **Files/packages:** auth organization integration, server organization routes/policies.
+- **Depends on:** P1.1b; proven P1.1a integration.
+- **Reuses:** Better Auth organization plugin, audit/event services, mailer, auth schema.
+- **Acceptance criteria:**
+  - [ ] Create org, select membership, invite/accept/cancel, remove member and change role work; admins cannot change owners, last-owner removal/demotion is rejected, removed members lose access immediately.
+  - [ ] Every administrative mutation audits atomically; direct `/api/auth/organization/*` calls obey the same rules or are disabled. Invitation identity/expiry/replay checks prevent joining a foreign organization.
+- **Tests:** Real DB rollback injection, concurrent last-owner changes, role matrix and raw-plugin bypass attempts.
+- **Risks/notes:** Organization deletion/ownership transfer exposure follows Q7; disabled endpoints must reject direct calls, not merely disappear from the UI.
+
+### [ ] P1.3b – Resolve principals and enforce declared permissions (est. 4 h)
+- **Description:** Bind trusted session principals/membership to TenantContext; implement role/scope policies and credential precedence. Define the key-resolver interface for P1.4c.
+- **Files/packages:** core principal/policy contracts, server auth/tenant middleware, route manifest.
+- **Depends on:** P1.1c, P1.3a, P1.11a; Q9 route policy.
+- **Reuses:** Better Auth sessions, scoped repositories, AppError and request context.
+- **Acceptance criteria:**
+  - [ ] Requested organization/project is authorized through membership or project-bound key; never trust a client organization header or stale active-org claim alone.
+  - [ ] Foreign resources give 404; missing credentials give 401; insufficient permissions on owned resources give the documented denial. Unsafe session requests require the CSRF header; publishable keys cannot manage data.
+- **Tests:** Cross-org/project principal substitution, conflicting credentials, removed memberships, role hierarchy and CSRF failures.
+- **Risks/notes:** I2 is about existence leaks, not a blanket requirement that list endpoints always return 404.
+
+### [ ] P1.13a – Start the automatic isolation suite (est. 4 h)
+- **Description:** Build real DB fixtures for 2 orgs × 2 projects × roles, with typed per-route resource builders and assertions generated from the registered management surface.
+- **Files/packages:** `apps/server/src/test/`, `apps/server/src/tenant-isolation.test.ts`, auth endpoint inventory.
+- **Depends on:** P1.3b.
+- **Reuses:** P0 integration service availability checks and P1.11a route metadata.
+- **Acceptance criteria:**
+  - [ ] Suite fails if an exposed management operation has no policy/fixture. Include tenant-bearing Better Auth paths, not just `/v1` routes.
+  - [ ] Resource paths test foreign 404, collections test filtering/non-disclosure, creation tests tenant binding, and denied mutations assert unchanged DB/audit state.
+- **Tests:** Deliberately omit one route and deliberately un-scope a fixture repository to prove the suite detects both failures; no DB mocks.
+- **Risks/notes:** Every later route task adds cases here before completion. Test runtime inspection guards against a manifest that omits mounted routes.
+
+### [ ] P1.5a – Implement projects and origins (est. 4 h)
+- **Description:** Add project list/create/detail/update/delete behavior and normalized allowed origins under the Q7/Q9 policy.
+- **Files/packages:** core project service/schemas, db repositories, server project routes.
+- **Depends on:** P1.13a, P1.8a; Q7/Q9.
+- **Reuses:** Tenant repositories, route declarations, Zod, audit/events and pagination contract.
+- **Acceptance criteria:**
+  - [ ] Names/slugs/settings and HTTP(S) origins validate; origins have no credentials/path/query or permissive wildcard matching. Empty origin allowlist has the documented meaning.
+  - [ ] Project deletion/archive is explicit and audited; inactive projects reject their keys/public access. Referenced foreign project IDs cannot move records across tenants.
+- **Tests:** Role/isolation matrix, duplicate slug, deceptive origin suffix/ports, deleted-project reads and all mutations' rollback.
+- **Risks/notes:** No personal-data soft deletion by accident; apply the accepted Q7 semantics.
+
+### [ ] P1.4a – Implement key primitives and scope presets (est. 4 h)
+- **Description:** Generate 32-character base62 CSPRNG tokens without modulo bias; derive hashes, display prefixes, scope schemas and named presets from one catalog.
+- **Files/packages:** core key/scopes contracts and pure helpers, db key repository.
+- **Depends on:** P1.3a; Q9 scope decisions.
+- **Reuses:** `ids`, Web Crypto, AppError catalog, §D.1 presets.
+- **Acceptance criteria:**
+  - [ ] Secret plaintext is returned only at creation; persistence stores SHA-256 and display metadata. Publishable plaintext is allowed only for publishable rows.
+  - [ ] Unknown scopes fail validation; agent preset excludes personal data/deletion/destructive rights; disabled module scopes cannot silently grant rights.
+- **Tests:** Format/property tests, rejected scopes, expiry/revocation lookup and serialization/log snapshots excluding secrets.
+- **Risks/notes:** Own website/agent keys remain separate from Better Auth sessions; do not add a second key plugin.
+
+### [ ] P1.4b – Add session-only key management (est. 4 h)
+- **Description:** Add list/create/revoke routes with preset selection, explicit expiry and reveal-once responses.
+- **Files/packages:** core key service, server key routes and isolation fixtures.
+- **Depends on:** P1.4a, P1.5a, P1.13a.
+- **Reuses:** Project repositories, route policy, audit and scope catalog.
+- **Acceptance criteria:**
+  - [ ] Only authorized dashboard sessions create/revoke keys; responses never redisplay a secret. Metadata read policy follows Q9.
+  - [ ] Create/revoke and their redacted audit entry share a transaction; attempts with a key cannot mint another key or gain scopes.
+- **Tests:** Owner/admin/member/key matrix, foreign key IDs, concurrent revoke and failed-audit rollback; public snapshots.
+- **Risks/notes:** I4/I7; clipboard/UI behavior belongs to P1.12c.
+
+### [ ] P1.4c – Authenticate keys and reject exposed secrets (est. 4 h)
+- **Description:** Finish the key resolver, project binding, scope enforcement, throttled last-used updates and foreign-Origin security handling.
+- **Files/packages:** server credential middleware, key service/repository, mail/security event integration.
+- **Depends on:** P1.4b, P1.8b/c, P1.3b.
+- **Reuses:** SHA-256 lookup, normalized origins, audit/event transactions and limiter.
+- **Acceptance criteria:**
+  - [ ] Expired/revoked/inactive-project keys fail; publishable keys only reach approved public routes. Exact dashboard origin is the documented secret-key exception.
+  - [ ] Foreign Origin with a valid secret returns `403 secret_key_exposed`, commits redacted audit/security notification intent and never executes the business action; incident emails are deduplicated/throttled.
+- **Tests:** Origin variants including `null`, invalid/revoked secrets, cross-project resource IDs, concurrent last-used updates and audit failure path.
+- **Risks/notes:** The rejection audit must survive the HTTP error; a rolled-back business transaction cannot be its only write.
+
+### [ ] P1.8d – Add usage, entitlements and service composition (est. 4 h)
+- **Description:** Complete the injected service container, transactional usage counters and UnlimitedEntitlements; define external-service interfaces required by the module contract without speculative adapters.
+- **Files/packages:** core services/metrics contracts, db usage implementation, server composition.
+- **Depends on:** P1.8a, P1.3a.
+- **Reuses:** `Clock`, `Ids`, config/infrastructure contracts and usage table.
+- **Acceptance criteria:**
+  - [ ] Usage increments in the caller's transaction with atomic UPSERT; monthly periods use injected time and tenant scope.
+  - [ ] Self-host limits are unlimited through DI; optional storage/scanner/captcha/billing contracts do not force infrastructure or cloud branches. Module config includes no undeclared service access.
+- **Tests:** Concurrent counter increments/rollback, period boundary, unlimited checks and absent optional services.
+- **Risks/notes:** No billing/plan implementation in M1; no replacement clock/ID abstractions.
+
+### [ ] P1.5b – Add organization activity and integration reads (est. 4 h)
+- **Description:** Expose session organization/project switcher data, paginated activity and usage reads, plus project integration metadata for permitted keys.
+- **Files/packages:** server organization/audit/usage/integration routes, core query services.
+- **Depends on:** P1.8d, P1.4c, P1.13a; Q9.
+- **Reuses:** Better Auth membership, audit/usage repositories, declared schemas and cursor pagination.
+- **Acceptance criteria:**
+  - [ ] Dashboard sees only its organizations/projects and permitted activity; integration output contains publishable credentials, never secret tokens or personal data.
+  - [ ] Pagination is bounded, stable and filter validation is shared; permission metadata and isolation fixtures cover every route.
+- **Tests:** Foreign cursor/filter tampering, role/scope matrix, public-safe integration response and audit redaction snapshots.
+- **Risks/notes:** No billing UI, notification CRUD or personal-data export endpoints in this task.
+
+### [ ] P1.6a – Define modules and capabilities (est. 6 h)
+- **Description:** Implement §C.1's typed ModuleDefinition, defineRegistry, capabilities, router/service/job/retention/privacy/codegen contracts and module configuration version rules. Record contract refinements in an ADR.
+- **Files/packages:** `packages/core/src/modules/`, module test fixtures, ADR/index.
+- **Depends on:** P1.8d, P1.11a, P1.3a; Q5 (DEV-9).
+- **Reuses:** InfraRequirement/requiredInfrastructure, service container, declared routes and scope/event catalogs.
+- **Acceptance criteria:**
+  - [ ] Duplicate types/resource names/scopes/events/capability providers and missing requirements fail startup; optional capabilities are typed and unavailable use fails clearly.
+  - [ ] A test module performs a capability write in its tenant transaction, registers routes/jobs and supplies config schema, retention/privacy and schema/codegen hooks without a forbidden import.
+- **Tests:** Valid and invalid registries, dependency/provider ordering, disabled providers and cross-module rollback fixture.
+- **Risks/notes:** No `any`, generic plugin loader or domain schemas. Zod config/JSON Schema must have representable public output.
+
+### [ ] P1.6b – Wire module selection and metadata (est. 4 h)
+- **Description:** Derive startup config, routes/jobs/services/readiness and web availability from selected descriptors/definitions, following DEV-9 during M1.
+- **Files/packages:** server modules/main/roles, core config, module shells' exports, web registry boundary.
+- **Depends on:** P1.6a; Q5.
+- **Reuses:** Existing module infrastructure exports, parseModuleList, readiness checks and compose profiles.
+- **Acceptance criteria:**
+  - [ ] Fixture registry boots empty, each single-module case and all combinations; storage/scanner are required only by enabled definitions. Unknown selection/capability errors fail startup clearly.
+  - [ ] `GET /v1/meta` reports operational availability truthfully; disabled module paths return `module_not_enabled` without exposing tenant data. M1 domain shells expose no working domain API.
+- **Tests:** Boot matrix (including no storage), route/job absence, metadata allowlist snapshots and disabled-module config rejection.
+- **Risks/notes:** Empty env still means all available modules; test core-only via an empty available registry, not a silent change to P0 env semantics.
+
+### [ ] P1.7a – Implement generic instance CRUD (est. 6 h)
+- **Description:** Add registry-driven instance CRUD, config validation, initial/subsequent revisions and shared config-change classification. Domain logic stays behind ModuleDefinition hooks.
+- **Files/packages:** core instance service, db instance/revision repositories, server generic routes.
+- **Depends on:** P1.6b, P1.5a, P1.4c, P1.13a.
+- **Reuses:** Registry schemas, tenant repositories, audit/events, error and pagination helpers.
+- **Acceptance criteria:**
+  - [ ] Create/read/update/status/delete enforce unique keys, active project/module, role/scopes and monotonic config versions; destructive API changes require the same rights as config apply.
+  - [ ] Config/revision/audit/event writes share a transaction; deletion behavior uses approved retention/erasure rules and cannot bypass destructive checks.
+- **Tests:** Synthetic modules through public service/HTTP interfaces; foreign IDs/keys, invalid config, concurrent update and forced rollback.
+- **Risks/notes:** I7/I12/I19; no production domain routes solely to demonstrate generic CRUD.
+
+### [ ] P1.7b – Add revision reads, rollback and config migration (est. 4 h)
+- **Description:** Expose bounded revision history/rollback; define deterministic module_version upgrades through migrateConfig and write a new revision when persisted.
+- **Files/packages:** core instance versioning service, db revision queries, server revision routes.
+- **Depends on:** P1.7a.
+- **Reuses:** Instance mutation path and destructive-change classifier; never update historical revisions in place.
+- **Acceptance criteria:**
+  - [ ] Rollback creates a new config_version and checks current permissions/destructive changes; a foreign revision cannot be applied.
+  - [ ] Unsupported future/old formats fail safely; repeated lazy migration is idempotent and no read silently mutates configuration without transactional audit/revision semantics.
+- **Tests:** Old-config fixture migration, failed migration, rollback after schema changes and concurrent config update.
+- **Risks/notes:** Define lazy read vs. persisted migration explicitly in the module ADR; background migration hooks are registered in P1.10b.
+
+### [ ] P1.7c – Plan config-as-code changes (est. 6 h)
+- **Description:** Build registry-derived config documents and a pure diff/normalization planner, with strict project/module/config version validation and destructive warnings.
+- **Files/packages:** core config-as-code schemas/planner, server GET/config dry-run route.
+- **Depends on:** P1.7b; Q5 config contract refinements.
+- **Reuses:** Module config schemas, instance services, scope policies and config-change classifier.
+- **Acceptance criteria:**
+  - [ ] Read/dry-run require config:read; planning makes no writes. Config exports omit keys, recipients and personal records; config sections map to module resource names without hand-written per-module branches.
+  - [ ] Define planHash binding to organization/project, principal, normalized desired config, current versions, registry/schema versions and expiry; tampered/cross-tenant plans cannot be accepted.
+- **Tests:** Property tests for deterministic ordering/no-op diffs, removed instances/fields and normalized equivalents; no side effects on dry run.
+- **Risks/notes:** §D.8 lacks an explicit per-instance module_version serialization field; settle it in the module/config ADR, not a second hand-written config schema.
+
+### [ ] P1.7d – Apply config atomically and export schemas (est. 6 h)
+- **Description:** Add planHash verification and apply under a project-level lock; expose registry-derived JSON Schema and types hook for later CLI use.
+- **Files/packages:** core config apply service, db locking/repositories, server config/schema/types routes.
+- **Depends on:** P1.7c.
+- **Reuses:** Generic mutations, audit/events and same-transaction capabilities.
+- **Acceptance criteria:**
+  - [ ] Missing/expired/stale/tampered plans fail without partial writes; concurrent plans from the same base cannot overwrite changes. Apply requires config:write and config:destructive when needed; session roles map explicitly.
+  - [ ] Disabled/omitted sections cannot silently delete data. Whole-document apply locks and rechecks state, creates revisions/audit/events atomically, and produces no revisions on a no-op.
+- **Tests:** Concurrent apply, replay after state change, cross-principal/tenant reuse, injected mid-apply failure and fixture schema/types generation.
+- **Risks/notes:** Recheck canonical plan under the write lock; never trust a client-supplied diff or destructive flag.
+
+### [ ] P1.8e – Implement private S3 storage (est. 6 h)
+- **Description:** Add StorageAdapter and S3 implementation for signed PUT, safe GET, HEAD/COPY/DELETE/stream. Separate internal endpoint from browser-facing signing endpoint in validated config.
+- **Files/packages:** core storage contract, `packages/adapters/src/storage/`, core config/`.env.example`, server composition/readiness.
+- **Depends on:** P1.8d, P1.6b.
+- **Reuses:** Garage compose/init/CORS, existing AWS SDK dependency, ADR-0020 settings.
+- **Acceptance criteria:**
+  - [ ] PUT signs length/type; GET defaults to short-lived attachment/octet-stream. Endpoint split works from server containers and the host browser; no public ACLs or original names in object keys.
+  - [ ] Checksums use WHEN_REQUIRED as spiked; optional storage is not constructed/probed for storage-free installations.
+- **Tests:** Garage signed size/type rejection, GET disposition/expiry, HEAD/COPY/DELETE/stream and server-vs-browser endpoint smoke; retain tests for P3.10 expansion.
+- **Risks/notes:** No uploads API, scanner implementation or proxy upload mode here. Recheck the paired AWS patch before adoption.
+
+### [ ] P1.9a – Add expiring proof-of-work challenges (est. 4 h)
+- **Description:** Define the PoW provider boundary, ALTCHA implementation and rate-limited challenge endpoint with atomic replay protection.
+- **Files/packages:** core abuse/captcha contracts, ALTCHA adapter, db replay repository, server public challenge route.
+- **Depends on:** P1.8c, P1.6b, P1.4c.
+- **Reuses:** `altcha-lib` spike settings, `clock`, APP_SECRET-derived purpose key and expiry tables.
+- **Acceptance criteria:**
+  - [ ] Signed challenges expire after the documented period and cannot be modified; replay claims use a unique atomic DB operation across workers.
+  - [ ] Challenge generation is bounded/rate-limited, project-bound and public output contains no internal data; secret-key public operations skip PoW only with the operation scope.
+- **Tests:** Tamper/expiry/wrong-secret/wrong-project cases, concurrent replay, fixed-clock difficulty checks and public response snapshot.
+- **Risks/notes:** Tune difficulty with measured solve time and record it; no third-party captcha dependency.
+
+### [ ] P1.9b – Compose AbuseGuard and public CORS (est. 6 h)
+- **Description:** Implement §D.5's cheap-first pipeline with body/rate/origin checks, honeypot short circuit, PoW, strict validation, heuristics and quota hooks.
+- **Files/packages:** core abuse pipeline, server public router/middleware, test-only public-write fixture.
+- **Depends on:** P1.9a, P1.8d.
+- **Reuses:** Shared limiter, IP identity, normalized origins, module config/schema and entitlements.
+- **Acceptance criteria:**
+  - [ ] Public write fixture proves ordering and size overrides; honeypot success persists nothing; schema errors are structured; heuristics return verdicts rather than dropping accepted data.
+  - [ ] CORS reflects only permitted origins with correct Vary/preflight behavior and no credential reflection; management routes gain no CORS. Quota rejection occurs before persistence.
+- **Tests:** Oversized/chunked bodies, denied/empty/null origins, honeypot, PoW skip scope, limiter/quota failures and full public response snapshots.
+- **Risks/notes:** Real domain writes arrive P2–P4; fixture route must not be mounted in production.
+
+### [ ] P1.9c – Add shared idempotent-write support (est. 4 h)
+- **Description:** Implement tenant/project-bound request hashing, atomic idempotency claim/replay and safe response storage for public writes; expose through core, not module-specific copies.
+- **Files/packages:** core idempotency contract/helper, db repository, public-write fixture.
+- **Depends on:** P1.9b, P1.2b; Q8 retention.
+- **Reuses:** Tenant transaction, canonicalization primitives where semantics match, expiry and response schemas.
+- **Acceptance criteria:**
+  - [ ] Same key/body replays the approved result; changed body conflicts; concurrent duplicates persist event/usage/data once. No in-flight/failed transaction leaves a successful replay record.
+  - [ ] Cache is bounded by expiry and stores only allowlisted public response data, never input content or secret keys. Cross-project keys are independent.
+- **Tests:** Real DB concurrent claim/rollback, request mismatch, expiry and no duplicate usage/outbox effects.
+- **Risks/notes:** Central support prepares P2.4; route-specific idempotency policy stays in the module contract.
+
+### [ ] P1.10a – Start pg-boss and transactional jobs (est. 4 h)
+- **Description:** Replace the idle worker with a pg-boss queue adapter; register validated job payloads and queue handlers from enabled modules/core.
+- **Files/packages:** core queue/job contracts, adapter, server worker/roles/shutdown wiring.
+- **Depends on:** P1.6b, P1.8d.
+- **Reuses:** Existing process lifecycle and shared pg driver/pool design; ADR-0020 transactional enqueue.
+- **Acceptance criteria:**
+  - [ ] Commit delivers jobs and rollback does not; worker/all roles consume only registered jobs with bounded concurrency/retries and safe error logs.
+  - [ ] Graceful stop drains active work and closes queue/database resources in order; invalid job payloads cannot escape validation.
+- **Tests:** Real Postgres enqueue/rollback/retry, fresh process role start/stop and disabled job registrations.
+- **Risks/notes:** Verify pg-boss 12.38.1 on Bun; do not assume the Drizzle transaction is compatible without the adapter smoke test.
+
+### [ ] P1.10b – Dispatch the outbox and retry mail (est. 4 h)
+- **Description:** Dispatch pending events to registered consumers via transactional job enqueue; wire durable auth/security mail delivery and module retention/privacy/config-migration job hooks.
+- **Files/packages:** outbox repositories/dispatcher, worker core handlers, auth mail integration.
+- **Depends on:** P1.10a, P1.8a/b, P1.7d.
+- **Reuses:** Events table, pg-boss transaction adapter, module job/event registry and Mailpit.
+- **Acceptance criteria:**
+  - [ ] Claim/enqueue/dispatched marker share a transaction; concurrent dispatchers cannot lose events. Stable consumer identities deduplicate retries with documented at-least-once semantics.
+  - [ ] Rolled-back auth actions send nothing; committed invitations/exposure alerts retry after SMTP failure. Email recipient/token jobs use bounded retention and sanitized logging per Q8.
+- **Tests:** Crash before/after enqueue, parallel dispatch, SMTP retry and failure recovery; module hooks tested with fixtures.
+- **Risks/notes:** External SMTP delivery cannot be made exactly-once by a DB transaction; document possible duplicate delivery and limit repeat alerts.
+
+### [ ] P1.10c – Add bounded cleanup schedules (est. 4 h)
+- **Description:** Register replay/idempotency/rate-bucket cleanup, audit retention and expired auth/job housekeeping, using the approved maintenance boundary.
+- **Files/packages:** worker core schedules/handlers, db maintenance repositories.
+- **Depends on:** P1.10b, P1.9c; Q8.
+- **Reuses:** `clock`, expiry indexes, module retention hooks and pg-boss cron.
+- **Acceptance criteria:**
+  - [ ] Cleanup is batched/retryable, removes only expired rows and leaves current data intact; disabled modules' jobs do not run.
+  - [ ] Audit purge enables its trigger override only transaction-locally through a restricted maintenance path; request handlers cannot use it. No application-wide append-only bypass.
+- **Tests:** Fixed-clock boundary data, repeated/parallel cleanup, failed-purge rollback and job retention of personal auth mail payloads.
+- **Risks/notes:** Module personal-record erasure is implemented with the domain modules; no fake GDPR endpoint with incomplete deletion.
+
+### [ ] P1.11b – Generate contract types and the admin client (est. 4 h)
+- **Description:** Export deterministic OpenAPI/TS types and add the MIT `@backbricks/sdk/admin` public entry point for the dashboard.
+- **Files/packages:** server contract exporter, `packages/api-contract/`, `packages/sdk/`, root scripts, architecture fixtures.
+- **Depends on:** P1.7d, P1.5b, P1.9b; Q5 (DEV-8).
+- **Reuses:** Route schemas/manifest, openapi-typescript/openapi-fetch and ADR-0020 local TS fallback.
+- **Acceptance criteria:**
+  - [ ] `bun run api:generate` is reproducible without live DB/network services; generated files are committed, never hand-edited. Generating package resolves TS 5.9.3 locally; root typecheck stays TS 7.
+  - [ ] Admin client imports AGPL contract types only, forwards session CSRF safely, never embeds secrets in generated output, and adds no dependency to the SDK root browser entry point.
+- **Tests:** Repeat generation, type-level request/response checks, declared admin subpath architecture fixture and Node 20/Bun import smoke.
+- **Risks/notes:** Better Auth's client is configured in web from its public library types; do not import the server auth instance for type inference. Resolve exports through public package entries.
+
+### [ ] P1.11c – Enforce drift and breaking-change checks (est. 4 h)
+- **Description:** Add `api:check` and an offline oasdiff compatibility gate against the PR base contract, including first-contract bootstrapping.
+- **Files/packages:** root scripts/package pipelines, `mise.toml`, `.github/workflows/ci.yml`, contract fixtures.
+- **Depends on:** P1.11b.
+- **Reuses:** Existing CI checkout/test jobs and deterministic exporter; oasdiff 1.35.0.
+- **Acceptance criteria:**
+  - [ ] CI fails for uncommitted spec/type drift and breaking `/v1` changes; a committed regeneration does not bypass comparison to base. `api:breaking` uses the PR base in CI, local merge-base with `origin/main` otherwise. Missing Git history is an error; bootstrap only when the actual base commit has no contract.
+  - [ ] Add to `bun run check`/pre-push consistently; tool pin is only in mise. Typed API routes get consistent 405 behavior without revealing protected resources.
+- **Tests:** Fixture additive change passes, removal/type change fails, generated drift fails and missing-base behavior is explicit.
+- **Risks/notes:** No hosted spec upload. Library auth routes are inventoried/tested separately; don't pretend they use the `/v1` OpenAPI contract.
+
+### [ ] P1.12a – Build dashboard auth flows (est. 6 h)
+- **Description:** Add login, signup, verification, reset and invitation-acceptance screens using the approved public Better Auth client and en/de translations.
+- **Files/packages:** web routes/auth client/i18n, UI primitives added through shadcn CLI in `packages/ui` as needed.
+- **Depends on:** P1.1c, P1.11b; Q6.
+- **Reuses:** Existing TanStack Router/Query, shared theme/Card/Button, i18next and Happy DOM/Testing Library.
+- **Acceptance criteria:**
+  - [ ] All flows handle loading, expiry, errors and signup policy with accessible labels; redirect targets stay same-origin and signed-out users cannot view protected pages.
+  - [ ] Verification/reset tokens do not enter analytics/logs or persistent client storage; no server-package imports or hand-written API payload types.
+- **Tests:** Component behavior/translation parity and Playwright verification/reset via Mailpit; malicious redirect and invalid invitation cases.
+- **Risks/notes:** React Hook Form/resolver patch verified with Zod 4. No M6 first-run setup UI.
+
+### [ ] P1.12b – Build the shell, switchers and project settings (est. 6 h)
+- **Description:** Add responsive authenticated navigation, org/project switchers, organization creation, project list/create and settings for names/domains.
+- **Files/packages:** web layout/project routes/module nav registry, shared UI where reused.
+- **Depends on:** P1.12a, P1.5a/b, P1.6b.
+- **Reuses:** Generated admin client, Better Auth organization client, Query cache, existing i18n/theme.
+- **Acceptance criteria:**
+  - [ ] Switching tenants resets tenant-specific cached data; project routes handle no project, revoked membership and foreign deep links safely.
+  - [ ] Navigation reflects operational module metadata; domain pages are absent until built. Settings validation uses the API contract, with human wording and explicit empty-origin warning.
+- **Tests:** Org/project switch with separate fixtures and stale requests; mobile navigation, roles and origin settings.
+- **Risks/notes:** No duplicate tenant selector state across screens; cache keys include organization/project.
+
+### [ ] P1.12c – Build Embed/key management (est. 4 h)
+- **Description:** Add key presets/create/reveal-once/revoke and allowed-domain integration guidance under Embed.
+- **Files/packages:** web Embed routes, `packages/ui` KeyRevealDialog/confirmation primitives when shared.
+- **Depends on:** P1.12b, P1.4b/c.
+- **Reuses:** Generated client, shared scope/preset contract, role policy and project settings UI.
+- **Acceptance criteria:**
+  - [ ] Secret is shown only from creation response and cleared on close/navigation; it never enters persistent storage, query cache, URL or error reports.
+  - [ ] Revocation refreshes metadata; members cannot manage keys. Preset descriptions explain access without exposing personal records.
+- **Tests:** Reveal lifecycle, clipboard error, revoke confirmation, session expiry and no secret in caches/DOM after close.
+- **Risks/notes:** M5's agent connection wizard/snippets are not built here.
+
+### [ ] P1.12d – Build members and activity views (est. 4 h)
+- **Description:** Add invitation, member-role/removal and paginated organization activity screens.
+- **Files/packages:** web organization/member/activity routes, i18n, reused shared UI.
+- **Depends on:** P1.12b, P1.1c, P1.5b.
+- **Reuses:** Better Auth client, generated activity client, role policy and shared confirmation/error patterns.
+- **Acceptance criteria:**
+  - [ ] Owner/admin/member capabilities match server rules, last-owner errors are understandable, and approved no-SMTP invitation fallback is restricted to authorized users.
+  - [ ] Key/member actions appear with safe audit fields; no secrets/personal payloads render in activity or translations.
+- **Tests:** Role matrix, invite accept/expiry/resend/cancel and audit display after actions; translation key parity.
+- **Risks/notes:** UI hiding is never the permission boundary; direct API tests remain mandatory.
+
+### [ ] P1.13b – Complete the management isolation/security matrix (est. 4 h)
+- **Description:** Audit runtime route coverage against every exposed management operation, including library routes, generated generic fixture routes and each credential kind.
+- **Files/packages:** server isolation tests/fixtures, auth security tests, architecture fixtures.
+- **Depends on:** All preceding API/worker tasks, P1.13a.
+- **Reuses:** Automatic suite and route metadata; no parallel manually maintained list as the source of truth.
+- **Acceptance criteria:**
+  - [ ] Coverage is 100% for registered/exposed management methods; missing declaration/fixture fails. Test foreign orgs, project-bound keys against sibling projects, mismatched nested resource IDs, roles, scopes, revocation and denied-write side effects. Organization-wide sessions may legitimately access both own-org projects.
+  - [ ] Public snapshot coverage proves no private fields; key/member/config actions prove atomic audit; unmounted test routes and raw auth bypasses are checked.
+- **Tests:** `CI=true bunx turbo run test --force` with compose services; full matrix must run fresh with zero service-related skips.
+- **Risks/notes:** Collection/list/create semantics use P1.13a's non-disclosure assertions; never weaken foreign-resource 404 to match a library default.
+
+### [ ] P1.13c – Demonstrate M1 and record the handoff (est. 6 h)
+- **Description:** Complete Playwright owner workflow, run every acceptance command fresh and write the phase report with evidence, deviations and unresolved gaps.
+- **Files/packages:** `e2e/`, `docs/progress/phase-1.md`, PLAN checkboxes and relevant run guides.
+- **Depends on:** P1.12a–d, P1.13b, P1.11c, P1.10c.
+- **Reuses:** Existing E2E server/build setup and P0 report format; Mailpit test helpers from auth tasks.
+- **Acceptance criteria:**
+  - [ ] Signup → verified account → org → project → key → invitation/acceptance works end to end; key/member audit visible, key revoke enforced and foreign tenant denied.
+  - [ ] Fresh check/build/E2E/isolation/drift/image commands pass with real services; report records exact commands/counts and identifies any remaining limitation. No skipped integration result is claimed as milestone proof.
+- **Tests:** Playwright en/de owner journey, second-browser invited member and foreign-origin secret rejection; full acceptance below.
+- **Risks/notes:** A different fresh session can review M1 per AGENTS §9. Maintainer pushes/opens PR; CI proof is required before M1 is declared accepted.
+
+### Phase acceptance
+
+Commands are the intended post-implementation interface; `api:*` scripts are created in P1.11. Run after `mise install && mise run infra`, using isolated test tenants/database and Mailpit. M1 E2E setup applies migrations and sets `SIGNUP_POLICY=open` explicitly (Q6); production defaults remain separately tested. Bring up Docker before recording integration evidence.
+
+- [ ] **Owner workflow:** `bun run build && bun run test:e2e` proves signup/verification → org → project → key → invite/accept, including en/de and separate users.
+- [ ] **100% management isolation:** `CI=true bunx turbo run test --force` runs the automatic route-policy/isolation suites, auth plugin coverage and all real DB/adapter tests with no service-related skips; `bun run test:scripts` runs architecture fixtures. New endpoints without policy/fixture fail.
+- [ ] **Visible audit:** the E2E command shows key create/revoke and invitation/member role actions in Activity; DB tests prove mutation/audit rollback together.
+- [ ] **Foreign-origin secret:** server tests and E2E assert `403 secret_key_exposed`, committed safe audit, notification intent, and no business mutation. No raw key appears in logs/audit/events.
+- [ ] **Contract CI:** `bun run api:generate && bun run api:check` leaves no generated diff; `bun run api:breaking` compares the PR base spec with the working spec using pinned oasdiff. CI runs both and a negative fixture proves the gates reject drift/breaking changes.
+- [ ] **Full quality:** `bun run check && bun run build` green; fresh tests above avoid cached service availability. `docker build -t backbricks/server:m1 .` plus the CI image smoke runs migrate/serve/worker and serves dashboard/health (extend P0's smoke to cover the now-functional worker).
+- [ ] **Optionality:** registry test matrix passes core-only and all synthetic subsets; disabled modules have no routes/jobs and storage-free cases boot without S3/scanner configuration. M1 contains no production domain implementation.
+- [ ] **Report and review:** `docs/progress/phase-1.md` records evidence, accepted ADRs and known gaps; all tasks checked, human-reviewed signed-off commits, green CI on maintainer-created PR. No push is implied by phase execution.
+
+### Planning risks and sources
+
+- Auth audit atomicity/raw organization endpoints (P1.1a) and the repository/capability transaction seam (P1.3a) are the critical path. A failed proof changes the design/estimate before dependent code, never I1/I12.
+- The original 12–15 PD allowance did not break out the dashboard flows, concurrency/rollback tests, schema/codegen boundaries and full route coverage. Keep the detailed estimate visible; do not hide overruns by skipping those criteria.
+- Planning baseline: P0 CI green on PR #4; local check in the onboarding session passed with Turbo cache and Garage skips. Docker was unavailable then. This is not fresh integration acceptance for M1.
+- Versioned primary references to inspect at implementation time: [Better Auth Drizzle adapter](https://better-auth.com/docs/adapters/drizzle), [organization hooks/endpoints](https://better-auth.com/docs/plugins/organization), [database/schema generation](https://better-auth.com/docs/concepts/database), [oasdiff CLI](https://www.oasdiff.com/docs/getting-started), [oasdiff 1.35.0 release](https://github.com/oasdiff/oasdiff/releases/tag/v1.35.0). Current docs may differ from pinned runtime; installed source/types and a real DB test decide compatibility.
+
+### Execution notes
+
+Implementation has not started. First task: P1.1a; decisions remain in OPEN_QUESTIONS Q5–Q9. Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 

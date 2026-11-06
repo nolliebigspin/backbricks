@@ -6,7 +6,7 @@
 - Architecture: `docs/ARCHITECTURE.md`; cloud background: `docs/CLOUD.md`
 - GitHub milestones are created from `.github/milestones.json` with `mise run gh:milestones` (idempotent; titles and one-line summaries only, this file holds the detail)
 
-Effort is in person-days (PD, 8 h) for one experienced developer working with AI coding agents, including tests and reviewing agent output. At 15–20 h/week, calendar time grows by roughly 2–2.5×. Total to 1.0: **≈ 57–73 PD**; cloud afterwards: **≈ 15–21 PD**.
+Effort is in person-days (PD, 8 h) for one experienced developer working with AI coding agents, including tests and reviewing agent output. At 15–20 h/week, calendar time grows by roughly 2–2.5×. The original roadmap allowance to 1.0 was **≈ 57–73 PD**; detailed phase estimates and the revised total are maintained in [`PLAN.md`](../PLAN.md#overview). Cloud afterwards: **≈ 15–21 PD**.
 
 ```mermaid
 flowchart LR
@@ -26,7 +26,7 @@ flowchart LR
 ## Open-source track
 
 ### M0 · Foundation · ✅ done
-- **Phase:** P0 · **Effort:** 4–5 PD · **Release:** – · **Report:** [`progress/phase-0.md`](progress/phase-0.md) (open: CI green on a PR)
+- **Phase:** P0 · **Effort:** 4–5 PD original allowance (detailed estimate in PLAN) · **Release:** – · **Report:** [`progress/phase-0.md`](progress/phase-0.md) · [CI green, merged PR #4](https://github.com/nolliebigspin/backbricks/pull/4)
 - **Goal:** A runnable, tested skeleton every later phase builds on.
 - **Scope:** workspace packages, architecture rules (dependency-cruiser), Docker Compose dev environment (infra + app services), env config, server/worker/migrate entry points, Drizzle + migration runner, dashboard skeleton reusing `packages/ui` (shadcn theme and components, already created with the website, ADR-0001), dependency-cruiser rule that `apps/www` imports only `packages/ui`, production Dockerfile, CI completion, library spike on Bun/TS 7.
 - **Exit criteria:**
@@ -36,7 +36,7 @@ flowchart LR
   - pre-push hook active; CodeGraph index builds
 
 ### M1 · Platform Core
-- **Phase:** P1 · **Effort:** 12–15 PD · **Release:** –
+- **Phase:** P1 · **Effort:** 12–15 PD original allowance; [detailed plan and proposed revised estimate](../PLAN.md#phase-p1--platform-core-m1--planned-2026-11-06) · **Release:** –
 - **Goal:** A multi-tenant platform with every contract in place, but no domain modules yet.
 - **Scope:** Better Auth (orgs, roles, invitations), core schema, `withTenant`, API keys + scopes, projects, module registry + capabilities, generic instance CRUD + config-as-code (plan/apply), services (audit, events, mailer, storage, rate limiter, usage, entitlements), AbuseGuard + PoW, worker + outbox, OpenAPI pipeline, dashboard shell, tenant isolation suite.
 - **Exit criteria:**
