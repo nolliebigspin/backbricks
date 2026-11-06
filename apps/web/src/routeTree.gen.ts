@@ -20,6 +20,7 @@ import { Route as DashboardIndexRouteImport } from './routes/_dashboard.index'
 import { Route as DashboardOrganizationsNewRouteImport } from './routes/_dashboard.organizations.new'
 import { Route as DashboardProjectsProjectIdRouteImport } from './routes/_dashboard.projects.$projectId'
 import { Route as DashboardProjectsProjectIdIndexRouteImport } from './routes/_dashboard.projects.$projectId.index'
+import { Route as DashboardProjectsProjectIdEmbedRouteImport } from './routes/_dashboard.projects.$projectId.embed'
 import { Route as DashboardProjectsProjectIdSettingsRouteImport } from './routes/_dashboard.projects.$projectId.settings'
 
 const DashboardRoute = DashboardRouteImport.update({
@@ -79,6 +80,12 @@ const DashboardProjectsProjectIdIndexRoute =
     path: '/',
     getParentRoute: () => DashboardProjectsProjectIdRoute,
   } as any)
+const DashboardProjectsProjectIdEmbedRoute =
+  DashboardProjectsProjectIdEmbedRouteImport.update({
+    id: '/embed',
+    path: '/embed',
+    getParentRoute: () => DashboardProjectsProjectIdRoute,
+  } as any)
 const DashboardProjectsProjectIdSettingsRoute =
   DashboardProjectsProjectIdSettingsRouteImport.update({
     id: '/settings',
@@ -96,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/organizations/new': typeof DashboardOrganizationsNewRoute
   '/projects/$projectId': typeof DashboardProjectsProjectIdRouteWithChildren
+  '/projects/$projectId/embed': typeof DashboardProjectsProjectIdEmbedRoute
   '/projects/$projectId/settings': typeof DashboardProjectsProjectIdSettingsRoute
   '/projects/$projectId/': typeof DashboardProjectsProjectIdIndexRoute
 }
@@ -108,6 +116,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/': typeof DashboardIndexRoute
   '/organizations/new': typeof DashboardOrganizationsNewRoute
+  '/projects/$projectId/embed': typeof DashboardProjectsProjectIdEmbedRoute
   '/projects/$projectId/settings': typeof DashboardProjectsProjectIdSettingsRoute
   '/projects/$projectId': typeof DashboardProjectsProjectIdIndexRoute
 }
@@ -123,6 +132,7 @@ export interface FileRoutesById {
   '/_dashboard/': typeof DashboardIndexRoute
   '/_dashboard/organizations/new': typeof DashboardOrganizationsNewRoute
   '/_dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRouteWithChildren
+  '/_dashboard/projects/$projectId/embed': typeof DashboardProjectsProjectIdEmbedRoute
   '/_dashboard/projects/$projectId/settings': typeof DashboardProjectsProjectIdSettingsRoute
   '/_dashboard/projects/$projectId/': typeof DashboardProjectsProjectIdIndexRoute
 }
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/organizations/new'
     | '/projects/$projectId'
+    | '/projects/$projectId/embed'
     | '/projects/$projectId/settings'
     | '/projects/$projectId/'
   fileRoutesByTo: FileRoutesByTo
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/'
     | '/organizations/new'
+    | '/projects/$projectId/embed'
     | '/projects/$projectId/settings'
     | '/projects/$projectId'
   id:
@@ -164,6 +176,7 @@ export interface FileRouteTypes {
     | '/_dashboard/'
     | '/_dashboard/organizations/new'
     | '/_dashboard/projects/$projectId'
+    | '/_dashboard/projects/$projectId/embed'
     | '/_dashboard/projects/$projectId/settings'
     | '/_dashboard/projects/$projectId/'
   fileRoutesById: FileRoutesById
@@ -257,6 +270,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProjectsProjectIdIndexRouteImport
       parentRoute: typeof DashboardProjectsProjectIdRoute
     }
+    '/_dashboard/projects/$projectId/embed': {
+      id: '/_dashboard/projects/$projectId/embed'
+      path: '/embed'
+      fullPath: '/projects/$projectId/embed'
+      preLoaderRoute: typeof DashboardProjectsProjectIdEmbedRouteImport
+      parentRoute: typeof DashboardProjectsProjectIdRoute
+    }
     '/_dashboard/projects/$projectId/settings': {
       id: '/_dashboard/projects/$projectId/settings'
       path: '/settings'
@@ -268,12 +288,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface DashboardProjectsProjectIdRouteChildren {
+  DashboardProjectsProjectIdEmbedRoute: typeof DashboardProjectsProjectIdEmbedRoute
   DashboardProjectsProjectIdSettingsRoute: typeof DashboardProjectsProjectIdSettingsRoute
   DashboardProjectsProjectIdIndexRoute: typeof DashboardProjectsProjectIdIndexRoute
 }
 
 const DashboardProjectsProjectIdRouteChildren: DashboardProjectsProjectIdRouteChildren =
   {
+    DashboardProjectsProjectIdEmbedRoute: DashboardProjectsProjectIdEmbedRoute,
     DashboardProjectsProjectIdSettingsRoute:
       DashboardProjectsProjectIdSettingsRoute,
     DashboardProjectsProjectIdIndexRoute: DashboardProjectsProjectIdIndexRoute,

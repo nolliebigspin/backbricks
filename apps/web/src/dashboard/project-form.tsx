@@ -72,7 +72,10 @@ export function ProjectForm({
           {t('projects.anyOrigin')}
         </label>
       )}
-      <Feedback error={action.error} done={action.done} />
+      <Feedback
+        error={action.error === 'common.invalid' ? 'projects.invalid' : action.error}
+        done={action.done}
+      />
       <Button type="submit" disabled={action.busy}>
         {t(action.busy ? 'common.working' : project ? 'common.save' : 'projects.create')}
       </Button>

@@ -14,9 +14,14 @@
     "create": "Create",
     "save": "Save changes",
     "more": "Load more",
-    "invalid": "Check the fields and use a full website origin such as https://example.com, without a path.",
+    "invalid": "Check the fields and try again.",
     "conflict": "This short name is already in use. Choose another.",
-    "missing": "This page is unavailable."
+    "missing": "This page is unavailable.",
+    "copy": "Copy key",
+    "close": "Close",
+    "copied": "Copied.",
+    "copyError": "Copying was blocked. Select the key above and copy it manually.",
+    "cancel": "Cancel"
   },
   "auth": {
     "name": "Your name",
@@ -98,6 +103,45 @@
     "anyOrigin": "Allow submissions from any website. Leaving this list empty allows all websites.",
     "overview": "Manage this website’s backend features and integration settings.",
     "noModules": "No website features are available yet on this installation.",
-    "allDomains": "All websites are allowed. Restrict this in Settings before sharing a publishable key."
+    "allDomains": "All websites are allowed. Restrict this in Settings before sharing a publishable key.",
+    "invalid": "Check the fields and use a full website origin such as https://example.com, without a path."
+  },
+  "keys": {
+    "title": "Access keys",
+    "kind": "Key type",
+    "publishable": "Publishable key",
+    "secret": "Secret key",
+    "publicHint": "Use this key in your website. It only allows supported public actions. Restrict allowed websites in Settings.",
+    "secretHint": "Keep this key on your server or in your coding agent’s private settings. Never add it to website code.",
+    "access": "Access preset",
+    "expiry": "Expires at",
+    "noExpiry": "No expiration",
+    "create": "Create key",
+    "active": "Active",
+    "expired": "Expired",
+    "revoked": "Revoked",
+    "revoke": "Revoke key",
+    "revokeTitle": "Revoke this key?",
+    "revokeDescription": "Any integration using this key will stop working immediately. This cannot be undone.",
+    "guidance": "Use a publishable key for your website and a secret key only for private integrations. Allowed websites protect public requests; they do not make a secret key safe to publish.",
+    "baseUrl": "API address",
+    "noPublicKey": "No active publishable key. Ask an owner or administrator to create one.",
+    "noPermission": "Only owners and administrators can create or revoke keys.",
+    "revealTitle": "Save your new key",
+    "revealDescription": "Copy it to a safe place now. A secret key is shown only once. Closing this window clears it from the dashboard.",
+    "presets": {
+      "agent": {
+        "title": "Coding agent",
+        "description": "Reads integration and configuration details, updates configuration, and reads usage. No personal records, deletion, or key management."
+      },
+      "server": {
+        "title": "Server integration",
+        "description": "Allows submissions to enabled website features. No personal record reads, deletion, or key management."
+      },
+      "data": {
+        "title": "Data access",
+        "description": "Explicitly grants reading and editing personal records plus usage reads. No deletion or key management. Share only with a trusted private integration."
+      }
+    }
   }
 }

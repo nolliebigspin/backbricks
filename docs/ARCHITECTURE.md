@@ -667,6 +667,8 @@ The [authenticated shell](../apps/web/src/dashboard/shell.tsx) uses the live ses
 
 Modules add themselves to the navigation through the web registry. Wording is deliberately non-technical ("Inbox"/"Entries" instead of "Submissions", "Embed" instead of "API").
 
+The [Embed screen](../apps/web/src/dashboard/embed.tsx) submits generated key contracts directly, outside mutation/query caches, and clears the creation token on dismissal or navigation. Only owner/admin sessions render key management; member integration reads remain safe. [Shared dialogs](../packages/ui/src/components/key-reveal-dialog.tsx) take translated copy and handle clipboard failure without logging values.
+
 ### E.2 Module dashboards
 
 | Module | Main view | Detail | Actions |

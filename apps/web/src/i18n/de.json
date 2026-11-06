@@ -14,9 +14,14 @@
     "create": "Erstellen",
     "save": "Änderungen speichern",
     "more": "Mehr laden",
-    "invalid": "Prüfe die Felder. Verwende eine vollständige Website-Adresse wie https://example.com ohne Pfad.",
+    "invalid": "Prüfe die Felder und versuche es erneut.",
     "conflict": "Dieser Kurzname wird bereits verwendet. Wähle einen anderen.",
-    "missing": "Diese Seite ist nicht verfügbar."
+    "missing": "Diese Seite ist nicht verfügbar.",
+    "copy": "Schlüssel kopieren",
+    "close": "Schließen",
+    "copied": "Kopiert.",
+    "copyError": "Kopieren wurde blockiert. Wähle den Schlüssel oben aus und kopiere ihn manuell.",
+    "cancel": "Abbrechen"
   },
   "auth": {
     "name": "Dein Name",
@@ -98,6 +103,45 @@
     "anyOrigin": "Einsendungen von allen Websites erlauben. Eine leere Liste erlaubt alle Websites.",
     "overview": "Verwalte die Backend-Funktionen und die Einbindung dieser Website.",
     "noModules": "In dieser Installation sind noch keine Website-Funktionen verfügbar.",
-    "allDomains": "Alle Websites sind erlaubt. Schränke dies in den Einstellungen ein, bevor du einen öffentlichen Schlüssel weitergibst."
+    "allDomains": "Alle Websites sind erlaubt. Schränke dies in den Einstellungen ein, bevor du einen öffentlichen Schlüssel weitergibst.",
+    "invalid": "Prüfe die Felder. Verwende eine vollständige Website-Adresse wie https://example.com ohne Pfad."
+  },
+  "keys": {
+    "title": "Zugriffsschlüssel",
+    "kind": "Schlüsseltyp",
+    "publishable": "Öffentlicher Schlüssel",
+    "secret": "Geheimer Schlüssel",
+    "publicHint": "Verwende diesen Schlüssel auf deiner Website. Er erlaubt nur unterstützte öffentliche Aktionen. Schränke die erlaubten Websites in den Einstellungen ein.",
+    "secretHint": "Bewahre diesen Schlüssel auf deinem Server oder in den privaten Einstellungen deines Coding-Agenten auf. Füge ihn niemals in Website-Code ein.",
+    "access": "Zugriffsprofil",
+    "expiry": "Gültig bis",
+    "noExpiry": "Kein Ablaufdatum",
+    "create": "Schlüssel erstellen",
+    "active": "Aktiv",
+    "expired": "Abgelaufen",
+    "revoked": "Widerrufen",
+    "revoke": "Schlüssel widerrufen",
+    "revokeTitle": "Diesen Schlüssel widerrufen?",
+    "revokeDescription": "Alle Einbindungen mit diesem Schlüssel funktionieren sofort nicht mehr. Dies kann nicht rückgängig gemacht werden.",
+    "guidance": "Verwende einen öffentlichen Schlüssel für deine Website und einen geheimen nur für private Einbindungen. Erlaubte Websites schützen öffentliche Anfragen, machen einen geheimen Schlüssel aber nicht sicher für die Veröffentlichung.",
+    "baseUrl": "API-Adresse",
+    "noPublicKey": "Kein aktiver öffentlicher Schlüssel. Bitte einen Inhaber oder Administrator, einen zu erstellen.",
+    "noPermission": "Nur Inhaber und Administratoren können Schlüssel erstellen oder widerrufen.",
+    "revealTitle": "Neuen Schlüssel sichern",
+    "revealDescription": "Kopiere ihn jetzt an einen sicheren Ort. Ein geheimer Schlüssel wird nur einmal angezeigt. Beim Schließen wird er aus dem Dashboard entfernt.",
+    "presets": {
+      "agent": {
+        "title": "Coding-Agent",
+        "description": "Liest Einbindungs- und Konfigurationsdaten, ändert Konfiguration und liest Nutzung. Kein Zugriff auf persönliche Datensätze, Löschen oder Schlüsselverwaltung."
+      },
+      "server": {
+        "title": "Servereinbindung",
+        "description": "Erlaubt Einsendungen für aktivierte Website-Funktionen. Kein Lesen persönlicher Datensätze, Löschen oder Schlüsselverwaltung."
+      },
+      "data": {
+        "title": "Datenzugriff",
+        "description": "Erlaubt ausdrücklich das Lesen und Bearbeiten persönlicher Datensätze sowie das Lesen der Nutzung. Kein Löschen oder Schlüsselverwaltung. Nur an vertrauenswürdige private Einbindungen weitergeben."
+      }
+    }
   }
 }

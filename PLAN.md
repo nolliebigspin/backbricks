@@ -515,14 +515,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Org/project switch with separate fixtures and stale requests; mobile navigation, roles and origin settings.
 - **Risks/notes:** No duplicate tenant selector state across screens; cache keys include organization/project.
 
-### [ ] P1.12c – Build Embed/key management (est. 4 h)
+### [x] P1.12c – Build Embed/key management (est. 4 h)
 - **Description:** Add key presets/create/reveal-once/revoke and allowed-domain integration guidance under Embed.
 - **Files/packages:** web Embed routes, `packages/ui` KeyRevealDialog/confirmation primitives when shared.
 - **Depends on:** P1.12b, P1.4b/c.
 - **Reuses:** Generated client, shared scope/preset contract, role policy and project settings UI.
 - **Acceptance criteria:**
-  - [ ] Secret is shown only from creation response and cleared on close/navigation; it never enters persistent storage, query cache, URL or error reports.
-  - [ ] Revocation refreshes metadata; members cannot manage keys. Preset descriptions explain access without exposing personal records.
+  - [x] Secret is shown only from creation response and cleared on close/navigation; it never enters persistent storage, query cache, URL or error reports.
+  - [x] Revocation refreshes metadata; members cannot manage keys. Preset descriptions explain access without exposing personal records.
 - **Tests:** Reveal lifecycle, clipboard error, revoke confirmation, session expiry and no secret in caches/DOM after close.
 - **Risks/notes:** M5's agent connection wizard/snippets are not built here.
 
