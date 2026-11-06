@@ -1,26 +1,14 @@
-import {
-  AppError,
-  projectSchema,
-  projectUpdateSchema,
-  type ProjectRepository,
-} from '@backbricks/core';
+import { projectSchema, projectUpdateSchema, type ProjectRepository } from '@backbricks/core';
 import { and, desc, eq, isNull } from 'drizzle-orm';
-import { DrizzleQueryError } from 'drizzle-orm/errors';
-import { z } from 'zod';
 
 import type { DbTransaction } from '../client.ts';
 import { projects } from '../schema/projects.ts';
-import { beforeCursor, requiredRow, type RepositoryScope } from './scope.ts';
+import { beforeCursor, requiredRow, uniqueConflict, type RepositoryScope } from './scope.ts';
 
-const duplicateSlug = z.object({
-  code: z.literal('23505'),
-  constraint: z.literal('projects_organization_id_slug_unique'),
-});
-function projectWriteFailure(error: unknown): never {
-  if (error instanceof DrizzleQueryError && duplicateSlug.safeParse(error.cause).success)
-    throw new AppError('conflict', { detail: 'This project slug is already in use.' });
-  throw error;
-}
+const projectWriteFailure = uniqueConflict(
+  'projects_organization_id_slug_unique',
+  'This project slug is already in use.',
+);
 
 export function createProjectRepository(
   tx: DbTransaction,

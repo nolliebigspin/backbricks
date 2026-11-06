@@ -39,7 +39,11 @@ export interface KeyRepository {
 }
 
 export interface InstanceRepository {
-  list(page: RepositoryPage, moduleType?: string): Promise<ModuleInstance[]>;
+  list(
+    page: RepositoryPage,
+    moduleType?: string,
+    options?: { includeArchived?: boolean },
+  ): Promise<ModuleInstance[]>;
   get(id: string): Promise<ModuleInstance>;
   getByKey(moduleType: string, key: string): Promise<ModuleInstance>;
   insert(input: ProjectChild<ModuleInstance>): Promise<ModuleInstance>;

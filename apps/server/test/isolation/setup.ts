@@ -81,6 +81,12 @@ export async function prepareIsolationFixture(fixture: AuthFixture) {
             async ({ repositories }) => ({
               keys: (await repositories.keys.list({ limit: 100 })).map(apiKeyMetadata),
               usage: await repositories.usage.list(monthlyUsagePeriod(fixture.now())),
+              instances: await Promise.all(
+                (await repositories.instances.list({ limit: 100 })).map(async (instance) => ({
+                  instance,
+                  revisions: await repositories.revisions.list(instance.id, { limit: 100 }),
+                })),
+              ),
             }),
           ),
         ),

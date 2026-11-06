@@ -87,7 +87,6 @@ export function moduleRoutes(
         const response = await services.withTenant(tenant, (tx) =>
           route.run(services.moduleRuntime.forTenant(tx).execution(module.type), input),
         );
-        if (management) response.headers.set('cache-control', 'no-store');
         return response;
       });
     }

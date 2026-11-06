@@ -49,3 +49,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0037](0037-static-module-contracts.md) | Static module contracts and borrowed capabilities | accepted |
 | [0038](0038-module-catalog-and-availability.md) | Module catalog and availability metadata | accepted |
 | [0039](0039-module-http-and-worker-wiring.md) | Module HTTP and worker wiring | accepted |
+| [0040](0040-generic-instance-lifecycle.md) | Generic instance lifecycle | accepted |

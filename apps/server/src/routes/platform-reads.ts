@@ -41,7 +41,6 @@ export function platformReadRoutes(
       const result = await deps.withTenant(requireTenantContext(c), (tx) =>
         deps.queries.activity(tx, c.req.valid('query')),
       );
-      c.header('Cache-Control', 'no-store');
       return c.json(result, 200);
     },
   );
@@ -68,7 +67,6 @@ export function platformReadRoutes(
       const result = await deps.withTenant(requireTenantContext(c), (tx) =>
         deps.queries.activity(tx, c.req.valid('query')),
       );
-      c.header('Cache-Control', 'no-store');
       return c.json(result, 200);
     },
   );
@@ -96,7 +94,6 @@ export function platformReadRoutes(
       const result = await deps.withTenant(requireTenantContext(c), (tx) =>
         deps.queries.usage(tx, c.req.valid('query').period),
       );
-      c.header('Cache-Control', 'no-store');
       return c.json(result, 200);
     },
   );
@@ -125,7 +122,6 @@ export function platformReadRoutes(
       const result = await deps.withTenant(requireTenantContext(c), (tx) =>
         deps.queries.integration(tx),
       );
-      c.header('Cache-Control', 'no-store');
       return c.json(result, 200);
     },
   );

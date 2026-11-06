@@ -54,7 +54,6 @@ export function keyRoutes(
       const result = await deps.withTenant(requireTenantContext(c), (tx) =>
         deps.keys.list(tx, repositoryPage(c.req.valid('query'))),
       );
-      c.header('Cache-Control', 'no-store');
       return c.json(result, 200);
     },
   );
@@ -91,7 +90,6 @@ export function keyRoutes(
       const result = await deps.withTenant(requireTenantContext(c), (tx) =>
         deps.keys.create(tx, c.req.valid('json'), c.get('requestId')),
       );
-      c.header('Cache-Control', 'no-store');
       return c.json(result, 201);
     },
   );
@@ -113,7 +111,6 @@ export function keyRoutes(
       await deps.withTenant(requireTenantContext(c), (tx) =>
         deps.keys.revoke(tx, c.req.valid('param').keyId, c.get('requestId')),
       );
-      c.header('Cache-Control', 'no-store');
       return c.body(null, 204);
     },
   );

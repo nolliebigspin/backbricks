@@ -6,11 +6,16 @@ import {
   type InstanceRepository,
   type RevisionRepository,
 } from '@backbricks/core';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, ne } from 'drizzle-orm';
 
 import type { DbTransaction } from '../client.ts';
 import { moduleInstanceRevisions, moduleInstances } from '../schema/instances.ts';
-import { beforeCursor, requiredRow, type RepositoryScope } from './scope.ts';
+import { beforeCursor, requiredRow, uniqueConflict, type RepositoryScope } from './scope.ts';
+
+const instanceWriteFailure = uniqueConflict(
+  'module_instances_project_id_module_type_key_unique',
+  'This instance key is already in use.',
+);
 
 export function createInstanceRepositories(
   tx: DbTransaction,
@@ -21,7 +26,7 @@ export function createInstanceRepositories(
     return scope.where(moduleInstances);
   };
   const instances: InstanceRepository = {
-    async list(page, moduleType) {
+    async list(page, moduleType, options = {}) {
       const rows = await tx
         .select()
         .from(moduleInstances)
@@ -29,6 +34,7 @@ export function createInstanceRepositories(
           and(
             where(),
             moduleType ? eq(moduleInstances.moduleType, moduleType) : undefined,
+            options.includeArchived === false ? ne(moduleInstances.status, 'archived') : undefined,
             beforeCursor(moduleInstances, page),
           ),
         )
@@ -63,7 +69,8 @@ export function createInstanceRepositories(
         await tx
           .insert(moduleInstances)
           .values({ ...input, ...scope.project() })
-          .returning(),
+          .returning()
+          .catch(instanceWriteFailure),
         moduleInstanceSchema,
       );
     },

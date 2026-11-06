@@ -3,14 +3,47 @@ import { expect, test } from 'bun:test';
 import { organizationRouteManifest } from '@backbricks/auth';
 
 import { available, scenario } from '../test/auth-fixture.ts';
+import { instanceCatalog } from '../test/instance-fixture.ts';
 import { apiIsolationCases } from '../test/isolation/api-cases.ts';
 import { authIsolationCases } from '../test/isolation/auth-cases.ts';
+import { instanceIsolationCases } from '../test/isolation/instance-cases.ts';
 import { keyIsolationCases } from '../test/isolation/key-cases.ts';
 import { platformReadIsolationCases } from '../test/isolation/platform-read-cases.ts';
 import { projectIsolationCases } from '../test/isolation/project-cases.ts';
 import { prepareIsolationFixture } from '../test/isolation/setup.ts';
 import { assertIsolationCoverage, exerciseIsolation } from '../test/isolation/suite.ts';
 import { managementFixtureRoutes } from '../test/management-fixture.ts';
+
+test.skipIf(!available)(
+  'every generated instance operation has a concrete isolation case',
+  async () => {
+    await scenario(
+      async (base) => {
+        const f = await prepareIsolationFixture(base);
+        const operations = base
+          .manifest()
+          .flatMap((row) =>
+            row.policy.kind === 'management' &&
+            row.policy.isolationCase.startsWith('sample.instance.')
+              ? [{ method: row.method, path: row.path, isolationCase: row.policy.isolationCase }]
+              : [],
+          );
+        const cases = await instanceIsolationCases(f);
+        expect(operations).toHaveLength(5);
+        assertIsolationCoverage(operations, cases);
+        for (const operation of operations) {
+          const entry = cases[operation.isolationCase];
+          if (!entry) throw new Error('Expected covered instance operation');
+          // oxlint-disable-next-line no-await-in-loop -- Updates and archive share the preceding instance version.
+          await exerciseIsolation(base, entry, () => f.snapshot(), operation);
+        }
+      },
+      { BACKBRICKS_MODULES: 'sample' },
+      { catalog: instanceCatalog() },
+    );
+  },
+  30_000,
+);
 
 test.skipIf(!available)(
   'every registered management operation has a concrete isolation case',

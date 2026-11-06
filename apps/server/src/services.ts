@@ -6,6 +6,7 @@ import {
   createKeyService,
   createKeyScopeCatalog,
   createProjectService,
+  createInstanceService,
   createPlatformQueries,
   createRateLimiter,
   createServiceContainer,
@@ -60,6 +61,11 @@ export function createServerServices(
     jobs: moduleJobs(modules, moduleRuntime, withTenant),
     withTenant,
     projects: createProjectService(container.core),
+    instances: createInstanceService({
+      ...container.core,
+      registry: modules.registry,
+      runtime: moduleRuntime,
+    }),
     queries: createPlatformQueries({ ...container.core, publicUrl: config.publicUrl, modules }),
     keys: createKeyService({ ...container.core, enabledModules: config.modules, scopeCatalog }),
     async close() {

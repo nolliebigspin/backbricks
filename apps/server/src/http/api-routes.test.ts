@@ -248,3 +248,27 @@ test('module and platform routes cannot reuse an OpenAPI operation ID', () => {
     }),
   ).toThrow('Duplicate API operation ID');
 });
+
+test('module hooks cannot shadow a generic route by renaming its path parameter', () => {
+  expect(() =>
+    setup((api) => {
+      api.register(example, { kind: 'public', bodyLimitBytes: 128 }, (c) =>
+        c.json({ id: 'first' }, 200),
+      );
+      api.register(
+        {
+          ...example,
+          path: '/v1/examples/{key}',
+          request: { params: z.object({ key: z.string() }) },
+        },
+        {
+          kind: 'management',
+          bodyLimitBytes: 128,
+          session: { role: 'owner' },
+          isolationCase: 'shadow',
+        },
+        (c) => c.json({ id: 'shadow' }, 200),
+      );
+    }),
+  ).toThrow('Duplicate API operation');
+});

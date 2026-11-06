@@ -21,6 +21,7 @@ import { createLogger } from '../src/logger.ts';
 import { createApiAuthorization } from '../src/middleware/authorization.ts';
 import { moduleCatalog } from '../src/modules.ts';
 import { registerProjects } from '../src/projects.ts';
+import { instanceRoutes } from '../src/routes/instances.ts';
 import { metaRoutes } from '../src/routes/meta.ts';
 import { moduleRoutes, type ModulePublicAuthorization } from '../src/routes/modules.ts';
 import { platformReadRoutes } from '../src/routes/platform-reads.ts';
@@ -45,6 +46,7 @@ export async function scenario(
     now: () => Date;
     manifest: () => ApiRoutes['manifest'];
     jobs: () => ReturnType<typeof createServerServices>['jobs'];
+    instances: () => ReturnType<typeof createServerServices>['instances'];
     authInventory: () => Promise<{ path: string; method: string }[]>;
     drainSecurity: () => Promise<void>;
     capabilities: (values: Pick<Config, 'mailer' | 'signupPolicy'>) => Promise<void>;
@@ -122,6 +124,7 @@ export async function scenario(
           registerKeys(api, runtime, config.modules);
           platformReadRoutes(api, runtime);
           metaRoutes(api, runtime.modules);
+          instanceRoutes(api, runtime);
           moduleRoutes(api, runtime, apiOptions.authorizePublic);
           apiOptions.configure?.(api, handle.db);
         },
@@ -145,6 +148,10 @@ export async function scenario(
       jobs: () => {
         if (!services) throw new Error('Expected runtime services');
         return services.jobs;
+      },
+      instances: () => {
+        if (!services) throw new Error('Expected runtime services');
+        return services.instances;
       },
       manifest: () => {
         if (!app) throw new Error('Expected mounted fixture');

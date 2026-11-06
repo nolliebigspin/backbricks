@@ -164,6 +164,22 @@ export {
 } from './projects/schemas.ts';
 
 export { createProjectService, type ProjectService } from './projects/service.ts';
+export { createInstanceService, type InstanceService } from './instances/service.ts';
+export {
+  CONFIG_ACCESS,
+  CONFIG_DESTRUCTIVE_SCOPE,
+  requireConfigAccess,
+} from './instances/permissions.ts';
+export {
+  instanceCreateSchema,
+  instancePatchSchema,
+  instanceResponseSchema,
+  instanceKeySchema,
+  instanceVersionSchema,
+  MAX_INSTANCE_VERSION,
+  type InstanceCreate,
+  type InstancePatch,
+} from './instances/schemas.ts';
 
 export {
   KEY_SCOPES,

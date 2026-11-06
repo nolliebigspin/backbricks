@@ -350,14 +350,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Boot matrix (including no storage), route/job absence, metadata allowlist snapshots and disabled-module config rejection.
 - **Risks/notes:** Empty env still means all available modules; test core-only via an empty available registry, not a silent change to P0 env semantics.
 
-### [ ] P1.7a – Implement generic instance CRUD (est. 6 h)
+### [x] P1.7a – Implement generic instance CRUD (est. 6 h)
 - **Description:** Add registry-driven instance CRUD, config validation, initial/subsequent revisions and shared config-change classification. Domain logic stays behind ModuleDefinition hooks.
 - **Files/packages:** core instance service, db instance/revision repositories, server generic routes.
 - **Depends on:** P1.6b, P1.5a, P1.4c, P1.13a.
 - **Reuses:** Registry schemas, tenant repositories, audit/events, error and pagination helpers.
 - **Acceptance criteria:**
-  - [ ] Create/read/update/status/delete enforce unique keys, active project/module, role/scopes and monotonic config versions; destructive API changes require the same rights as config apply.
-  - [ ] Config/revision/audit/event writes share a transaction; deletion behavior uses approved retention/erasure rules and cannot bypass destructive checks.
+  - [x] Create/read/update/status/delete enforce unique keys, active project/module, role/scopes and monotonic config versions; destructive API changes require the same rights as config apply.
+  - [x] Config/revision/audit/event writes share a transaction; deletion behavior uses approved retention/erasure rules and cannot bypass destructive checks.
 - **Tests:** Synthetic modules through public service/HTTP interfaces; foreign IDs/keys, invalid config, concurrent update and forced rollback.
 - **Risks/notes:** I7/I12/I19; no production domain routes solely to demonstrate generic CRUD.
 
@@ -581,7 +581,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.1a/b/c, P1.11a, P1.2a/b, P1.3a/b, P1.8a/b/c/d, P1.13a, P1.5a/b, P1.4a/b/c and P1.6a/b complete. ADRs 0021–0039 record implemented boundaries. Q5–Q10 are explicitly approved; I1 now states the sole exact-hash/ID authentication bootstrap exception. `bun run check` passes with no skipped tests (83 server tests, 36 real DB tests). Production key resolution, exposure audit/notification intent and owner/admin SMTP delivery pass real HTTP/Postgres/Mailpit tests, including failure rollback of notification throttling. Durable worker retries remain P1.10b; complete dashboard flows remain P1.12/P1.13. Shared provider lifetimes, restricted module service views, usage and UnlimitedEntitlements are implemented and tested. Activity/usage/integration reads are scoped, covered by isolation cases and privacy/expiry/precision tests; build and 4 browser smoke tests pass. Static module contracts and exact-handle capability/service binding pass real cross-module rollback tests, including public output snapshots, expired/foreign handle rejection and prototype/content-type regressions. P1.6a/b are complete: static definitions/capabilities, catalog selection, truthful meta/integration availability, scoped HTTP hooks, merged issuance/auth scopes, worker job hand-off and all-subset tests. Public hooks fail closed until P1.9 authorization; durable job delivery remains P1.10. Full checks, build and 4 browser smoke tests pass. Next: P1.7a (generic instance CRUD). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
+P1.7a is complete; see ADR-0040 and its signed-off task commit for implementation and verification evidence. The existing feature branch remains the sequential Claude/Codex handoff checkout. No partial task is left in the working tree. Next: P1.7b (revision reads, rollback and config migration). M1 remains in progress; complete the remaining tasks before writing the phase report or claiming milestone acceptance.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 

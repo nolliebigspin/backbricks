@@ -9,6 +9,7 @@ import { registerKeys } from './keys.ts';
 import type { Logger } from './logger.ts';
 import { createApiAuthorization } from './middleware/authorization.ts';
 import { registerProjects } from './projects.ts';
+import { instanceRoutes } from './routes/instances.ts';
 import { metaRoutes } from './routes/meta.ts';
 import { moduleRoutes } from './routes/modules.ts';
 import { platformReadRoutes } from './routes/platform-reads.ts';
@@ -50,6 +51,7 @@ export function startServe(config: Config, log: Logger): RunningRole {
       registerKeys(api, services, config.modules);
       platformReadRoutes(api, services);
       metaRoutes(api, services.modules);
+      instanceRoutes(api, services);
       moduleRoutes(api, services);
     },
     createApiAuthorization({ config, db: database.db, auth, resolveKey: keyAuth.resolveKey }),

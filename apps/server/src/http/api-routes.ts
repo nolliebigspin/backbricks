@@ -72,7 +72,7 @@ export class ApiRoutes {
     if (parsed.kind === 'management' && parsed.secretKey && !tenant.projectParam) {
       throw new Error('Secret-key management routes must be project-scoped.');
     }
-    const key = `${method} ${route.path}`;
+    const key = `${method} ${route.path.replaceAll(/\{[^}]+\}/g, '{}')}`;
     if (this.#operations.has(key)) throw new Error(`Duplicate API operation: ${key}`);
     if (route.operationId && this.#operationIds.has(route.operationId))
       throw new Error(`Duplicate API operation ID: ${route.operationId}`);
@@ -86,8 +86,12 @@ export class ApiRoutes {
     });
     this.#app.use(path, async (c, next) => {
       if (c.req.method !== method && !(c.req.method === 'HEAD' && method === 'GET')) return next();
-      if (parsed.kind === 'management') await this.#authorize(parsed, c, tenant);
-      return limit(c, next);
+      if (parsed.kind === 'management') {
+        c.header('Cache-Control', 'no-store');
+        await this.#authorize(parsed, c, tenant);
+      }
+      await limit(c, next);
+      if (parsed.kind === 'management') c.header('Cache-Control', 'no-store');
     });
     this.#app.openapi(
       {

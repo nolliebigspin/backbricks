@@ -1,6 +1,8 @@
 import { AppError, MAX_PAGE_SIZE, type RepositoryPage, type TenantContext } from '@backbricks/core';
 import { and, eq, sql } from 'drizzle-orm';
+import { DrizzleQueryError } from 'drizzle-orm/errors';
 import type { AnyPgColumn } from 'drizzle-orm/pg-core';
+import { z } from 'zod';
 
 type TenantTable = { organizationId: AnyPgColumn; projectId?: AnyPgColumn };
 
@@ -44,4 +46,14 @@ export function beforeCursor(
 export function requiredRow<T>(rows: unknown[], schema: { parse(value: unknown): T }): T {
   if (rows[0] === undefined) throw new AppError('not_found');
   return schema.parse(rows[0]);
+}
+
+/** Translate only the owning resource's unique constraint; unrelated database failures stay failures. */
+export function uniqueConflict(constraint: string, detail: string) {
+  const duplicate = z.object({ code: z.literal('23505'), constraint: z.literal(constraint) });
+  return (error: unknown): never => {
+    if (error instanceof DrizzleQueryError && duplicate.safeParse(error.cause).success)
+      throw new AppError('conflict', { detail });
+    throw error;
+  };
 }

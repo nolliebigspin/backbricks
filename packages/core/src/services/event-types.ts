@@ -1,5 +1,8 @@
 /** Platform-owned events; module registration reserves these exact names. */
 export const CORE_EVENTS = {
+  instanceCreated: 'instance.created',
+  instanceUpdated: 'instance.updated',
+  instanceArchived: 'instance.archived',
   projectCreated: 'project.created',
   projectUpdated: 'project.updated',
   projectArchived: 'project.archived',

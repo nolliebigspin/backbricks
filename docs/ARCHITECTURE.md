@@ -317,7 +317,7 @@ Static, no runtime plugins. `apps/server/src/modules.ts` lists the modules. [`de
 
 **Generic features the core provides for every module** (no module code needed):
 
-- Instance CRUD (`GET/POST /v1/projects/{id}/{plural}`, `GET/PATCH/DELETE …/{key}`) incl. config validation, revision, audit log and event
+- [Instance CRUD](../packages/core/src/instances/service.ts) (`GET/POST /v1/projects/{id}/{plural}`, `GET/PATCH/DELETE …/{key}`) incl. config validation, revision, audit log and event; PATCH/DELETE require the current config version, DELETE archives configuration and requires destructive permission (ADR-0040)
 - Viewing and rolling back revisions
 - Config-as-code document `GET/PUT /v1/projects/{id}/config` (all instances of all modules)
 - JSON Schema export for editor autocompletion
