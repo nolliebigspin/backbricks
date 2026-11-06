@@ -11,6 +11,7 @@
     "LICENSE",
     "bun.lock",
     "packages/api-contract/src/generated/**",
-    "packages/db/migrations/**"
+    "packages/db/migrations/**",
+    "apps/web/src/routeTree.gen.ts"
   ]
 }

@@ -1,0 +1,17 @@
+{
+  "name": "@backbricks/module-uploads",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Uploads module",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@backbricks/core": "workspace:*"
+  }
+}

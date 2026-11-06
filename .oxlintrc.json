@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["typescript", "unicorn", "oxc", "import", "promise", "react", "jsx-a11y"],
+  "plugins": ["typescript", "unicorn", "oxc", "import", "promise", "react", "jsx-a11y", "node"],
   "jsPlugins": ["@shadcn/lint"],
   "options": {
     "typeAware": true,
@@ -25,6 +25,15 @@
     "import/no-cycle": "error",
     "import/no-default-export": "error",
     "react/no-danger": "error",
+    "node/no-process-env": "error",
+    "no-restricted-properties": [
+      "error",
+      {
+        "object": "Bun",
+        "property": "env",
+        "message": "Read configuration through @backbricks/core config, not Bun.env (AGENTS.md §2.2)."
+      }
+    ],
     "react/jsx-no-target-blank": "error",
     "shadcn/no-restyle": [
       "error",
@@ -54,9 +63,33 @@
       }
     },
     {
+      "files": [
+        "packages/core/src/config/**",
+        "scripts/**",
+        "**/*.config.ts",
+        "**/*.config.js",
+        "**/*.test.ts",
+        "**/test/**"
+      ],
+      "rules": {
+        "node/no-process-env": "off",
+        "no-restricted-properties": "off"
+      }
+    },
+    {
       "files": ["**/*.test.ts", "**/*.test.tsx", "**/e2e/**"],
       "rules": {
         "typescript/no-explicit-any": "warn"
+      }
+    },
+    {
+      "files": [
+        "apps/*/src/index.ts",
+        "packages/*/src/index.ts",
+        "packages/modules/*/src/index.ts"
+      ],
+      "rules": {
+        "unicorn/no-empty-file": "off"
       }
     },
     {
@@ -72,6 +105,8 @@
     "**/node_modules/**",
     "**/.turbo/**",
     ".codegraph/**",
+    "scripts/arch/fixtures/**",
+    "apps/web/src/routeTree.gen.ts",
     "packages/api-contract/src/generated/**",
     "packages/db/migrations/**"
   ],

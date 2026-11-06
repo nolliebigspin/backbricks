@@ -1,0 +1,3 @@
+[test]
+# Same DOM setup as packages/ui (shared, not copied).
+preload = ["../../packages/ui/test/setup-dom.ts"]

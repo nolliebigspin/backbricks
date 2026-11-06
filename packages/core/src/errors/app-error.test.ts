@@ -1,0 +1,33 @@
+import { describe, expect, test } from 'bun:test';
+
+import { AppError, toProblemDetails } from './app-error.ts';
+
+describe('AppError → problem details (RFC 9457)', () => {
+  test('takes status and title from the catalog', () => {
+    const error = new AppError('validation_failed', {
+      detail: '1 field is invalid.',
+      errors: [{ path: 'email', code: 'invalid_email', message: 'Must be a valid email address.' }],
+      hint: 'Fetch the form schema first.',
+    });
+    expect(toProblemDetails(error, 'req_1')).toEqual({
+      type: 'https://backbricks.app/errors/validation_failed',
+      title: 'Validation failed',
+      status: 422,
+      code: 'validation_failed',
+      detail: '1 field is invalid.',
+      errors: [{ path: 'email', code: 'invalid_email', message: 'Must be a valid email address.' }],
+      hint: 'Fetch the form schema first.',
+      requestId: 'req_1',
+    });
+  });
+
+  test('omits optional members that are not set', () => {
+    expect(Object.keys(toProblemDetails(new AppError('not_found'), 'req_2'))).toEqual([
+      'type',
+      'title',
+      'status',
+      'code',
+      'requestId',
+    ]);
+  });
+});

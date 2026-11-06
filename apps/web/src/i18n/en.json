@@ -1,0 +1,10 @@
+{
+  "app": {
+    "name": "Backbricks"
+  },
+  "home": {
+    "title": "Welcome to Backbricks",
+    "description": "Your dashboard is being set up. Forms, files and reviews will show up here.",
+    "status": "The dashboard is running."
+  }
+}

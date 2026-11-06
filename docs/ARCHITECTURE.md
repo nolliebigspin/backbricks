@@ -1150,8 +1150,7 @@ backbricks/
 │  ├─ api-contract/           # generated openapi.json + TS types (committed build artifact)
 │  ├─ sdk/                    # @backbricks/sdk (MIT)
 │  ├─ cli/                    # backbricks CLI + MCP (MIT)
-│  ├─ ui/                     # shared theme + components for dashboard and website (shadcn-based)
-│  └─ tsconfig/               # shared tsconfig presets
+│  └─ ui/                     # shared theme + components for dashboard and website (shadcn-based)
 ├─ cloud/                     # cloud only: plans, billing adapter (added in C1; narrow)
 ├─ examples/{nextjs,astro,html}/   # MIT
 ├─ skills/backbricks/SKILL.md     # MIT
@@ -1162,7 +1161,7 @@ backbricks/
 ├─ CLAUDE.md, AGENTS.md       # agent instructions
 ├─ LICENSE (AGPL-3.0), LICENSING.md, TRADEMARKS.md
 ├─ CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md
-├─ mise.toml, package.json, turbo.json, tsconfig.base.json
+├─ mise.toml, package.json, turbo.json, tsconfig.base.json   # tsconfig.base.json is the shared TS preset
 ├─ .oxlintrc.json, .oxfmtrc.json, lefthook.yml, .mcp.json
 └─ .github/{workflows,ISSUE_TEMPLATE}/, dependabot.yml
 ```
@@ -1188,7 +1187,7 @@ backbricks/
 | **FSL/BSL** (source-available) | Strong commercial protection, converts to OSS later | Not OSI open source; community skepticism; contradicts the product promise |
 | **Open core** | Clear monetization via enterprise features | Risk of a crippled community edition; conflicts with "no feature lock" |
 
-**Decision:** AGPL-3.0-only for `apps/*`, `packages/{core,db,auth,adapters,modules,ui,api-contract,tsconfig}`, `cloud/`; **MIT** for `packages/sdk`, `packages/cli`, `examples/*`, `skills/*` (customer websites never embed AGPL code). Contributions under **DCO** (`Signed-off-by`). If dual licensing is ever wanted, switch to a CLA before accepting the first external contribution. Register the **trademark**: with open source, the name is what protects the cloud. See `LICENSING.md` and `TRADEMARKS.md`. Legal review before the 1.0 release.
+**Decision:** AGPL-3.0-only for `apps/*`, `packages/{core,db,auth,adapters,modules,ui,api-contract}`, `cloud/`; **MIT** for `packages/sdk`, `packages/cli`, `examples/*`, `skills/*` (customer websites never embed AGPL code). Contributions under **DCO** (`Signed-off-by`). If dual licensing is ever wanted, switch to a CLA before accepting the first external contribution. Register the **trademark**: with open source, the name is what protects the cloud. See `LICENSING.md` and `TRADEMARKS.md`. Legal review before the 1.0 release.
 
 ### G.4 Self-hosting architecture (Docker Compose)
 

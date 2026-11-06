@@ -1,0 +1,14 @@
+{
+  "name": "@backbricks/auth",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Better Auth configuration for the dashboard",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}

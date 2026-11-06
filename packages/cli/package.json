@@ -1,0 +1,17 @@
+{
+  "name": "backbricks",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Backbricks CLI and MCP server",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

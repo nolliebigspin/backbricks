@@ -1,0 +1,23 @@
+# Keep the build context small and free of local state and secrets.
+**/node_modules
+**/dist
+**/.turbo
+**/.astro
+**/.vercel
+.git
+.codegraph
+.claude
+.env
+.env.*
+**/*.pem
+coverage
+playwright-report
+test-results
+blob-report
+
+# Tests and test fixtures don't ship in the image.
+**/*.test.ts
+**/*.test.tsx
+**/test
+scripts
+e2e

@@ -1,5 +1,5 @@
 ---
-description: Plan (and after approval implement) a new website module, e.g. /new-module waitlist "…purpose…"
+description: Plan (and after approval implement) a new website module, e.g. /bb-new-module waitlist "…purpose…"
 argument-hint: <name> "<purpose>"
 ---
 

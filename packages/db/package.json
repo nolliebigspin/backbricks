@@ -1,0 +1,25 @@
+{
+  "name": "@backbricks/db",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Drizzle setup, migrations and withTenant",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "bun test",
+    "generate": "bun --bun drizzle-kit generate"
+  },
+  "dependencies": {
+    "@backbricks/core": "workspace:*",
+    "drizzle-orm": "1.0.0-rc.5",
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@types/pg": "8.23.1",
+    "drizzle-kit": "1.0.0-rc.5"
+  }
+}
