@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { MAX_KEY_SCOPES } from '../keys/constants.ts';
 import { scopeNameSchema } from '../keys/protocol.ts';
 import { actorTypeSchema, apiKeyKindSchema, moduleInstanceStatusSchema } from './values.ts';
 
@@ -41,7 +42,7 @@ export const apiKeyRecordSchema = z
     lookupHash: z.instanceof(Uint8Array),
     displayPrefix: z.string(),
     publicToken: z.string().nullable(),
-    scopes: z.array(scopeNameSchema),
+    scopes: z.array(scopeNameSchema).max(MAX_KEY_SCOPES),
     createdBy: z.string().nullable(),
     lastUsedAt: z.date().nullable(),
     expiresAt: z.date().nullable(),

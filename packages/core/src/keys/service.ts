@@ -10,7 +10,7 @@ import type { Clock } from '../time/clock.ts';
 import { apiKeyCreateSchema, type ApiKeyCreate } from './creation.ts';
 import { createApiKeyMaterial } from './material.ts';
 import { apiKeyMetadata } from './metadata.ts';
-import { keyPresetScopes } from './scopes.ts';
+import { keyPresetScopes, type KeyScopeCatalog } from './scopes.ts';
 
 function managementSession(tx: TenantTransaction) {
   const principal = tx.context.principal;
@@ -26,9 +26,10 @@ export function createKeyService(deps: {
   audit: AuditService;
   events: EventService;
   enabledModules: readonly string[];
+  scopeCatalog?: KeyScopeCatalog;
 }) {
   const enabled = [...deps.enabledModules];
-  const schema = apiKeyCreateSchema(enabled);
+  const schema = apiKeyCreateSchema(enabled, deps.scopeCatalog);
   return {
     async list(tx: TenantTransaction, page: RepositoryPage) {
       managementSession(tx);

@@ -44,7 +44,7 @@ export {
   pageResult,
 } from './http/pagination.ts';
 export { AUTH_BASE_PATH } from './http/auth-path.ts';
-export { API_KEY_PREFIXES, API_KEY_ALPHABET } from './keys/constants.ts';
+export { API_KEY_PREFIXES, API_KEY_ALPHABET, MAX_KEY_SCOPES } from './keys/constants.ts';
 export {
   API_KEY_TOKEN_LENGTH,
   scopeNameSchema,
@@ -167,6 +167,9 @@ export { createProjectService, type ProjectService } from './projects/service.ts
 
 export {
   KEY_SCOPES,
+  createKeyScopeCatalog,
+  keyScopeDefinitionSchema,
+  type KeyScopeCatalog,
   KEY_SCOPE_PRESETS,
   keyScopeSchema,
   keyScopesSchema,

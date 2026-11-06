@@ -10,6 +10,7 @@ import type { Logger } from './logger.ts';
 import { createApiAuthorization } from './middleware/authorization.ts';
 import { registerProjects } from './projects.ts';
 import { metaRoutes } from './routes/meta.ts';
+import { moduleRoutes } from './routes/modules.ts';
 import { platformReadRoutes } from './routes/platform-reads.ts';
 import { createServerServices } from './services.ts';
 
@@ -49,6 +50,7 @@ export function startServe(config: Config, log: Logger): RunningRole {
       registerKeys(api, services, config.modules);
       platformReadRoutes(api, services);
       metaRoutes(api, services.modules);
+      moduleRoutes(api, services);
     },
     createApiAuthorization({ config, db: database.db, auth, resolveKey: keyAuth.resolveKey }),
   );
@@ -81,7 +83,7 @@ export async function startWorker(config: Config, log: Logger): Promise<RunningR
   log.info(
     {
       modules: config.modules,
-      jobs: services.modules.registry.modules.flatMap((module) => module.jobs).length,
+      jobs: services.jobs.length,
     },
     'worker ready',
   );

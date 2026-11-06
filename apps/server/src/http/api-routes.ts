@@ -32,6 +32,7 @@ export class ApiRoutes {
   readonly #handlers = new Set<RuntimeRoute>();
   readonly #manifest: RegisteredRoute[] = [];
   readonly #operations = new Set<string>();
+  readonly #operationIds = new Set<string>();
 
   constructor(
     app: OpenAPIHono<AppEnv>,
@@ -73,6 +74,8 @@ export class ApiRoutes {
     }
     const key = `${method} ${route.path}`;
     if (this.#operations.has(key)) throw new Error(`Duplicate API operation: ${key}`);
+    if (route.operationId && this.#operationIds.has(route.operationId))
+      throw new Error(`Duplicate API operation ID: ${route.operationId}`);
     const start = this.#app.routes.length;
     const path = route.path.replaceAll(/\{([^}]+)\}/g, ':$1');
     const limit = bodyLimit({
@@ -101,6 +104,7 @@ export class ApiRoutes {
     );
     for (const registered of this.#app.routes.slice(start)) this.#handlers.add(registered);
     this.#operations.add(key);
+    if (route.operationId) this.#operationIds.add(route.operationId);
     this.#manifest.push(
       Object.freeze({
         method: route.method.toUpperCase(),

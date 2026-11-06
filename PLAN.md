@@ -339,14 +339,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Valid and invalid registries, dependency/provider ordering, disabled providers and cross-module rollback fixture.
 - **Risks/notes:** No `any`, generic plugin loader or domain schemas. Zod config/JSON Schema must have representable public output.
 
-### [ ] P1.6b – Wire module selection and metadata (est. 4 h)
+### [x] P1.6b – Wire module selection and metadata (est. 4 h)
 - **Description:** Derive startup config, routes/jobs/services/readiness and web availability from selected descriptors/definitions, following DEV-9 during M1.
 - **Files/packages:** server modules/main/roles, core config, module shells' exports, web registry boundary.
 - **Depends on:** P1.6a; Q5.
 - **Reuses:** Existing module infrastructure exports, parseModuleList, readiness checks and compose profiles.
 - **Acceptance criteria:**
-  - [ ] Fixture registry boots empty, each single-module case and all combinations; storage/scanner are required only by enabled definitions. Unknown selection/capability errors fail startup clearly.
-  - [ ] `GET /v1/meta` reports operational availability truthfully; disabled module paths return `module_not_enabled` without exposing tenant data. M1 domain shells expose no working domain API.
+  - [x] Fixture registry boots empty, each single-module case and all combinations; storage/scanner are required only by enabled definitions. Unknown selection/capability errors fail startup clearly.
+  - [x] `GET /v1/meta` reports operational availability truthfully; disabled module paths return `module_not_enabled` without exposing tenant data. M1 domain shells expose no working domain API.
 - **Tests:** Boot matrix (including no storage), route/job absence, metadata allowlist snapshots and disabled-module config rejection.
 - **Risks/notes:** Empty env still means all available modules; test core-only via an empty available registry, not a silent change to P0 env semantics.
 
@@ -581,7 +581,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.1a/b/c, P1.11a, P1.2a/b, P1.3a/b, P1.8a/b/c/d, P1.13a, P1.5a/b, P1.4a/b/c and P1.6a complete. ADRs 0021–0037 record implemented boundaries. Q5–Q10 are explicitly approved; I1 now states the sole exact-hash/ID authentication bootstrap exception. `bun run check` passes with no skipped tests (78 server tests, 36 real DB tests). Production key resolution, exposure audit/notification intent and owner/admin SMTP delivery pass real HTTP/Postgres/Mailpit tests, including failure rollback of notification throttling. Durable worker retries remain P1.10b; complete dashboard flows remain P1.12/P1.13. Shared provider lifetimes, restricted module service views, usage and UnlimitedEntitlements are implemented and tested. Activity/usage/integration reads are scoped, covered by isolation cases and privacy/expiry/precision tests; build and 4 browser smoke tests pass. Static module contracts and exact-handle capability/service binding pass real cross-module rollback tests, including public output snapshots, expired/foreign handle rejection and prototype/content-type regressions. P1.6b partially implemented: catalog selection, truthful public/project availability metadata, primary-namespace unavailable responses and HTTP/worker registry binding; subset/metadata tests pass. Operational HTTP route mounting and job registration hand-off remain before ticking P1.6b (ADR-0038). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
+P1.1a/b/c, P1.11a, P1.2a/b, P1.3a/b, P1.8a/b/c/d, P1.13a, P1.5a/b, P1.4a/b/c and P1.6a/b complete. ADRs 0021–0039 record implemented boundaries. Q5–Q10 are explicitly approved; I1 now states the sole exact-hash/ID authentication bootstrap exception. `bun run check` passes with no skipped tests (83 server tests, 36 real DB tests). Production key resolution, exposure audit/notification intent and owner/admin SMTP delivery pass real HTTP/Postgres/Mailpit tests, including failure rollback of notification throttling. Durable worker retries remain P1.10b; complete dashboard flows remain P1.12/P1.13. Shared provider lifetimes, restricted module service views, usage and UnlimitedEntitlements are implemented and tested. Activity/usage/integration reads are scoped, covered by isolation cases and privacy/expiry/precision tests; build and 4 browser smoke tests pass. Static module contracts and exact-handle capability/service binding pass real cross-module rollback tests, including public output snapshots, expired/foreign handle rejection and prototype/content-type regressions. P1.6a/b are complete: static definitions/capabilities, catalog selection, truthful meta/integration availability, scoped HTTP hooks, merged issuance/auth scopes, worker job hand-off and all-subset tests. Public hooks fail closed until P1.9 authorization; durable job delivery remains P1.10. Full checks, build and 4 browser smoke tests pass. Next: P1.7a (generic instance CRUD). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 

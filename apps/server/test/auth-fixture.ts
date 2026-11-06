@@ -5,6 +5,7 @@ import {
   type Config,
   type Clock,
   type SecretKeyResolver,
+  type defineModuleCatalog,
 } from '@backbricks/core';
 import { createDatabase, runMigrations } from '@backbricks/db';
 import { z } from '@hono/zod-openapi';
@@ -18,8 +19,10 @@ import { createServerKeyAuth } from '../src/key-auth.ts';
 import { registerKeys } from '../src/keys.ts';
 import { createLogger } from '../src/logger.ts';
 import { createApiAuthorization } from '../src/middleware/authorization.ts';
+import { moduleCatalog } from '../src/modules.ts';
 import { registerProjects } from '../src/projects.ts';
 import { metaRoutes } from '../src/routes/meta.ts';
+import { moduleRoutes, type ModulePublicAuthorization } from '../src/routes/modules.ts';
 import { platformReadRoutes } from '../src/routes/platform-reads.ts';
 import { createServerServices } from '../src/services.ts';
 
@@ -41,6 +44,7 @@ export async function scenario(
     origin: string;
     now: () => Date;
     manifest: () => ApiRoutes['manifest'];
+    jobs: () => ReturnType<typeof createServerServices>['jobs'];
     authInventory: () => Promise<{ path: string; method: string }[]>;
     drainSecurity: () => Promise<void>;
     capabilities: (values: Pick<Config, 'mailer' | 'signupPolicy'>) => Promise<void>;
@@ -50,8 +54,14 @@ export async function scenario(
     configure?: (api: ApiRoutes, db: ReturnType<typeof createDatabase>['db']) => void;
     resolveKey?: SecretKeyResolver;
     keyClock?: Clock;
+    catalog?: ReturnType<typeof defineModuleCatalog>;
+    moduleRepositories?: NonNullable<
+      Parameters<typeof createServerServices>[2]
+    >['moduleRepositories'];
+    authorizePublic?: ModulePublicAuthorization;
   } = {},
 ) {
+  const catalog = apiOptions.catalog ?? moduleCatalog;
   const database = await createTestDatabase();
   await runMigrations(database.url);
   const handle = createDatabase(database.url);
@@ -80,12 +90,16 @@ export async function scenario(
         MAIL_FROM: 'noreply@example.invalid',
         ...overrides,
       },
-      { forms: [] },
+      catalog.available,
     );
     if (!result.ok) throw new Error(formatConfigIssues(result.issues));
     const log = createLogger('debug', { write: (line) => logs.push(line) });
     const mount = (config: Config) => {
-      const runtime = createServerServices(config, handle.db, { clock: apiOptions.keyClock });
+      const runtime = createServerServices(config, handle.db, {
+        clock: apiOptions.keyClock,
+        modules: catalog.select(config.modules),
+        moduleRepositories: apiOptions.moduleRepositories,
+      });
       services = runtime;
       auth = createServerAuth(config, handle.db, log, runtime);
       keyAuth = createServerKeyAuth(config, handle.db, log, runtime);
@@ -108,6 +122,7 @@ export async function scenario(
           registerKeys(api, runtime, config.modules);
           platformReadRoutes(api, runtime);
           metaRoutes(api, runtime.modules);
+          moduleRoutes(api, runtime, apiOptions.authorizePublic);
           apiOptions.configure?.(api, handle.db);
         },
         createApiAuthorization({
@@ -127,6 +142,10 @@ export async function scenario(
         return services.container.core.clock.now();
       },
       logs,
+      jobs: () => {
+        if (!services) throw new Error('Expected runtime services');
+        return services.jobs;
+      },
       manifest: () => {
         if (!app) throw new Error('Expected mounted fixture');
         return app.apiRoutes.manifest;

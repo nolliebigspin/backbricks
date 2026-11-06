@@ -1,5 +1,9 @@
 import { z } from 'zod';
 
+import { AppError } from '../errors/app-error.ts';
+import { MAX_KEY_SCOPES } from './constants.ts';
+import { scopeNameSchema } from './protocol.ts';
+
 /** The v1 scope catalog. Module-dependent rights are unavailable when that module is disabled. */
 export const KEY_SCOPES = [
   { name: 'integration:read', module: null },
@@ -31,16 +35,44 @@ export const keyPresetSchema = z.enum(
   ),
 );
 
+export const keyScopeDefinitionSchema = z
+  .object({ name: scopeNameSchema, module: z.string().nullable() })
+  .strict();
+export type KeyScopeCatalog = readonly z.infer<typeof keyScopeDefinitionSchema>[];
+
+/** Merge selected declarations without replacing core grants or broadening preset rights. */
+export function createKeyScopeCatalog(moduleScopes: KeyScopeCatalog): KeyScopeCatalog {
+  const entries = new Map<string, z.infer<typeof keyScopeDefinitionSchema>>(
+    KEY_SCOPES.map((entry) => [entry.name, Object.freeze({ ...entry })]),
+  );
+  for (const input of moduleScopes) {
+    const entry = keyScopeDefinitionSchema.parse({ name: input.name, module: input.module });
+    const previous = entries.get(entry.name);
+    if (
+      entry.module === null ||
+      !entry.name.startsWith(`${entry.module}:`) ||
+      (previous && previous.module !== entry.module)
+    )
+      throw new AppError('invalid_request', { detail: 'Module scope ownership is invalid.' });
+    if (!previous) entries.set(entry.name, Object.freeze(entry));
+  }
+  return Object.freeze([...entries.values()]);
+}
+
 /** Creation and authentication both use this enabled-module-aware boundary. Unknown rights fail. */
-export function keyScopesSchema(enabledModules: readonly string[]) {
+export function keyScopesSchema(
+  enabledModules: readonly string[],
+  catalog: KeyScopeCatalog = KEY_SCOPES,
+) {
   const enabled = new Set(enabledModules);
+  const definitions = catalog.map((entry) => keyScopeDefinitionSchema.parse(entry));
   return z
-    .array(keyScopeSchema)
-    .max(KEY_SCOPES.length)
+    .array(z.enum(definitions.map((entry) => entry.name)))
+    .max(Math.min(MAX_KEY_SCOPES, definitions.length))
     .refine(
       (scopes) =>
         scopes.every((name) => {
-          const entry = KEY_SCOPES.find((scope) => scope.name === name);
+          const entry = definitions.find((scope) => scope.name === name);
           return entry && (entry.module === null || enabled.has(entry.module));
         }),
       { message: 'A requested scope requires a disabled module.' },

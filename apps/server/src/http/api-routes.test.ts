@@ -233,3 +233,18 @@ describe('declared API routes', () => {
     expect(response.status).toBe(200);
   });
 });
+
+test('module and platform routes cannot reuse an OpenAPI operation ID', () => {
+  expect(() =>
+    setup((api) => {
+      const first = { ...example, operationId: 'sharedOperation' };
+      const second = { ...first, path: '/v1/other-examples/{id}' };
+      api.register(first, { kind: 'public', bodyLimitBytes: 128 }, (c) =>
+        c.json({ id: 'first' }, 200),
+      );
+      api.register(second, { kind: 'public', bodyLimitBytes: 128 }, (c) =>
+        c.json({ id: 'second' }, 200),
+      );
+    }),
+  ).toThrow('Duplicate API operation ID');
+});

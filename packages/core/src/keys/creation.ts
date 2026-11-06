@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { API_KEY_PREFIXES } from './constants.ts';
 import { apiKeyMetadataSchema } from './metadata.ts';
-import { keyPresetSchema, keyScopesSchema } from './scopes.ts';
+import { keyPresetSchema, keyScopesSchema, type KeyScopeCatalog } from './scopes.ts';
 
 export const KEY_NAME_MAX_LENGTH = 120;
 const fields = {
@@ -16,7 +16,7 @@ const fields = {
 };
 
 /** Expiry is an explicit choice (null means non-expiring); secret rights require one explicit grant source. */
-export function apiKeyCreateSchema(enabledModules: readonly string[]) {
+export function apiKeyCreateSchema(enabledModules: readonly string[], catalog?: KeyScopeCatalog) {
   const secret = { kind: z.literal('secret'), ...fields };
   return z.union([
     z.object({ kind: z.literal('publishable'), ...fields }).strict(),
@@ -24,7 +24,7 @@ export function apiKeyCreateSchema(enabledModules: readonly string[]) {
     z
       .object({
         ...secret,
-        scopes: keyScopesSchema(enabledModules).refine((scopes) => scopes.length > 0),
+        scopes: keyScopesSchema(enabledModules, catalog).refine((scopes) => scopes.length > 0),
       })
       .strict(),
   ]);

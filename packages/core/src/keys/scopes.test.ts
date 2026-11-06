@@ -2,7 +2,14 @@ import { expect, test } from 'bun:test';
 
 import * as fc from 'fast-check';
 
-import { KEY_SCOPE_PRESETS, keyPresetSchema, keyPresetScopes, keyScopesSchema } from '../index.ts';
+import {
+  KEY_SCOPE_PRESETS,
+  MAX_KEY_SCOPES,
+  createKeyScopeCatalog,
+  keyPresetSchema,
+  keyPresetScopes,
+  keyScopesSchema,
+} from '../index.ts';
 
 const modules = ['forms', 'uploads', 'reviews'];
 
@@ -43,4 +50,40 @@ test('module subsets produce only enabled grants; explicit disabled/unknown righ
   const snapshot = keyScopesSchema(mutable);
   mutable.push('uploads');
   expect(snapshot.safeParse(['uploads:create']).success).toBe(false);
+});
+
+test('selected module scopes share issuance/auth catalog without broadening presets or mutable aliases', () => {
+  const declared = { name: 'counter:read', module: 'counter' };
+  const catalog = createKeyScopeCatalog([declared, { name: 'forms:submit', module: 'forms' }]);
+  const schema = keyScopesSchema(['counter'], catalog);
+  declared.module = 'other';
+  expect(schema.parse(['counter:read'])).toEqual(['counter:read']);
+  expect(keyScopesSchema([], catalog).safeParse(['counter:read']).success).toBe(false);
+  expect(keyScopesSchema(['counter'], catalog).safeParse(['counter:delete']).success).toBe(false);
+  expect(keyPresetScopes('agent', ['counter'])).not.toContain('counter:read');
+  expect(keyPresetScopes('server_integration', ['counter'])).toEqual([]);
+  expect(() => createKeyScopeCatalog([{ name: 'project:write', module: 'project' }])).toThrow(
+    'ownership',
+  );
+  expect(() => createKeyScopeCatalog([{ name: 'forms:submit', module: 'counter' }])).toThrow(
+    'ownership',
+  );
+  const mutable = [{ name: 'counter:read', module: 'counter' }];
+  const snapshot = keyScopesSchema([], mutable);
+  mutable[0]!.module = 'other';
+  expect(snapshot.safeParse(['counter:read']).success).toBe(false);
+});
+
+test('expanded scope catalogs cannot exceed the audit-safe grant bound', () => {
+  const catalog = createKeyScopeCatalog(
+    Array.from({ length: MAX_KEY_SCOPES + 1 }, (_value, index) => ({
+      name: `counter:read_${index}`,
+      module: 'counter',
+    })),
+  );
+  const scopes = catalog.filter((entry) => entry.module === 'counter').map((entry) => entry.name);
+  expect(keyScopesSchema(['counter'], catalog).safeParse(scopes).success).toBe(false);
+  expect(
+    keyScopesSchema(['counter'], catalog).safeParse(scopes.slice(0, MAX_KEY_SCOPES)).success,
+  ).toBe(true);
 });

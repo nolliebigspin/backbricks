@@ -9,7 +9,7 @@ import type { TenantContext, TenantTransaction } from '../tenancy/tenant-context
 import type { Clock } from '../time/clock.ts';
 import { hashApiKey } from './material.ts';
 import { secretKeyTokenSchema } from './protocol.ts';
-import { keyScopesSchema } from './scopes.ts';
+import { keyScopesSchema, type KeyScopeCatalog } from './scopes.ts';
 
 export const KEY_LAST_USED_INTERVAL_MS = 60_000;
 export const KEY_EXPOSURE_NOTIFICATION_WINDOW_MS = 3_600_000;
@@ -28,6 +28,7 @@ export function createSecretKeyResolver(deps: {
   clock: Clock;
   publicOrigin: string;
   enabledModules: readonly string[];
+  scopeCatalog?: KeyScopeCatalog;
   lookup: SecretKeyLookup;
   transaction: AuthenticationTransaction;
   audit: AuditService;
@@ -35,7 +36,7 @@ export function createSecretKeyResolver(deps: {
   /** Must only schedule delivery; durable metadata intent has already committed. */
   notify: (notice: KeyExposureNotice) => void;
 }): SecretKeyResolver {
-  const scopesSchema = keyScopesSchema(deps.enabledModules);
+  const scopesSchema = keyScopesSchema(deps.enabledModules, deps.scopeCatalog);
   return async (credential, request) => {
     try {
       if (!secretKeyTokenSchema.safeParse(credential).success) return null;

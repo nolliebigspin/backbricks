@@ -48,6 +48,7 @@ export function createServerKeyAuth(
     clock,
     publicOrigin: new URL(config.publicUrl).origin,
     enabledModules: config.modules,
+    scopeCatalog: services.scopeCatalog,
     lookup: createSecretKeyLookup(db),
     audit,
     events,

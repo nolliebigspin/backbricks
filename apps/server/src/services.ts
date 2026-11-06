@@ -4,6 +4,7 @@ import {
   createEventService,
   createIds,
   createKeyService,
+  createKeyScopeCatalog,
   createProjectService,
   createPlatformQueries,
   createRateLimiter,
@@ -18,15 +19,22 @@ import {
 } from '@backbricks/core';
 import { createPostgresRateLimitStore, createWithTenant, type Database } from '@backbricks/db';
 
+import { moduleJobs } from './module-jobs.ts';
 import { moduleCatalog } from './modules.ts';
 
 /** One provider/service lifetime per server runtime. Modules receive only the core's restricted views. */
 export function createServerServices(
   config: Config,
   db: Database,
-  options: { clock?: Clock; entitlements?: Entitlements; modules?: SelectedModules } = {},
+  options: {
+    clock?: Clock;
+    entitlements?: Entitlements;
+    modules?: SelectedModules;
+    moduleRepositories?: Parameters<typeof createWithTenant>[1];
+  } = {},
 ) {
   const modules = options.modules ?? moduleCatalog.select(config.modules);
+  const scopeCatalog = createKeyScopeCatalog(modules.registry.scopes);
   const clock = options.clock ?? systemClock;
   const ids = createIds(clock);
   const activity = { clock, ids };
@@ -42,14 +50,18 @@ export function createServerServices(
     },
     { mailer },
   );
+  const withTenant = createWithTenant(db, options.moduleRepositories);
+  const moduleRuntime = modules.registry.bind(container);
   return Object.freeze({
     container,
     modules,
-    moduleRuntime: modules.registry.bind(container),
-    withTenant: createWithTenant(db),
+    scopeCatalog,
+    moduleRuntime,
+    jobs: moduleJobs(modules, moduleRuntime, withTenant),
+    withTenant,
     projects: createProjectService(container.core),
     queries: createPlatformQueries({ ...container.core, publicUrl: config.publicUrl, modules }),
-    keys: createKeyService({ ...container.core, enabledModules: config.modules }),
+    keys: createKeyService({ ...container.core, enabledModules: config.modules, scopeCatalog }),
     async close() {
       await mailer?.close();
     },

@@ -4,6 +4,7 @@ import { AppError } from '../errors/app-error.ts';
 import { organizationRoleSchema } from '../http/route-policy.ts';
 import type { Principal } from '../identity/principal.ts';
 import type { Ids, TypeId } from '../ids/type-id.ts';
+import { MAX_KEY_SCOPES } from '../keys/constants.ts';
 import { scopeNameSchema } from '../keys/protocol.ts';
 import {
   activityTextSchema as metadataString,
@@ -28,7 +29,7 @@ export const activityMetadataSchema = z
       .optional(),
     previousVersion: z.number().int().positive().optional(),
     configVersion: z.number().int().positive().optional(),
-    scopes: z.array(scopeNameSchema).max(MAX_METADATA_ITEMS).optional(),
+    scopes: z.array(scopeNameSchema).max(MAX_KEY_SCOPES).optional(),
     preset: tag.optional(),
     reason: tag.optional(),
     status: tag.optional(),

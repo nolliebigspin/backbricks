@@ -6,6 +6,7 @@ import {
   pageQuerySchema,
   repositoryPage,
   type KeyService,
+  type KeyScopeCatalog,
   type WithTenant,
 } from '@backbricks/core';
 import { createRoute, z } from '@hono/zod-openapi';
@@ -23,7 +24,12 @@ const listResponse = z.object({
 /** No operation permits bearer credentials, including when accompanied by a valid session cookie. */
 export function keyRoutes(
   api: ApiRoutes,
-  deps: { withTenant: WithTenant; keys: KeyService; enabledModules: readonly string[] },
+  deps: {
+    withTenant: WithTenant;
+    keys: KeyService;
+    enabledModules: readonly string[];
+    scopeCatalog?: KeyScopeCatalog;
+  },
 ) {
   api.register(
     createRoute({
@@ -61,7 +67,11 @@ export function keyRoutes(
         params,
         body: {
           required: true,
-          content: { 'application/json': { schema: apiKeyCreateSchema(deps.enabledModules) } },
+          content: {
+            'application/json': {
+              schema: apiKeyCreateSchema(deps.enabledModules, deps.scopeCatalog),
+            },
+          },
         },
       },
       responses: {
