@@ -32,3 +32,32 @@ test('the generator resolves its pinned TypeScript fallback locally', async () =
   expect(await child.exited).toBe(0);
   expect(await new Response(child.stdout).text()).toBe(manifest.devDependencies.typescript);
 });
+
+test('problem status and code are extensible on the wire while known catalog values remain documented', async () => {
+  const { z } = await import('zod');
+  const { ERROR_CODES } = await import('../../packages/core/src/index.ts');
+  const record = z.record(z.string(), z.unknown());
+  const nested = (value: unknown, path: readonly string[]) =>
+    path.reduce((item, key) => record.parse(item)[key], value);
+  const document: unknown = JSON.parse(await exportOpenApi());
+  const properties = [
+    'paths',
+    '/v1/meta',
+    'get',
+    'responses',
+    'default',
+    'content',
+    'application/problem+json',
+    'schema',
+    'properties',
+  ];
+  expect(nested(document, [...properties, 'status'])).toMatchObject({
+    type: 'integer',
+    minimum: 100,
+    maximum: 599,
+  });
+  expect(nested(document, [...properties, 'code'])).toMatchObject({
+    type: 'string',
+    'x-extensible-enum': Object.keys(ERROR_CODES),
+  });
+});

@@ -275,23 +275,7 @@ export interface operations {
         };
         content: {
           'application/problem+json': {
-            /** @enum {string} */
-            code:
-              | 'internal_error'
-              | 'invalid_request'
-              | 'conflict'
-              | 'module_not_enabled'
-              | 'not_found'
-              | 'unauthorized'
-              | 'forbidden'
-              | 'secret_key_exposed'
-              | 'validation_failed'
-              | 'payload_too_large'
-              | 'unsupported_media_type'
-              | 'service_unavailable'
-              | 'rate_limited'
-              | 'proof_invalid'
-              | 'quota_exceeded';
+            code: string;
             detail?: string;
             errors?: {
               code: string;
@@ -303,8 +287,7 @@ export interface operations {
             }[];
             hint?: string;
             requestId: string;
-            /** @enum {number} */
-            status: 500;
+            status: number;
             title: string;
             type: string;
           };
@@ -339,23 +322,7 @@ export interface operations {
         };
         content: {
           'application/problem+json': {
-            /** @enum {string} */
-            code:
-              | 'internal_error'
-              | 'invalid_request'
-              | 'conflict'
-              | 'module_not_enabled'
-              | 'not_found'
-              | 'unauthorized'
-              | 'forbidden'
-              | 'secret_key_exposed'
-              | 'validation_failed'
-              | 'payload_too_large'
-              | 'unsupported_media_type'
-              | 'service_unavailable'
-              | 'rate_limited'
-              | 'proof_invalid'
-              | 'quota_exceeded';
+            code: string;
             detail?: string;
             errors?: {
               code: string;
@@ -367,8 +334,7 @@ export interface operations {
             }[];
             hint?: string;
             requestId: string;
-            /** @enum {number} */
-            status: 500;
+            status: number;
             title: string;
             type: string;
           };
@@ -441,23 +407,7 @@ export interface operations {
         };
         content: {
           'application/problem+json': {
-            /** @enum {string} */
-            code:
-              | 'internal_error'
-              | 'invalid_request'
-              | 'conflict'
-              | 'module_not_enabled'
-              | 'not_found'
-              | 'unauthorized'
-              | 'forbidden'
-              | 'secret_key_exposed'
-              | 'validation_failed'
-              | 'payload_too_large'
-              | 'unsupported_media_type'
-              | 'service_unavailable'
-              | 'rate_limited'
-              | 'proof_invalid'
-              | 'quota_exceeded';
+            code: string;
             detail?: string;
             errors?: {
               code: string;
@@ -469,8 +419,7 @@ export interface operations {
             }[];
             hint?: string;
             requestId: string;
-            /** @enum {number} */
-            status: 500;
+            status: number;
             title: string;
             type: string;
           };
@@ -522,23 +471,7 @@ export interface operations {
         };
         content: {
           'application/problem+json': {
-            /** @enum {string} */
-            code:
-              | 'internal_error'
-              | 'invalid_request'
-              | 'conflict'
-              | 'module_not_enabled'
-              | 'not_found'
-              | 'unauthorized'
-              | 'forbidden'
-              | 'secret_key_exposed'
-              | 'validation_failed'
-              | 'payload_too_large'
-              | 'unsupported_media_type'
-              | 'service_unavailable'
-              | 'rate_limited'
-              | 'proof_invalid'
-              | 'quota_exceeded';
+            code: string;
             detail?: string;
             errors?: {
               code: string;
@@ -550,8 +483,7 @@ export interface operations {
             }[];
             hint?: string;
             requestId: string;
-            /** @enum {number} */
-            status: 500;
+            status: number;
             title: string;
             type: string;
           };
@@ -608,23 +540,7 @@ export interface operations {
         };
         content: {
           'application/problem+json': {
-            /** @enum {string} */
-            code:
-              | 'internal_error'
-              | 'invalid_request'
-              | 'conflict'
-              | 'module_not_enabled'
-              | 'not_found'
-              | 'unauthorized'
-              | 'forbidden'
-              | 'secret_key_exposed'
-              | 'validation_failed'
-              | 'payload_too_large'
-              | 'unsupported_media_type'
-              | 'service_unavailable'
-              | 'rate_limited'
-              | 'proof_invalid'
-              | 'quota_exceeded';
+            code: string;
             detail?: string;
             errors?: {
               code: string;
@@ -636,8 +552,7 @@ export interface operations {
             }[];
             hint?: string;
             requestId: string;
-            /** @enum {number} */
-            status: 500;
+            status: number;
             title: string;
             type: string;
           };
@@ -685,23 +600,7 @@ export interface operations {
         };
         content: {
           'application/problem+json': {
-            /** @enum {string} */
-            code:
-              | 'internal_error'
-              | 'invalid_request'
-              | 'conflict'
-              | 'module_not_enabled'
-              | 'not_found'
-              | 'unauthorized'
-              | 'forbidden'
-              | 'secret_key_exposed'
-              | 'validation_failed'
-              | 'payload_too_large'
-              | 'unsupported_media_type'
-              | 'service_unavailable'
-              | 'rate_limited'
-              | 'proof_invalid'
-              | 'quota_exceeded';
+            code: string;
             detail?: string;
             errors?: {
               code: string;
@@ -713,8 +612,7 @@ export interface operations {
             }[];
             hint?: string;
             requestId: string;
-            /** @enum {number} */
-            status: 500;
+            status: number;
             title: string;
             type: string;
           };
@@ -747,23 +645,7 @@ export interface operations {
         };
         content: {
           'application/problem+json': {
-            /** @enum {string} */
-            code:
-              | 'internal_error'
-              | 'invalid_request'
-              | 'conflict'
-              | 'module_not_enabled'
-              | 'not_found'
-              | 'unauthorized'
-              | 'forbidden'
-              | 'secret_key_exposed'
-              | 'validation_failed'
-              | 'payload_too_large'
-              | 'unsupported_media_type'
-              | 'service_unavailable'
-              | 'rate_limited'
-              | 'proof_invalid'
-              | 'quota_exceeded';
+            code: string;
             detail?: string;
             errors?: {
               code: string;
@@ -775,8 +657,7 @@ export interface operations {
             }[];
             hint?: string;
             requestId: string;
-            /** @enum {number} */
-            status: 500;
+            status: number;
             title: string;
             type: string;
           };
@@ -833,23 +714,7 @@ export interface operations {
         };
         content: {
           'application/problem+json': {
-            /** @enum {string} */
-            code:
-              | 'internal_error'
-              | 'invalid_request'
-              | 'conflict'
-              | 'module_not_enabled'
-              | 'not_found'
-              | 'unauthorized'
-              | 'forbidden'
-              | 'secret_key_exposed'
-              | 'validation_failed'
-              | 'payload_too_large'
-              | 'unsupported_media_type'
-              | 'service_unavailable'
-              | 'rate_limited'
-              | 'proof_invalid'
-              | 'quota_exceeded';
+            code: string;
             detail?: string;
             errors?: {
               code: string;
@@ -861,8 +726,7 @@ export interface operations {
             }[];
             hint?: string;
             requestId: string;
-            /** @enum {number} */
-            status: 500;
+            status: number;
             title: string;
             type: string;
           };
@@ -935,23 +799,7 @@ export interface operations {
         };
         content: {
           'application/problem+json': {
-            /** @enum {string} */
-            code:
-              | 'internal_error'
-              | 'invalid_request'
-              | 'conflict'
-              | 'module_not_enabled'
-              | 'not_found'
-              | 'unauthorized'
-              | 'forbidden'
-              | 'secret_key_exposed'
-              | 'validation_failed'
-              | 'payload_too_large'
-              | 'unsupported_media_type'
-              | 'service_unavailable'
-              | 'rate_limited'
-              | 'proof_invalid'
-              | 'quota_exceeded';
+            code: string;
             detail?: string;
             errors?: {
               code: string;
@@ -963,8 +811,7 @@ export interface operations {
             }[];
             hint?: string;
             requestId: string;
-            /** @enum {number} */
-            status: 500;
+            status: number;
             title: string;
             type: string;
           };
@@ -1021,23 +868,7 @@ export interface operations {
         };
         content: {
           'application/problem+json': {
-            /** @enum {string} */
-            code:
-              | 'internal_error'
-              | 'invalid_request'
-              | 'conflict'
-              | 'module_not_enabled'
-              | 'not_found'
-              | 'unauthorized'
-              | 'forbidden'
-              | 'secret_key_exposed'
-              | 'validation_failed'
-              | 'payload_too_large'
-              | 'unsupported_media_type'
-              | 'service_unavailable'
-              | 'rate_limited'
-              | 'proof_invalid'
-              | 'quota_exceeded';
+            code: string;
             detail?: string;
             errors?: {
               code: string;
@@ -1049,8 +880,7 @@ export interface operations {
             }[];
             hint?: string;
             requestId: string;
-            /** @enum {number} */
-            status: 500;
+            status: number;
             title: string;
             type: string;
           };
@@ -1146,23 +976,7 @@ export interface operations {
         };
         content: {
           'application/problem+json': {
-            /** @enum {string} */
-            code:
-              | 'internal_error'
-              | 'invalid_request'
-              | 'conflict'
-              | 'module_not_enabled'
-              | 'not_found'
-              | 'unauthorized'
-              | 'forbidden'
-              | 'secret_key_exposed'
-              | 'validation_failed'
-              | 'payload_too_large'
-              | 'unsupported_media_type'
-              | 'service_unavailable'
-              | 'rate_limited'
-              | 'proof_invalid'
-              | 'quota_exceeded';
+            code: string;
             detail?: string;
             errors?: {
               code: string;
@@ -1174,8 +988,7 @@ export interface operations {
             }[];
             hint?: string;
             requestId: string;
-            /** @enum {number} */
-            status: 500;
+            status: number;
             title: string;
             type: string;
           };
@@ -1236,23 +1049,7 @@ export interface operations {
         };
         content: {
           'application/problem+json': {
-            /** @enum {string} */
-            code:
-              | 'internal_error'
-              | 'invalid_request'
-              | 'conflict'
-              | 'module_not_enabled'
-              | 'not_found'
-              | 'unauthorized'
-              | 'forbidden'
-              | 'secret_key_exposed'
-              | 'validation_failed'
-              | 'payload_too_large'
-              | 'unsupported_media_type'
-              | 'service_unavailable'
-              | 'rate_limited'
-              | 'proof_invalid'
-              | 'quota_exceeded';
+            code: string;
             detail?: string;
             errors?: {
               code: string;
@@ -1264,8 +1061,7 @@ export interface operations {
             }[];
             hint?: string;
             requestId: string;
-            /** @enum {number} */
-            status: 500;
+            status: number;
             title: string;
             type: string;
           };
@@ -1322,23 +1118,7 @@ export interface operations {
         };
         content: {
           'application/problem+json': {
-            /** @enum {string} */
-            code:
-              | 'internal_error'
-              | 'invalid_request'
-              | 'conflict'
-              | 'module_not_enabled'
-              | 'not_found'
-              | 'unauthorized'
-              | 'forbidden'
-              | 'secret_key_exposed'
-              | 'validation_failed'
-              | 'payload_too_large'
-              | 'unsupported_media_type'
-              | 'service_unavailable'
-              | 'rate_limited'
-              | 'proof_invalid'
-              | 'quota_exceeded';
+            code: string;
             detail?: string;
             errors?: {
               code: string;
@@ -1350,8 +1130,7 @@ export interface operations {
             }[];
             hint?: string;
             requestId: string;
-            /** @enum {number} */
-            status: 500;
+            status: number;
             title: string;
             type: string;
           };
@@ -1445,23 +1224,7 @@ export interface operations {
         };
         content: {
           'application/problem+json': {
-            /** @enum {string} */
-            code:
-              | 'internal_error'
-              | 'invalid_request'
-              | 'conflict'
-              | 'module_not_enabled'
-              | 'not_found'
-              | 'unauthorized'
-              | 'forbidden'
-              | 'secret_key_exposed'
-              | 'validation_failed'
-              | 'payload_too_large'
-              | 'unsupported_media_type'
-              | 'service_unavailable'
-              | 'rate_limited'
-              | 'proof_invalid'
-              | 'quota_exceeded';
+            code: string;
             detail?: string;
             errors?: {
               code: string;
@@ -1473,8 +1236,7 @@ export interface operations {
             }[];
             hint?: string;
             requestId: string;
-            /** @enum {number} */
-            status: 500;
+            status: number;
             title: string;
             type: string;
           };
@@ -1508,23 +1270,7 @@ export interface operations {
         };
         content: {
           'application/problem+json': {
-            /** @enum {string} */
-            code:
-              | 'internal_error'
-              | 'invalid_request'
-              | 'conflict'
-              | 'module_not_enabled'
-              | 'not_found'
-              | 'unauthorized'
-              | 'forbidden'
-              | 'secret_key_exposed'
-              | 'validation_failed'
-              | 'payload_too_large'
-              | 'unsupported_media_type'
-              | 'service_unavailable'
-              | 'rate_limited'
-              | 'proof_invalid'
-              | 'quota_exceeded';
+            code: string;
             detail?: string;
             errors?: {
               code: string;
@@ -1536,8 +1282,7 @@ export interface operations {
             }[];
             hint?: string;
             requestId: string;
-            /** @enum {number} */
-            status: 500;
+            status: number;
             title: string;
             type: string;
           };
@@ -1574,23 +1319,7 @@ export interface operations {
         };
         content: {
           'application/problem+json': {
-            /** @enum {string} */
-            code:
-              | 'internal_error'
-              | 'invalid_request'
-              | 'conflict'
-              | 'module_not_enabled'
-              | 'not_found'
-              | 'unauthorized'
-              | 'forbidden'
-              | 'secret_key_exposed'
-              | 'validation_failed'
-              | 'payload_too_large'
-              | 'unsupported_media_type'
-              | 'service_unavailable'
-              | 'rate_limited'
-              | 'proof_invalid'
-              | 'quota_exceeded';
+            code: string;
             detail?: string;
             errors?: {
               code: string;
@@ -1602,8 +1331,7 @@ export interface operations {
             }[];
             hint?: string;
             requestId: string;
-            /** @enum {number} */
-            status: 500;
+            status: number;
             title: string;
             type: string;
           };
@@ -1647,23 +1375,7 @@ export interface operations {
         };
         content: {
           'application/problem+json': {
-            /** @enum {string} */
-            code:
-              | 'internal_error'
-              | 'invalid_request'
-              | 'conflict'
-              | 'module_not_enabled'
-              | 'not_found'
-              | 'unauthorized'
-              | 'forbidden'
-              | 'secret_key_exposed'
-              | 'validation_failed'
-              | 'payload_too_large'
-              | 'unsupported_media_type'
-              | 'service_unavailable'
-              | 'rate_limited'
-              | 'proof_invalid'
-              | 'quota_exceeded';
+            code: string;
             detail?: string;
             errors?: {
               code: string;
@@ -1675,8 +1387,7 @@ export interface operations {
             }[];
             hint?: string;
             requestId: string;
-            /** @enum {number} */
-            status: 500;
+            status: number;
             title: string;
             type: string;
           };
@@ -1726,23 +1437,7 @@ export interface operations {
         };
         content: {
           'application/problem+json': {
-            /** @enum {string} */
-            code:
-              | 'internal_error'
-              | 'invalid_request'
-              | 'conflict'
-              | 'module_not_enabled'
-              | 'not_found'
-              | 'unauthorized'
-              | 'forbidden'
-              | 'secret_key_exposed'
-              | 'validation_failed'
-              | 'payload_too_large'
-              | 'unsupported_media_type'
-              | 'service_unavailable'
-              | 'rate_limited'
-              | 'proof_invalid'
-              | 'quota_exceeded';
+            code: string;
             detail?: string;
             errors?: {
               code: string;
@@ -1754,8 +1449,7 @@ export interface operations {
             }[];
             hint?: string;
             requestId: string;
-            /** @enum {number} */
-            status: 500;
+            status: number;
             title: string;
             type: string;
           };
@@ -1788,23 +1482,7 @@ export interface operations {
         };
         content: {
           'application/problem+json': {
-            /** @enum {string} */
-            code:
-              | 'internal_error'
-              | 'invalid_request'
-              | 'conflict'
-              | 'module_not_enabled'
-              | 'not_found'
-              | 'unauthorized'
-              | 'forbidden'
-              | 'secret_key_exposed'
-              | 'validation_failed'
-              | 'payload_too_large'
-              | 'unsupported_media_type'
-              | 'service_unavailable'
-              | 'rate_limited'
-              | 'proof_invalid'
-              | 'quota_exceeded';
+            code: string;
             detail?: string;
             errors?: {
               code: string;
@@ -1816,8 +1494,7 @@ export interface operations {
             }[];
             hint?: string;
             requestId: string;
-            /** @enum {number} */
-            status: 500;
+            status: number;
             title: string;
             type: string;
           };
@@ -1852,23 +1529,7 @@ export interface operations {
         };
         content: {
           'application/problem+json': {
-            /** @enum {string} */
-            code:
-              | 'internal_error'
-              | 'invalid_request'
-              | 'conflict'
-              | 'module_not_enabled'
-              | 'not_found'
-              | 'unauthorized'
-              | 'forbidden'
-              | 'secret_key_exposed'
-              | 'validation_failed'
-              | 'payload_too_large'
-              | 'unsupported_media_type'
-              | 'service_unavailable'
-              | 'rate_limited'
-              | 'proof_invalid'
-              | 'quota_exceeded';
+            code: string;
             detail?: string;
             errors?: {
               code: string;
@@ -1880,8 +1541,7 @@ export interface operations {
             }[];
             hint?: string;
             requestId: string;
-            /** @enum {number} */
-            status: 500;
+            status: number;
             title: string;
             type: string;
           };

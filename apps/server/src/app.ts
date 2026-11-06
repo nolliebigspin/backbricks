@@ -68,6 +68,7 @@ export function createApp(
     (c) => c.json(apiDocument(app), 200),
   );
   configureApi(api);
+  api.finalize();
   // API routes are mounted above this line; the dashboard catches the remaining GETs.
   if (deps.dashboardDir !== null) app.route('/', dashboardRoutes(deps.dashboardDir));
 

@@ -43,6 +43,7 @@ describe('AppError → problem details (RFC 9457)', () => {
     expect(problemDetailsSchema.safeParse({ ...payload, stack: 'internal detail' }).success).toBe(
       false,
     );
+    expect(problemDetailsSchema.safeParse({ ...payload, status: 499 }).success).toBe(false);
     expect(problemDetailsSchema.safeParse({ ...payload, code: 'uncatalogued_error' }).success).toBe(
       false,
     );

@@ -8,6 +8,7 @@ export const ERROR_CODES = {
   conflict: { status: 409, title: 'Conflict' },
   module_not_enabled: { status: 404, title: 'Module is not available' },
   not_found: { status: 404, title: 'Not found' },
+  method_not_allowed: { status: 405, title: 'Method is not available' },
   unauthorized: { status: 401, title: 'Authentication required' },
   forbidden: { status: 403, title: 'Access denied' },
   secret_key_exposed: { status: 403, title: 'Secret key exposed' },

@@ -482,14 +482,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Repeat generation, type-level request/response checks, declared admin subpath architecture fixture and Node 20/Bun import smoke.
 - **Risks/notes:** Better Auth's client is configured in web from its public library types; do not import the server auth instance for type inference. Resolve exports through public package entries.
 
-### [ ] P1.11c – Enforce drift and breaking-change checks (est. 4 h)
+### [x] P1.11c – Enforce drift and breaking-change checks (est. 4 h)
 - **Description:** Add `api:check` and an offline oasdiff compatibility gate against the PR base contract, including first-contract bootstrapping.
 - **Files/packages:** root scripts/package pipelines, `mise.toml`, `.github/workflows/ci.yml`, contract fixtures.
 - **Depends on:** P1.11b.
 - **Reuses:** Existing CI checkout/test jobs and deterministic exporter; oasdiff 1.35.0.
 - **Acceptance criteria:**
-  - [ ] CI fails for uncommitted spec/type drift and breaking `/v1` changes; a committed regeneration does not bypass comparison to base. `api:breaking` uses the PR base in CI, local merge-base with `origin/main` otherwise. Missing Git history is an error; bootstrap only when the actual base commit has no contract.
-  - [ ] Add to `bun run check`/pre-push consistently; tool pin is only in mise. Typed API routes get consistent 405 behavior without revealing protected resources.
+  - [x] CI fails for uncommitted spec/type drift and breaking `/v1` changes; a committed regeneration does not bypass comparison to base. `api:breaking` uses the PR base in CI, local merge-base with `origin/main` otherwise. Missing Git history is an error; bootstrap only when the actual base commit has no contract.
+  - [x] Add to `bun run check`/pre-push consistently; tool pin is only in mise. Typed API routes get consistent 405 behavior without revealing protected resources.
 - **Tests:** Fixture additive change passes, removal/type change fails, generated drift fails and missing-base behavior is explicit.
 - **Risks/notes:** No hosted spec upload. Library auth routes are inventoried/tested separately; don't pretend they use the `/v1` OpenAPI contract.
 

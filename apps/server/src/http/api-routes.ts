@@ -33,6 +33,8 @@ export class ApiRoutes {
   readonly #manifest: RegisteredRoute[] = [];
   readonly #operations = new Set<string>();
   readonly #operationIds = new Set<string>();
+  readonly #fallbacks = new Set<string>();
+  #finalized = false;
 
   constructor(
     app: OpenAPIHono<AppEnv>,
@@ -124,6 +126,37 @@ export class ApiRoutes {
         tenant,
       }),
     );
+    if (this.#finalized) this.#mountMethodGuard(route.path);
+  }
+
+  /** Unknown methods inherit a declared access policy before returning the path's allowed methods. */
+  finalize(): void {
+    this.#finalized = true;
+    for (const route of this.#manifest) this.#mountMethodGuard(route.path);
+  }
+
+  #mountMethodGuard(template: string): void {
+    const pattern = template.replaceAll(/\{[^}]+\}/g, '{}');
+    if (this.#fallbacks.has(pattern)) return;
+    const start = this.#app.routes.length;
+    this.#app.all(template.replaceAll(/\{([^}]+)\}/g, ':$1'), async (c, next) => {
+      const operations = this.#manifest.filter(
+        (route) => route.path.replaceAll(/\{[^}]+\}/g, '{}') === pattern,
+      );
+      const methods = new Set(operations.map((route) => route.method));
+      if (methods.has('GET')) methods.add('HEAD');
+      if (methods.has(c.req.method)) return next();
+      const fallback = operations.find((route) => route.method === 'GET') ?? operations[0];
+      if (!fallback) throw new AppError('not_found');
+      if (fallback.policy.kind === 'management') {
+        c.header('Cache-Control', 'no-store');
+        await this.#authorize(fallback.policy, c, fallback.tenant);
+      }
+      c.header('Allow', [...methods].toSorted().join(', '));
+      throw new AppError('method_not_allowed');
+    });
+    for (const route of this.#app.routes.slice(start)) this.#handlers.add(route);
+    this.#fallbacks.add(pattern);
   }
 
   /** Fails when a raw HTTP registration bypasses policy, including duplicate-path handlers. */

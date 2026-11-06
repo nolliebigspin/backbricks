@@ -490,7 +490,7 @@ Stable `code` values are part of the API contract (catalog in `packages/core/src
 
 - Route policy and HTTP registration are implemented in [`route-policy.ts`](../packages/core/src/http/route-policy.ts) and [`ApiRoutes`](../apps/server/src/http/api-routes.ts). Every `/v1/*` operation declares access, body size and (for management) an isolation case; the runtime guard detects handlers bypassing registration. Health/static routes are outside `/v1`; Better Auth uses its separate inventoried surface and transaction boundary (ADR-0021). The generated document is served at `/v1/openapi.json`; committed type generation/drift checks arrive in P1.11b/c.
 - Major version in the path (`/v1`); within v1 additive changes only (I17).
-- The OpenAPI spec (`/v1/openapi.json`) is generated from the Zod routes and committed; CI fails on unintended diffs (`bun run api:check`) and detects breaking changes with `oasdiff`.
+- The [OpenAPI artifact](../packages/api-contract/openapi.json) is generated from the Zod routes and committed. [Drift checks](../scripts/api/check.ts) compare without overwriting edits; [compatibility checks](../scripts/api/breaking.ts) compare the actual PR base (local merge-base otherwise), allowing bootstrap only for a real base with no contract. Both gates run in check/pre-push/CI. [ADR-0052](adr/0052-contract-gates-and-method-handling.md) defines authorization-safe 405 handling and extensible RFC 9457 code/status documentation.
 - Deprecations get `Deprecation`/`Sunset` headers and a changelog entry; minimum 6 months.
 - Module config formats are versioned via `module_version`; the config file via `$schema` (`config.v1.json`).
 

@@ -98,12 +98,14 @@
                   "additionalProperties": false,
                   "properties": {
                     "code": {
-                      "enum": [
+                      "type": "string",
+                      "x-extensible-enum": [
                         "internal_error",
                         "invalid_request",
                         "conflict",
                         "module_not_enabled",
                         "not_found",
+                        "method_not_allowed",
                         "unauthorized",
                         "forbidden",
                         "secret_key_exposed",
@@ -114,8 +116,7 @@
                         "rate_limited",
                         "proof_invalid",
                         "quota_exceeded"
-                      ],
-                      "type": "string"
+                      ]
                     },
                     "detail": {
                       "type": "string"
@@ -150,8 +151,9 @@
                       "type": "string"
                     },
                     "status": {
-                      "enum": [500],
-                      "type": "number"
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
                     },
                     "title": {
                       "type": "string"
@@ -192,12 +194,14 @@
                   "additionalProperties": false,
                   "properties": {
                     "code": {
-                      "enum": [
+                      "type": "string",
+                      "x-extensible-enum": [
                         "internal_error",
                         "invalid_request",
                         "conflict",
                         "module_not_enabled",
                         "not_found",
+                        "method_not_allowed",
                         "unauthorized",
                         "forbidden",
                         "secret_key_exposed",
@@ -208,8 +212,7 @@
                         "rate_limited",
                         "proof_invalid",
                         "quota_exceeded"
-                      ],
-                      "type": "string"
+                      ]
                     },
                     "detail": {
                       "type": "string"
@@ -244,8 +247,9 @@
                       "type": "string"
                     },
                     "status": {
-                      "enum": [500],
-                      "type": "number"
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
                     },
                     "title": {
                       "type": "string"
@@ -478,12 +482,14 @@
                   "additionalProperties": false,
                   "properties": {
                     "code": {
-                      "enum": [
+                      "type": "string",
+                      "x-extensible-enum": [
                         "internal_error",
                         "invalid_request",
                         "conflict",
                         "module_not_enabled",
                         "not_found",
+                        "method_not_allowed",
                         "unauthorized",
                         "forbidden",
                         "secret_key_exposed",
@@ -494,8 +500,7 @@
                         "rate_limited",
                         "proof_invalid",
                         "quota_exceeded"
-                      ],
-                      "type": "string"
+                      ]
                     },
                     "detail": {
                       "type": "string"
@@ -530,8 +535,9 @@
                       "type": "string"
                     },
                     "status": {
-                      "enum": [500],
-                      "type": "number"
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
                     },
                     "title": {
                       "type": "string"
@@ -651,12 +657,14 @@
                   "additionalProperties": false,
                   "properties": {
                     "code": {
-                      "enum": [
+                      "type": "string",
+                      "x-extensible-enum": [
                         "internal_error",
                         "invalid_request",
                         "conflict",
                         "module_not_enabled",
                         "not_found",
+                        "method_not_allowed",
                         "unauthorized",
                         "forbidden",
                         "secret_key_exposed",
@@ -667,8 +675,7 @@
                         "rate_limited",
                         "proof_invalid",
                         "quota_exceeded"
-                      ],
-                      "type": "string"
+                      ]
                     },
                     "detail": {
                       "type": "string"
@@ -703,8 +710,9 @@
                       "type": "string"
                     },
                     "status": {
-                      "enum": [500],
-                      "type": "number"
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
                     },
                     "title": {
                       "type": "string"
@@ -827,12 +835,14 @@
                   "additionalProperties": false,
                   "properties": {
                     "code": {
-                      "enum": [
+                      "type": "string",
+                      "x-extensible-enum": [
                         "internal_error",
                         "invalid_request",
                         "conflict",
                         "module_not_enabled",
                         "not_found",
+                        "method_not_allowed",
                         "unauthorized",
                         "forbidden",
                         "secret_key_exposed",
@@ -843,8 +853,7 @@
                         "rate_limited",
                         "proof_invalid",
                         "quota_exceeded"
-                      ],
-                      "type": "string"
+                      ]
                     },
                     "detail": {
                       "type": "string"
@@ -879,8 +888,9 @@
                       "type": "string"
                     },
                     "status": {
-                      "enum": [500],
-                      "type": "number"
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
                     },
                     "title": {
                       "type": "string"
@@ -923,12 +933,14 @@
                   "additionalProperties": false,
                   "properties": {
                     "code": {
-                      "enum": [
+                      "type": "string",
+                      "x-extensible-enum": [
                         "internal_error",
                         "invalid_request",
                         "conflict",
                         "module_not_enabled",
                         "not_found",
+                        "method_not_allowed",
                         "unauthorized",
                         "forbidden",
                         "secret_key_exposed",
@@ -939,8 +951,7 @@
                         "rate_limited",
                         "proof_invalid",
                         "quota_exceeded"
-                      ],
-                      "type": "string"
+                      ]
                     },
                     "detail": {
                       "type": "string"
@@ -975,8 +986,9 @@
                       "type": "string"
                     },
                     "status": {
-                      "enum": [500],
-                      "type": "number"
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
                     },
                     "title": {
                       "type": "string"
@@ -1068,12 +1080,14 @@
                   "additionalProperties": false,
                   "properties": {
                     "code": {
-                      "enum": [
+                      "type": "string",
+                      "x-extensible-enum": [
                         "internal_error",
                         "invalid_request",
                         "conflict",
                         "module_not_enabled",
                         "not_found",
+                        "method_not_allowed",
                         "unauthorized",
                         "forbidden",
                         "secret_key_exposed",
@@ -1084,8 +1098,7 @@
                         "rate_limited",
                         "proof_invalid",
                         "quota_exceeded"
-                      ],
-                      "type": "string"
+                      ]
                     },
                     "detail": {
                       "type": "string"
@@ -1120,8 +1133,9 @@
                       "type": "string"
                     },
                     "status": {
-                      "enum": [500],
-                      "type": "number"
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
                     },
                     "title": {
                       "type": "string"
@@ -1251,12 +1265,14 @@
                   "additionalProperties": false,
                   "properties": {
                     "code": {
-                      "enum": [
+                      "type": "string",
+                      "x-extensible-enum": [
                         "internal_error",
                         "invalid_request",
                         "conflict",
                         "module_not_enabled",
                         "not_found",
+                        "method_not_allowed",
                         "unauthorized",
                         "forbidden",
                         "secret_key_exposed",
@@ -1267,8 +1283,7 @@
                         "rate_limited",
                         "proof_invalid",
                         "quota_exceeded"
-                      ],
-                      "type": "string"
+                      ]
                     },
                     "detail": {
                       "type": "string"
@@ -1303,8 +1318,9 @@
                       "type": "string"
                     },
                     "status": {
-                      "enum": [500],
-                      "type": "number"
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
                     },
                     "title": {
                       "type": "string"
@@ -1537,12 +1553,14 @@
                   "additionalProperties": false,
                   "properties": {
                     "code": {
-                      "enum": [
+                      "type": "string",
+                      "x-extensible-enum": [
                         "internal_error",
                         "invalid_request",
                         "conflict",
                         "module_not_enabled",
                         "not_found",
+                        "method_not_allowed",
                         "unauthorized",
                         "forbidden",
                         "secret_key_exposed",
@@ -1553,8 +1571,7 @@
                         "rate_limited",
                         "proof_invalid",
                         "quota_exceeded"
-                      ],
-                      "type": "string"
+                      ]
                     },
                     "detail": {
                       "type": "string"
@@ -1589,8 +1606,9 @@
                       "type": "string"
                     },
                     "status": {
-                      "enum": [500],
-                      "type": "number"
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
                     },
                     "title": {
                       "type": "string"
@@ -1686,12 +1704,14 @@
                   "additionalProperties": false,
                   "properties": {
                     "code": {
-                      "enum": [
+                      "type": "string",
+                      "x-extensible-enum": [
                         "internal_error",
                         "invalid_request",
                         "conflict",
                         "module_not_enabled",
                         "not_found",
+                        "method_not_allowed",
                         "unauthorized",
                         "forbidden",
                         "secret_key_exposed",
@@ -1702,8 +1722,7 @@
                         "rate_limited",
                         "proof_invalid",
                         "quota_exceeded"
-                      ],
-                      "type": "string"
+                      ]
                     },
                     "detail": {
                       "type": "string"
@@ -1738,8 +1757,9 @@
                       "type": "string"
                     },
                     "status": {
-                      "enum": [500],
-                      "type": "number"
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
                     },
                     "title": {
                       "type": "string"
@@ -2000,12 +2020,14 @@
                   "additionalProperties": false,
                   "properties": {
                     "code": {
-                      "enum": [
+                      "type": "string",
+                      "x-extensible-enum": [
                         "internal_error",
                         "invalid_request",
                         "conflict",
                         "module_not_enabled",
                         "not_found",
+                        "method_not_allowed",
                         "unauthorized",
                         "forbidden",
                         "secret_key_exposed",
@@ -2016,8 +2038,7 @@
                         "rate_limited",
                         "proof_invalid",
                         "quota_exceeded"
-                      ],
-                      "type": "string"
+                      ]
                     },
                     "detail": {
                       "type": "string"
@@ -2052,8 +2073,9 @@
                       "type": "string"
                     },
                     "status": {
-                      "enum": [500],
-                      "type": "number"
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
                     },
                     "title": {
                       "type": "string"
@@ -2201,12 +2223,14 @@
                   "additionalProperties": false,
                   "properties": {
                     "code": {
-                      "enum": [
+                      "type": "string",
+                      "x-extensible-enum": [
                         "internal_error",
                         "invalid_request",
                         "conflict",
                         "module_not_enabled",
                         "not_found",
+                        "method_not_allowed",
                         "unauthorized",
                         "forbidden",
                         "secret_key_exposed",
@@ -2217,8 +2241,7 @@
                         "rate_limited",
                         "proof_invalid",
                         "quota_exceeded"
-                      ],
-                      "type": "string"
+                      ]
                     },
                     "detail": {
                       "type": "string"
@@ -2253,8 +2276,9 @@
                       "type": "string"
                     },
                     "status": {
-                      "enum": [500],
-                      "type": "number"
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
                     },
                     "title": {
                       "type": "string"
@@ -2394,12 +2418,14 @@
                   "additionalProperties": false,
                   "properties": {
                     "code": {
-                      "enum": [
+                      "type": "string",
+                      "x-extensible-enum": [
                         "internal_error",
                         "invalid_request",
                         "conflict",
                         "module_not_enabled",
                         "not_found",
+                        "method_not_allowed",
                         "unauthorized",
                         "forbidden",
                         "secret_key_exposed",
@@ -2410,8 +2436,7 @@
                         "rate_limited",
                         "proof_invalid",
                         "quota_exceeded"
-                      ],
-                      "type": "string"
+                      ]
                     },
                     "detail": {
                       "type": "string"
@@ -2446,8 +2471,9 @@
                       "type": "string"
                     },
                     "status": {
-                      "enum": [500],
-                      "type": "number"
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
                     },
                     "title": {
                       "type": "string"
@@ -2652,12 +2678,14 @@
                   "additionalProperties": false,
                   "properties": {
                     "code": {
-                      "enum": [
+                      "type": "string",
+                      "x-extensible-enum": [
                         "internal_error",
                         "invalid_request",
                         "conflict",
                         "module_not_enabled",
                         "not_found",
+                        "method_not_allowed",
                         "unauthorized",
                         "forbidden",
                         "secret_key_exposed",
@@ -2668,8 +2696,7 @@
                         "rate_limited",
                         "proof_invalid",
                         "quota_exceeded"
-                      ],
-                      "type": "string"
+                      ]
                     },
                     "detail": {
                       "type": "string"
@@ -2704,8 +2731,9 @@
                       "type": "string"
                     },
                     "status": {
-                      "enum": [500],
-                      "type": "number"
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
                     },
                     "title": {
                       "type": "string"
@@ -2756,12 +2784,14 @@
                   "additionalProperties": false,
                   "properties": {
                     "code": {
-                      "enum": [
+                      "type": "string",
+                      "x-extensible-enum": [
                         "internal_error",
                         "invalid_request",
                         "conflict",
                         "module_not_enabled",
                         "not_found",
+                        "method_not_allowed",
                         "unauthorized",
                         "forbidden",
                         "secret_key_exposed",
@@ -2772,8 +2802,7 @@
                         "rate_limited",
                         "proof_invalid",
                         "quota_exceeded"
-                      ],
-                      "type": "string"
+                      ]
                     },
                     "detail": {
                       "type": "string"
@@ -2808,8 +2837,9 @@
                       "type": "string"
                     },
                     "status": {
-                      "enum": [500],
-                      "type": "number"
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
                     },
                     "title": {
                       "type": "string"
@@ -2869,12 +2899,14 @@
                   "additionalProperties": false,
                   "properties": {
                     "code": {
-                      "enum": [
+                      "type": "string",
+                      "x-extensible-enum": [
                         "internal_error",
                         "invalid_request",
                         "conflict",
                         "module_not_enabled",
                         "not_found",
+                        "method_not_allowed",
                         "unauthorized",
                         "forbidden",
                         "secret_key_exposed",
@@ -2885,8 +2917,7 @@
                         "rate_limited",
                         "proof_invalid",
                         "quota_exceeded"
-                      ],
-                      "type": "string"
+                      ]
                     },
                     "detail": {
                       "type": "string"
@@ -2921,8 +2952,9 @@
                       "type": "string"
                     },
                     "status": {
-                      "enum": [500],
-                      "type": "number"
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
                     },
                     "title": {
                       "type": "string"
@@ -3006,12 +3038,14 @@
                   "additionalProperties": false,
                   "properties": {
                     "code": {
-                      "enum": [
+                      "type": "string",
+                      "x-extensible-enum": [
                         "internal_error",
                         "invalid_request",
                         "conflict",
                         "module_not_enabled",
                         "not_found",
+                        "method_not_allowed",
                         "unauthorized",
                         "forbidden",
                         "secret_key_exposed",
@@ -3022,8 +3056,7 @@
                         "rate_limited",
                         "proof_invalid",
                         "quota_exceeded"
-                      ],
-                      "type": "string"
+                      ]
                     },
                     "detail": {
                       "type": "string"
@@ -3058,8 +3091,9 @@
                       "type": "string"
                     },
                     "status": {
-                      "enum": [500],
-                      "type": "number"
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
                     },
                     "title": {
                       "type": "string"
@@ -3166,12 +3200,14 @@
                   "additionalProperties": false,
                   "properties": {
                     "code": {
-                      "enum": [
+                      "type": "string",
+                      "x-extensible-enum": [
                         "internal_error",
                         "invalid_request",
                         "conflict",
                         "module_not_enabled",
                         "not_found",
+                        "method_not_allowed",
                         "unauthorized",
                         "forbidden",
                         "secret_key_exposed",
@@ -3182,8 +3218,7 @@
                         "rate_limited",
                         "proof_invalid",
                         "quota_exceeded"
-                      ],
-                      "type": "string"
+                      ]
                     },
                     "detail": {
                       "type": "string"
@@ -3218,8 +3253,9 @@
                       "type": "string"
                     },
                     "status": {
-                      "enum": [500],
-                      "type": "number"
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
                     },
                     "title": {
                       "type": "string"
@@ -3260,12 +3296,14 @@
                   "additionalProperties": false,
                   "properties": {
                     "code": {
-                      "enum": [
+                      "type": "string",
+                      "x-extensible-enum": [
                         "internal_error",
                         "invalid_request",
                         "conflict",
                         "module_not_enabled",
                         "not_found",
+                        "method_not_allowed",
                         "unauthorized",
                         "forbidden",
                         "secret_key_exposed",
@@ -3276,8 +3314,7 @@
                         "rate_limited",
                         "proof_invalid",
                         "quota_exceeded"
-                      ],
-                      "type": "string"
+                      ]
                     },
                     "detail": {
                       "type": "string"
@@ -3312,8 +3349,9 @@
                       "type": "string"
                     },
                     "status": {
-                      "enum": [500],
-                      "type": "number"
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
                     },
                     "title": {
                       "type": "string"
@@ -3354,12 +3392,14 @@
                   "additionalProperties": false,
                   "properties": {
                     "code": {
-                      "enum": [
+                      "type": "string",
+                      "x-extensible-enum": [
                         "internal_error",
                         "invalid_request",
                         "conflict",
                         "module_not_enabled",
                         "not_found",
+                        "method_not_allowed",
                         "unauthorized",
                         "forbidden",
                         "secret_key_exposed",
@@ -3370,8 +3410,7 @@
                         "rate_limited",
                         "proof_invalid",
                         "quota_exceeded"
-                      ],
-                      "type": "string"
+                      ]
                     },
                     "detail": {
                       "type": "string"
@@ -3406,8 +3445,9 @@
                       "type": "string"
                     },
                     "status": {
-                      "enum": [500],
-                      "type": "number"
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
                     },
                     "title": {
                       "type": "string"

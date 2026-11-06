@@ -23,6 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - uses: jdx/mise-action@v3
       - uses: actions/cache@v4
         with:
@@ -33,6 +35,11 @@ jobs:
       - run: bun run format:check
       - run: bun run lint
       - run: bun run lint:arch
+      - run: bun run api:check
+      - name: API compatibility against the actual base commit
+        env:
+          API_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: bun run api:breaking --base "$API_BASE_REF"
       - run: bun run typecheck
       - run: bunx turbo run build
 
