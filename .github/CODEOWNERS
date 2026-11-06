@@ -10,7 +10,7 @@
 /CLAUDE.md                  @nolliebigspin
 /.claude/                   @nolliebigspin
 /.mcp.json                  @nolliebigspin
-/docs/PLANNING_PROMPT.md    @nolliebigspin
+/PLAN.md                    @nolliebigspin
 
 # Local tooling that runs code on checkout, setup, commit or push
 /mise.toml                  @nolliebigspin

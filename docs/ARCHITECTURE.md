@@ -2,40 +2,40 @@
 
 > **Backbricks** is an open-source, self-hostable headless platform that gives any website managed backend features (forms, file uploads, reviews), integrated by AI coding agents via API, SDK, CLI and MCP, and managed by non-technical site owners in a dashboard. A managed EU cloud follows after the open-source 1.0.
 >
-> *Backbricks are the backend bricks of a website: pick the ones you need (forms, uploads, reviews, …) and build any frontend on top. Backbricks carries the functionality; the website keeps its own look.*
+> *Backbricks are the backend bricks of a website: pick the ones you need and build any frontend on top. Backbricks carries the functionality; the website keeps its own look.*
 >
-> **Status:** Architecture v1 · November 2026
 > **Naming:** packages `@backbricks/*`, CLI `backbricks`, key prefixes `bb_pk_` / `bb_sk_`, config file `backbricks.config.json`. Project domain: `backbricks.app`.
-> **Authority:** This document is the source of truth for implementation. Deviations are recorded as ADRs in `docs/adr/`. Non-negotiable engineering rules and invariants live in `/AGENTS.md`.
+> **Authority:** This document says *what* we build and how the parts fit. The *why* of each key decision lives in its ADR (`docs/adr/`); deviations are recorded there too. Engineering rules and invariants: `/AGENTS.md`. Roadmap: `docs/MILESTONES.md`. Cloud-only topics: `docs/CLOUD.md`.
+> **Once built, code wins.** Sections that specify something not yet implemented (e.g. the SQL in §B.3) are replaced by a link to the code when it lands.
 
 ---
 
 ## 0. Key decisions at a glance
 
-| # | Decision | Choice | Rationale |
+| # | Decision | Choice | ADR |
 |---|---|---|---|
-| 1 | System style | **Modular monolith**, one Docker image, two process roles (`serve`, `worker`) | Fewest moving parts, simple self-hosting, one deployment |
-| 2 | Language / runtime | **TypeScript 7, Bun** (runtime, package manager, test runner, bundler) | Existing expertise, one toolchain, fast DX. Node.js is kept only for Playwright and for compatibility tests of published packages |
-| 3 | Tooling | **mise** (tool versions + tasks), **Turborepo** (task graph + cache), **oxlint** (type-aware) + **oxfmt**, **lefthook** (pre-push) | Fast, reproducible, one command to set up |
-| 4 | HTTP framework | **Hono** on `Bun.serve` + `@hono/zod-openapi` | Zod schemas give validation, OpenAPI and types from one source |
-| 5 | Dashboard | **React SPA (Vite)**, TanStack Router/Query, **shadcn/ui**, Tailwind v4, served statically by the API process | No SEO/SSR needs behind a login; one process |
-| 6 | Database | **PostgreSQL 18**, Drizzle ORM (`pg` driver), SQL migrations | The only stateful core dependency, also used for queue and rate limits |
-| 7 | Background jobs | **pg-boss** | No Redis required |
-| 8 | File storage | **S3-compatible** behind an interface; self-host default **Garage** | MinIO community edition entered maintenance mode in late 2025 and has since been archived |
-| 9 | Dashboard auth | **Better Auth** (email/password, organization plugin; later OAuth provider for remote MCP) | Self-hostable, Postgres, roles and invitations built in |
-| 10 | Multi-tenancy | Shared DB/schema, `organization_id` + `project_id` on every row, `withTenant()` access layer; **Postgres RLS as second line of defense** (cloud phase) | Cheap, simple, can be hardened later without data migration |
-| 11 | Public abuse protection | Publishable key + rate limits + honeypot + **self-hosted proof-of-work (ALTCHA protocol)** + quotas | No third-party captcha, privacy-friendly |
-| 12 | Uploads | Presigned **PUT** directly to object storage, signed size/type, **copy-then-scan** (ClamAV optional), private by default | The app never proxies large files; no overwrite-after-scan gap |
-| 13 | Agent integration | REST + OpenAPI, SDK, CLI with **config-as-code** (`backbricks.config.json`), **MCP server over stdio inside the CLI**; remote MCP with OAuth later | Simple, safe, works immediately in Claude Code / Codex / Cursor |
-| 14 | Local development | **Docker Compose** for the whole dev environment (infra + app services); the **same compose file** is used by CI | One definition of the environment, no drift |
-| 15 | License | **AGPL-3.0-only** for server/dashboard/modules, **MIT** for SDK/CLI/examples/skills, **DCO** for contributions, trademark policy for the name | Protects against cloud resale; zero license friction for customer websites |
-| 16 | Self-host vs. cloud | **Same code**, `DEPLOYMENT_MODE=self_hosted\|cloud`; differences only via `Entitlements`/`Billing` interfaces | No fork, no feature lock in the core |
-| 17 | Priority | **Open-source release first** (milestones M0–M6), managed cloud afterwards (C1–C3) | Validates the product and builds community before operating costs |
-| 18 | Module selection | **Every module is optional**: `BACKBRICKS_MODULES` enables any subset at runtime; required infrastructure is derived from the enabled modules (e.g. object storage only with Uploads) | Self-hosters deploy only the stack they need; one image, enabling a module later needs no rebuild (§C.7) |
+| 1 | System style | **Modular monolith**, one Docker image, process roles (`serve`, `worker`, …) | [0002](adr/0002-modular-monolith.md) |
+| 2 | Language / runtime | **TypeScript 7, Bun** (runtime, package manager, test runner, bundler); Node only for Playwright and compatibility tests | [0003](adr/0003-typescript-and-bun.md) |
+| 3 | Tooling | **mise**, **Turborepo**, **oxlint** (type-aware) + **oxfmt**, **lefthook** | [0004](adr/0004-tooling.md) |
+| 4 | HTTP framework | **Hono** on `Bun.serve` + `@hono/zod-openapi` | [0005](adr/0005-hono-and-zod-openapi.md) |
+| 5 | Dashboard | **React SPA (Vite)**, TanStack Router/Query, shadcn/ui, Tailwind v4, served by the API process | [0006](adr/0006-dashboard-spa.md) |
+| 6 | Database | **PostgreSQL 18**, Drizzle ORM (`pg` driver); also queue and rate limits | [0007](adr/0007-postgresql-and-drizzle.md) |
+| 7 | Background jobs | **pg-boss** (no Redis) | [0008](adr/0008-pg-boss.md) |
+| 8 | File storage | **S3-compatible** behind an interface; self-host default **Garage** | [0009](adr/0009-s3-storage-and-garage.md) |
+| 9 | Dashboard auth | **Better Auth** (email/password, organizations; later OAuth provider for remote MCP) | [0010](adr/0010-better-auth.md) |
+| 10 | Multi-tenancy | Shared schema, `organization_id` + `project_id` on every row, `withTenant()`; Postgres RLS as second line (cloud) | [0011](adr/0011-multi-tenancy.md) |
+| 11 | Public abuse protection | Publishable key + rate limits + honeypot + self-hosted **proof-of-work (ALTCHA)** + quotas | [0012](adr/0012-public-abuse-protection.md) |
+| 12 | Uploads | Presigned **PUT** to object storage, signed size/type, **copy-then-scan**, private by default | [0013](adr/0013-presigned-uploads-copy-then-scan.md) |
+| 13 | Agent integration | REST + OpenAPI, SDK, CLI with **config-as-code**, **stdio MCP inside the CLI**; remote MCP later | [0014](adr/0014-agent-integration.md) |
+| 14 | Local development | **Docker Compose** for the whole dev environment; the same file in CI | [0015](adr/0015-docker-compose-dev-environment.md) |
+| 15 | License | **AGPL-3.0-only** platform, **MIT** SDK/CLI/examples/skills, **DCO**, trademark policy | [0016](adr/0016-licensing.md) |
+| 16 | Self-host vs. cloud | **Same code**, `DEPLOYMENT_MODE=self_hosted\|cloud`, differences only via injected interfaces | [0017](adr/0017-self-host-and-cloud-same-code.md) |
+| 17 | Priority | **Open-source release first** (M0–M6), managed cloud afterwards (C1–C3) | [0018](adr/0018-open-source-first.md) |
+| 18 | Module selection | **Every module is optional** (`BACKBRICKS_MODULES`); infrastructure derived from enabled modules (§C.7) | [0019](adr/0019-optional-modules.md) |
 
 ---
 
-## 1. Assumptions and open points
+## 1. Assumptions and scope
 
 **Assumptions** (re-evaluate if they stop holding):
 
@@ -46,38 +46,25 @@
 - A5: Review ratings use a 1–5 scale by default, configurable up to 10.
 - A6: The website operator is the GDPR controller; the managed cloud acts as processor. Self-hosters are their own controllers and processors.
 
-**Deferred decisions** (see section J): billing provider, remote MCP with OAuth, webhook delivery, per-project permissions, application-level field encryption, final legal review of the license setup.
-
 **Out of scope for v1:** visual website builder; drag-and-drop form designer with its own design engine; general-purpose CRM or CMS; auth-as-a-service for website end users; workflow automation builder; third-party module marketplace; email marketing infrastructure; payments/subscriptions for connected websites; native mobile SDKs; enterprise SSO.
 
-**After v1:** candidate modules (live chat, booking, polls, feature voting, surveys, analytics, cookie consent, job postings, gallery, product catalog, protected content, …) and the platform capabilities they need are listed in `docs/MODULES.md`.
+**After v1:** candidate modules and the platform capabilities they need: `docs/MODULES.md`. Deferred technical topics: §J.3.
 
 ---
 
 ## A. Architecture
 
-### A.1 Recommendation: modular monolith
+### A.1 Modular monolith and process roles
 
-One TypeScript codebase with clearly separated domain modules (`forms`, `uploads`, `reviews`) on a shared `core`. Shipped as **one** Docker image (`oven/bun` base) that starts in one of these roles:
+One TypeScript codebase with separated domain modules (`forms`, `uploads`, `reviews`) on a shared `core`, shipped as **one** Docker image (`oven/bun` base) that starts in one of these roles:
 
 - `serve`: HTTP (public API, management API, Better Auth routes, static dashboard)
 - `worker`: pg-boss jobs (malware scan, email, outbox dispatcher, retention, cleanup, usage aggregation)
-- `all`: `serve` and `worker` in one process, for the smallest self-hosted setups (two containers: app + Postgres)
+- `all`: `serve` and `worker` in one process, for the smallest self-hosted setups (app + Postgres)
 - `migrate`: one-shot database migrations
-- `setup`: first-run setup (instance admin) for self-hosting
+- `setup`: first-run setup (instance admin) for self-hosting (arrives in P6)
 
-**Why not microservices**
-
-| Criterion | Modular monolith | Microservices |
-|---|---|---|
-| Services for self-hosting | 4 (app, worker, Postgres, storage) + optional ClamAV, Caddy | 8–15 |
-| Cross-module transactions (e.g. submission + file claim) | One DB transaction | Sagas / eventual consistency |
-| Operable by a solo founder | Yes | Unrealistic |
-| Later extraction | Possible if module boundaries hold | – |
-
-Module boundaries are enforced technically (C.3), which keeps a later extraction (e.g. the scan worker or the public API) possible without paying for it now.
-
-**Why not Next.js:** The dashboard needs no SSR/SEO. The public API needs precise control (per-project CORS, body limits, rate limits, streamed exports, problem-details errors), and the worker is a separate process anyway. Hono + Vite SPA gives **one** Bun process with clear separation. All React/TypeScript/Tailwind knowledge still applies. The marketing and docs site is a separate static Astro app (`apps/www`, see ADR-0001).
+Module boundaries are enforced technically (§C.3), so a later extraction (e.g. the scan worker) stays possible. The marketing and docs site is a separate static Astro app (`apps/www`, ADR-0001).
 
 ### A.2 System context
 
@@ -109,47 +96,6 @@ flowchart LR
   platform --> smtp
 ```
 
-### A.3 Containers and processes
-
-```mermaid
-flowchart TB
-  subgraph image["One Docker image: backbricks/server"]
-    direction TB
-    subgraph serve["role: serve (HTTP, Bun.serve)"]
-      hono["Hono app"]
-      pub["Public router<br/>/v1/public/*"]
-      adm["Management router<br/>/v1/*"]
-      auth["Better Auth<br/>/api/auth/*"]
-      static["Dashboard SPA<br/>(static files)"]
-      hono --> pub & adm & auth & static
-    end
-    subgraph worker["role: worker"]
-      boss["pg-boss runner"]
-      jobs["Jobs: scan, mail, outbox,<br/>retention, cleanup, usage"]
-      boss --> jobs
-    end
-    core["core: registry, TenantContext, services<br/>(audit, events, storage, mailer, abuse guard,<br/>rate limiter, usage, entitlements)"]
-    mods["modules: forms · uploads · reviews"]
-    serve --> core
-    worker --> core
-    core --- mods
-  end
-
-  pg[("PostgreSQL 18<br/>app data · pg-boss · rate limits")]
-  s3[("Object storage<br/>Garage / Hetzner / Scaleway / IONOS")]
-  clam["ClamAV (clamd)<br/>optional"]
-  caddy["Caddy<br/>TLS, reverse proxy"]
-  smtp["SMTP"]
-
-  caddy --> serve
-  serve --> pg
-  worker --> pg
-  serve --> s3
-  worker --> s3
-  worker --> clam
-  worker --> smtp
-```
-
 ### A.4 Communication paths
 
 | From → To | Channel | Auth |
@@ -164,30 +110,16 @@ flowchart TB
 
 ### A.5 Infrastructure components
 
-| Component | MVP | Required | Self-host default | Cloud |
-|---|---|---|---|---|
-| App (`serve`) | ✔ | Yes | container | 1 instance (stateless, horizontally scalable later) |
-| Worker | ✔ | Yes (own container, or in-process via role `all`) | container (same image) | 1 instance |
-| PostgreSQL | ✔ | Yes (the only always-required service) | `postgres:18` | self-operated with PITR or managed in DE |
-| Object storage | ✔ | Only if an enabled module needs files (Uploads) | Garage, compose profile `storage` | Hetzner Object Storage (DE) or alternative |
-| SMTP | ✔ | Recommended (notifications; without SMTP, invitations fall back to copyable links) | any SMTP | EU SMTP provider |
-| ClamAV | ✔ | Optional, only with Uploads (`SCANNER=none\|clamav`) | compose profile `scan` | on |
-| Reverse proxy/TLS | ✔ | Recommended | Caddy | Caddy |
-| Redis | ✘ | No | – | only with measured need |
-| CDN for review read API | ✘ | No | – | later (cache headers correct from day one) |
-
-### A.6 MVP vs. later scale
-
-| Topic | MVP | Later (only when needed) |
-|---|---|---|
-| Instances | 1× serve, 1× worker | n× serve behind a load balancer; workers split by queue |
-| Rate limiting | Postgres implementation (UNLOGGED table), memory impl for tests | Redis/Valkey impl behind the same interface |
-| Review read API | `Cache-Control` + `ETag`, Postgres query | CDN/edge cache, precomputed aggregates |
-| Tenant isolation | `withTenant()` + tests | + Postgres RLS (cloud), schema-per-tenant for enterprise |
-| Uploads | Single PUT ≤ 100 MB | Multipart, resumable (tus), image variants |
-| MCP | stdio inside the CLI | Remote MCP (`/mcp`, Streamable HTTP, OAuth 2.1) |
-| Webhooks | Outbox table as foundation | Delivery with signatures, retries, logs |
-| Regions | One EU region (DE) | More EU regions per organization |
+| Component | Required | Self-host default | Cloud |
+|---|---|---|---|
+| App (`serve`) | Yes | container | 1 instance (stateless, horizontally scalable later) |
+| Worker | Yes (own container, or in-process via role `all`) | container (same image) | 1 instance |
+| PostgreSQL | Yes (the only always-required service) | `postgres:18` | see `docs/CLOUD.md` |
+| Object storage | Only if an enabled module needs files (Uploads) | Garage, compose profile `storage` | see `docs/CLOUD.md` |
+| SMTP | Recommended (notifications; without SMTP, invitations fall back to copyable links) | any SMTP | EU SMTP provider |
+| ClamAV | Optional, only with Uploads (`SCANNER=none\|clamav`) | compose profile `scan` | on |
+| Reverse proxy/TLS | Recommended | Caddy | Caddy |
+| Redis, CDN | No | – | only with measured need (§J.3) |
 
 ---
 
@@ -227,7 +159,9 @@ Hierarchy: **Organization → Project (= website) → Module instance (form `con
 
 ### B.3 PostgreSQL schema (first version)
 
-Better Auth tables (`user`, `session`, `account`, `verification`, `organization`, `member`, `invitation`) are generated by the Better Auth CLI and committed into our migration history. All tables below belong to the platform. (Validated against PostgreSQL 16; target is 18.)
+> **Spec for tables that are not built yet.** When a table is implemented (core tables in P1.2, module tables in P2–P4), its SQL below is replaced by a link to the Drizzle schema, which becomes the source of truth.
+
+Better Auth tables (`user`, `session`, `account`, `verification`, `organization`, `member`, `invitation`) are generated by the Better Auth CLI and committed into our migration history. All tables below belong to the platform.
 
 ```sql
 -- =========================================================
@@ -499,7 +433,7 @@ CREATE TABLE system_settings (
 
 ### B.5 Migrations and schema versioning
 
-- **One migration history** (`packages/db/migrations/*.sql`), generated with `drizzle-kit generate`, reviewed by hand and committed. Module tables are defined in module packages but migrated centrally (no ordering problems).
+- **One migration history** (`packages/db/migrations/`), generated with `drizzle-kit generate`, reviewed by hand and committed. Module tables are defined in module packages but migrated centrally (no ordering problems).
 - **Forward-only** in production. Breaking changes follow *expand → migrate → contract* across two releases.
 - `migrate` holds a Postgres advisory lock. In compose it runs as a one-shot service before `serve`/`worker`.
 - **Module config formats:** `module_version` per instance. When a module changes its config format it ships `migrateConfig(fromVersion, config)`; configs are migrated lazily on read, and a job migrates all instances after deployment.
@@ -509,19 +443,11 @@ CREATE TABLE system_settings (
 
 - **Access layer:** every request creates a `TenantContext { organizationId, projectId?, principal, scopes }`. Tenant tables are accessed only through `withTenant(ctx, async (tx) => …)`, which
   1. opens a transaction,
-  2. runs `SET LOCAL app.org_id` / `app.project_id` (prepares RLS),
+  2. sets `app.org_id` / `app.project_id` as transaction-local settings (prepares RLS),
   3. returns repositories whose queries are always scoped by `organization_id`/`project_id`.
 - **Resources of other tenants return `404`**, never `403` (no existence leaks).
-- **Cloud phase: enable RLS** on all tenant tables:
-  ```sql
-  ALTER TABLE form_submissions ENABLE ROW LEVEL SECURITY;
-  CREATE POLICY tenant_isolation ON form_submissions
-    USING (organization_id = current_setting('app.org_id', true)
-           AND (current_setting('app.project_id', true) IS NULL
-                OR current_setting('app.project_id', true) = ''
-                OR project_id = current_setting('app.project_id', true)));
-  ```
-  The app role has no `BYPASSRLS`; cross-tenant jobs (retention) use a dedicated role.
+- **Enforced by:** an architecture rule against direct table access outside repositories, and the isolation suite: fixtures with 2 organizations × 2 projects; for **every** registered management route, credentials of B on resources of A must return `404`. Object keys are prefixed with org/project; download URLs are only issued after DB authorization.
+- **Cloud phase:** Postgres RLS as second line of defense (`docs/CLOUD.md`).
 
 ---
 
@@ -566,18 +492,7 @@ export interface ModuleDefinition<TConfig = unknown> {
 
 ### C.2 Registration
 
-Static, no runtime plugins:
-
-```ts
-// apps/server/src/modules.ts
-import { formsModule } from '@backbricks/module-forms';
-import { uploadsModule } from '@backbricks/module-uploads';
-import { reviewsModule } from '@backbricks/module-reviews';
-
-export const modules = defineRegistry([uploadsModule, formsModule, reviewsModule]);
-```
-
-`defineRegistry` validates at startup: unique types and scopes, satisfied `requires`, no event collisions. The dashboard has a parallel static registry (`apps/web/src/modules/registry.ts`) with nav entries, routes and icons per module.
+Static, no runtime plugins. `apps/server/src/modules.ts` lists the modules; `defineRegistry` validates at startup: unique types and scopes, satisfied `requires`, no event collisions. The dashboard has a parallel static registry (`apps/web/src/modules/registry.ts`) with nav entries, routes and icons per module.
 
 **Generic features the core provides for every module** (no module code needed):
 
@@ -591,7 +506,7 @@ export const modules = defineRegistry([uploadsModule, formsModule, reviewsModule
 
 ### C.3 Module boundaries and data isolation
 
-- A module imports **only** `@backbricks/core` and its own files (enforced by dependency-cruiser in CI).
+- A module imports **only** `@backbricks/core` and its own files (enforced by dependency-cruiser).
 - A module reads/writes **only its own tables**, plus the generic core tables through core services, never directly.
 - **Cross-module collaboration happens via capabilities.** Example: `forms` needs files; `uploads` provides the `files` capability:
   ```ts
@@ -615,12 +530,12 @@ export const modules = defineRegistry([uploadsModule, formsModule, reviewsModule
 | `scanner` | Malware scan of a stream | `none`, `clamav` |
 | `mailer` | Templated mail | SMTP (nodemailer); dev: Mailpit |
 | `abuseGuard` | Pipeline for public writes | honeypot, PoW (`altcha-lib`), origin, rate limit, heuristics |
-| `rateLimiter` | Fixed window / token bucket | Postgres, memory |
+| `rateLimiter` | Fixed window / token bucket | Postgres (UNLOGGED table), memory |
 | `usage` | Increment counters | Postgres |
 | `entitlements` | Check limits/quotas | `unlimited` (self-host), `plans` (cloud) |
 | `clock`, `ids` | Testable time, TypeIDs | – |
 
-### C.5 Demonstration: a hypothetical fourth module "Waitlist"
+### C.5 Example: a hypothetical fourth module "Waitlist"
 
 Goal: visitors join a waitlist with email (and an optional referral code) with double opt-in.
 
@@ -634,11 +549,11 @@ packages/modules/waitlist/
   src/privacy.ts       # exportSubject/deleteSubject by email
   src/index.ts         # export const waitlistModule: ModuleDefinition<WaitlistConfig>
 apps/web/src/modules/waitlist/   # list + settings pages, registry entry
-packages/db/migrations/00xx_waitlist.sql   # generated
+packages/db/migrations/…         # generated
 apps/server/src/modules.ts       # one line: add waitlistModule
 ```
 
-**What does not change:** core tables, auth, keys, audit, notifications (rule on `waitlist.entry.confirmed`), CLI (config-as-code learns `waitlists` from the registry), MCP (generic `config_*` tools), SDK (the generic `client.request('waitlists', key, 'entries', body)` works immediately; a typed `waitlists.join()` is optional sugar). That is scenario E.
+**What does not change:** core tables, auth, keys, audit, notifications (rule on `waitlist.entry.confirmed`), CLI (config-as-code learns `waitlists` from the registry), MCP (generic `config_*` tools), SDK (the generic `client.request('waitlists', key, 'entries', body)` works immediately; a typed `waitlists.join()` is optional sugar).
 
 ### C.6 Deliberately not built
 
@@ -650,25 +565,21 @@ apps/server/src/modules.ts       # one line: add waitlistModule
 
 Every module can be switched on or off per installation. A self-hoster who only needs uploads runs only what uploads needs.
 
-**Mechanism**
-
-- **One image, runtime selection.** All modules ship in the same Docker image; `BACKBRICKS_MODULES=uploads` (comma-separated, default: all) decides which are active. Separate builds per combination are deliberately avoided: one release artifact, and enabling a module later is an env change plus a restart.
+- **One image, runtime selection.** All modules ship in the same image; `BACKBRICKS_MODULES=uploads` (comma-separated, default: all) decides which are active. Enabling a module later is an env change plus a restart, no rebuild.
 - **Filtered registry.** `defineRegistry` registers only enabled modules: their routes, jobs, scopes, events, MCP tools and dashboard navigation. Disabled modules are inert.
-- **Dependencies are validated at startup.** A module's hard `requires` must be satisfied by enabled modules, otherwise startup fails with a clear message (`reviews` requires nothing; nothing in v1 hard-requires another module). `optional` capabilities degrade gracefully: without Uploads, the forms field type `file` is unavailable and configs using it are rejected with `capability_unavailable`.
+- **Dependencies are validated at startup.** Unsatisfied hard `requires` fail startup with a clear message (nothing in v1 hard-requires another module). `optional` capabilities degrade gracefully: without Uploads, the forms field type `file` is unavailable and configs using it are rejected with `capability_unavailable`.
 - **Infrastructure is derived, not assumed.** Each module declares `infrastructure` (`storage`, `scanner`, …). The core composes the env schema from the enabled modules: S3 variables are required only if a module needs storage; ClamAV only if Uploads runs with `SCANNER=clamav`. `/readyz` checks only the services that are actually needed.
-- **Disabled modules in the API.** Their routes aren't mounted; requests get `404` with code `module_not_enabled` and a hint. `GET /v1/meta` (public) and `GET /v1/projects/{id}/integration` list enabled modules, so the dashboard, SDK, CLI and MCP adapt automatically. Pushing config for a disabled module fails validation.
-- **Migrations stay one history.** All tables are created regardless of selection (empty tables cost nothing), so enabling a module later needs no special migration ordering, and disabling one never deletes data.
-- **Compose profiles follow the selection.** `deploy/compose` uses profiles per infrastructure (`storage` for Garage, `scan` for ClamAV). A `configure` step (setup CLI) asks which modules to enable and writes `BACKBRICKS_MODULES` plus the matching `COMPOSE_PROFILES` into `.env`.
+- **Disabled modules in the API.** Their routes aren't mounted; requests get `404` with code `module_not_enabled` and a hint. `GET /v1/meta` (public) and `GET /v1/projects/{id}/integration` list enabled modules, so dashboard, SDK, CLI and MCP adapt automatically. Pushing config for a disabled module fails validation.
+- **Migrations stay one history.** All tables are created regardless of selection, so enabling a module later needs no special migration ordering, and disabling one never deletes data.
+- **Compose profiles follow the selection.** `deploy/compose` uses profiles per infrastructure (`storage` for Garage, `scan` for ClamAV). A `configure` step asks which modules to enable and writes `BACKBRICKS_MODULES` plus the matching `COMPOSE_PROFILES` into `.env`.
 
-**Resulting footprints (self-hosted)**
-
-| Enabled modules | Containers | Notes |
+| Enabled modules | Containers (self-hosted) | Notes |
 |---|---|---|
 | Forms and/or Reviews | app (`all`) + postgres (+ caddy) | No object storage, no ClamAV; ~512 MB RAM total |
-| Uploads | app + worker + postgres + garage (+ clamav) (+ caddy) | Add ClamAV (~1.5–2 GB RAM) only if scanning is wanted |
+| Uploads | app + worker + postgres + garage (+ clamav) (+ caddy) | ClamAV (~1.5–2 GB RAM) only if scanning is wanted |
 | All v1 modules | app + worker + postgres + garage + clamav + caddy | Full setup |
 
-**Cloud:** all modules are enabled at the instance level. Per-organization availability (e.g. by plan) is a separate concern handled by `entitlements`, not by `BACKBRICKS_MODULES`.
+**Cloud:** all modules are enabled at the instance level. Per-organization availability (e.g. by plan) is handled by `entitlements`, not by `BACKBRICKS_MODULES`.
 
 ---
 
@@ -757,14 +668,14 @@ RFC 9457 problem details with agent-friendly extensions:
 }
 ```
 
-Stable `code` values are part of the API contract (catalog in `packages/core/src/errors/codes.ts`, documented and generated).
+Stable `code` values are part of the API contract (catalog in `packages/core/src/errors/codes.ts`).
 
 ### D.4 API versioning
 
-- Major version in the path (`/v1`). Within v1, **additive changes only** (new fields, endpoints, optional parameters).
+- Major version in the path (`/v1`); within v1 additive changes only (I17).
 - The OpenAPI spec (`/v1/openapi.json`) is generated from the Zod routes and committed; CI fails on unintended diffs (`bun run api:check`) and detects breaking changes with `oasdiff`.
 - Deprecations get `Deprecation`/`Sunset` headers and a changelog entry; minimum 6 months.
-- Module config formats are versioned separately via `module_version`; the config file via `$schema` (`config.v1.json`).
+- Module config formats are versioned via `module_version`; the config file via `$schema` (`config.v1.json`).
 
 ### D.5 Secure direct browser integration
 
@@ -832,26 +743,13 @@ sequenceDiagram
 | `@backbricks/react` (later) | MIT | Unstyled hooks `useForm`, `useUpload`, `useReviews` |
 
 ```ts
-import { createClient, BackbricksError } from '@backbricks/sdk';
-
 const backbricks = createClient({ publishableKey: import.meta.env.PUBLIC_BACKBRICKS_KEY });
-
-const cv = await backbricks.uploads.upload(fileInput.files![0], {
-  zone: 'cv',
-  onProgress: (p) => setProgress(p.percent),
-});
-
-try {
-  await backbricks.forms.submit('contact', { name, email, message, cv: [cv.ref], privacy: true });
-} catch (e) {
-  if (e instanceof BackbricksError && e.code === 'validation_failed') showFieldErrors(e.fieldErrors);
-}
-
+const cv = await backbricks.uploads.upload(file, { zone: 'cv', onProgress: (p) => setProgress(p.percent) });
+await backbricks.forms.submit('contact', { name, email, message, cv: [cv.ref], privacy: true }); // throws BackbricksError
 const { data, nextCursor } = await backbricks.reviews.list('testimonials', { sort: 'newest', limit: 10 });
-const stats = await backbricks.reviews.stats('testimonials');
 ```
 
-`backbricks codegen` generates form types so `backbricks.forms.submit('contact', …)` is typed (module augmentation of a `BackbricksSchema` interface).
+`backbricks codegen` generates form types so `forms.submit('contact', …)` is typed (module augmentation of a `BackbricksSchema` interface).
 
 ### D.8 CLI
 
@@ -909,13 +807,11 @@ const stats = await backbricks.reviews.stats('testimonials');
 }
 ```
 
-**Field types in the MVP:** `text`, `textarea`, `email`, `phone`, `number`, `url`, `select`, `multiselect`, `checkbox`, `date`, `hidden`, `file`, `consent`. Validations: `required`, `minLength`/`maxLength`, `min`/`max`, `options`. **No custom regex** in the MVP (ReDoS risk).
+**Field types in the MVP:** `text`, `textarea`, `email`, `phone`, `number`, `url`, `select`, `multiselect`, `checkbox`, `date`, `hidden`, `file`, `consent`. Validations: `required`, `minLength`/`maxLength`, `min`/`max`, `options`. **No custom regex** (ReDoS risk, I10).
 
 ### D.9 MCP server
 
-**MVP:** `backbricks mcp` starts a stdio MCP server (official TypeScript MCP SDK) inside the CLI, authenticated with the secret key from env/credentials. Setup in Claude Code: `claude mcp add backbricks -- npx backbricks mcp`.
-
-**Later (cloud, optional):** remote MCP at `/mcp` (Streamable HTTP) with OAuth 2.1 via the Better Auth OAuth provider plugin, so users can connect without copying keys.
+**MVP:** `backbricks mcp` starts a stdio MCP server (official TypeScript MCP SDK) inside the CLI, authenticated with the secret key from env/credentials. Setup in Claude Code: `claude mcp add backbricks -- npx backbricks mcp`. Remote MCP with OAuth is a later option (`docs/CLOUD.md`).
 
 | Tool | Scope | Behavior |
 |---|---|---|
@@ -932,37 +828,17 @@ const stats = await backbricks.reviews.stats('testimonials');
 
 **Security boundaries:** no delete tools, no reading of personal data in the default preset, no key management. Every change is audited with `actor_type='mcp'` and can be rolled back via revisions. Tool descriptions contain no secrets.
 
-### D.10 End to end: an agent integrates a contact form, upload and reviews
+### D.10 Scenario A: an agent integrates a contact form, upload and reviews
 
-```mermaid
-sequenceDiagram
-  autonumber
-  actor U as Site owner
-  participant D as Dashboard
-  participant A as Coding agent
-  participant CLI as backbricks CLI/MCP
-  participant M as Management API
-  participant P as Public API
+1. The site owner signs up, creates project "example.com" and a key with preset "AI agent / CLI" (shown once).
+2. The owner asks the coding agent for "a contact form with CV upload and testimonials" and provides `BACKBRICKS_SECRET_KEY` locally.
+3. `backbricks init --project prj_…` reads `/integration` and writes `backbricks.config.json` and `.env.local` (`PUBLIC_BACKBRICKS_KEY=bb_pk_…`).
+4. The agent extends the config (`forms.contact`, `uploadZones.cv`, `reviewCollections.testimonials`) and runs `backbricks push --yes` (dry run → plan → apply with `planHash`).
+5. `backbricks codegen`, then the agent builds its own UI components with `@backbricks/sdk`.
+6. `backbricks test submit forms/contact` creates a test entry (secret key, `is_test`); `backbricks doctor` confirms no secret key in public variables.
+7. The owner sees the test entry in the dashboard, adds a notification email and confirms the origin.
 
-  U->>D: Sign up, create project "example.com"
-  U->>D: Create key with preset "AI agent / CLI" (shown once)
-  U->>A: "Build a contact form with CV upload and testimonials" + BACKBRICKS_SECRET_KEY locally
-  A->>CLI: backbricks init --project prj_…
-  CLI->>M: GET /integration
-  CLI-->>A: backbricks.config.json, .env.local (PUBLIC_BACKBRICKS_KEY=bb_pk_…)
-  A->>A: Extend config (forms.contact, uploadZones.cv, reviewCollections.testimonials)
-  A->>CLI: backbricks push --yes
-  CLI->>M: PUT /config?dryRun=true → plan
-  CLI->>M: PUT /config (planHash)
-  A->>CLI: backbricks codegen
-  A->>A: Build custom UI components with @backbricks/sdk
-  A->>CLI: backbricks test submit forms/contact
-  CLI->>P: POST /v1/public/forms/contact/submissions (secret key, is_test)
-  A->>CLI: backbricks doctor
-  CLI-->>A: OK, no secret key in public variables
-  A-->>U: Done, test entry visible
-  U->>D: See test entry, add notification email, confirm origin
-```
+The P5 end-to-end test automates this scenario.
 
 ### D.11 Documentation for humans and agents
 
@@ -974,7 +850,7 @@ sequenceDiagram
 
 ---
 
-## E. Dashboard architecture
+## E. Dashboard
 
 ### E.1 Information architecture
 
@@ -1024,7 +900,7 @@ Modules add themselves to the navigation through the web registry. Wording is de
 | Manage members | ✔ | ✔ (not owners) | ✘ |
 | Billing, delete organization, transfer ownership | ✔ | ✘ | ✘ |
 
-Roles are organization-wide. Per-project access comes later (data model prepared: a `project_access` table can be added).
+Roles are organization-wide. Per-project access comes later (a `project_access` table can be added).
 
 ### E.5 UX principles for non-technical owners
 
@@ -1036,44 +912,36 @@ Roles are organization-wide. Per-project access comes later (data model prepared
 6. **"Connect an AI agent" wizard:** creates a preset key and a ready-to-copy prompt block for Claude Code/Codex
 7. Mobile-friendly entry and moderation views (owners often read inquiries on their phone)
 
-### E.6 Technology
-
-Vite + React 19 + TypeScript, TanStack Router (typed routes), TanStack Query, shadcn/ui (Radix) + Tailwind v4, react-hook-form + zod, i18next. API access via the client generated from OpenAPI (identical to `@backbricks/sdk/admin`). No `dangerouslySetInnerHTML` (lint rule). Strict CSP.
-
 ---
 
-## F. EU hosting, GDPR and security
+## F. Security and privacy
 
-### F.1 Security architecture
+### F.1 Security measures
+
+Beyond the invariants in AGENTS.md §3:
 
 | Layer | Measure |
 |---|---|
 | Transport | TLS 1.2+ via Caddy, HSTS, no clear-text ports exposed |
-| Storage | Provider disk encryption; object storage server-side encryption; encrypted backups (restic/WAL-G with our own key) |
-| Secrets | Secret keys stored as SHA-256 only (high-entropy tokens need no slow hash); env-based app secrets; pino redaction for `authorization`, `cookie`, `*token*`, `*key*` |
+| Storage | Provider disk encryption; object storage server-side encryption; encrypted backups |
+| Secrets | SHA-256 only (high-entropy tokens need no slow hash); env-based app secrets; pino redaction for `authorization`, `cookie`, `*token*`, `*key*` |
 | Sessions | Better Auth, `HttpOnly`/`Secure`/`SameSite=Lax`, CSRF header required for mutating dashboard requests, login rate limits |
-| Authorization | Every management route declares `requires: { role?, scope? }`; a test fails for undeclared routes |
-| Input | Zod at every boundary, body limits, no customer-provided regex |
-| Output | User content is always untrusted: React escaping, CSV injection protection (prefix `'` before `= + - @ \t \r`), HTML-escaped emails, reviews as plain text |
-| Files | Private, presigned GET with `attachment`, magic-byte check, copy-then-scan, quarantine |
+| Output | CSV injection protection: prefix `'` before `= + - @ \t \r` |
 | Exfiltration | Export only for owner/admin, audited and rate limited; `data:read` not in the agent preset; page size max 100 |
 | Dependencies | Lockfile, Dependabot, `bun audit` in CI, minimal runtime deps, non-root containers with read-only file system |
-| Headers | CSP, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `frame-ancestors 'none'` for the dashboard |
+| Headers | Strict CSP, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `frame-ancestors 'none'` for the dashboard |
 
-### F.2 Tenant isolation (summary)
+### F.2 Tenant isolation
 
-1. `withTenant()` as the only access path (lint/architecture rule against direct table imports outside repositories)
-2. Automated isolation suite: fixtures with 2 organizations × 2 projects; for **every** registered management route, credentials of B on resources of A must return `404`
-3. Object keys prefixed with org/project; download URLs are only issued after DB authorization
-4. Cloud: Postgres RLS as second line
+See §B.6 and invariants I1–I3.
 
 ### F.3 Malware scanning
 
-- ClamAV (`clamd`) as an optional container with `freshclam` updates. Needs roughly 1.5–2 GB RAM, so size the server for it
+- ClamAV (`clamd`) as an optional container with `freshclam` updates; needs roughly 1.5–2 GB RAM
 - Scan via `INSTREAM`; `StreamMaxLength` matches the max file size
 - `FOUND` → `quarantined`, object deleted, metadata kept, admin notification; scan errors → retry, `rejected` after 3 failures
 - `SCANNER=none` (self-host option): files become `ready` but the dashboard marks them "not scanned for malware"
-- Limits: ClamAV does not catch everything; the real protection is the combination of allowlist, magic bytes, private storage and forced download
+- ClamAV does not catch everything; the real protection is the combination of allowlist, magic bytes, private storage and forced download
 
 ### F.4 Privacy and deletion
 
@@ -1086,124 +954,45 @@ Vite + React 19 + TypeScript, TanStack Router (typed routes), TanStack Query, sh
 | Minimization | IP only as rotating HMAC; user agent only as family; notifications without content by default; no tracking cookies |
 | Consent | `consent` field type stores text version and timestamp |
 | Deleting projects/organizations | Hard, cascading, objects via job; confirmation by typing the name |
-| Backups | Deleted data disappears when backup rotation expires (30 days), disclosed in the privacy documentation (legal review) |
+| Backups | Deleted data disappears when backup rotation expires (30 days), disclosed in the privacy documentation |
 
-### F.5 Backup and restore
+### F.5 Backup and restore (self-host)
 
-- **Postgres (cloud):** continuous WAL archiving + daily base backups with **pgBackRest or WAL-G** to object storage at a **different location**, PITR for 14–30 days, plus a weekly logical `pg_dump`
-- **Object storage:** versioning/replication to a second location or nightly `rclone sync`
-- **Self-host:** bundled backup container (`pg_dump` + `restic` to any target) and a documented restore guide
-- **Restore tests:** CI job (dump → restore → smoke test); in the cloud a quarterly manual restore drill with a written record
+- Bundled backup container (`pg_dump` + `restic` to any target) and a documented restore guide
+- CI job: dump → restore → smoke test
+- Cloud backups (PITR, offsite, drills): `docs/CLOUD.md`
 
 ### F.6 Audit logging
 
 Logged: login events (Better Auth hooks), member and role changes, key creation/revocation, config changes (with diff), exports, downloads, deletions (single and bulk), GDPR requests, secret-key exposure, retention runs. **Not** logged: submission content. Audit logs are append-only (trigger), kept for 1 year, filterable and exportable in the dashboard.
 
-### F.7 EU hosting providers (cloud phase)
-
-Verify before deciding; prices and availability change.
-
-| Provider | HQ | Compute in DE | Managed Postgres | Object storage | Assessment |
-|---|---|---|---|---|---|
-| **Hetzner** | DE | ✔ (Nuremberg, Falkenstein) | ✘ | ✔ (Nuremberg, Falkenstein, Helsinki) | Cheapest start; run the DB yourself. Price increases and object storage load issues in 2026 |
-| **IONOS Cloud** | DE | ✔ | ✔ | ✔ | Full managed stack in DE, pricier, weaker DX |
-| **STACKIT** | DE | ✔ | ✔ | ✔ | Sovereign, enterprise-oriented |
-| **Scaleway** | FR | ✘ (FR/NL/PL) | ✔ | ✔ | Best EU DX and managed services, but no DE region |
-| **OVHcloud** | FR | ✔ | ✔ | ✔ | Broad offering, mixed DX |
-
-**Recommendation for the cloud start:** Hetzner Cloud (DE). VM 1 runs app + worker + ClamAV, VM 2 runs Postgres (dedicated vCPU, local NVMe), with pgBackRest/WAL-G backups to object storage at **another provider or location**. If running the DB yourself becomes too much, switch to managed Postgres at IONOS or STACKIT (DE). Files go to Hetzner Object Storage (DE); because storage is abstracted, switching providers is configuration plus a data copy. Use an EU-based SMTP provider with a DPA, self-hosted GlitchTip or Sentry's EU region for error tracking, and uptime checks plus logs (self-hosted Grafana/Loki or an EU provider) for monitoring.
-
-### F.8 Technically buildable vs. legally to be reviewed
-
-| Topic | Technical (we build) | Legal (lawyer/DPO reviews) |
-|---|---|---|
-| Processing on behalf | Tenant isolation, deletion features, audit | DPA template (Art. 28 GDPR) for cloud customers |
-| TOMs | Encryption, access control, backups, logging | TOM documentation as DPA annex |
-| Sub-processors | Swappable providers, EU locations | Public list, change notifications |
-| Third-country transfer | No US services in the data path | Review of all providers (incl. email, error tracking, billing) |
-| Data breaches | Audit logs, alerting, runbook | 72 h notification process (Art. 33), customer information |
-| Data subject rights | Export/erasure by email | Process between customer (controller) and us |
-| Reviews | Moderation, publish status, "verification method" field | Transparency duties about review authenticity (§ 5b UWG in Germany), shown as hints in the dashboard |
-| Consent | Consent field with version | Wording is the site operator's responsibility |
-| Backups containing deleted data | 30-day rotation | Disclosure in privacy policy/DPA |
-| License | License files, SPDX headers, DCO check | License setup, trademark registration |
-| Records of processing, imprint, terms, privacy policy | – | Have them drafted |
-
 ---
 
-## G. Open source, local development and cloud
+## G. Repository, self-hosting and open source
 
 ### G.1 Repository structure
 
 ```
-backbricks/
-├─ apps/
-│  ├─ server/                 # Hono app; entry: serve | worker | migrate | setup
-│  ├─ web/                    # dashboard SPA (Vite)
-│  └─ www/                    # backbricks.app: marketing site (Astro, Vercel); docs via Starlight from M5 (ADR-0001)
-├─ packages/
-│  ├─ core/                   # contracts, TenantContext, errors, service interfaces, AbuseGuard, IDs, config
-│  ├─ db/                     # Drizzle setup, core tables, withTenant, migrations, seeds
-│  ├─ auth/                   # Better Auth configuration
-│  ├─ adapters/               # S3 storage, SMTP mailer, ClamAV scanner, Postgres rate limiter
-│  ├─ modules/{forms,uploads,reviews}/
-│  ├─ api-contract/           # generated openapi.json + TS types (committed build artifact)
-│  ├─ sdk/                    # @backbricks/sdk (MIT)
-│  ├─ cli/                    # backbricks CLI + MCP (MIT)
-│  └─ ui/                     # shared theme + components for dashboard and website (shadcn-based)
-├─ cloud/                     # cloud only: plans, billing adapter (added in C1; narrow)
-├─ examples/{nextjs,astro,html}/   # MIT
-├─ skills/backbricks/SKILL.md     # MIT
-├─ compose.yaml               # local dev environment (also used by CI)
-├─ deploy/compose/            # production self-host compose, Caddyfile, .env.example
-├─ docs/{adr,guides,security,progress}/
-├─ .claude/                   # Claude Code settings + project commands
-├─ CLAUDE.md, AGENTS.md       # agent instructions
-├─ LICENSE (AGPL-3.0), LICENSING.md, TRADEMARKS.md
-├─ CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md
-├─ mise.toml, package.json, turbo.json, tsconfig.base.json   # tsconfig.base.json is the shared TS preset
-├─ .oxlintrc.json, .oxfmtrc.json, lefthook.yml, .mcp.json
-└─ .github/{workflows,ISSUE_TEMPLATE}/, dependabot.yml
+apps/{server,web,www}/               # API + worker roles · dashboard SPA · marketing/docs site (ADR-0001)
+packages/{core,db,auth,adapters}/    # contracts + pure logic · Drizzle + withTenant · Better Auth · S3/SMTP/ClamAV/…
+packages/modules/{forms,uploads,reviews}/
+packages/{api-contract,sdk,cli,ui}/  # generated OpenAPI · SDK (MIT) · CLI + MCP (MIT) · shared UI
+cloud/                               # cloud only: plans, billing adapter (C1)
+examples/{nextjs,astro,html}/  skills/backbricks/   # MIT
+compose.yaml                         # dev environment, also used by CI
+deploy/compose/                      # production self-host compose, Caddyfile, .env.example (P6)
+docs/{adr,progress,guides,security}/
 ```
 
-### G.2 Local development
+Dependency directions between these: AGENTS.md §2.1.
 
-**Principles:** one command to set up, one to run; the dev environment is defined exactly once (`compose.yaml`) and reused by CI.
+### G.3 License
 
-- `mise install` installs pinned tools (Bun, Node for Playwright, lefthook, codegraph, gh)
-- `mise run setup` runs `bun install`, installs git hooks (lefthook) and builds the local code graph
-- `mise run dev` runs `docker compose up`. **Infra services:** `postgres`, `garage` + `garage-init` (bucket, key, CORS), `mailpit` (SMTP catcher + web UI), `clamav` (profile `scan`). **App services:** `server`, `worker`, `web` (Vite), all from one dev image based on `oven/bun`, with the source bind-mounted and `node_modules` in named volumes (no host/container binary mismatch), plus hot reload via `bun --watch` and Vite HMR
-- `mise run infra` starts infra only, for running apps or tests on the host
-- **Code graph:** [CodeGraph](https://github.com/colbymchenry/codegraph) builds a local semantic index (`.codegraph/`, gitignored) that Claude Code queries via MCP (`.mcp.json`) to find existing code, callers and blast radius before changing anything
-- **Git hooks:** lefthook `pre-push` runs format check, lint, typecheck and affected tests
-- **CI:** GitHub Actions on every PR against `main` (and pushes to `main`): format, lint, architecture rules, typecheck, tests against the compose services, build, Docker image build, DCO check
+AGPL-3.0-only for `apps/*`, `packages/{core,db,auth,adapters,modules,ui,api-contract}`, `cloud/`; **MIT** for `packages/sdk`, `packages/cli`, `examples/*`, `skills/*` (customer websites never embed AGPL code). Contributions under **DCO**; if dual licensing is ever wanted, switch to a CLA before the first external contribution. The registered **trademark** protects the cloud. Details: `LICENSING.md`, `TRADEMARKS.md`, ADR-0016. Legal review before 1.0.
 
-### G.3 License options
+### G.4 Self-hosting (Docker Compose)
 
-| Option | Pros | Cons |
-|---|---|---|
-| **AGPL-3.0 (core)** | Competing clouds must publish their changes; OSI-approved; established (Plausible, Cal.com, Formbricks core) | Some companies avoid AGPL; relicensing later requires all contributors' consent |
-| **Apache 2.0** | Maximum adoption, patent grant | Anyone can run a competing hosted service without giving back |
-| **FSL/BSL** (source-available) | Strong commercial protection, converts to OSS later | Not OSI open source; community skepticism; contradicts the product promise |
-| **Open core** | Clear monetization via enterprise features | Risk of a crippled community edition; conflicts with "no feature lock" |
-
-**Decision:** AGPL-3.0-only for `apps/*`, `packages/{core,db,auth,adapters,modules,ui,api-contract}`, `cloud/`; **MIT** for `packages/sdk`, `packages/cli`, `examples/*`, `skills/*` (customer websites never embed AGPL code). Contributions under **DCO** (`Signed-off-by`). If dual licensing is ever wanted, switch to a CLA before accepting the first external contribution. Register the **trademark**: with open source, the name is what protects the cloud. See `LICENSING.md` and `TRADEMARKS.md`. Legal review before the 1.0 release.
-
-### G.4 Self-hosting architecture (Docker Compose)
-
-```mermaid
-flowchart LR
-  internet((Internet)) --> caddy["caddy :443<br/>app.example.com<br/>storage.example.com"]
-  caddy --> app["app<br/>backbricks/server serve"]
-  caddy --> garage["garage<br/>S3 :3900"]
-  app --> pg[("postgres:18")]
-  worker["worker<br/>backbricks/server worker"] --> pg
-  worker --> garage
-  app --> garage
-  worker --> clam["clamav (profile scan)"]
-  migrate["migrate (one-shot)"] --> pg
-  backup["backup (profile backup)<br/>pg_dump + restic"] --> pg
-```
+Services: `caddy` (TLS, routes the app and, if needed, the storage domain), `app` (`serve`), `worker`, `migrate` (one-shot), `postgres:18`, `garage` (profile `storage`), `clamav` (profile `scan`), `backup` (profile `backup`, `pg_dump` + `restic`).
 
 1. Run the `configure` step (or fill `.env` from `.env.example` by hand): choose modules (`BACKBRICKS_MODULES`), domain, `APP_SECRET`, DB password, optional SMTP; S3 settings only if a selected module needs storage. It sets `COMPOSE_PROFILES` to match (§C.7)
 2. `docker compose up -d` starts only the services the selected modules need (plus `--profile backup` if wanted)
@@ -1211,9 +1000,9 @@ flowchart LR
 4. `migrate` runs before `app`/`worker` (`depends_on: condition: service_completed_successfully`)
 5. A setup wizard on first visit creates the instance admin; afterwards sign-up is invite-only by default (`SIGNUP_POLICY=invite_only`)
 
-**Configuration** only via environment variables, validated with Zod at startup (clear error, exit). Docker secrets via `*_FILE` variants. **Updates:** semver-tagged images (`backbricks/server:1.4.2`), `docker compose pull && docker compose up -d`, migrations run automatically; breaking changes only in majors with an upgrade guide. **Telemetry:** off, optional opt-in.
+**Configuration** only via environment variables, validated with Zod at startup (clear error, exit). Docker secrets via `*_FILE` variants. **Updates:** semver-tagged images, `docker compose pull && docker compose up -d`, migrations run automatically; breaking changes only in majors with an upgrade guide. **Telemetry:** off, optional opt-in.
 
-### G.5 Single-tenant self-host vs. multi-tenant cloud
+### G.5 Self-hosted vs. cloud
 
 | Aspect | Self-hosted | Cloud |
 |---|---|---|
@@ -1226,125 +1015,59 @@ flowchart LR
 | RLS | optional | on |
 | Telemetry | off | internal metrics |
 
-The difference is wired at startup via `DEPLOYMENT_MODE` and dependency injection (`entitlements`, `billing`, `signupPolicy`). **There are no `if (cloud)` branches in modules.**
-
-### G.6 Usage metering and billing (cloud)
-
-- **Metrics:** `forms.submissions`, `reviews.submissions`, `uploads.files`, `uploads.bytes_ingested`, `uploads.bytes_stored` (gauge, daily), `downloads.bytes` (approximated from issued download URLs × size), `api.public_requests`, number of projects and members
-- **Capture:** `usage.increment()` inside the write transaction (UPSERT on `usage_counters`); a daily job computes gauges
-- **Enforcement:** `entitlements.check(org, metric, delta)` before writes. At 80 % an email goes out; at 100 % there is a 10 % grace margin, then `402 quota_exceeded`. The dashboard is never locked; data stays readable
-- **Billing:** `cloud/billing` implements a `BillingProvider` interface (checkout, portal, webhooks → org plan); provider chosen in C2 (Stripe Billing vs. Paddle as merchant of record)
+The difference is wired at startup via `DEPLOYMENT_MODE` and dependency injection (`entitlements`, `billing`, `signupPolicy`). **There are no `if (cloud)` branches in modules** (I15). Cloud details: `docs/CLOUD.md`.
 
 ### G.7 What is open source
 
-**Everything essential to run it:** all three modules in full, teams and roles, audit log, retention, GDPR tools, exports, CLI, MCP, SDK, later webhooks. **Cloud-exclusive** is only what makes sense in managed operation: billing and plans, operated scanning, backups, monitoring, email delivery, DPA and support. Paid business features (SSO/SAML, longer audit retention, multiple regions) are decided only once there are paying customers.
+**Everything essential to run it:** all modules in full, teams and roles, audit log, retention, GDPR tools, exports, CLI, MCP, SDK, later webhooks. **Cloud-exclusive** is only what makes sense in managed operation: billing and plans, operated scanning, backups, monitoring, email delivery, DPA and support. Paid business features (SSO/SAML, longer audit retention, multiple regions) are decided only once there are paying customers.
 
 ---
 
-## H. Technology decisions
+## H. Technology choices
 
-| Area | Choice | Alternatives | Rationale |
-|---|---|---|---|
-| Tool versions & tasks | **mise** | asdf, Volta, Makefile | One file for pinned tools and dev tasks |
-| Runtime | **Bun** | Node.js, Deno | Fast startup, built-in TS, test runner, bundler, package manager; Hono runs natively on `Bun.serve` |
-| Language | **TypeScript 7** (native compiler) for typechecking | TS 5.x | Fast typechecks. If a tool still needs the TS JavaScript API (e.g. code generators), it may pin its own older `typescript` devDependency; record it in an ADR |
-| Monorepo | **Bun workspaces + Turborepo** | Nx, plain workspaces | Task graph, caching, `--affected` for hooks/CI |
-| Lint | **oxlint** with type-aware rules (`oxlint-tsgolint`) | ESLint, Biome | Very fast, type-aware rules like `no-floating-promises` |
-| Format | **oxfmt** | Prettier, Biome | Same toolchain as oxlint, Prettier-compatible output |
-| Architecture rules | **dependency-cruiser** | oxlint `no-restricted-imports` only | Enforces module boundaries as a graph |
-| Git hooks | **lefthook** (`pre-push`) | husky, simple-git-hooks | Single binary via mise, parallel commands |
-| HTTP | **Hono** + `@hono/zod-openapi` | Fastify, Elysia, Next.js route handlers | Lightweight, Zod → OpenAPI, web standards, easy tests via `app.request()` |
-| Validation | **Zod 4** | Valibot, TypeBox | One schema for API, config, dashboard forms, JSON Schema export |
-| DB | **PostgreSQL 18** | MySQL, SQLite | JSONB, full text, RLS, advisory locks, queue in one dependency |
-| ORM / migrations | **Drizzle ORM** (`pg` driver) + drizzle-kit | Kysely, Prisma | SQL-near, light, good types, reviewable SQL migrations; `pg` driver shared with pg-boss (one driver) |
-| Jobs | **pg-boss** | Graphile Worker, BullMQ | No extra service, cron built in |
-| Auth | **Better Auth** (+ organization; later oauth-provider) | Auth.js, Keycloak | TS-native, Postgres, orgs and roles ready, self-hostable |
-| Storage client | **AWS SDK v3** S3 client + presigner, behind `StorageAdapter` | `Bun.S3Client` | Portable across runtimes and S3 implementations, supports signing content length; Bun's client may be adopted behind the same interface after the storage contract suite passes |
-| Self-host storage | **Garage** | SeaweedFS, RustFS, MinIO (archived) | Production-ready, lightweight (~1 GB RAM), actively maintained |
-| Malware | **ClamAV** (clamd) | US cloud scanners | Open source, local, EU-friendly |
-| Anti-bot | **ALTCHA protocol** (`altcha-lib`, MIT), self-hosted | Turnstile, hCaptcha, Friendly Captcha | No third party, no cookies; others as optional providers later |
-| Mail | **nodemailer** (SMTP), templates as TS functions; dev: **Mailpit** | React Email | Simple, provider-neutral |
-| Logging | **pino** (JSON), request IDs | – | Fast, redaction |
-| Dashboard | **Vite, React 19, TanStack Router + Query, shadcn/ui, Tailwind v4, i18next** | Next.js | SPA is enough; one process |
-| Unit/integration tests | **`bun test`** | Vitest, Jest | Built in, fast, native TS; integration tests run against real compose services |
-| Component tests | **`bun test` + @testing-library/react + happy-dom** | Vitest browser mode | Same runner everywhere |
-| E2E tests | **Playwright** (runs on Node via mise) | Cypress | Cross-browser, reliable, also used for SDK browser tests |
-| Property tests | **fast-check** (validators, CSV escaping, config diff) | – | Catches edge cases in parsers and validators |
-| API docs | **Scalar** (from OpenAPI) | Redoc, Swagger UI | Modern, readable |
-| Website + docs | **Astro** (static, React islands) + **Starlight** at `/docs`, hosted on Vercel | Next.js, Docusaurus, separate docs app | Static, shares `packages/ui`, Markdown-first, `llms.txt` easy (ADR-0001) |
-| MCP | **official TypeScript MCP SDK** (stdio) | – | Standard |
-| Code intelligence | **CodeGraph** (local, MCP) | Serena, plain grep | Local semantic graph; agents find existing code and impact before writing new code |
-| CI | **GitHub Actions** (`jdx/mise-action`), GHCR images, npm provenance | – | Standard for OSS |
-| Reverse proxy | **Caddy** | Traefik, nginx | Automatic TLS, minimal config |
+Rationale and alternatives: the ADRs in §0. Pinned versions: `PLAN.md` → version list. Version rule: AGENTS.md §10 (check current versions, pin exactly, read the docs instead of guessing).
 
-**Version rule:** check current stable versions at implementation time (`bun pm view <pkg> version` / `npm view`) and pin exactly. For library APIs (Better Auth, Drizzle, Hono, pg-boss, MCP SDK, AWS SDK) read the current docs or types instead of relying on memory.
+| Area | Choice |
+|---|---|
+| Tools & tasks, monorepo | mise · Bun workspaces + Turborepo |
+| Runtime, language | Bun · TypeScript 7 (a tool may pin an older `typescript` locally, ADR-0020) |
+| Lint, format, architecture rules, hooks | oxlint (type-aware) · oxfmt · dependency-cruiser · lefthook |
+| HTTP, validation | Hono + `@hono/zod-openapi` · Zod 4 |
+| DB, ORM, jobs | PostgreSQL 18 · Drizzle (`pg` driver, shared with pg-boss) · pg-boss |
+| Auth | Better Auth (+ organization; later oauth-provider) |
+| Storage | AWS SDK v3 S3 client + presigner behind `StorageAdapter` · Garage for self-hosting |
+| Malware, anti-bot | ClamAV (clamd) · ALTCHA protocol via `altcha-lib` |
+| Mail, logging | nodemailer (SMTP), templates as TS functions, Mailpit in dev · pino (JSON) with request IDs |
+| Dashboard | Vite, React 19, TanStack Router + Query, shadcn/ui, Tailwind v4, react-hook-form, i18next |
+| Tests | `bun test` (+ Testing Library, happy-dom) · Playwright · fast-check |
+| API docs, website | Scalar · Astro + Starlight on Vercel (ADR-0001) |
+| MCP, code intelligence | official TypeScript MCP SDK (stdio) · CodeGraph |
+| CI, proxy | GitHub Actions (`jdx/mise-action`), GHCR, npm provenance · Caddy |
 
 ---
 
-## I. Roadmap and milestones (open source first)
+## I. Roadmap
 
-Effort in **person-days (PD, 8 h) for an experienced solo developer working with AI coding agents**, including tests and reviewing agent output. At 15–20 h/week, calendar time grows by roughly 2–2.5×. Detailed milestone definitions: `docs/MILESTONES.md`. Task-level breakdown: `docs/PLANNING_PROMPT.md` → `PLAN.md`.
+Milestones, scope, exit criteria and effort: `docs/MILESTONES.md`. Tasks: `PLAN.md`.
 
-### I.1 Open-source track
+---
 
-| Milestone | Phase | Scope | Effort | Release |
-|---|---|---|---|---|
-| **M0 Foundation** | P0 | Workspaces, tooling, compose dev env, CI, skeletons | 4–5 PD | – |
-| **M1 Platform Core** | P1 | Auth, orgs, projects, keys, tenancy, registry, services, worker, OpenAPI, dashboard shell | 12–15 PD | – |
-| **M2 Forms** | P2 | Forms module end to end | 9–11 PD | `v0.1.0` developer preview |
-| **M3 Uploads** | P3 | Uploads incl. scan and forms linking | 9–12 PD | `v0.2.0` |
-| **M4 Reviews** | P4 | Reviews module | 5–7 PD | `v0.3.0` |
-| **M5 Agent-ready** | P5 | SDK, CLI, MCP, skill, examples, docs site | 12–15 PD | `v0.4.0` |
-| **M6 Open Source 1.0** | P6 | Production self-hosting, hardening, release engineering | 6–8 PD | **`v1.0.0`** |
+## J. Risks and critical decisions
 
-Total to 1.0: **≈ 57–73 PD**.
+### J.1 Top risks
 
-### I.2 Managed cloud track (after 1.0)
-
-| Milestone | Scope | Effort |
+| # | Risk | Mitigation |
 |---|---|---|
-| **C1 Cloud Foundation** | Cloud mode, onboarding, plans/entitlements, metering, RLS, infrastructure, backups/PITR | 7–9 PD |
-| **C2 Cloud Beta** | Billing, monitoring/alerting, runbooks, restore drill, load test, legal drafts, closed beta | 5–7 PD |
-| **C3 Cloud GA** | Legal sign-off, status page, public launch, optional remote MCP with OAuth | 3–5 PD |
-
-Total cloud: **≈ 15–21 PD** after 1.0.
-
-### I.3 Phase summaries
-
-**P0 Foundation (4–5 PD).** Goal: a runnable, tested skeleton. Tasks: workspace packages, architecture rules, `compose.yaml` dev environment, env validation, server skeleton with health checks and problem details, Drizzle and the migration runner, the dashboard skeleton, the Dockerfile and CI completion. Acceptance: `mise run setup && mise run dev` brings up everything; `bun run check` is green; the image serves `/healthz` and the dashboard; CI is green on a PR. Risk: tooling overhead, so build only what the next phases need.
-
-**P1 Platform Core (12–15 PD).** Goal: a multi-tenant platform without domain modules but with every contract in place. Tasks: Better Auth, core schema, `withTenant`, keys and scopes, projects, module registry, generic instance CRUD and config-as-code, services, AbuseGuard, the worker, the OpenAPI pipeline, the dashboard shell and the isolation suite. Acceptance: sign-up → org → project → keys → invite works in the dashboard (Playwright); the isolation suite covers 100 % of management routes; OpenAPI drift check active. Risks: Better Auth integration details (spike early) and over-engineering the registry.
-
-**P2 Forms (9–11 PD) → v0.1.0.** Goal: a complete form backend with dashboard. Acceptance: a plain HTML form and a fetch example create entries; validation errors are structured; spam is handled; notifications arrive in Mailpit without content; CSV is injection-safe; retention purges. Risk: feature creep in the field editor.
-
-**P3 Uploads (9–12 PD) → v0.2.0.** Goal: safe direct uploads with scanning and linking. Acceptance: EICAR → quarantined; oversized uploads are rejected by storage; overwrite after `complete` does not change the scanned file; foreign/claimed `fileRef`s fail; downloads are attachments. Risk: S3 compatibility differences, covered by a storage contract suite run against Garage and a real provider.
-
-**P4 Reviews (5–7 PD) → v0.3.0.** Goal: collect, moderate, publish. Acceptance: only approved and published reviews are public; snapshot tests prove private fields never leak; ETag/304 works. Risk: legal transparency duties are shown as hints in the UI, not given as legal advice.
-
-**P5 Agent-ready (12–15 PD) → v0.4.0.** Goal: scenario A is achieved by an agent without human help. Acceptance: the scenario-A E2E test is green; `doctor` catches a misplaced secret key; the MCP server works in Claude Code; the SDK size budget holds; CLI and SDK pass on Node and Bun. Risk: CLI breadth, so focus on `init/push/codegen/test/doctor`.
-
-**P6 Open Source 1.0 (6–8 PD) → v1.0.0.** Goal: scenario C and a publishable OSS project. Acceptance: fresh-VM install in < 30 min following the README; restore test green; release pipeline publishes image and npm packages. Risk: self-hoster support load, mitigated by good docs and issue templates.
-
-**C1–C3 Cloud (15–21 PD).** Goal: scenario D, production-ready and legally covered. Acceptance: sign-up → project → integration → usage → limits on staging and production; RLS tests green; restore drill recorded; DPA, TOMs and sub-processor list published. Risk: operating burden, so keep the managed-Postgres option open.
-
----
-
-## J. Architecture risks and critical decisions
-
-### J.1 Top ten risks
-
-| # | Risk | Kind | Impact | Mitigation |
-|---|---|---|---|---|
-| 1 | **Abuse of public endpoints** (spam, storage abuse, malware hosting, cost explosion) | Technical/financial | High | AbuseGuard, PoW, quotas, private files, forced download, scanning |
-| 2 | **Cross-tenant data leak** | Technical/legal | Existential | `withTenant`, 404 policy, isolation suite over all routes, RLS |
-| 3 | **Scope creep** towards CMS, no-code DB or workflow engine | Product | High | Fixed module contract, out-of-scope list, ADR required for new core concepts |
-| 4 | **Solo-founder ops burden** (DB, backups, on-call) | Ops | High | Minimal services, PITR, alerting, runbooks, managed-DB option; cloud only after 1.0 |
-| 5 | **Processor liability** (DPA, TOMs, breaches) | Legal | High | Early legal review, data minimization, audit, notification process |
-| 6 | **Competition and differentiation** (Formspree, Basin, UploadThing, Supabase/Pocketbase, testimonial tools, AI builders with bundled backends) | Market | High | Agent-native + EU + open source + non-technical dashboard + several modules from one place |
-| 7 | **Secret key leaks by agents** and destructive agent changes | Security | Medium–high | Scopes and presets, browser detection, `doctor`, plan/apply, no delete tools, revisions |
-| 8 | **Unstable API contract** with websites you don't control | Technical | High | Contract-first, additive-only, drift checks, deprecation policy |
-| 9 | **License choice** (adoption vs. protection); relicensing without CLA impossible | Business/legal | Medium | AGPL core + MIT clients, DCO, trademark, decide before the first external PR |
-| 10 | **Toolchain maturity** (Bun compatibility of libraries, oxfmt 0.x, TS 7 tooling ecosystem, S3/ClamAV dependencies) | Technical | Medium | Spike critical libs in P0, storage contract tests, fallbacks recorded in ADRs (Node for specific tools, older TS for generators) |
+| 1 | **Abuse of public endpoints** (spam, storage abuse, malware hosting, cost explosion) | AbuseGuard, PoW, quotas, private files, forced download, scanning |
+| 2 | **Cross-tenant data leak** (existential) | `withTenant`, 404 policy, isolation suite over all routes, RLS |
+| 3 | **Scope creep** towards CMS, no-code DB or workflow engine | Fixed module contract, out-of-scope list, ADR required for new core concepts |
+| 4 | **Solo-founder ops burden** (DB, backups, on-call) | Minimal services, cloud only after 1.0, managed-DB option (`docs/CLOUD.md`) |
+| 5 | **Processor liability** (DPA, TOMs, breaches) | Early legal review, data minimization, audit, notification process |
+| 6 | **Competition** (Formspree, Basin, UploadThing, Supabase/Pocketbase, testimonial tools, AI builders with bundled backends) | Agent-native + EU + open source + non-technical dashboard + several modules from one place |
+| 7 | **Secret key leaks by agents** and destructive agent changes | Scopes and presets, browser detection, `doctor`, plan/apply, no delete tools, revisions |
+| 8 | **Unstable API contract** with websites you don't control | Contract-first, additive-only, drift checks, deprecation policy |
+| 9 | **License choice**; relicensing without CLA impossible | AGPL core + MIT clients, DCO, trademark, decide before the first external PR |
+| 10 | **Toolchain maturity** (Bun compatibility, oxfmt 0.x, TS 7 ecosystem, S3/ClamAV) | Library spike (ADR-0020), storage contract tests, tool-local fallbacks |
 
 ### J.2 Get right from the start (expensive to change)
 
@@ -1365,17 +1088,19 @@ Total cloud: **≈ 15–21 PD** after 1.0.
 | Topic | When | Prepared now |
 |---|---|---|
 | Billing provider | C2 | `BillingProvider` interface |
-| RLS enforcement | C1 | `SET LOCAL` in `withTenant` |
-| Remote MCP with OAuth | C3 / later | Scopes, stdio MCP |
-| Webhook delivery | post-1.0 OSS | `events` outbox |
-| Multipart/resumable uploads, image variants | on demand | storage interface |
-| Per-project permissions, SSO | on customer demand | central role checks |
+| RLS enforcement | C1 | transaction-local settings in `withTenant` |
+| Remote MCP with OAuth 2.1 (`/mcp`, Streamable HTTP) | C3 / later | Scopes, stdio MCP |
+| Webhook delivery (signatures, retries, logs) | post-1.0 OSS | `events` outbox |
+| Multipart/resumable uploads (tus), image variants | on demand | storage interface |
+| Several `serve` instances, workers split by queue | measured need | stateless app, pg-boss queues |
+| Redis/Valkey rate limiter, CDN for the review read API, more EU regions | measured need | interfaces, correct cache headers (`Cache-Control`, `ETag`) |
+| Schema-per-tenant for enterprise | enterprise demand | shared-schema scoping in repositories |
+| Per-project permissions, SSO | customer demand | central role checks |
 | Application-level field encryption | enterprise demand | data access encapsulated in repositories |
 | Test/live environments per project | post-1.0 | `is_test`, extensible key prefixes |
-| Redis, CDN, multiple regions | measured need | interfaces, correct cache headers |
 | `@backbricks/react` hooks | post-1.0 | framework-neutral SDK core |
 | More dashboard languages | post-1.0 | i18n keys from day one |
 
 ---
 
-*End of the architecture document. Changes to decisions in section 0 or J.2 require an ADR.*
+*Changes to decisions in §0 or §J.2 require an ADR.*

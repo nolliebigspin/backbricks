@@ -2,7 +2,7 @@
 
 - **Status:** accepted
 - **Date:** 2026-11-04
-- **Related:** ARCHITECTURE §0 #1, §A.1, §A.3, §C.3, §J.2 #7; PLAN P0.5b, P0.8a
+- **Related:** ARCHITECTURE §0 #1, §A.1, §C.3, §J.2 #7; PLAN P0.5b, P0.8a
 
 ## Context
 

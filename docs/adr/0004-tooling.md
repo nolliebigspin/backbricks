@@ -2,7 +2,7 @@
 
 - **Status:** accepted
 - **Date:** 2026-11-04
-- **Related:** ARCHITECTURE §0 #3, §G.2, §H; AGENTS.md §4, §8; PLAN P0.1, P0.2
+- **Related:** ARCHITECTURE §0 #3, §H; AGENTS.md §4, §8; PLAN P0.1, P0.2
 
 ## Context
 

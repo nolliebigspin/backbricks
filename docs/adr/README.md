@@ -4,7 +4,7 @@ Short documents that record significant decisions: deviations from or refinement
 
 - File name: `NNNN-short-title.md`, numbered sequentially, starting from [`0000-template.md`](0000-template.md)
 - Never rewrite an accepted ADR; supersede it with a new one
-- The initial set (one per key decision) is created in the planning run (`/bb-plan`)
+- ADR-0002 to ADR-0019 record the key decisions in ARCHITECTURE §0, one per row
 
 ## Index
 

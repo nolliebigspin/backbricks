@@ -1,6 +1,6 @@
 # Open questions
 
-Decisions the maintainer needs to make, from the planning run `/bb-plan P0` (2026-11-04). Answer inline under each question. Each lists a recommendation and the latest task by which the answer is needed. Later runs add questions here; execution runs add their own choices under "Decided, please confirm".
+Decisions the maintainer needs to make, from the P0 planning run (2026-11-04). Answer inline under each question. Each lists a recommendation and the latest task by which the answer is needed. Later runs add questions here; execution runs add their own choices under "Decided, please confirm".
 
 ## Open
 
@@ -23,7 +23,7 @@ Decisions the maintainer needs to make, from the planning run `/bb-plan P0` (202
 - **Answer (2026-11-05):** No organization. The repo stays at `nolliebigspin/backbricks`, so images go to the GHCR namespace of that account (`ghcr.io/nolliebigspin/…`, exact image name set in P2.10). P0 still uses only the local tag `backbricks/server:dev`.
 
 ### Q4 – Accept the proposed deviations?
-- **Context:** `PLAN.md` → "Proposed deviations": DEV-1 (no `packages/tsconfig`), DEV-2 (internal packages as TS source), DEV-3 (`ids` and tenancy types in core), DEV-4 (`/readyz` DB-only in P0), DEV-5 (env lint rules), DEV-7 (no `setup` stub in P0). DEV-6 only applies if the TypeScript 7 decision rule triggers it; DEV-8 is decided at `/bb-plan P1`.
+- **Context:** `PLAN.md` → "Proposed deviations": DEV-1 (no `packages/tsconfig`), DEV-2 (internal packages as TS source), DEV-3 (`ids` and tenancy types in core), DEV-4 (`/readyz` DB-only in P0), DEV-5 (env lint rules), DEV-7 (no `setup` stub in P0). DEV-6 only applies if the TypeScript 7 decision rule triggers it; DEV-8 is decided when planning P1.
 - **Recommendation:** accept all six.
 - **Needed by:** start of P0.
 - **Answer (2026-11-05):** Accepted: DEV-1, DEV-2, DEV-3, DEV-4, DEV-5, DEV-7.
