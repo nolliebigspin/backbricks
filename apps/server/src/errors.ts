@@ -1,5 +1,6 @@
 import { AppError, toProblemDetails } from '@backbricks/core';
 import type { Context, ErrorHandler, NotFoundHandler } from 'hono';
+import { HTTPException } from 'hono/http-exception';
 
 import type { AppEnv } from './context.ts';
 
@@ -16,6 +17,12 @@ export function problemResponse(c: Context<AppEnv>, error: AppError): Response {
  */
 export const handleError: ErrorHandler<AppEnv> = (error, c) => {
   if (error instanceof AppError) return problemResponse(c, error);
+  if (error instanceof HTTPException && (error.status === 400 || error.status === 415)) {
+    return problemResponse(
+      c,
+      new AppError(error.status === 400 ? 'invalid_request' : 'unsupported_media_type'),
+    );
+  }
   c.get('log').error({ err: error }, 'unhandled error');
   return problemResponse(c, new AppError('internal_error'));
 };

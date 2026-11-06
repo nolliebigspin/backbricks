@@ -4,9 +4,11 @@
  */
 export const ERROR_CODES = {
   internal_error: { status: 500, title: 'Internal server error' },
+  invalid_request: { status: 400, title: 'Invalid request' },
   not_found: { status: 404, title: 'Not found' },
   validation_failed: { status: 422, title: 'Validation failed' },
   payload_too_large: { status: 413, title: 'Payload too large' },
+  unsupported_media_type: { status: 415, title: 'Unsupported media type' },
   service_unavailable: { status: 503, title: 'Service unavailable' },
 } as const satisfies Record<string, { status: number; title: string }>;
 

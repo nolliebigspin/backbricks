@@ -1,12 +1,7 @@
 import { ERROR_CODES, ERROR_TYPE_BASE_URL, type ErrorCode, type ErrorStatus } from './codes.ts';
+import type { FieldError, ProblemDetails } from './schema.ts';
 
-/** One invalid field or parameter in a `validation_failed` problem. */
-export type FieldError = {
-  path: string;
-  code: string;
-  message: string;
-  meta?: Record<string, unknown>;
-};
+export type { FieldError, ProblemDetails } from './schema.ts';
 
 export type AppErrorOptions = {
   /** Human-readable explanation of this occurrence. Never put secrets or personal data here. */
@@ -34,18 +29,6 @@ export class AppError extends Error {
     this.hint = options.hint;
   }
 }
-
-/** RFC 9457 problem details with the agent-friendly extensions from ARCHITECTURE §D.3. */
-export type ProblemDetails = {
-  type: string;
-  title: string;
-  status: ErrorStatus;
-  code: ErrorCode;
-  detail?: string;
-  errors?: FieldError[];
-  hint?: string;
-  requestId: string;
-};
 
 export function toProblemDetails(error: AppError, requestId: string): ProblemDetails {
   return {

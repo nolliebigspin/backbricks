@@ -16,6 +16,7 @@
     "@backbricks/module-forms": "workspace:*",
     "@backbricks/module-reviews": "workspace:*",
     "@backbricks/module-uploads": "workspace:*",
+    "@hono/zod-openapi": "1.6.3",
     "hono": "4.13.16",
     "pino": "10.4.0"
   }

@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 
 import { AppError, toProblemDetails } from './app-error.ts';
+import { problemDetailsSchema } from './schema.ts';
 
 describe('AppError → problem details (RFC 9457)', () => {
   test('takes status and title from the catalog', () => {
@@ -29,5 +30,21 @@ describe('AppError → problem details (RFC 9457)', () => {
       'code',
       'requestId',
     ]);
+  });
+
+  test('the documented error contract accepts the wire payload and rejects private extras', () => {
+    const payload = toProblemDetails(
+      new AppError('validation_failed', {
+        errors: [{ path: 'name', code: 'invalid_type', message: 'Invalid value.' }],
+      }),
+      'req_contract',
+    );
+    expect(problemDetailsSchema.parse(payload)).toEqual(payload);
+    expect(problemDetailsSchema.safeParse({ ...payload, stack: 'internal detail' }).success).toBe(
+      false,
+    );
+    expect(problemDetailsSchema.safeParse({ ...payload, code: 'uncatalogued_error' }).success).toBe(
+      false,
+    );
   });
 });

@@ -140,14 +140,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Real DB spike for member role change, invitation acceptance and org creation; recheck Better Auth/CLI patch and generated relations import.
 - **Risks/notes:** Time-box discovery. Public docs describe organization hooks but do not establish our same-transaction guarantee; unresolved findings get a new bounded task, not an assumed API.
 
-### [ ] P1.11a – Establish declared OpenAPI routes (est. 4 h)
+### [x] P1.11a – Establish declared OpenAPI routes (est. 4 h)
 - **Description:** Add OpenAPI routing and one route-registration contract carrying credential policy, role/scope requirements, body limit and isolation fixture metadata. Keep business policies in core and HTTP wiring in server.
 - **Files/packages:** `packages/core/src/http/`, `apps/server/src/routes/`, app/context/error wiring.
 - **Depends on:** P1.1a endpoint inventory.
 - **Reuses:** `createApp`, `AppError` catalog, request context, health/dashboard routing.
 - **Acceptance criteria:**
-  - [ ] The first management route must declare access policy; raw registrations are detected by a coverage test, not silently omitted from the manifest.
-  - [ ] Inputs use Zod, responses have explicit public/management shapes, and `/v1/openapi.json` excludes secrets and internal schema details. Document narrow exemptions for health/auth/static routes.
+  - [x] The first management route must declare access policy; raw registrations are detected by a coverage test, not silently omitted from the manifest.
+  - [x] Inputs use Zod, responses have explicit public/management shapes, and `/v1/openapi.json` excludes secrets and internal schema details. Document narrow exemptions for health/auth/static routes.
 - **Tests:** Deliberately undeclared route fails; validation/problem responses, body limits and SPA/API separation remain correct.
 - **Risks/notes:** ADR-0005; keep library-specific router types at the HTTP boundary. P1.11b/c finish codegen and CI, not route conversion.
 
@@ -580,7 +580,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.1a complete (ADR-0021): disposable real-Postgres HTTP spike passed commit/rollback assertions for organization creation, invitation acceptance and member role updates, including a failing stock-adapter control. `mise run infra` and `bun run check` passed. Next task: P1.11a. Q8 was explicitly approved; apply the lifecycle clarification before P1.2a. Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
+P1.1a complete (ADR-0021). P1.11a complete: declared OpenAPI routes, runtime coverage guard, body limits and shared problem schema; HEAD authorization regression covered. `mise run infra` and `bun run check` passed with script integration tests running (83 pass, zero skips); package checks use Turbo where unchanged. Next task: P1.2a. Q8 was explicitly approved; apply the lifecycle clarification before schema generation. Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 
