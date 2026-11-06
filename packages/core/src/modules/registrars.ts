@@ -134,6 +134,10 @@ export function jobRegistrar<Runtime>(context: (execution: ModuleExecution) => R
         .strict()
         .parse(spec);
       schemaDocument(payload, 'input');
+      if (metadata.cron && !payload.safeParse({}).success)
+        throw new AppError('invalid_request', {
+          detail: 'Scheduled jobs must accept an empty wire payload.',
+        });
       jobs.push(
         Object.freeze({
           ...metadata,

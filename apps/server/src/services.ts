@@ -18,6 +18,7 @@ import {
   systemClock,
   type Clock,
   type Queue,
+  type ProjectJobEnqueue,
   type TenantContext,
   type Config,
   type Entitlements,
@@ -40,6 +41,7 @@ export function createServerServices(
   options: {
     clock?: Clock;
     queue?: Queue;
+    enqueueProject?: ProjectJobEnqueue;
     entitlements?: Entitlements;
     modules?: SelectedModules;
     moduleRepositories?: Parameters<typeof createWithTenant>[1];
@@ -84,11 +86,12 @@ export function createServerServices(
     moduleRuntime,
     jobs: [
       ...moduleJobs(modules, moduleRuntime, withTenant),
-      ...createPlatformJobHandlers({
-        ...container.core,
-        registry: modules.registry,
-        runtime: moduleRuntime,
-      }).map((handler) => {
+      ...createPlatformJobHandlers(
+        { ...container.core, registry: modules.registry, runtime: moduleRuntime },
+        options.queue && options.enqueueProject
+          ? { queue: options.queue, enqueueProject: options.enqueueProject }
+          : undefined,
+      ).map((handler) => {
         const definition = PLATFORM_JOB_DEFINITIONS.find((job) => job.name === handler.name);
         if (!definition) throw new Error('Missing platform job definition');
         return Object.freeze({

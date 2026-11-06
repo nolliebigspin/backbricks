@@ -46,18 +46,21 @@ export function createServerOutbox(
         }
       : {}),
   });
-  let after: string | undefined;
   return {
     dispatch,
-    async tick() {
+    async tick(after?: string) {
+      let more = false;
       const organizations = await maintenanceOrganizationIds(db, after);
       for (const organization of organizations) {
         // oxlint-disable-next-line no-await-in-loop -- Each org gets its own short, bounded transaction.
-        await services.withTenant({ organizationId: organization.id }, (tx) =>
+        const count = await services.withTenant({ organizationId: organization.id }, (tx) =>
           dispatch(tx, MAX_MAINTENANCE_BATCH),
         );
+        more ||= count === MAX_MAINTENANCE_BATCH;
       }
-      after = organizations.length === MAX_MAINTENANCE_BATCH ? organizations.at(-1)?.id : undefined;
+      const last = organizations.at(-1);
+      if (organizations.length === MAX_MAINTENANCE_BATCH && last) return { after: last.id };
+      return more;
     },
   };
 }

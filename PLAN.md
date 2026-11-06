@@ -460,14 +460,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Crash before/after enqueue, parallel dispatch, SMTP retry and failure recovery; module hooks tested with fixtures.
 - **Risks/notes:** External SMTP delivery cannot be made exactly-once by a DB transaction; document possible duplicate delivery and limit repeat alerts.
 
-### [ ] P1.10c – Add bounded cleanup schedules (est. 4 h)
+### [x] P1.10c – Add bounded cleanup schedules (est. 4 h)
 - **Description:** Register replay/idempotency/rate-bucket cleanup (including email-verification `auth_token_replays`), audit retention and expired auth/job housekeeping, using the approved maintenance boundary.
 - **Files/packages:** worker core schedules/handlers, db maintenance repositories.
 - **Depends on:** P1.10b, P1.9c; Q8.
 - **Reuses:** `clock`, expiry indexes, module retention hooks and pg-boss cron.
 - **Acceptance criteria:**
-  - [ ] Cleanup is batched/retryable, removes only expired rows and leaves current data intact; disabled modules' jobs do not run.
-  - [ ] Audit purge enables its trigger override only transaction-locally through a restricted maintenance path; request handlers cannot use it. No application-wide append-only bypass.
+  - [x] Cleanup is batched/retryable, removes only expired rows and leaves current data intact; disabled modules' jobs do not run.
+  - [x] Audit purge enables its trigger override only transaction-locally through a restricted maintenance path; request handlers cannot use it. No application-wide append-only bypass.
 - **Tests:** Fixed-clock boundary data, repeated/parallel cleanup, failed-purge rollback and job retention of personal auth mail payloads.
 - **Risks/notes:** Module personal-record erasure is implemented with the domain modules; no fake GDPR endpoint with incomplete deletion.
 
@@ -692,3 +692,5 @@ P1.9c is implemented with shared, acknowledgement-only transactional caching (AD
 P1.10a replaces the idle worker with pg-boss 12.38.1 (ADR-0048). One-connection real PG tests prove transactional enqueue/completion, rollback/retry, scoped deduplication and graceful active-job drain. Fresh serve/worker/all process smoke tests pass; all shares one provider/queue/pool lifetime. Full `bun run check` passes.
 
 P1.10b implements locked transactional outbox dispatch, stable selected consumers, restricted durable auth/security delivery and worker-bound migration/retention/module-erasure hooks (ADR-0049). Real PG/Mailpit tests prove parallel claims, failure rollback, SMTP outage/restart recovery, no mail after deferred commit failure, no personal audit fields and system migration atomicity. Full `bun run check` passes with real services. P1.10c adds the absolute-expiry housekeeping and scheduled fan-out.
+
+P1.10c adds bounded, locked expiry batches, transaction-local audit purge, absolute job payload deletion and durable scheduled org/project/instance fan-out (ADR-0050). Real services prove concurrent cleanup, exact boundaries, archive/tenant isolation, failure rollback, nonleaking audit settings, failed-mail expiry, cursor pages beyond 100 projects/instances and retry deduplication. Full `bun run check` passes without service skips.

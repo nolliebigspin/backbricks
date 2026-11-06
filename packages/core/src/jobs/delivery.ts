@@ -12,4 +12,7 @@ export const mailDeliverySchema = z
     securityOrganizationId: activityIdentifierSchema.optional(),
   })
   .strict();
-export const systemJobPayloadSchema = z.object({}).strict();
+export const systemJobPayloadSchema = z
+  .object({ runId: z.uuid().optional(), after: activityIdentifierSchema.optional() })
+  .strict();
+export type SystemJobResult = void | boolean | { after: string };

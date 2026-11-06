@@ -7,6 +7,7 @@ import { findDashboard } from './dashboard.ts';
 import { createServerKeyAuth } from './key-auth.ts';
 import { registerKeys } from './keys.ts';
 import type { Logger } from './logger.ts';
+import { createServerMaintenance } from './maintenance.ts';
 import { createApiAuthorization } from './middleware/authorization.ts';
 import { moduleJobDefinitions } from './module-jobs.ts';
 import { moduleCatalog } from './modules.ts';
@@ -57,7 +58,11 @@ async function startRuntime(
   };
   try {
     await queue.start();
-    const runtime = createServerServices(config, database.db, { modules, queue: queue.queue });
+    const runtime = createServerServices(config, database.db, {
+      modules,
+      queue: queue.queue,
+      enqueueProject: queue.enqueueProject,
+    });
     services = runtime;
     if (role !== 'worker') {
       const dashboardDir = findDashboard();
@@ -123,7 +128,26 @@ async function startRuntime(
       await queue.consume(runtime.jobs, runtime.withTenant);
       await queue.consumeMail(runtime.container.optional('mailer'));
       const outbox = createServerOutbox(config, database.db, runtime, queue);
-      await queue.scheduleSystem('core.outbox.dispatch', '* * * * *', () => outbox.tick());
+      await queue.scheduleSystem('core.outbox.dispatch', '* * * * *', (_runId, after) =>
+        outbox.tick(after),
+      );
+      const maintenance = createServerMaintenance(database.db, runtime, queue);
+      await queue.scheduleSystem('core.maintenance.cleanup', '* * * * *', (_runId, after) =>
+        maintenance.cleanup(after),
+      );
+      await queue.scheduleSystem('core.maintenance.tenants', '0 * * * *', (runId, after) =>
+        maintenance.fanout(runId, after),
+      );
+      await Promise.all(
+        runtime.jobs
+          .filter((job) => job.cron)
+          .map((job) =>
+            queue.scheduleSystem(`core.schedule.${job.name}`, job.cron ?? '', (runId, after) =>
+              maintenance.fanout(runId, after, job.name),
+            ),
+          ),
+      );
+
       log.info({ modules: config.modules, jobs: runtime.jobs.length }, 'worker ready');
     }
     return { stop };

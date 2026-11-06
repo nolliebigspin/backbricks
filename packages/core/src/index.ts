@@ -395,6 +395,7 @@ export {
   queueJobDefinitionSchema,
   type QueueJobDefinition,
   type QueueJobHandler,
+  type ProjectJobEnqueue,
 } from './jobs/contract.ts';
 
 export {
@@ -402,6 +403,7 @@ export {
   MAIL_JOB_RETENTION_SECONDS,
   mailDeliverySchema,
   systemJobPayloadSchema,
+  type SystemJobResult,
 } from './jobs/delivery.ts';
 export {
   createOutboxDispatcher,
@@ -410,3 +412,5 @@ export {
 } from './jobs/outbox.ts';
 
 export { PLATFORM_JOB_DEFINITIONS, createPlatformJobHandlers } from './jobs/platform.ts';
+
+export { PLATFORM_JOBS } from './jobs/platform-names.ts';

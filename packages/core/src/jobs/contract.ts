@@ -27,3 +27,8 @@ export type QueueJobHandler = {
   name: string;
   runInTransaction(tx: TenantTransaction, payload: unknown): Promise<void>;
 };
+/** Trusted worker fan-out port; modules receive only Queue.enqueue bound to their current project. */
+export type ProjectJobEnqueue = (
+  tx: TenantTransaction,
+  input: { projectId: string; name: string; payload: unknown; singletonKey: string },
+) => Promise<string | null>;

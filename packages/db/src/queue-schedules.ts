@@ -1,10 +1,16 @@
-import { AppError, systemJobPayloadSchema } from '@backbricks/core';
+import { AppError, systemJobPayloadSchema, type SystemJobResult } from '@backbricks/core';
 import type { PgBoss } from 'pg-boss';
+
+import { queueSingletonId } from './queue-identities.ts';
 
 /** Trusted host callbacks only; module Queue capabilities cannot enqueue these global tasks. */
 export function createQueueSchedules(boss: PgBoss, report: (name: string) => void) {
   return {
-    async scheduleSystem(name: string, cron: string, run: () => Promise<void>) {
+    async scheduleSystem(
+      name: string,
+      cron: string,
+      run: (runId: string, after?: string) => Promise<SystemJobResult>,
+    ) {
       if (!/^core\.[a-z][a-z0-9_.]+$/.test(name)) throw new AppError('invalid_request');
       const policy = {
         policy: 'stately' as const,
@@ -25,8 +31,15 @@ export function createQueueSchedules(boss: PgBoss, report: (name: string) => voi
           const job = jobs[0];
           if (!job) return;
           try {
-            systemJobPayloadSchema.parse(job.data);
-            await run();
+            const payload = systemJobPayloadSchema.parse(job.data);
+            const runId = payload.runId ?? job.id;
+            const result = await run(runId, payload.after);
+            if (result === true) await boss.send(name, { runId }, { singletonKey: runId });
+            else if (result && typeof result === 'object')
+              await boss.send(name, systemJobPayloadSchema.parse({ runId, after: result.after }), {
+                singletonKey: runId,
+                id: queueSingletonId([name, runId, result.after]),
+              });
           } catch {
             report(name);
             throw new Error('Scheduled operation failed.');

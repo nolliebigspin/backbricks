@@ -63,6 +63,7 @@ export async function scenario(
   overrides: Record<string, string> = {},
   apiOptions: {
     durableDelivery?: boolean;
+    consumeJobs?: boolean;
     configure?: (api: ApiRoutes, db: ReturnType<typeof createDatabase>['db']) => void;
     resolveKey?: SecretKeyResolver;
     lookupPublishable?: SecretKeyLookup;
@@ -126,13 +127,14 @@ export async function scenario(
         entitlements: apiOptions.entitlements,
         modules,
         queue: queue?.queue,
+        enqueueProject: queue?.enqueueProject,
         moduleRepositories: apiOptions.moduleRepositories,
       });
       services = runtime;
       auth = createServerAuth(config, handle.db, log, runtime, queue);
       keyAuth = createServerKeyAuth(config, handle.db, log, runtime, apiOptions.durableDelivery);
       if (queue) {
-        await queue.consume(runtime.jobs, runtime.withTenant);
+        if (apiOptions.consumeJobs !== false) await queue.consume(runtime.jobs, runtime.withTenant);
         await queue.consumeMail(runtime.container.optional('mailer'));
         outbox = createServerOutbox(config, handle.db, runtime, queue);
       }

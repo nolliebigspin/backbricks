@@ -10,6 +10,12 @@ import { instanceCreateSchema, instanceVersionSchema } from '../instances/schema
 import { moduleNameSchema } from '../modules/values.ts';
 import type { TenantTransaction } from '../tenancy/tenant-context.ts';
 import { MAX_MAINTENANCE_BATCH } from './contract.ts';
+import { PLATFORM_JOBS } from './platform-names.ts';
+import {
+  createTenantMaintenanceHandlers,
+  TENANT_MAINTENANCE_DEFINITIONS,
+  type MaintenanceScheduling,
+} from './tenant-maintenance.ts';
 
 const migrationPayload = z
   .object({
@@ -21,30 +27,40 @@ const migrationPayload = z
 const emptyPayload = z.object({}).strict();
 const erasurePayload = z.object({ email: z.email() }).strict();
 export const PLATFORM_JOB_DEFINITIONS = Object.freeze([
+  ...TENANT_MAINTENANCE_DEFINITIONS,
   {
-    name: 'core.instances.migrate',
+    name: PLATFORM_JOBS.instanceMigration,
     payload: migrationPayload,
     retentionSeconds: 86_400,
     retries: 2,
   },
-  { name: 'core.retention.purge', payload: emptyPayload, retentionSeconds: 3600, retries: 2 },
-  { name: 'core.privacy.erase', payload: erasurePayload, retentionSeconds: 86_400, retries: 2 },
+  { name: PLATFORM_JOBS.retentionPurge, payload: emptyPayload, retentionSeconds: 3600, retries: 2 },
+  {
+    name: PLATFORM_JOBS.subjectErasure,
+    payload: erasurePayload,
+    retentionSeconds: 86_400,
+    retries: 2,
+  },
 ]);
 
 /** Trusted worker-only handlers; these are never registered as HTTP erasure or migration bypasses. */
-export function createPlatformJobHandlers(deps: InstanceDependencies) {
+export function createPlatformJobHandlers(
+  deps: InstanceDependencies,
+  scheduling?: MaintenanceScheduling,
+) {
   const persistence = instancePersistence(deps, 'system');
   const execution = (tx: TenantTransaction, type: string) =>
     deps.runtime.forTenant(tx).execution(type);
   return [
+    ...createTenantMaintenanceHandlers(deps, scheduling),
     {
-      name: 'core.instances.migrate',
+      name: PLATFORM_JOBS.instanceMigration,
       async runInTransaction(this: void, tx: TenantTransaction, input: unknown) {
         const data = migrationPayload.parse(input);
         if (!tx.context.projectId) throw new AppError('not_found');
         await tx.repositories.projects.get(tx.context.projectId, { lock: true });
         const module = deps.registry.get(data.moduleType);
-        if (!module) throw new AppError('module_not_enabled');
+        if (!module) return;
         const instance = await tx.repositories.instances.getByKey(module.type, data.key);
         // A queued migration never overwrites a newer edit or restores an archived instance.
         if (
@@ -64,7 +80,7 @@ export function createPlatformJobHandlers(deps: InstanceDependencies) {
       },
     },
     {
-      name: 'core.retention.purge',
+      name: PLATFORM_JOBS.retentionPurge,
       async runInTransaction(this: void, tx: TenantTransaction, input: unknown) {
         emptyPayload.parse(input);
         if (!tx.context.projectId) throw new AppError('not_found');
@@ -85,7 +101,7 @@ export function createPlatformJobHandlers(deps: InstanceDependencies) {
       },
     },
     {
-      name: 'core.privacy.erase',
+      name: PLATFORM_JOBS.subjectErasure,
       async runInTransaction(this: void, tx: TenantTransaction, input: unknown) {
         const data = erasurePayload.parse(input);
         if (!tx.context.projectId) throw new AppError('not_found');

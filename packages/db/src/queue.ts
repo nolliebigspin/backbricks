@@ -4,6 +4,8 @@ import {
   type Clock,
   type EventRecord,
   type TenantTransaction,
+  type TenantContext,
+  type ProjectJobEnqueue,
   QUEUE_STOP_TIMEOUT_MS,
   queueEnvelopeSchema,
   queueJobDefinitionSchema,
@@ -16,10 +18,13 @@ import {
 import { sql } from 'drizzle-orm';
 import { PgBoss, fromDrizzle } from 'pg-boss';
 
-import { databasePool, type Database } from './client.ts';
+import { databasePool, type Database, type DbTransaction } from './client.ts';
+import { createQueueCleanup } from './queue-cleanup.ts';
+import { QUEUE_SCHEMA } from './queue-constants.ts';
 import { queueSingletonId } from './queue-identities.ts';
 import { createMailQueue } from './queue-mail.ts';
 import { createQueueSchedules } from './queue-schedules.ts';
+import { createMaintenanceRepository } from './repositories/maintenance.ts';
 import { securityRecipients } from './repositories/security-recipients.ts';
 import { transactionFor } from './transaction-binding.ts';
 
@@ -43,6 +48,7 @@ export function createPostgresQueue(
   );
   if (registered.size !== definitions.length) throw new AppError('invalid_request');
   const boss = new PgBoss({
+    schema: QUEUE_SCHEMA,
     db: { executeSql: (text, values) => databasePool(db).query(text, values) },
   });
   boss.on('error', () => report('core.queue'));
@@ -56,24 +62,31 @@ export function createPostgresQueue(
     async (organizationId, to) => (await securityRecipients(db, organizationId)).includes(to),
   );
   const schedules = createQueueSchedules(boss, report);
-  const queue: Queue = {
-    async enqueue(tx, name, input, options) {
-      if (!started) throw new AppError('service_unavailable');
-      const definition = registered.get(name);
-      if (!definition) throw new AppError('invalid_request');
-      const payload = definition.payload.safeParse(input);
-      if (!payload.success) throw new AppError('validation_failed');
-      const wire = jsonValueSchema.safeParse(input);
-      if (!wire.success) throw new AppError('validation_failed');
-      const envelope = queueEnvelopeSchema.parse({
-        organizationId: tx.context.organizationId,
-        projectId: tx.context.projectId,
-        payload: wire.data,
-      });
-      return boss.send(name, envelope, {
-        db: fromDrizzle(transactionFor(tx), sql),
-        startAfter: options?.notBefore,
-        ...(options?.singletonKey
+  async function send(
+    tx: DbTransaction,
+    context: TenantContext,
+    name: string,
+    input: unknown,
+    options?: Parameters<Queue['enqueue']>[3],
+    id?: string,
+  ) {
+    if (!started) throw new AppError('service_unavailable');
+    const definition = registered.get(name);
+    if (!definition) throw new AppError('invalid_request');
+    if (!definition.payload.safeParse(input).success) throw new AppError('validation_failed');
+    const wire = jsonValueSchema.safeParse(input);
+    if (!wire.success) throw new AppError('validation_failed');
+    const envelope = queueEnvelopeSchema.parse({
+      organizationId: context.organizationId,
+      projectId: context.projectId,
+      payload: wire.data,
+    });
+    return boss.send(name, envelope, {
+      db: fromDrizzle(tx, sql),
+      startAfter: options?.notBefore,
+      ...(id
+        ? { id }
+        : options?.singletonKey
           ? {
               id: queueSingletonId([
                 envelope.organizationId,
@@ -83,13 +96,32 @@ export function createPostgresQueue(
               ]),
             }
           : {}),
-      });
-    },
+    });
+  }
+  const queue: Queue = {
+    enqueue: async (tx, name, input, options) =>
+      send(transactionFor(tx), tx.context, name, input, options),
   };
+  const enqueueProject: ProjectJobEnqueue = async (tx, input) => {
+    if (tx.context.projectId && tx.context.projectId !== input.projectId)
+      throw new AppError('not_found');
+    await tx.repositories.projects.get(input.projectId);
+    return send(
+      transactionFor(tx),
+      { organizationId: tx.context.organizationId, projectId: input.projectId },
+      input.name,
+      input.payload,
+      { singletonKey: input.singletonKey },
+    );
+  };
+
   return {
+    maintenance: createMaintenanceRepository(db),
+    purgeExpiredJobs: createQueueCleanup(db),
     ...mail,
     ...schedules,
     queue,
+    enqueueProject,
     async enqueueEvent(
       this: void,
       tx: TenantTransaction,
@@ -97,22 +129,18 @@ export function createPostgresQueue(
       name: string,
       payload: unknown,
     ) {
-      const definition = registered.get(name);
-      if (!started || !definition) throw new AppError('service_unavailable');
       if (
         event.organizationId !== tx.context.organizationId ||
         (tx.context.projectId && tx.context.projectId !== event.projectId)
       )
         throw new AppError('not_found');
-      if (!definition.payload.safeParse(payload).success) throw new AppError('validation_failed');
-      return boss.send(
+      return send(
+        transactionFor(tx),
+        { organizationId: event.organizationId, projectId: event.projectId ?? undefined },
         name,
-        queueEnvelopeSchema.parse({
-          organizationId: event.organizationId,
-          projectId: event.projectId ?? undefined,
-          payload,
-        }),
-        { id: queueSingletonId([event.id, name]), db: fromDrizzle(transactionFor(tx), sql) },
+        payload,
+        undefined,
+        queueSingletonId([event.id, name]),
       );
     },
     async start() {
