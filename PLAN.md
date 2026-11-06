@@ -581,7 +581,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.1a/b/c, P1.11a, P1.2a/b, P1.3a/b, P1.8a/b/c and P1.13a complete. ADRs 0021–0029 record the implemented boundaries. `bun run check` passes; all six package test tasks rerun uncached, including 65 server tests and 30 real DB tests, with no skips. Key resolution is an interface until P1.4c; complete dashboard flows remain P1.12/P1.13. Next task: P1.5a (projects/origins); Q7/Q9 confirmation requested in the execution session. Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
+P1.1a/b/c, P1.11a, P1.2a/b, P1.3a/b, P1.8a/b/c and P1.13a complete. ADRs 0021–0029 record the implemented boundaries. `bun run check` passes; all six package test tasks rerun uncached, including 65 server tests and 30 real DB tests, with no skips. Key resolution is an interface until P1.4c; complete dashboard flows remain P1.12/P1.13. P1.5a in progress: origin normalization/matching and strict project input/response schemas are implemented with property/boundary tests. No project HTTP routes or archive behavior mounted yet. Q7/Q9 approved explicitly in the execution session; implementing routes and archive next. Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 

@@ -548,6 +548,8 @@ Assumption: an attacker knows the publishable key and every form key and can sen
 9. Quotas/entitlements (cloud): monthly limit, storage limit → `402 quota_exceeded`
 10. Persist + event + usage in one transaction
 
+Origin validation and exact matching live in [`origins.ts`](../packages/core/src/http/origins.ts). Project write payloads use [`project schemas`](../packages/core/src/projects/schemas.ts); settings currently accept only the empty reserved object until typed settings are introduced. Project API routes are still pending P1.5a.
+
 **CORS:** public routes reflect `Origin` when it is in `allowed_origins` (if the list is empty: "all", with a warning in the dashboard). Management routes have **no** CORS.
 
 ### D.6 Upload flow
