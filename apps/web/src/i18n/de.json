@@ -2,16 +2,21 @@
   "app": {
     "name": "Backbricks"
   },
-  "home": {
-    "title": "Willkommen bei Backbricks",
-    "description": "Dein Dashboard wird gerade eingerichtet. Formulare, Dateien und Bewertungen erscheinen hier.",
-    "status": "Das Dashboard läuft."
-  },
   "common": {
     "loading": "Wird geladen…",
     "working": "Wird bearbeitet…",
     "signOut": "Abmelden",
-    "language": "Sprache"
+    "language": "Sprache",
+    "saved": "Gespeichert.",
+    "name": "Name",
+    "address": "Kurzname",
+    "addressHint": "Verwende Kleinbuchstaben, Zahlen und einzelne Bindestriche.",
+    "create": "Erstellen",
+    "save": "Änderungen speichern",
+    "more": "Mehr laden",
+    "invalid": "Prüfe die Felder. Verwende eine vollständige Website-Adresse wie https://example.com ohne Pfad.",
+    "conflict": "Dieser Kurzname wird bereits verwendet. Wähle einen anderen.",
+    "missing": "Diese Seite ist nicht verfügbar."
   },
   "auth": {
     "name": "Dein Name",
@@ -67,5 +72,32 @@
       "session": "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
       "credentials": "Prüfe deine E-Mail-Adresse und dein Passwort und versuche es erneut."
     }
+  },
+  "dashboard": {
+    "organization": "Organisation",
+    "project": "Projekt",
+    "selectOrganization": "Organisation auswählen",
+    "newOrganization": "Neue Organisation",
+    "chooseOrganization": "Wähle oben eine Organisation oder erstelle eine, um zu beginnen.",
+    "accessLost": "Diese Organisation oder dieses Projekt ist nicht verfügbar. Dein Zugriff könnte sich geändert haben. Wähle eine andere Organisation oder kontaktiere einen Inhaber.",
+    "forbidden": "Nur Inhaber und Administratoren können diese Einstellungen ändern.",
+    "navigation": "Organisationsnavigation",
+    "projectNavigation": "Projektnavigation",
+    "projects": "Projekte",
+    "members": "Mitglieder",
+    "activity": "Aktivität",
+    "overview": "Übersicht",
+    "settings": "Einstellungen",
+    "embed": "Einbinden"
+  },
+  "projects": {
+    "create": "Projekt erstellen",
+    "empty": "Noch keine Projekte. Erstelle eines für deine Website.",
+    "domains": "Erlaubte Websites",
+    "domainsHint": "Eine Website-Adresse pro Zeile, einschließlich https:// (oder http:// für lokale Entwicklung). Gib bei Bedarf den Port an, aber keinen Pfad.",
+    "anyOrigin": "Einsendungen von allen Websites erlauben. Eine leere Liste erlaubt alle Websites.",
+    "overview": "Verwalte die Backend-Funktionen und die Einbindung dieser Website.",
+    "noModules": "In dieser Installation sind noch keine Website-Funktionen verfügbar.",
+    "allDomains": "Alle Websites sind erlaubt. Schränke dies in den Einstellungen ein, bevor du einen öffentlichen Schlüssel weitergibst."
   }
 }

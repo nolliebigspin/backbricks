@@ -21,6 +21,7 @@ export function accountError(error: unknown): string {
       return 'auth.errors.inviteOnly';
     case 'EMAIL_UNAVAILABLE':
       return 'auth.errors.noEmail';
+    case 'rate_limited':
     case 'RATE_LIMITED':
       return 'auth.errors.rateLimit';
     case 'INVALID_TOKEN':
@@ -28,8 +29,18 @@ export function accountError(error: unknown): string {
     case 'INVALID_INVITATION':
     case 'NOT_FOUND':
       return 'auth.errors.expired';
+    case 'validation_failed':
+    case 'invalid_request':
+      return 'common.invalid';
+    case 'forbidden':
+      return 'dashboard.forbidden';
+    case 'not_found':
+      return 'dashboard.accessLost';
+    case 'conflict':
+      return 'common.conflict';
     case 'LAST_OWNER':
       return 'auth.errors.lastOwner';
+    case 'unauthorized':
     case 'UNAUTHORIZED':
       return 'auth.errors.session';
     case 'INVALID_EMAIL_OR_PASSWORD':

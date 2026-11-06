@@ -1,7 +1,7 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
-export const Route = createRootRoute({ component: RootLayout });
+export const Route = createRootRoute({ component: RootLayout, notFoundComponent: MissingPage });
 
 function RootLayout() {
   const { t, i18n } = useTranslation();
@@ -32,6 +32,18 @@ function RootLayout() {
       <main className="mx-auto flex max-w-6xl justify-center px-4 py-8 sm:px-6">
         <Outlet />
       </main>
+    </div>
+  );
+}
+
+function MissingPage() {
+  const { t } = useTranslation();
+  return (
+    <div className="space-y-4">
+      <h1>{t('common.missing')}</h1>
+      <a href="/" className="underline">
+        {t('dashboard.projects')}
+      </a>
     </div>
   );
 }

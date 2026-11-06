@@ -663,6 +663,8 @@ Account screens use the [public Better Auth client](../apps/web/src/auth/client.
    └─ Settings
 ```
 
+The [authenticated shell](../apps/web/src/dashboard/shell.tsx) uses the live session’s organization, cancels/removes tenant queries before switching, and keys project queries by organization/project with an explicit organization header. Project forms use the generated admin client; empty allowed-origin lists require an explicit warning acknowledgement. M1 renders only operational module availability and mounts no domain pages.
+
 Modules add themselves to the navigation through the web registry. Wording is deliberately non-technical ("Inbox"/"Entries" instead of "Submissions", "Embed" instead of "API").
 
 ### E.2 Module dashboards

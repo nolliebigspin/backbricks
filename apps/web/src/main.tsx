@@ -8,7 +8,7 @@ import { detectLanguage, initI18n } from './i18n/index.ts';
 import { routeTree } from './routeTree.gen.ts';
 
 const router = createRouter({ routeTree });
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
 declare module '@tanstack/react-router' {
   interface Register {

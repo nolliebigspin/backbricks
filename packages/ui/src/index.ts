@@ -21,3 +21,5 @@ export { Tabs, TabsContent, TabsList, TabsTrigger, tabsListVariants } from '#com
 
 export { Input } from '#components/input';
 export { Label } from '#components/label';
+export { Textarea } from '#components/textarea';
+export { NativeSelect, NativeSelectOption, NativeSelectOptGroup } from '#components/native-select';

@@ -2,16 +2,21 @@
   "app": {
     "name": "Backbricks"
   },
-  "home": {
-    "title": "Welcome to Backbricks",
-    "description": "Your dashboard is being set up. Forms, files and reviews will show up here.",
-    "status": "The dashboard is running."
-  },
   "common": {
     "loading": "Loading…",
     "working": "Working…",
     "signOut": "Sign out",
-    "language": "Language"
+    "language": "Language",
+    "saved": "Saved.",
+    "name": "Name",
+    "address": "Short name",
+    "addressHint": "Use lowercase letters, numbers and single hyphens.",
+    "create": "Create",
+    "save": "Save changes",
+    "more": "Load more",
+    "invalid": "Check the fields and use a full website origin such as https://example.com, without a path.",
+    "conflict": "This short name is already in use. Choose another.",
+    "missing": "This page is unavailable."
   },
   "auth": {
     "name": "Your name",
@@ -67,5 +72,32 @@
       "session": "Your session has expired. Please sign in again.",
       "credentials": "Check your email address and password and try again."
     }
+  },
+  "dashboard": {
+    "organization": "Organization",
+    "project": "Project",
+    "selectOrganization": "Choose an organization",
+    "newOrganization": "New organization",
+    "chooseOrganization": "Choose an organization above, or create one to get started.",
+    "accessLost": "This organization or project is unavailable. Your access may have changed. Choose another organization or contact an owner.",
+    "forbidden": "Only owners and administrators can change these settings.",
+    "navigation": "Organization navigation",
+    "projectNavigation": "Project navigation",
+    "projects": "Projects",
+    "members": "Members",
+    "activity": "Activity",
+    "overview": "Overview",
+    "settings": "Settings",
+    "embed": "Embed"
+  },
+  "projects": {
+    "create": "Create project",
+    "empty": "No projects yet. Create one for your website.",
+    "domains": "Allowed websites",
+    "domainsHint": "One website origin per line, including https:// (or http:// for local development). Include the port when needed; do not include paths.",
+    "anyOrigin": "Allow submissions from any website. Leaving this list empty allows all websites.",
+    "overview": "Manage this website’s backend features and integration settings.",
+    "noModules": "No website features are available yet on this installation.",
+    "allDomains": "All websites are allowed. Restrict this in Settings before sharing a publishable key."
   }
 }

@@ -504,14 +504,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Component behavior/translation parity and Playwright verification/reset via Mailpit; malicious redirect and invalid invitation cases.
 - **Risks/notes:** React Hook Form/resolver patch verified with Zod 4. No M6 first-run setup UI.
 
-### [ ] P1.12b – Build the shell, switchers and project settings (est. 6 h)
+### [x] P1.12b – Build the shell, switchers and project settings (est. 6 h)
 - **Description:** Add responsive authenticated navigation, org/project switchers, organization creation, project list/create and settings for names/domains.
 - **Files/packages:** web layout/project routes/module nav registry, shared UI where reused.
 - **Depends on:** P1.12a, P1.5a/b, P1.6b.
 - **Reuses:** Generated admin client, Better Auth organization client, Query cache, existing i18n/theme.
 - **Acceptance criteria:**
-  - [ ] Switching tenants resets tenant-specific cached data; project routes handle no project, revoked membership and foreign deep links safely.
-  - [ ] Navigation reflects operational module metadata; domain pages are absent until built. Settings validation uses the API contract, with human wording and explicit empty-origin warning.
+  - [x] Switching tenants resets tenant-specific cached data; project routes handle no project, revoked membership and foreign deep links safely.
+  - [x] Navigation reflects operational module metadata; domain pages are absent until built. Settings validation uses the API contract, with human wording and explicit empty-origin warning.
 - **Tests:** Org/project switch with separate fixtures and stale requests; mobile navigation, roles and origin settings.
 - **Risks/notes:** No duplicate tenant selector state across screens; cache keys include organization/project.
 
