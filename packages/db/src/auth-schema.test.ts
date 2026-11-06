@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import { systemClock } from '@backbricks/core';
 import { eq, sql } from 'drizzle-orm';
 
+import { expectDatabaseError } from '../test/expect-database-error.ts';
 import { createTestDatabase, postgresAvailable } from '../test/test-database.ts';
 import { createDatabase, type DatabaseHandle } from './client.ts';
 import { runMigrations } from './migrate.ts';
@@ -61,6 +62,19 @@ describe.skipIf(!available)('generated auth schema (real Postgres)', () => {
       createdAt: now,
     });
     expect(await handle.db.select().from(authSchema.member)).toHaveLength(1);
+    await expectDatabaseError(
+      handle.db
+        .insert(authSchema.member)
+        .values({
+          id: 'duplicate-member',
+          organizationId: 'schema-org',
+          userId: 'schema-user',
+          role: 'member',
+          createdAt: now,
+        })
+        .execute(),
+      '23505',
+    );
     await handle.db.delete(authSchema.user).where(eq(authSchema.user.id, 'schema-user'));
     expect(await handle.db.select().from(authSchema.member)).toEqual([]);
     expect(await handle.db.select().from(authSchema.organization)).toHaveLength(1);

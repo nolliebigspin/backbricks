@@ -44,6 +44,12 @@ export {
 export { isSecretField, REDACTED, redactFields, redactSecrets } from './logging/redact.ts';
 export { fieldErrorSchema, problemDetailsSchema } from './errors/schema.ts';
 export {
+  actorTypeSchema,
+  apiKeyKindSchema,
+  moduleInstanceStatusSchema,
+  notificationChannelSchema,
+} from './platform/values.ts';
+export {
   DEFAULT_BODY_LIMIT_BYTES,
   type ManagementRoutePolicy,
   managementRoutePolicySchema,

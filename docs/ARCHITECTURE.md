@@ -159,78 +159,21 @@ Hierarchy: **Organization → Project (= website) → Module instance (form `con
 
 ### B.3 PostgreSQL schema (first version)
 
-> **Spec for tables that are not built yet.** When a table is implemented (core tables in P1.2, module tables in P2–P4), its SQL below is replaced by a link to the Drizzle schema, which becomes the source of truth.
+> **Code is authoritative for implemented tables.** Domain table SQL remains a spec until P2–P4 replaces it with schema links.
 
 Better Auth tables (`user`, `session`, `account`, `verification`, `organization`, `member`, `invitation`) are implemented in the [generated auth schema](../packages/db/src/schema/auth.generated.ts) and the [central migration history](../packages/db/migrations/). Regenerate with `bun run auth:generate`, then `bun run db:generate` and review the resulting SQL. The [schema-only config](../packages/auth/auth.config.ts) has no database connection or import of its own generated output (ADR-0021). All tables specified below belong to the platform.
 
+Implemented core tables are defined in code (ADR-0023), with no parallel SQL spec:
+
+- [Projects and API keys](../packages/db/src/schema/projects.ts)
+- [Module instances and revisions](../packages/db/src/schema/instances.ts)
+- [Events, audit, notification rules and usage](../packages/db/src/schema/platform.ts)
+- [Idempotency, rate limiting, replay and system settings](../packages/db/src/schema/technical.ts)
+- [Custom audit/membership/UNLOGGED constraints](../packages/db/migrations/20261106024528_audit_immutability/migration.sql)
+
+Live child references include organization/project/instance identity; audit IDs are historical references retained without cascading FKs. Platform timestamps are supplied through the injected clock. Expiry/lifecycle rules follow ADR-0022. The SQL below specifies only the unimplemented domain tables.
+
 ```sql
--- =========================================================
--- Core: projects and credentials
--- =========================================================
-CREATE TABLE projects (
-  id               text PRIMARY KEY,                       -- prj_…
-  organization_id  text NOT NULL REFERENCES organization(id) ON DELETE CASCADE,
-  name             text NOT NULL,
-  slug             text NOT NULL,
-  allowed_origins  text[] NOT NULL DEFAULT '{}',            -- e.g. {https://example.com}
-  settings         jsonb NOT NULL DEFAULT '{}',             -- timezone, locale, defaults
-  created_at       timestamptz NOT NULL DEFAULT now(),
-  updated_at       timestamptz NOT NULL DEFAULT now(),
-  deleted_at       timestamptz,
-  UNIQUE (organization_id, slug)
-);
-
-CREATE TABLE api_keys (
-  id               text PRIMARY KEY,                       -- key_…
-  organization_id  text NOT NULL REFERENCES organization(id) ON DELETE CASCADE,
-  project_id       text NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  kind             text NOT NULL CHECK (kind IN ('publishable','secret')),
-  name             text NOT NULL,
-  lookup_hash      bytea NOT NULL UNIQUE,                  -- sha256(token)
-  display_prefix   text NOT NULL,                          -- "bb_sk_7Hq2…" (display only)
-  public_token     text UNIQUE,                            -- publishable keys only; may be shown again
-  scopes           text[] NOT NULL DEFAULT '{}',
-  created_by       text REFERENCES "user"(id) ON DELETE SET NULL,
-  last_used_at     timestamptz,
-  expires_at       timestamptz,
-  revoked_at       timestamptz,
-  created_at       timestamptz NOT NULL DEFAULT now(),
-  CHECK ((kind = 'publishable') = (public_token IS NOT NULL))
-);
-CREATE INDEX api_keys_project_idx ON api_keys (project_id) WHERE revoked_at IS NULL;
-
--- =========================================================
--- Generic: module instances and configuration revisions
--- =========================================================
-CREATE TABLE module_instances (
-  id               text PRIMARY KEY,                       -- mod_…
-  organization_id  text NOT NULL,
-  project_id       text NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  module_type      text NOT NULL,                          -- 'forms' | 'uploads' | 'reviews' | …
-  key              text NOT NULL CHECK (key ~ '^[a-z0-9][a-z0-9-]{0,62}$'),
-  name             text NOT NULL,
-  status           text NOT NULL DEFAULT 'active' CHECK (status IN ('active','paused','archived')),
-  config           jsonb NOT NULL,                         -- validated by ModuleDefinition.configSchema
-  config_version   integer NOT NULL DEFAULT 1,             -- revision of this instance
-  module_version   integer NOT NULL,                       -- version of the module's config format
-  created_at       timestamptz NOT NULL DEFAULT now(),
-  updated_at       timestamptz NOT NULL DEFAULT now(),
-  UNIQUE (project_id, module_type, key)
-);
-
-CREATE TABLE module_instance_revisions (
-  id               text PRIMARY KEY,                       -- rvn_…
-  organization_id  text NOT NULL,
-  project_id       text NOT NULL,
-  instance_id      text NOT NULL REFERENCES module_instances(id) ON DELETE CASCADE,
-  config_version   integer NOT NULL,
-  config           jsonb NOT NULL,
-  actor_type       text NOT NULL,                          -- user | api_key | mcp | system
-  actor_id         text,
-  created_at       timestamptz NOT NULL DEFAULT now(),
-  UNIQUE (instance_id, config_version)
-);
-
 -- =========================================================
 -- Module: forms
 -- =========================================================
@@ -322,104 +265,9 @@ CREATE TABLE reviews (
 CREATE INDEX reviews_public_idx ON reviews (instance_id, published_at DESC)
   WHERE moderation_status = 'approved' AND published_at IS NOT NULL AND is_test = false;
 CREATE INDEX reviews_queue_idx  ON reviews (instance_id, moderation_status, created_at DESC);
-
--- =========================================================
--- Platform: events (outbox), audit, notifications, usage
--- =========================================================
-CREATE TABLE events (
-  id               text PRIMARY KEY,                       -- evt_…
-  organization_id  text NOT NULL,
-  project_id       text,
-  type             text NOT NULL,                          -- 'forms.submission.created'
-  subject_type     text,
-  subject_id       text,
-  payload          jsonb NOT NULL DEFAULT '{}',            -- minimal, NO full personal content
-  created_at       timestamptz NOT NULL DEFAULT now(),
-  dispatched_at    timestamptz
-);
-CREATE INDEX events_pending_idx ON events (created_at) WHERE dispatched_at IS NULL;
-
-CREATE TABLE audit_logs (
-  id               text PRIMARY KEY,                       -- aud_…
-  organization_id  text NOT NULL,
-  project_id       text,
-  actor_type       text NOT NULL CHECK (actor_type IN ('user','api_key','mcp','system')),
-  actor_id         text,
-  actor_label      text,                                   -- email / key name at the time of action
-  action           text NOT NULL,                          -- 'forms.instance.updated', 'files.downloaded', 'data.exported'
-  target_type      text,
-  target_id        text,
-  changes          jsonb,                                  -- config diffs, never submission content
-  ip_hash          bytea,
-  request_id       text,
-  created_at       timestamptz NOT NULL DEFAULT now()
-);
-CREATE INDEX audit_logs_org_idx ON audit_logs (organization_id, created_at DESC);
-
--- Audit logs are append-only for the app role
-CREATE FUNCTION audit_logs_immutable() RETURNS trigger LANGUAGE plpgsql AS $$
-BEGIN
-  IF current_setting('app.allow_audit_purge', true) IS DISTINCT FROM 'on' THEN
-    RAISE EXCEPTION 'audit_logs are append-only';
-  END IF;
-  RETURN OLD;
-END $$;
-CREATE TRIGGER audit_logs_no_update BEFORE UPDATE OR DELETE ON audit_logs
-  FOR EACH ROW EXECUTE FUNCTION audit_logs_immutable();
-
-CREATE TABLE notification_rules (
-  id               text PRIMARY KEY,                       -- ntf_…
-  organization_id  text NOT NULL,
-  project_id       text NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  instance_id      text REFERENCES module_instances(id) ON DELETE CASCADE, -- NULL = all instances
-  event_type       text NOT NULL,
-  channel          text NOT NULL DEFAULT 'email' CHECK (channel IN ('email')),
-  recipients       text[] NOT NULL,
-  include_content  boolean NOT NULL DEFAULT false,         -- privacy by default
-  enabled          boolean NOT NULL DEFAULT true,
-  created_at       timestamptz NOT NULL DEFAULT now(),
-  updated_at       timestamptz NOT NULL DEFAULT now()
-);
-
-CREATE TABLE usage_counters (
-  organization_id  text NOT NULL,
-  project_id       text NOT NULL,
-  metric           text NOT NULL,                          -- 'forms.submissions', 'uploads.bytes_ingested', …
-  period           date NOT NULL,                          -- first day of month
-  value            bigint NOT NULL DEFAULT 0,
-  PRIMARY KEY (organization_id, project_id, metric, period)
-);
-
--- =========================================================
--- Technical helper tables
--- =========================================================
-CREATE TABLE idempotency_keys (
-  project_id       text NOT NULL,
-  key              text NOT NULL,
-  request_hash     bytea NOT NULL,
-  response_status  integer NOT NULL,
-  response_body    jsonb NOT NULL,
-  created_at       timestamptz NOT NULL DEFAULT now(),
-  PRIMARY KEY (project_id, key)
-);
-
-CREATE UNLOGGED TABLE rate_limit_buckets (
-  bucket           text PRIMARY KEY,                       -- "ip:<hash>:mod_…:60"
-  count            integer NOT NULL,
-  window_start     timestamptz NOT NULL
-);
-
-CREATE TABLE pow_challenges_used (
-  signature        text PRIMARY KEY,                       -- proof-of-work replay protection
-  expires_at       timestamptz NOT NULL
-);
-
-CREATE TABLE system_settings (
-  key              text PRIMARY KEY,                       -- 'setup_completed', 'signup_policy', …
-  value            jsonb NOT NULL,
-  updated_at       timestamptz NOT NULL DEFAULT now()
-);
 ```
+
+
 
 ### B.4 Generic vs. module-specific
 

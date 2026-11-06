@@ -162,14 +162,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Auth schema generation repeatability; real migration concurrency and startup schema smoke tests.
 - **Risks/notes:** DEV-10; inspect current package exports. Root TS 7 stays; codegen fallback is local only.
 
-### [ ] P1.2b – Migrate the platform schema and constraints (est. 6 h)
+### [x] P1.2b – Migrate the platform schema and constraints (est. 6 h)
 - **Description:** Implement §B.3 core/helper tables without domain tables, resolving DEV-11 before copying the SQL. Add tenant-consistent foreign keys, unique constraints, retention columns and the append-only audit trigger.
 - **Files/packages:** `packages/db/src/schema/`, migrations; link implemented core tables from ARCHITECTURE §B.3.
 - **Depends on:** P1.2a; Q7/Q8 decisions.
 - **Reuses:** IDs in core, generated auth organization/user references, migration runner.
 - **Acceptance criteria:**
-  - [ ] Projects, keys, instances/revisions, events, audit, notification rules, usage and technical tables exist; project-scoped idempotency also carries `organization_id`. Global tables are explicitly classified.
-  - [ ] Cross-org parent/child references fail at the DB boundary; audit update/delete fails except the bounded purge path; privacy expiry/index choices match the accepted decision.
+  - [x] Projects, keys, instances/revisions, events, audit, notification rules, usage and technical tables exist; project-scoped idempotency also carries `organization_id`. Global tables are explicitly classified.
+  - [x] Cross-org and sibling-project references fail at the DB boundary; audit update/delete fails except expired-row purge, with no transaction-local flag leakage. Audit survives parent erasure; expiry/indexes follow ADR-0022/0023.
 - **Tests:** Real DB constraints, cascade behavior, append-only protection, clean migration and second-run no-op.
 - **Risks/notes:** Notification CRUD belongs to P2.6. No forms/files/reviews tables, silent audit-retention exception or speculative cloud tables.
 
@@ -580,7 +580,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.1a/P1.11a/P1.2a complete. Q8's approved lifecycle clarification is in I11/ADR-0022. Auth CLI regeneration is deterministic without DB/env input; the generated auth migration and cascade/expiry tests pass on real Postgres (db: 10 pass). `bun run check` passed, including 84 script tests with zero skips; unchanged packages may use Turbo cache. Next task: P1.2b. Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
+P1.1a/P1.11a/P1.2a/P1.2b complete. Q8's approved lifecycle clarification is in I11/ADR-0022; schema integrity decisions are ADR-0023. Auth generation is deterministic; migrations/DB constraints/audit retention tests pass on real Postgres (db: 17 pass). `bun run check` passed, including 84 script tests with zero skips; unchanged packages may use Turbo cache. A second `db:generate` reports no schema drift. Next task: P1.3a. Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 
