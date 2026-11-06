@@ -32,6 +32,43 @@ for (const language of ['en', 'de'] as const) {
       .getByRole('dialog')
       .getByRole('button', { name: copy.common.close, exact: true })
       .click();
+    await page.getByLabel(copy.common.name, { exact: true }).fill('Website key');
+    await page.getByLabel(copy.keys.kind).selectOption('publishable');
+    await page.getByRole('button', { name: copy.keys.create, exact: true }).click();
+    const publicToken = await page
+      .getByRole('dialog')
+      .getByLabel(copy.keys.revealTitle)
+      .inputValue();
+    await page
+      .getByRole('dialog')
+      .getByRole('button', { name: copy.common.close, exact: true })
+      .click();
+    const publicHeaders = {
+      authorization: `Bearer ${publicToken}`,
+      origin: 'https://example.test',
+    };
+    const challenge = await request.get('/v1/public/challenge', { headers: publicHeaders });
+    expect(challenge.status()).toBe(200);
+    const challengeText = await challenge.text();
+    expect(challengeText).not.toContain(projectId);
+    expect(challengeText).not.toContain(orgId);
+    expect(
+      (
+        await request.get('/v1/public/challenge', {
+          headers: { ...publicHeaders, origin: 'https://foreign.example.test' },
+        })
+      ).status(),
+    ).toBe(403);
+    expect(
+      (await request.get(`/v1/projects/${projectId}`, { headers: publicHeaders })).status(),
+    ).toBe(403);
+    const publicRow = page.getByRole('listitem').filter({ hasText: 'Website key' });
+    await publicRow.getByRole('button', { name: copy.keys.revoke }).click();
+    await page.getByRole('alertdialog').getByRole('button', { name: copy.keys.revoke }).click();
+    await expect(publicRow).toContainText(copy.keys.revoked);
+    expect((await request.get('/v1/public/challenge', { headers: publicHeaders })).status()).toBe(
+      404,
+    );
     const foreign = await request.get(`/v1/projects/${projectId}`, {
       headers: { authorization: `Bearer ${token}`, origin: 'https://foreign.example.test' },
     });
@@ -98,7 +135,7 @@ for (const language of ['en', 'de'] as const) {
       copy.activity.actions.secretExposed,
     ]) {
       // oxlint-disable-next-line no-await-in-loop -- Each localized audit action must be visible in the same owner view.
-      await expect(page.getByText(action, { exact: true })).toBeVisible();
+      await expect(page.getByText(action, { exact: true }).first()).toBeVisible();
     }
     const activity = await page.locator('main').textContent();
     expect(activity).not.toContain(email);

@@ -70,7 +70,7 @@ Decisions for the maintainer, started in P0 planning (2026-11-04), extended for 
 - **Context:** Public requests carry an opaque publishable credential without a trusted tenant selector. I1/Q10 currently permit the narrow active-secret-key hash/ID bootstrap only. The public challenge/auth tasks need the equivalent lookup for publishable credentials before scoped access can begin.
 - **Recommendation:** Extend the same exact SHA-256, active-key/active-project, IDs-only authentication projection to publishable keys. Keep kind selection trusted and separate from HTTP input; all metadata/origin/instance/scope/business access still goes through `withTenant`. No general query API or unscoped HTTP endpoint. Alternative: change the public protocol to require an explicit project-ID header on every request.
 - **Needed by:** Public-key challenge/auth composition in P1.9a/b. Provider/replay work does not depend on this answer.
-- **Answer:** Pending; requested from the maintainer in this execution chat. Do not widen I1 or the lookup before explicit approval.
+- **Answer (2026-11-06):** The maintainer explicitly approved: “Approve Q11 and finish it (recommended).” Extend the same exact-hash, active-key/project, IDs-only bootstrap to publishable credentials through a trusted kind-specific factory; all later access stays scoped. Implemented in ADR-0054.
 
 ## Decided in planning, please confirm
 

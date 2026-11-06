@@ -291,7 +291,7 @@ CREATE INDEX reviews_queue_idx  ON reviews (instance_id, moderation_status, crea
 
 ### B.6 Tenant isolation in the data layer
 
-- **Approved authentication bootstrap exception (I1 / Q10):** [exact secret-key hash lookup](../packages/db/src/repositories/credential-bootstrap.ts) returns only active key/organization/project IDs before a tenant is known. It exposes no unscoped metadata/query endpoint; all subsequent access uses `withTenant` (ADR-0034).
+- **Approved authentication bootstrap exception (I1 / Q10/Q11):** [exact credential hash lookup](../packages/db/src/repositories/credential-bootstrap.ts) returns only active key/organization/project IDs before a tenant is known. It exposes no unscoped metadata/query endpoint; trusted factories fix the secret/publishable kind and all subsequent access uses `withTenant` (ADR-0034/0054).
 - **Access layer:** every request creates a `TenantContext { organizationId, projectId?, principal, scopes }`. Tenant tables are accessed only through `withTenant(ctx, async (tx) => …)`, which
   1. opens a transaction,
   2. sets `app.org_id` / `app.project_id` as transaction-local settings (prepares RLS),
@@ -870,7 +870,7 @@ Milestones, scope, exit criteria and effort: `docs/MILESTONES.md`. Tasks: `PLAN.
 
 ### J.2 Get right from the start (expensive to change)
 
-1. `organization_id`/`project_id` on every tenant table and `withTenant` as the access path, with only the approved authentication hash/ID bootstrap exception (I1, ADR-0034)
+1. `organization_id`/`project_id` on every tenant table and `withTenant` as the access path, with only the approved authentication hash/ID bootstrap exception (I1, ADR-0034/0054)
 2. ID format (TypeID as `text`)
 3. Public vs. management API separation and the key model (publishable/secret + scopes)
 4. Module contract, config-as-code format with `$schema`/`module_version`, revisions

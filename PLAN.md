@@ -405,14 +405,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Garage signed size/type rejection, GET disposition/expiry, HEAD/COPY/DELETE/stream and server-vs-browser endpoint smoke; retain tests for P3.10 expansion.
 - **Risks/notes:** No uploads API, scanner implementation or proxy upload mode here. Recheck the paired AWS patch before adoption.
 
-### [ ] P1.9a – Add expiring proof-of-work challenges (est. 4 h)
+### [x] P1.9a – Add expiring proof-of-work challenges (est. 4 h)
 - **Description:** Define the PoW provider boundary, ALTCHA implementation and rate-limited challenge endpoint with atomic replay protection.
 - **Files/packages:** core abuse/captcha contracts, ALTCHA adapter, db replay repository, server public challenge route.
 - **Depends on:** P1.8c, P1.6b, P1.4c.
 - **Reuses:** `altcha-lib` spike settings, `clock`, APP_SECRET-derived purpose key and expiry tables.
 - **Acceptance criteria:**
-  - [ ] Signed challenges expire after the documented period and cannot be modified; replay claims use a unique atomic DB operation across workers.
-  - [ ] Challenge generation is bounded/rate-limited, project-bound and public output contains no internal data; secret-key public operations skip PoW only with the operation scope.
+  - [x] Signed challenges expire after the documented period and cannot be modified; replay claims use a unique atomic DB operation across workers.
+  - [x] Challenge generation is bounded/rate-limited, project-bound and public output contains no internal data; secret-key public operations skip PoW only with the operation scope.
 - **Tests:** Tamper/expiry/wrong-secret/wrong-project cases, concurrent replay, fixed-clock difficulty checks and public response snapshot.
 - **Risks/notes:** Tune difficulty with measured solve time and record it; no third-party captcha dependency.
 
@@ -582,9 +582,9 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.13c acceptance resolved the key expiry display regression with a failing-then-passing component test and the shared display clock. Owner/image acceptance and the handoff are recorded in docs/progress/phase-1.md. All local acceptance commands passed (256 package + 92 script + 10 browser tests, Node 20/24, image worker consumption); Q11 and remote CI/fresh review remain pending.
+P1.13c acceptance resolved the key expiry display regression with a failing-then-passing component test and the shared display clock. Owner/image acceptance and the handoff are recorded in docs/progress/phase-1.md. All local acceptance commands passed (258 package + 92 script + 10 browser tests, Node 20/24, image worker consumption). Q11 was explicitly approved and implemented in ADR-0054; only remote CI/fresh review remain as merge-acceptance gates.
 
-P1.9a provider, atomic replay store and rate-limited challenge composition are implemented and verified (ADR-0045). P1.9a remains unticked: production publishable-key bootstrap is deliberately absent pending Q11 approval. Fixture lookup is followed by real scoped DB validation; the production port fails closed. Continue independent AbuseGuard/CORS work through the injected port while awaiting the answer, then finish the public-auth gate before milestone acceptance.
+P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted publishable-key exact-hash/IDs-only bootstrap into production before scoped revalidation. The challenge regression failed with 503 before wiring and passes with the real lookup; DB and en/de process-level journeys prove kind/expiry/revocation/archive/origin boundaries. All 39 M1 implementation tasks are checked.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 
@@ -688,7 +688,7 @@ P1.9a provider, atomic replay store and rate-limited challenge composition are i
 | R8 | File watching across the macOS bind mount | P0.3b | Polling options, documented | open |
 | R9 | Garage may not enforce signed `Content-Length` on presigned PUTs | P0.9b, P3 | Enforced (403 on mismatch); needs the checksum setting (ADR-0020); P3.10 keeps it under test | resolved |
 
-P1.9b implements the shared guard and public CORS (ADR-0046), verified through real HTTP/PG fixtures including quota/provider failure and atomic rollback. Production publishable bootstrap remains the separate Q11/P1.9a gate; no new unscoped lookup was introduced. JSON transport is in M1; HTML form adaptation stays M2.
+P1.9b implements the shared guard and public CORS (ADR-0046), verified through real HTTP/PG fixtures including quota/provider failure and atomic rollback. The former Q11/P1.9a gate was resolved with explicit approval and the narrow lookup in ADR-0054. JSON transport is in M1; HTML form adaptation stays M2.
 
 P1.9c is implemented with shared, acknowledgement-only transactional caching (ADR-0047). Real HTTP/PG tests prove twelve concurrent duplicates persist usage/outbox once, project separation, mismatch/expiry, spent-proof replay and rollback on both domain/cache failure. Full `bun run check` passes with no service skips.
 

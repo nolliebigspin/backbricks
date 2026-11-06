@@ -54,8 +54,8 @@ Short documents that record significant decisions: deviations from or refinement
 | [0042](0042-config-documents-and-bound-plans.md) | Configuration documents and bound plans | accepted |
 | [0043](0043-atomic-config-apply-and-exports.md) | Atomic configuration apply and exports | accepted |
 | [0044](0044-private-s3-storage.md) | Private S3 storage | accepted |
-| [0045](0045-proof-of-work-and-replay.md) | Proof-of-work and replay protection | accepted; publishable bootstrap gated by Q11 |
-| [0046](0046-public-write-guard-and-cors.md) | Public write guard and CORS | accepted; production publishable bootstrap gated by Q11 |
+| [0045](0045-proof-of-work-and-replay.md) | Proof-of-work and replay protection | accepted; Q11 resolved by ADR-0054 |
+| [0046](0046-public-write-guard-and-cors.md) | Public write guard and CORS | accepted; Q11 resolved by ADR-0054 |
 | [0047](0047-atomic-public-idempotency.md) | Atomic public idempotency | accepted |
 | [0048](0048-transactional-postgres-jobs.md) | Transactional PostgreSQL jobs | accepted |
 | [0049](0049-outbox-and-restricted-delivery.md) | Outbox dispatch and restricted delivery | accepted |
@@ -63,3 +63,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0051](0051-offline-contract-and-admin-client.md) | Offline contract and admin client | accepted |
 | [0052](0052-contract-gates-and-method-handling.md) | Contract gates and method handling | accepted |
 | [0053](0053-dashboard-account-boundary.md) | Dashboard account boundary | accepted |
+| [0054](0054-publishable-key-authentication-bootstrap.md) | Publishable key authentication bootstrap | accepted; Q11 approved |

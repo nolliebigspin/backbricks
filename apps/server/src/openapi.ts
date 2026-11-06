@@ -1,5 +1,5 @@
 import { canonicalJson, formatConfigIssues, jsonValueSchema, loadConfig } from '@backbricks/core';
-import { createDatabase } from '@backbricks/db';
+import { createPublishableKeyLookup, createDatabase } from '@backbricks/db';
 
 import { createApp } from './app.ts';
 import { apiDocument } from './http/openapi-document.ts';
@@ -38,6 +38,7 @@ export async function exportOpenApi(): Promise<string> {
       clock: services.container.core.clock,
       withTenant: services.withTenant,
       resolveSecret: keys.resolveKey,
+      lookupPublishable: createPublishableKeyLookup(database.db),
     });
     const app = createApp(
       {

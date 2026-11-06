@@ -1,8 +1,8 @@
 # Phase P1 – Platform Core (M1): report
 
-- **Branch:** `feat/p1-platform-core`; signed-off local commits; no push or PR.
+- **Branch:** `feat/p1-platform-core`; signed-off commits; PR-based review against `main`.
 - **Date:** 2026-11-06.
-- **Status:** Local owner/image/security acceptance implemented. M1 is **not accepted yet**: Q11 still requires the maintainer’s explicit invariant decision; P1.9a remains open. P1.13c’s local owner/image evidence and handoff are complete. Remote CI and a fresh review session are also outstanding.
+- **Status:** All 39 M1 tasks are implemented. The maintainer explicitly approved Q11; production publishable authentication is wired and the local owner/image/security evidence is complete. Merge acceptance still requires green PR CI and maintainer/fresh-session review.
 
 ## Delivered
 
@@ -10,7 +10,7 @@
 |---|---|
 | Identity | Verified email/password accounts, reset/logout, organization roles and invitations through a closed Better Auth surface; same-transaction audit and durable mail. [ADRs](../adr/README.md) 0021–0028 define the boundaries. |
 | Tenant platform | Scoped repositories, immutable principals, declared route access and real isolation fixtures; bounded audit/outbox/usage and project archive lifecycle. |
-| Keys | CSPRNG publishable/secret material, SHA-256 storage, explicit scope presets, session-only creation, revocation/expiry and exposure audit/notification intent. The approved **secret** bootstrap is live; the publishable bootstrap is gated by Q11. |
+| Keys | CSPRNG publishable/secret material, SHA-256 storage, explicit scope presets, session-only creation, revocation/expiry and exposure audit/notification intent. Both secret and publishable bootstrap factories are live under the explicitly approved Q10/Q11 boundary ([ADR-0054](../adr/0054-publishable-key-authentication-bootstrap.md)). |
 | Modules/config | Optional registry/capabilities, infrastructure selection, generic instances, immutable revisions, migration/rollback and signed plan/atomic apply. Synthetic test modules prove the framework; production forms/uploads/reviews remain descriptors until M2–M4. |
 | Providers/workers | Private S3 signing/I/O, SMTP, ALTCHA/replay, shared Postgres limiter, transactional pg-boss jobs, durable outbox/mail and bounded maintenance. No production domain feature is invented for M1. |
 | Contract | Offline deterministic OpenAPI and TS generation, MIT admin client, non-destructive drift checks and pinned offline oasdiff against the actual base commit; authorization-safe 405 handling. ADRs 0051/0052. |
@@ -23,10 +23,10 @@ All commands below passed on 2026-11-06 against real compose services. No servic
 
 | Criterion | Command / evidence | Result |
 |---|---|---|
-| Full quality | `bun run check` | Passed: formatting, lint, architecture, both API gates, typecheck, 256 package tests and 92 script tests; zero failures/skips. |
+| Full quality | `bun run check` | Passed: formatting, lint, architecture, both API gates, typecheck, 258 package tests and 92 script tests; zero failures/skips. |
 | All build artifacts | `bun run build` | Passed: dashboard, website and SDK builds, all three tasks executed without cache. |
-| Fresh service/security/optionality suites | `CI=true bunx turbo run test --force` | Passed: 256 package tests (79 core, 43 db, 108 server, 7 adapters, 7 UI, 11 web, 1 SDK), zero failures/skips; all seven test tasks ran without cache. |
-| Owner workflows | `CI=true bun run test:e2e` | Passed: all 10 tests, no retries/skips, including complete en/de owner journeys and visible audit pagination. |
+| Fresh service/security/optionality suites | `CI=true bunx turbo run test --force` | Passed: 258 package tests (79 core, 44 db, 109 server, 7 adapters, 7 UI, 11 web, 1 SDK), zero failures/skips; all seven test tasks ran without cache. |
+| Owner workflows | `CI=true bun run test:e2e` | Passed: all 10 tests, no retries/skips, including complete en/de owner journeys, production publishable challenge/revocation and visible audit pagination. |
 | Contract generation/drift | `bun run api:generate && bun run api:check`; `git diff --exit-code -- packages/api-contract` | Passed; committed contract artifacts remained unchanged after regeneration. |
 | Compatibility gate | `bun run api:breaking` and breaking/drift negative fixtures | The actual local merge-base has no pre-M1 contract, so bootstrap is expected. Fixtures prove additive changes pass, removal/type changes and missing history fail, and regeneration cannot bypass comparison. Passed in the final check and standalone rerun. |
 | Production image | `docker build -t backbricks/server:m1 .`; `bun scripts/image/smoke.ts` | Passed on Linux arm64 with disposable real Postgres. Final image: 385,860,112 bytes. No registry push. |
@@ -47,12 +47,12 @@ Browser acceptance covers signup/verification/reset through local Mailpit, a sec
 
 ## Remaining gates and risks
 
-1. **Q11 / P1.9a:** [OPEN_QUESTIONS](../../OPEN_QUESTIONS.md#q11--extend-the-exact-hash-authentication-bootstrap-to-publishable-keys) is still pending. I1 currently authorizes the active-secret-key exact-hash/IDs-only bootstrap only. Production publishable authentication deliberately returns unavailable; tests inject a directory of IDs and then exercise actual scoped DB validation. Do not treat those fixtures as a live publishable bootstrap.
-2. After an explicit Q11 answer, implement the approved public credential bootstrap/protocol, add production real-DB cases, update the invariant/ADR if authorized and rerun final acceptance. Do not infer approval from the request to finish M1.
-3. The maintainer must review, push/open a PR and obtain green remote CI. No push/PR was requested, and local arm64 image evidence does not claim an amd64 GitHub runner result.
+1. Q11 was explicitly approved on 2026-11-06 and implemented in [ADR-0054](../adr/0054-publishable-key-authentication-bootstrap.md). Real database tests cover exact matching, fixed kind, IDs-only output, expiry/revocation/archive and scoped stale-candidate rejection; en/de browser journeys exercise production publishable challenge access and revocation.
+2. All implementation tasks are complete; there is no pending public-auth implementation gate. The approved exception remains limited to exact hash/active kind/project/IDs-only discovery.
+3. Green remote CI and review are required before merge and tracked on the feature-branch PR; local arm64 image evidence alone does not claim an amd64 GitHub runner result.
 4. A different fresh session must perform the phase review under AGENTS §9. This implementing chat has not issued a phase-review report.
 5. M2 still owns forms/personal-data erasure orchestration; M3 owns file scanning/upload workflows. No incomplete domain feature or personal erasure endpoint is claimed as M1 functionality.
 
 ## Resume
 
-Continue P1.9a after Q11 is answered. Preserve the exact-hash/active-kind/active-project/IDs-only boundary and keep all metadata/business reads under `withTenant`. After the approved Q11 implementation, rerun affected security/public-auth and final acceptance commands, refresh this report and finish the remaining phase checkboxes only when their stated gates are satisfied. Do not push without instructions.
+Review the feature-branch PR and obtain green CI before merging. A fresh session can perform the phase review under AGENTS §9. All implementation tasks are complete; proceed to M2 planning only after milestone acceptance. No merge or main-branch push is authorized.

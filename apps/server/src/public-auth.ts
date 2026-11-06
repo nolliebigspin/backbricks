@@ -10,12 +10,12 @@ import {
   type WithTenant,
 } from '@backbricks/core';
 
-/** All post-bootstrap reads stay scoped. Publishable bootstrap is injected only after the I1 decision. */
+/** All post-bootstrap reads stay scoped. Trusted kind-specific bootstrap is followed by a scoped credential recheck (ADR-0054). */
 export function createPublicCredentialResolver(deps: {
   clock: Clock;
   withTenant: WithTenant;
   resolveSecret: SecretKeyResolver;
-  lookupPublishable?: SecretKeyLookup;
+  lookupPublishable: SecretKeyLookup;
 }): PublicCredentialResolver {
   return async (credential, request) => {
     try {
@@ -23,7 +23,6 @@ export function createPublicCredentialResolver(deps: {
         const identity = await deps.resolveSecret(credential, request);
         return identity ? publicCredentialSchema.parse({ ...identity, kind: 'secret' }) : null;
       }
-      if (!deps.lookupPublishable) throw new AppError('service_unavailable');
       const hash = await hashApiKey(credential);
       const now = deps.clock.now();
       const reference = await deps.lookupPublishable(hash, now);

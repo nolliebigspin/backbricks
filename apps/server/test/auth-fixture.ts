@@ -8,7 +8,12 @@ import {
   type SecretKeyLookup,
   type defineModuleCatalog,
 } from '@backbricks/core';
-import { createDatabase, createPostgresQueue, runMigrations } from '@backbricks/db';
+import {
+  createPublishableKeyLookup,
+  createDatabase,
+  createPostgresQueue,
+  runMigrations,
+} from '@backbricks/db';
 import { z } from '@hono/zod-openapi';
 
 import { createTestDatabase, postgresAvailable } from '../../../scripts/test/database.ts';
@@ -134,7 +139,7 @@ export async function scenario(
         clock: runtime.container.core.clock,
         withTenant: runtime.withTenant,
         resolveSecret: keyAuth.resolveKey,
-        lookupPublishable: apiOptions.lookupPublishable,
+        lookupPublishable: apiOptions.lookupPublishable ?? createPublishableKeyLookup(handle.db),
       });
       app = createApp(
         {

@@ -1,5 +1,10 @@
 import { type Config, createIpIdentity } from '@backbricks/core';
-import { createDatabase, createPostgresQueue, runMigrations } from '@backbricks/db';
+import {
+  createPublishableKeyLookup,
+  createDatabase,
+  createPostgresQueue,
+  runMigrations,
+} from '@backbricks/db';
 
 import { createApp } from './app.ts';
 import { createServerAuth } from './auth.ts';
@@ -66,6 +71,7 @@ async function startRuntime(
         clock: runtime.container.core.clock,
         withTenant: runtime.withTenant,
         resolveSecret: keys.resolveKey,
+        lookupPublishable: createPublishableKeyLookup(database.db),
       });
       const app = createApp(
         {
