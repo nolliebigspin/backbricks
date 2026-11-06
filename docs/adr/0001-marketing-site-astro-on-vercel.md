@@ -2,7 +2,7 @@
 
 - **Status:** accepted
 - **Date:** 2026-11-04
-- **Related:** ARCHITECTURE §B (why not Next.js), §D.11 (docs), §E.3/§E.6 (UI), §G.1 (repo layout), §H (stack); PLANNING_PROMPT P5.7
+- **Related:** ARCHITECTURE §D.11 (docs), §E.3 (UI), §G.1 (repo layout), §H (stack); PLAN P5.7
 
 ## Context
 

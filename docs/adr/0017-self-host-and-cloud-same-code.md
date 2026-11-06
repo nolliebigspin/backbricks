@@ -2,7 +2,7 @@
 
 - **Status:** accepted
 - **Date:** 2026-11-04
-- **Related:** ARCHITECTURE §0 #16, §G.5, §G.6; AGENTS.md I14, I15; PLAN P0.4, C1
+- **Related:** ARCHITECTURE §0 #16, §G.5; docs/CLOUD.md §2; AGENTS.md I14, I15; PLAN P0.4, C1
 
 ## Context
 
