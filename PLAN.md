@@ -184,14 +184,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Real transactions across 2 orgs × 2 projects; empty/reused context, rollback and transaction-local setting isolation; capability fixture writes roll back together.
 - **Risks/notes:** I1–I3/I13. RLS remains deferred; transaction settings alone do not scope a SQL query.
 
-### [ ] P1.8a – Add transactional audit and events (est. 4 h)
+### [x] P1.8a – Add transactional audit and events (est. 4 h)
 - **Description:** Add core AuditService/EventService and db implementations that require the caller's transaction. Restrict audit diffs and event payloads to safe metadata.
 - **Files/packages:** core service contracts, db repositories, server dependency wiring.
 - **Depends on:** P1.3a.
 - **Reuses:** Clock, Ids, tenant repositories, append-only trigger, redaction utilities.
 - **Acceptance criteria:**
-  - [ ] Mutation, audit and outbox insert commit or roll back together; neither service silently creates a second transaction.
-  - [ ] Actor/request/tenant metadata is recorded without tokens, submission content or unapproved personal labels; unknown errors do not serialize input values.
+  - [x] Real DB constraint failures prove mutation/audit/outbox rollback together; services require the caller's tenant transaction and never open another one. Runtime container composition remains P1.8d.
+  - [x] Strict bounded metadata excludes content, readable labels and secret-shaped values; validation failures expose no input values. Injected clock determines one-year audit and 30-day outbox expiry.
 - **Tests:** Force audit/outbox failure and assert no mutation survives; malicious config/key payloads never enter audit diffs or logs.
 - **Risks/notes:** I4/I11/I12; secret exposure uses a committed security-event transaction before returning the rejection.
 
@@ -303,7 +303,7 @@ All tasks are done; the task details are in the git history of this file, the re
   - [ ] Expired/revoked/inactive-project keys fail; publishable keys only reach approved public routes. Exact dashboard origin is the documented secret-key exception.
   - [ ] Foreign Origin with a valid secret returns `403 secret_key_exposed`, commits redacted audit/security notification intent and never executes the business action; incident emails are deduplicated/throttled.
 - **Tests:** Origin variants including `null`, invalid/revoked secrets, cross-project resource IDs, concurrent last-used updates and audit failure path.
-- **Risks/notes:** The rejection audit must survive the HTTP error; a rolled-back business transaction cannot be its only write.
+- **Risks/notes:** The rejection audit must survive the HTTP error; a rolled-back business transaction cannot be its only write. Also cover secret-shaped values in caller-controlled request IDs/paths and error/log strings; name-based field redaction and activity validation alone do not protect those HTTP sinks.
 
 ### [ ] P1.8d – Add usage, entitlements and service composition (est. 4 h)
 - **Description:** Complete the injected service container, transactional usage counters and UnlimitedEntitlements; define external-service interfaces required by the module contract without speculative adapters.
@@ -580,7 +580,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.1a/P1.11a/P1.2a/P1.2b/P1.3a complete. ADRs 0021–0024 record transaction, privacy, schema and repository boundaries. Real DB tests: 24 pass across 5 files; script tests include the new direct-table-import violation. `bun run check` passed with services running and zero skips; unchanged packages may use Turbo cache. Next task: P1.8a (transactional audit/events). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
+P1.1a/P1.11a/P1.2a/P1.2b/P1.3a/P1.8a complete. ADRs 0021–0024 record transaction, privacy, schema and repository boundaries. Real DB tests: 28 pass across 6 files; audit/outbox constraint failures prove atomic rollback. `bun run check` passed with services running and zero skips; unchanged packages may use Turbo cache. Next task: P1.8b (SMTP and safe templates). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 

@@ -814,7 +814,9 @@ See §B.6 and invariants I1–I3.
 
 ### F.6 Audit logging
 
-Logged: login events (Better Auth hooks), member and role changes, key creation/revocation, config changes (with diff), exports, downloads, deletions (single and bulk), GDPR requests, secret-key exposure, retention runs. **Not** logged: submission content. Audit logs are append-only (trigger), kept for 1 year, filterable and exportable in the dashboard.
+Logged: login events (Better Auth hooks), member and role changes, key creation/revocation, config changes (changed field paths and revision numbers; values stay in authorized revision reads), exports, downloads, deletions (single and bulk), GDPR requests, secret-key exposure, retention runs. **Not** logged: submission content or readable actor/key labels. Audit logs are append-only (trigger), kept for 1 year, filterable and exportable in the dashboard.
+
+The [activity services and metadata schemas](../packages/core/src/services/activity.ts) write through the caller's scoped repositories, never a second transaction. Audit retention is one year; outbox metadata expires after 30 days. Payloads are structural metadata/identifiers/counters only; token-bearing email delivery is a separate restricted lifecycle (ADR-0022). P1.10 supplies dispatch, and later route tasks supply their action records and dashboard queries.
 
 ---
 

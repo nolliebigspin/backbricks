@@ -30,6 +30,21 @@ export type { TenantContext, TenantTransaction, WithTenant } from './tenancy/ten
 export * from './tenancy/repositories.ts';
 export * from './platform/models.ts';
 export { MAX_PAGE_SIZE } from './http/pagination.ts';
+export { API_KEY_PREFIXES } from './keys/constants.ts';
+export { expiresAfterDays, MILLISECONDS_PER_DAY } from './time/retention.ts';
+export {
+  activityMetadataSchema,
+  AUDIT_RETENTION_DAYS,
+  EVENT_RETENTION_DAYS,
+  auditMutationSchema,
+  eventMutationSchema,
+  type AuditMutation,
+  type EventMutation,
+  type AuditService,
+  type EventService,
+  createAuditService,
+  createEventService,
+} from './services/activity.ts';
 export { type Clock, systemClock } from './time/clock.ts';
 export {
   AppError,
