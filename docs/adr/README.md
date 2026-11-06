@@ -33,3 +33,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0021](0021-auth-transactions-and-schema-ownership.md) | Auth transactions and schema ownership | accepted |
 | [0022](0022-personal-data-lifecycles.md) | Personal data lifecycles | accepted |
 | [0023](0023-platform-schema-integrity.md) | Platform schema integrity | accepted |
+| [0024](0024-tenant-repository-boundary.md) | Tenant repository boundary | accepted |

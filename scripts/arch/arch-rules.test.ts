@@ -34,6 +34,7 @@ describe('architecture rules (lint:arch)', () => {
   });
 
   const cases: [fixture: string, rule: string][] = [
+    ['direct-tenant-table', 'tenant-tables-only-repositories'],
     ['module-type-import-db', 'modules-only-core'],
     ['core-imports-db', 'core-no-internal-deps'],
     ['sdk-imports-core', 'clients-only-contract'],

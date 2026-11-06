@@ -26,7 +26,10 @@ export {
   parseTypeId,
   type TypeId,
 } from './ids/type-id.ts';
-export type { TenantContext, WithTenant } from './tenancy/tenant-context.ts';
+export type { TenantContext, TenantTransaction, WithTenant } from './tenancy/tenant-context.ts';
+export * from './tenancy/repositories.ts';
+export * from './platform/models.ts';
+export { MAX_PAGE_SIZE } from './http/pagination.ts';
 export { type Clock, systemClock } from './time/clock.ts';
 export {
   AppError,

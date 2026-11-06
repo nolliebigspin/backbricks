@@ -173,14 +173,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Real DB constraints, cascade behavior, append-only protection, clean migration and second-run no-op.
 - **Risks/notes:** Notification CRUD belongs to P2.6. No forms/files/reviews tables, silent audit-retention exception or speculative cloud tables.
 
-### [ ] P1.3a – Implement tenant-bound repositories (est. 6 h)
+### [x] P1.3a – Implement tenant-bound repositories (est. 6 h)
 - **Description:** Extend core tenancy contracts with scoped repository interfaces and an opaque transaction identity; implement them in db. Domain consumers never receive an unrestricted Drizzle handle. Define module repository/capability transaction extension without importing db into core/modules.
 - **Files/packages:** `packages/core/src/tenancy/`, `packages/db/src/with-tenant.ts`, `packages/db/src/repositories/`, architecture fixtures.
 - **Depends on:** P1.2b, P1.1a boundary decision.
 - **Reuses:** `TenantContext`, `WithTenant`, `createWithTenant`, parameterized `set_config`.
 - **Acceptance criteria:**
-  - [ ] Every tenant operation scopes organization and optional project, rejects mismatched parents and returns not-found for foreign resource lookup.
-  - [ ] Audit/events/capabilities can share the same transaction; a negative architecture fixture rejects direct tenant-table imports outside their repositories. Document the narrow auth and maintenance boundaries.
+  - [x] Core repositories scope organization/project, reject foreign parents, stamp tenant IDs, protect writable fields and return not-found for foreign resource lookup. Contexts are snapshots; escaped handles fail after transaction end.
+  - [x] Core/module repositories and outer auth transactions enlist on the same connection/savepoints. The negative architecture fixture rejects route→table imports; boundaries and module binding contract are ADR-0024.
 - **Tests:** Real transactions across 2 orgs × 2 projects; empty/reused context, rollback and transaction-local setting isolation; capability fixture writes roll back together.
 - **Risks/notes:** I1–I3/I13. RLS remains deferred; transaction settings alone do not scope a SQL query.
 
@@ -580,7 +580,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.1a/P1.11a/P1.2a/P1.2b complete. Q8's approved lifecycle clarification is in I11/ADR-0022; schema integrity decisions are ADR-0023. Auth generation is deterministic; migrations/DB constraints/audit retention tests pass on real Postgres (db: 17 pass). `bun run check` passed, including 84 script tests with zero skips; unchanged packages may use Turbo cache. A second `db:generate` reports no schema drift. Next task: P1.3a. Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
+P1.1a/P1.11a/P1.2a/P1.2b/P1.3a complete. ADRs 0021–0024 record transaction, privacy, schema and repository boundaries. Real DB tests: 24 pass across 5 files; script tests include the new direct-table-import violation. `bun run check` passed with services running and zero skips; unchanged packages may use Turbo cache. Next task: P1.8a (transactional audit/events). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 

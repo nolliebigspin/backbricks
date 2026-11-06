@@ -5,6 +5,7 @@
 export const ERROR_CODES = {
   internal_error: { status: 500, title: 'Internal server error' },
   invalid_request: { status: 400, title: 'Invalid request' },
+  conflict: { status: 409, title: 'Conflict' },
   not_found: { status: 404, title: 'Not found' },
   validation_failed: { status: 422, title: 'Validation failed' },
   payload_too_large: { status: 413, title: 'Payload too large' },

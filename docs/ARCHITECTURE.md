@@ -293,6 +293,7 @@ CREATE INDEX reviews_queue_idx  ON reviews (instance_id, moderation_status, crea
   1. opens a transaction,
   2. sets `app.org_id` / `app.project_id` as transaction-local settings (prepares RLS),
   3. returns repositories whose queries are always scoped by `organization_id`/`project_id`.
+- Implemented boundary: [`createWithTenant`](../packages/db/src/with-tenant.ts), [core repository contracts](../packages/core/src/tenancy/repositories.ts) and [db repositories](../packages/db/src/repositories/). Contexts are trusted snapshots, handles expire with the transaction, and domain callbacks receive no raw driver (ADR-0024). Auth principal/scope middleware is added in P1.3b/P1.4c; the repository boundary itself does not authorize callers.
 - **Resources of other tenants return `404`**, never `403` (no existence leaks).
 - **Enforced by:** an architecture rule against direct table access outside repositories, and the isolation suite: fixtures with 2 organizations × 2 projects; for **every** registered management route, credentials of B on resources of A must return `404`. Object keys are prefixed with org/project; download URLs are only issued after DB authorization.
 - **Cloud phase:** Postgres RLS as second line of defense (`docs/CLOUD.md`).

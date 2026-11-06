@@ -2,6 +2,22 @@
   "$schema": "https://raw.githubusercontent.com/sverweij/dependency-cruiser/main/src/schema/configuration.schema.json",
   "forbidden": [
     {
+      "name": "tenant-tables-only-repositories",
+      "comment": "I1: tenant table definitions stay inside schema/repositories; identity tables and tests are explicit exceptions.",
+      "severity": "error",
+      "from": {
+        "pathNot": [
+          "^packages/(db|modules/[^/]+)/src/(schema(/|\\.ts$)|repositories/|repository\\.ts$)",
+          "\\.test\\.tsx?$",
+          "/test/"
+        ]
+      },
+      "to": {
+        "path": "^packages/(db|modules/[^/]+)/src/schema(/|\\.ts$)",
+        "pathNot": "^packages/db/src/schema/auth\\.generated\\.ts$"
+      }
+    },
+    {
       "name": "no-circular",
       "comment": "Circular dependencies hide layering problems (AGENTS.md §2.1).",
       "severity": "error",
