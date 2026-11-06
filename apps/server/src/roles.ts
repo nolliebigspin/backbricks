@@ -4,6 +4,7 @@ import { createDatabase, runMigrations } from '@backbricks/db';
 import { createApp } from './app.ts';
 import { createServerAuth } from './auth.ts';
 import { findDashboard } from './dashboard.ts';
+import { registerKeys } from './keys.ts';
 import type { Logger } from './logger.ts';
 import { createApiAuthorization } from './middleware/authorization.ts';
 import { registerProjects } from './projects.ts';
@@ -36,7 +37,10 @@ export function startServe(config: Config, log: Logger): RunningRole {
       dashboardDir,
       auth,
     },
-    (api) => registerProjects(api, database.db),
+    (api) => {
+      registerProjects(api, database.db);
+      registerKeys(api, database.db, config.modules);
+    },
     createApiAuthorization({ config, db: database.db, auth }),
   );
   const server = Bun.serve({ port: config.port, fetch: app.fetch, development: false });

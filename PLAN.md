@@ -284,14 +284,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Format/property tests, rejected scopes, expiry/revocation lookup and serialization/log snapshots excluding secrets.
 - **Risks/notes:** Own website/agent keys remain separate from Better Auth sessions; do not add a second key plugin.
 
-### [ ] P1.4b – Add session-only key management (est. 4 h)
+### [x] P1.4b – Add session-only key management (est. 4 h)
 - **Description:** Add list/create/revoke routes with preset selection, explicit expiry and reveal-once responses.
 - **Files/packages:** core key service, server key routes and isolation fixtures.
 - **Depends on:** P1.4a, P1.5a, P1.13a.
 - **Reuses:** Project repositories, route policy, audit and scope catalog.
 - **Acceptance criteria:**
-  - [ ] Only authorized dashboard sessions create/revoke keys; responses never redisplay a secret. Metadata read policy follows Q9.
-  - [ ] Create/revoke and their redacted audit entry share a transaction; attempts with a key cannot mint another key or gain scopes.
+  - [x] Only authorized dashboard sessions create/revoke keys; responses never redisplay a secret. Metadata read policy follows Q9.
+  - [x] Create/revoke and their redacted audit entry share a transaction; attempts with a key cannot mint another key or gain scopes.
 - **Tests:** Owner/admin/member/key matrix, foreign key IDs, concurrent revoke and failed-audit rollback; public snapshots.
 - **Risks/notes:** I4/I7; clipboard/UI behavior belongs to P1.12c.
 
@@ -581,7 +581,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.1a/b/c, P1.11a, P1.2a/b, P1.3a/b, P1.8a/b/c, P1.13a, P1.5a and P1.4a complete. ADRs 0021–0031 record the implemented boundaries. `bun run check`, build and 4 Playwright smoke tests pass; all package test tasks rerun uncached with no skips (68 server tests, 31 real DB tests). Q7/Q9 are explicitly approved. Production project routes are mounted, audited and covered by isolation cases; archive closes project-bound access. Key resolution remains an interface until P1.4c; complete dashboard flows remain P1.12/P1.13. P1.4a key primitives/scopes pass the full checks; metadata omits secret/hash material, and active hash lookup requires injected time. Next: P1.4b (session-only key management). Q5/Q6 confirmation requested ahead of the module/client tasks. Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
+P1.1a/b/c, P1.11a, P1.2a/b, P1.3a/b, P1.8a/b/c, P1.13a, P1.5a and P1.4a/b complete. ADRs 0021–0032 record the implemented boundaries. `bun run check`, build and 4 Playwright smoke tests pass; all package test tasks rerun uncached with no skips (70 server tests, 32 real DB tests). Q5–Q9 are explicitly approved. Production project routes are mounted, audited and covered by isolation cases; archive closes project-bound access. Key resolution remains an interface until P1.4c; complete dashboard flows remain P1.12/P1.13. Key list/create/revoke routes are session-only, reveal once, and covered by the isolation suite including key-state snapshots. Concurrent revoke and audit/outbox rollback tests pass. Next: P1.4c (production key authentication/exposure handling, including HTTP/log secret sinks). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 

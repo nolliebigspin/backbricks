@@ -41,3 +41,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0029](0029-automatic-isolation-coverage.md) | Automatic isolation coverage | accepted |
 | [0030](0030-project-lifecycle-and-management.md) | Project lifecycle and management | accepted |
 | [0031](0031-key-material-and-scope-catalog.md) | Key material and scope catalog | accepted |
+| [0032](0032-session-only-key-management.md) | Session-only key management | accepted |

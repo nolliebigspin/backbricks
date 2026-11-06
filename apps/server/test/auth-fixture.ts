@@ -15,6 +15,7 @@ import { mailpitAvailable, receivedMail, TEST_SMTP_URL } from '../../../scripts/
 import { createApp } from '../src/app.ts';
 import { createServerAuth } from '../src/auth.ts';
 import type { ApiRoutes } from '../src/http/api-routes.ts';
+import { registerKeys } from '../src/keys.ts';
 import { createLogger } from '../src/logger.ts';
 import { createApiAuthorization } from '../src/middleware/authorization.ts';
 import { registerProjects } from '../src/projects.ts';
@@ -92,6 +93,7 @@ export async function scenario(
         },
         (api) => {
           registerProjects(api, handle.db);
+          registerKeys(api, handle.db, config.modules);
           apiOptions.configure?.(api, handle.db);
         },
         createApiAuthorization({

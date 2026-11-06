@@ -20,15 +20,13 @@ export function createKeyRepository(tx: DbTransaction, scope: RepositoryScope): 
         .limit(scope.limit(page));
       return rows.map((row) => apiKeyRecordSchema.parse(row));
     },
-    async get(id) {
-      return requiredRow(
-        await tx
-          .select()
-          .from(apiKeys)
-          .where(and(where(), eq(apiKeys.id, id)))
-          .limit(1),
-        apiKeyRecordSchema,
-      );
+    async get(id, options = {}) {
+      const query = tx
+        .select()
+        .from(apiKeys)
+        .where(and(where(), eq(apiKeys.id, id)))
+        .limit(1);
+      return requiredRow(await (options.lock ? query.for('update') : query), apiKeyRecordSchema);
     },
     async findByHash(hash, now) {
       const rows = await tx

@@ -453,7 +453,7 @@ Implemented management principal/selector/permission behavior: [ADR-0028](adr/00
 
 The implemented [scope catalog and presets](../packages/core/src/keys/scopes.ts) are the source of truth (ADR-0031). Issuance rejects unknown/disabled-module grants. The agent preset excludes personal-data and destructive/deletion rights. [Key material](../packages/core/src/keys/material.ts) separates the one-time credential from hashed secret persistence; [management metadata](../packages/core/src/keys/metadata.ts) never redisplays a secret.
 
-Keys are created exclusively in the dashboard (session). No key can create keys.
+Keys are created exclusively through owner/admin dashboard sessions. [Key management routes](../apps/server/src/routes/keys.ts) and the [core service](../packages/core/src/keys/service.ts) enforce this at both boundaries; list responses never redisplay secrets (ADR-0032). No key can create keys.
 
 ### D.2 Resource structure and URL conventions
 

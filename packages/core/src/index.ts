@@ -177,3 +177,11 @@ export {
 } from './keys/material.ts';
 
 export { apiKeyMetadataSchema, apiKeyMetadata } from './keys/metadata.ts';
+
+export {
+  apiKeyCreateSchema,
+  apiKeyCreationResponseSchema,
+  KEY_NAME_MAX_LENGTH,
+  type ApiKeyCreate,
+} from './keys/creation.ts';
+export { createKeyService, type KeyService } from './keys/service.ts';

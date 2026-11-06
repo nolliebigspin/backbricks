@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 
+import { apiKeyMetadata } from '@backbricks/core';
 import { authSchema, createWithTenant } from '@backbricks/db';
 
 import { createVerifiedUser, idResponseSchema, type AuthFixture } from '../auth-fixture.ts';
@@ -71,6 +72,17 @@ export async function prepareIsolationFixture(fixture: AuthFixture) {
         })),
       ),
     );
+    const keys = await Promise.all(
+      scoped
+        .flatMap((tenant) => tenant.projects)
+        .map((project) =>
+          createWithTenant(db)(
+            { organizationId: project.organizationId, projectId: project.id },
+            async ({ repositories }) =>
+              (await repositories.keys.list({ limit: 100 })).map(apiKeyMetadata),
+          ),
+        ),
+    );
     const [members, invitations, sessions, users] = await Promise.all([
       db.select().from(authSchema.member),
       db.select().from(authSchema.invitation),
@@ -79,6 +91,7 @@ export async function prepareIsolationFixture(fixture: AuthFixture) {
     ]);
     return {
       scoped,
+      keys,
       organizations: sorted(organizations).map(({ id, name }) => ({ id, name })),
       members: sorted(members),
       invitations: invitations
