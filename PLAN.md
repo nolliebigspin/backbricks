@@ -306,14 +306,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Origin variants including `null`, invalid/revoked secrets, cross-project resource IDs, concurrent last-used updates and audit failure path.
 - **Risks/notes:** The rejection audit must survive the HTTP error; a rolled-back business transaction cannot be its only write. Also cover secret-shaped values in caller-controlled request IDs/paths and error/log strings; name-based field redaction and activity validation alone do not protect those HTTP sinks.
 
-### [ ] P1.8d – Add usage, entitlements and service composition (est. 4 h)
+### [x] P1.8d – Add usage, entitlements and service composition (est. 4 h)
 - **Description:** Complete the injected service container, transactional usage counters and UnlimitedEntitlements; define external-service interfaces required by the module contract without speculative adapters.
 - **Files/packages:** core services/metrics contracts, db usage implementation, server composition.
 - **Depends on:** P1.8a, P1.3a.
 - **Reuses:** `Clock`, `Ids`, config/infrastructure contracts and usage table.
 - **Acceptance criteria:**
-  - [ ] Usage increments in the caller's transaction with atomic UPSERT; monthly periods use injected time and tenant scope.
-  - [ ] Self-host limits are unlimited through DI; optional storage/scanner/captcha/billing contracts do not force infrastructure or cloud branches. Module config includes no undeclared service access.
+  - [x] Usage increments in the caller's transaction with atomic UPSERT; monthly periods use injected time and tenant scope.
+  - [x] Self-host limits are unlimited through DI; optional storage/scanner/captcha/billing contracts do not force infrastructure or cloud branches. Module config includes no undeclared service access.
 - **Tests:** Concurrent counter increments/rollback, period boundary, unlimited checks and absent optional services.
 - **Risks/notes:** No billing/plan implementation in M1; no replacement clock/ID abstractions.
 
@@ -581,7 +581,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.1a/b/c, P1.11a, P1.2a/b, P1.3a/b, P1.8a/b/c, P1.13a, P1.5a and P1.4a/b/c complete. ADRs 0021–0034 record implemented boundaries. Q5–Q10 are explicitly approved; I1 now states the sole exact-hash/ID authentication bootstrap exception. `bun run check` passes with no skipped tests (75 server tests, 32 real DB tests). Production key resolution, exposure audit/notification intent and owner/admin SMTP delivery pass real HTTP/Postgres/Mailpit tests, including failure rollback of notification throttling. Durable worker retries remain P1.10b; complete dashboard flows remain P1.12/P1.13. Next: P1.8d (usage, entitlements and shared service composition). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
+P1.1a/b/c, P1.11a, P1.2a/b, P1.3a/b, P1.8a/b/c/d, P1.13a, P1.5a and P1.4a/b/c complete. ADRs 0021–0035 record implemented boundaries. Q5–Q10 are explicitly approved; I1 now states the sole exact-hash/ID authentication bootstrap exception. `bun run check` passes with no skipped tests (75 server tests, 33 real DB tests). Production key resolution, exposure audit/notification intent and owner/admin SMTP delivery pass real HTTP/Postgres/Mailpit tests, including failure rollback of notification throttling. Durable worker retries remain P1.10b; complete dashboard flows remain P1.12/P1.13. Shared provider lifetimes, restricted module service views, usage and UnlimitedEntitlements are implemented and tested. Next: P1.5b (organization activity, usage and integration reads). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 

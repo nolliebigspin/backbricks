@@ -1,4 +1,4 @@
-import { type Config, createIds, createIpIdentity, systemClock } from '@backbricks/core';
+import { type Config, createIpIdentity } from '@backbricks/core';
 import { createDatabase, runMigrations } from '@backbricks/db';
 
 import { createApp } from './app.ts';
@@ -9,6 +9,7 @@ import { registerKeys } from './keys.ts';
 import type { Logger } from './logger.ts';
 import { createApiAuthorization } from './middleware/authorization.ts';
 import { registerProjects } from './projects.ts';
+import { createServerServices } from './services.ts';
 
 /** A started role; `stop` drains it for a graceful shutdown. */
 export type RunningRole = { stop: () => Promise<void> };
@@ -24,15 +25,16 @@ export function isRole(value: string | undefined): value is Role {
 export function startServe(config: Config, log: Logger): RunningRole {
   const database = createDatabase(config.databaseUrl, { applicationName: 'backbricks-serve' });
   const dashboardDir = findDashboard();
-  const auth = createServerAuth(config, database.db, log);
-  const keyAuth = createServerKeyAuth(config, database.db, log);
+  const services = createServerServices(config, database.db);
+  const auth = createServerAuth(config, database.db, log, services);
+  const keyAuth = createServerKeyAuth(config, database.db, log, services);
   const app = createApp(
     {
       log,
-      ids: createIds(systemClock),
+      ids: services.container.core.ids,
       ipIdentity: createIpIdentity({
         appSecret: config.appSecret,
-        clock: systemClock,
+        clock: services.container.core.clock,
         trustedProxies: config.trustedProxies,
       }),
       readinessChecks: [{ name: 'database', check: database.ping }],
@@ -40,8 +42,8 @@ export function startServe(config: Config, log: Logger): RunningRole {
       auth,
     },
     (api) => {
-      registerProjects(api, database.db);
-      registerKeys(api, database.db, config.modules);
+      registerProjects(api, services);
+      registerKeys(api, services, config.modules);
     },
     createApiAuthorization({ config, db: database.db, auth, resolveKey: keyAuth.resolveKey }),
   );
@@ -55,6 +57,7 @@ export function startServe(config: Config, log: Logger): RunningRole {
       await server.stop(); // stops accepting, waits for in-flight requests
       await keyAuth.close();
       await auth.close();
+      await services.close();
       await database.close();
     },
   };

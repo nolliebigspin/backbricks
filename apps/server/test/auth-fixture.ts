@@ -1,9 +1,7 @@
 import {
   loadConfig,
   formatConfigIssues,
-  createIds,
   createIpIdentity,
-  systemClock,
   type Config,
   type Clock,
   type SecretKeyResolver,
@@ -21,6 +19,7 @@ import { registerKeys } from '../src/keys.ts';
 import { createLogger } from '../src/logger.ts';
 import { createApiAuthorization } from '../src/middleware/authorization.ts';
 import { registerProjects } from '../src/projects.ts';
+import { createServerServices } from '../src/services.ts';
 
 export const available = (await postgresAvailable()) && (await mailpitAvailable());
 export const AUTH_TEST_SECRET = 'auth-test-only-not-a-real-secret-000000000000';
@@ -56,6 +55,7 @@ export async function scenario(
   const logs: string[] = [];
   let auth: ReturnType<typeof createServerAuth> | undefined;
   let keyAuth: ReturnType<typeof createServerKeyAuth> | undefined;
+  let services: ReturnType<typeof createServerServices> | undefined;
   let app: ReturnType<typeof createApp> | undefined;
   const server = Bun.serve({
     hostname: '127.0.0.1',
@@ -82,24 +82,26 @@ export async function scenario(
     if (!result.ok) throw new Error(formatConfigIssues(result.issues));
     const log = createLogger('debug', { write: (line) => logs.push(line) });
     const mount = (config: Config) => {
-      auth = createServerAuth(config, handle.db, log);
-      keyAuth = createServerKeyAuth(config, handle.db, log, apiOptions.keyClock);
+      const runtime = createServerServices(config, handle.db, { clock: apiOptions.keyClock });
+      services = runtime;
+      auth = createServerAuth(config, handle.db, log, runtime);
+      keyAuth = createServerKeyAuth(config, handle.db, log, runtime);
       app = createApp(
         {
           log,
           auth,
-          ids: createIds(systemClock),
+          ids: runtime.container.core.ids,
           dashboardDir: null,
           readinessChecks: [],
           ipIdentity: createIpIdentity({
             appSecret: config.appSecret,
-            clock: systemClock,
+            clock: runtime.container.core.clock,
             trustedProxies: [],
           }),
         },
         (api) => {
-          registerProjects(api, handle.db);
-          registerKeys(api, handle.db, config.modules);
+          registerProjects(api, runtime);
+          registerKeys(api, runtime, config.modules);
           apiOptions.configure?.(api, handle.db);
         },
         createApiAuthorization({
@@ -129,6 +131,7 @@ export async function scenario(
       capabilities: async (values) => {
         await keyAuth?.close();
         await auth?.close();
+        await services?.close();
         mount({ ...result.config, ...values });
       },
       request: (path, body, cookie, extraHeaders, method = body === undefined ? 'GET' : 'POST') => {
@@ -152,6 +155,7 @@ export async function scenario(
     await server.stop(true);
     await keyAuth?.close();
     await auth?.close();
+    await services?.close();
     await handle.close();
     await database.drop();
   }

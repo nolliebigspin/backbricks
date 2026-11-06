@@ -1,26 +1,12 @@
-import {
-  createAuditService,
-  createEventService,
-  createIds,
-  createKeyService,
-  systemClock,
-} from '@backbricks/core';
-import { createWithTenant, type Database } from '@backbricks/db';
-
 import type { ApiRoutes } from './http/api-routes.ts';
 import { keyRoutes } from './routes/keys.ts';
+import type { ServerServices } from './services.ts';
 
-/** Compose key lifecycle with the same services and tenant transaction boundary as project management. */
-export function registerKeys(api: ApiRoutes, db: Database, enabledModules: readonly string[]) {
-  const dependencies = { clock: systemClock, ids: createIds(systemClock) };
-  keyRoutes(api, {
-    withTenant: createWithTenant(db),
-    enabledModules,
-    keys: createKeyService({
-      ...dependencies,
-      enabledModules,
-      audit: createAuditService(dependencies),
-      events: createEventService(dependencies),
-    }),
-  });
+/** Permission/schema declarations share one enabled-module snapshot with the key lifecycle service. */
+export function registerKeys(
+  api: ApiRoutes,
+  services: Pick<ServerServices, 'withTenant' | 'keys'>,
+  enabledModules: readonly string[],
+) {
+  keyRoutes(api, { ...services, enabledModules });
 }

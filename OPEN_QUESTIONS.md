@@ -107,3 +107,5 @@ Details: `docs/progress/phase-0.md` → "Deviations".
 - **D23 – Initial project settings and pagination:** ADR-0030 reserves project settings as a strict empty object until typed feature fields exist and introduces shared keyset pagination with the first real collection route. Q7/Q9 are explicitly approved above; configuration archive is distinct from personal-data erasure.
 
 - **D24 – Key protocol/catalog:** ADR-0031 uses unbiased base62 sampling, SHA-256 over the complete credential, eight-character token display excerpts and an enabled-module-aware v1 scope catalog. Unknown/disabled explicit grants fail; preset results expose their effective enabled grants. No new permission or production route is added by P1.4a.
+
+- **D25 – Shared services and usage:** ADR-0035 uses frozen declared-provider views, one runtime provider lifetime and caller-transaction usage with UTC month-start dates and lossless bigint values. Self-hosted entitlements are unlimited through DI; optional storage/scanner/captcha/queue/billing are ports until their planned implementation tasks. No module gets a raw driver or unbound tenant selector.

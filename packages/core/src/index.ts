@@ -200,3 +200,37 @@ export {
   type SecretKeyLookup,
   type KeyExposureNotice,
 } from './keys/authentication.ts';
+export {
+  createUsageService,
+  metricNameSchema,
+  usagePeriodSchema,
+  usageIncrementSchema,
+  monthlyUsagePeriod,
+  MAX_USAGE_VALUE,
+  type UsageIncrement,
+  type UsageService,
+} from './services/usage.ts';
+export {
+  createUnlimitedEntitlements,
+  type Entitlements,
+  type EntitlementDecision,
+} from './services/entitlements.ts';
+export {
+  createServiceContainer,
+  type CoreServices,
+  type OptionalServices,
+  type OptionalServiceName,
+  type ServiceContainer,
+} from './services/container.ts';
+export type {
+  StorageAdapter,
+  SignedStorageRequest,
+  StorageObject,
+  InlineImageType,
+  Scanner,
+  ScanVerdict,
+  CaptchaProvider,
+  Queue,
+  BillingProvider,
+  BillingPlanChange,
+} from './services/providers.ts';

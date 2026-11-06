@@ -387,6 +387,8 @@ Static, no runtime plugins. `apps/server/src/modules.ts` lists the modules; `def
 | `entitlements` | Check limits/quotas | `unlimited` (self-host), `plans` (cloud) |
 | `clock`, `ids` | Testable time, TypeIDs | – |
 
+Implemented [service container](../packages/core/src/services/container.ts), [usage](../packages/core/src/services/usage.ts), [entitlements](../packages/core/src/services/entitlements.ts) and [provider ports](../packages/core/src/services/providers.ts) are the source of truth (ADR-0035). [Server composition](../apps/server/src/services.ts) owns shared runtime lifetimes. Module views enforce declared provider access and never expose an unbound tenant selector or raw driver.
+
 ### C.5 Example: a hypothetical fourth module "Waitlist"
 
 Goal: visitors join a waitlist with email (and an optional referral code) with double opt-in.

@@ -1,24 +1,11 @@
-import {
-  createAuditService,
-  createEventService,
-  createIds,
-  createProjectService,
-  systemClock,
-} from '@backbricks/core';
-import { createWithTenant, type Database } from '@backbricks/db';
-
 import type { ApiRoutes } from './http/api-routes.ts';
 import { projectRoutes } from './routes/projects.ts';
+import type { ServerServices } from './services.ts';
 
-/** Production and test composition share the same project routes and transaction-bound services. */
-export function registerProjects(api: ApiRoutes, db: Database) {
-  const dependencies = { clock: systemClock, ids: createIds(systemClock) };
-  projectRoutes(api, {
-    withTenant: createWithTenant(db),
-    projects: createProjectService({
-      ...dependencies,
-      audit: createAuditService(dependencies),
-      events: createEventService(dependencies),
-    }),
-  });
+/** Production and tests mount the same routes over the shared runtime's services. */
+export function registerProjects(
+  api: ApiRoutes,
+  services: Pick<ServerServices, 'withTenant' | 'projects'>,
+) {
+  projectRoutes(api, services);
 }
