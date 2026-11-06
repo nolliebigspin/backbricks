@@ -438,14 +438,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Real DB concurrent claim/rollback, request mismatch, expiry and no duplicate usage/outbox effects.
 - **Risks/notes:** Central support prepares P2.4; route-specific idempotency policy stays in the module contract.
 
-### [ ] P1.10a – Start pg-boss and transactional jobs (est. 4 h)
+### [x] P1.10a – Start pg-boss and transactional jobs (est. 4 h)
 - **Description:** Replace the idle worker with a pg-boss queue adapter; register validated job payloads and queue handlers from enabled modules/core.
 - **Files/packages:** core queue/job contracts, adapter, server worker/roles/shutdown wiring.
 - **Depends on:** P1.6b, P1.8d.
 - **Reuses:** Existing process lifecycle and shared pg driver/pool design; ADR-0020 transactional enqueue.
 - **Acceptance criteria:**
-  - [ ] Commit delivers jobs and rollback does not; worker/all roles consume only registered jobs with bounded concurrency/retries and safe error logs.
-  - [ ] Graceful stop drains active work and closes queue/database resources in order; invalid job payloads cannot escape validation.
+  - [x] Commit delivers jobs and rollback does not; worker/all roles consume only registered jobs with bounded concurrency/retries and safe error logs.
+  - [x] Graceful stop drains active work and closes queue/database resources in order; invalid job payloads cannot escape validation.
 - **Tests:** Real Postgres enqueue/rollback/retry, fresh process role start/stop and disabled job registrations.
 - **Risks/notes:** Verify pg-boss 12.38.1 on Bun; do not assume the Drizzle transaction is compatible without the adapter smoke test.
 
@@ -688,3 +688,5 @@ P1.9a provider, atomic replay store and rate-limited challenge composition are i
 P1.9b implements the shared guard and public CORS (ADR-0046), verified through real HTTP/PG fixtures including quota/provider failure and atomic rollback. Production publishable bootstrap remains the separate Q11/P1.9a gate; no new unscoped lookup was introduced. JSON transport is in M1; HTML form adaptation stays M2.
 
 P1.9c is implemented with shared, acknowledgement-only transactional caching (ADR-0047). Real HTTP/PG tests prove twelve concurrent duplicates persist usage/outbox once, project separation, mismatch/expiry, spent-proof replay and rollback on both domain/cache failure. Full `bun run check` passes with no service skips.
+
+P1.10a replaces the idle worker with pg-boss 12.38.1 (ADR-0048). One-connection real PG tests prove transactional enqueue/completion, rollback/retry, scoped deduplication and graceful active-job drain. Fresh serve/worker/all process smoke tests pass; all shares one provider/queue/pool lifetime. Full `bun run check` passes.

@@ -1,6 +1,11 @@
-import type { SelectedModules, TenantContext, WithTenant } from '@backbricks/core';
+import type {
+  SelectedModules,
+  TenantContext,
+  TenantTransaction,
+  WithTenant,
+} from '@backbricks/core';
 
-/** A worker hand-off; pg-boss registration/execution is supplied by P1.10. */
+/** Selected handlers support direct invocation and atomic queue completion in the caller transaction. */
 export function moduleJobs(
   modules: SelectedModules,
   runtime: ReturnType<SelectedModules['registry']['bind']>,
@@ -16,6 +21,8 @@ export function moduleJobs(
           retries: job.retries,
           retentionSeconds: job.retentionSeconds,
           cron: job.cron,
+          runInTransaction: (tx: TenantTransaction, input: unknown) =>
+            job.run(runtime.forTenant(tx).execution(module.type), input),
           run: (context: TenantContext, input: unknown) =>
             withTenant(context, (tx) =>
               job.run(runtime.forTenant(tx).execution(module.type), input),

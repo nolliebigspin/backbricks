@@ -5,11 +5,13 @@ import {
   type TenantContext,
   type WithTenant,
 } from '@backbricks/core';
+import type { TenantTransaction } from '@backbricks/core';
 import { sql } from 'drizzle-orm';
 
 import type { Database, DbTransaction } from './client.ts';
 import { createTenantRepositories } from './repositories/index.ts';
 import { createRepositoryScope } from './repositories/scope.ts';
+import { bindTransaction, releaseTransaction } from './transaction-binding.ts';
 
 /**
  * `withTenant` (ARCHITECTURE §B.6, I1): every tenant-table access runs in a transaction whose
@@ -49,15 +51,19 @@ export function createWithTenant(
           if (project.organizationId !== context.organizationId || project.id !== context.projectId)
             throw new AppError('not_found');
         }
-        return await fn(
-          Object.freeze({
-            context,
-            identity: Symbol('tenant transaction'),
-            assertActive,
-            repositories,
-            modules: Object.freeze(createModuleRepositories?.(tx, context, assertActive) ?? {}),
-          }),
-        );
+        const handle: TenantTransaction = Object.freeze({
+          context,
+          identity: Symbol('tenant transaction'),
+          assertActive,
+          repositories,
+          modules: Object.freeze(createModuleRepositories?.(tx, context, assertActive) ?? {}),
+        });
+        bindTransaction(handle, tx);
+        try {
+          return await fn(handle);
+        } finally {
+          releaseTransaction(handle);
+        }
       } finally {
         active = false;
       }

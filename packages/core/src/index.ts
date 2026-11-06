@@ -386,3 +386,12 @@ export {
   idempotencyResponseSchema,
   IDEMPOTENCY_RETENTION_DAYS,
 } from './abuse/idempotency.ts';
+
+export {
+  QUEUE_STOP_TIMEOUT_MS,
+  PROCESS_SHUTDOWN_TIMEOUT_MS,
+  queueEnvelopeSchema,
+  queueJobDefinitionSchema,
+  type QueueJobDefinition,
+  type QueueJobHandler,
+} from './jobs/contract.ts';

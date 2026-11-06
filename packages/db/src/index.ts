@@ -14,3 +14,5 @@ export * as authSchema from './schema/auth.generated.ts';
 
 export { createSecretKeyLookup } from './repositories/credential-bootstrap.ts';
 export { securityRecipients } from './repositories/security-recipients.ts';
+
+export { createPostgresQueue } from './queue.ts';

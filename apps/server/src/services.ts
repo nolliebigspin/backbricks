@@ -15,6 +15,7 @@ import {
   createUsageService,
   systemClock,
   type Clock,
+  type Queue,
   type Config,
   type Entitlements,
   type SelectedModules,
@@ -35,6 +36,7 @@ export function createServerServices(
   db: Database,
   options: {
     clock?: Clock;
+    queue?: Queue;
     entitlements?: Entitlements;
     modules?: SelectedModules;
     moduleRepositories?: Parameters<typeof createWithTenant>[1];
@@ -61,7 +63,7 @@ export function createServerServices(
       entitlements: options.entitlements ?? createUnlimitedEntitlements(),
       rateLimiter: createRateLimiter(createPostgresRateLimitStore(db), clock),
     },
-    { mailer, storage, captcha },
+    { mailer, storage, captcha, queue: options.queue },
   );
   const withTenant = createWithTenant(db, options.moduleRepositories);
   const moduleRuntime = modules.registry.bind(container);

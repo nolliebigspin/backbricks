@@ -51,7 +51,7 @@ export interface Queue {
     name: string,
     payload: unknown,
     options?: { notBefore?: Date; singletonKey?: string },
-  ): Promise<string>;
+  ): Promise<string | null>;
 }
 
 export type BillingPlanChange = { eventId: string; organizationId: string; plan: string | null };

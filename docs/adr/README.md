@@ -57,3 +57,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0045](0045-proof-of-work-and-replay.md) | Proof-of-work and replay protection | accepted; publishable bootstrap gated by Q11 |
 | [0046](0046-public-write-guard-and-cors.md) | Public write guard and CORS | accepted; production publishable bootstrap gated by Q11 |
 | [0047](0047-atomic-public-idempotency.md) | Atomic public idempotency | accepted |
+| [0048](0048-transactional-postgres-jobs.md) | Transactional PostgreSQL jobs | accepted |

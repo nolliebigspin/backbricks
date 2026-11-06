@@ -16,7 +16,8 @@
   "dependencies": {
     "@backbricks/core": "workspace:*",
     "drizzle-orm": "1.0.0-rc.5",
-    "pg": "8.23.1"
+    "pg": "8.23.1",
+    "pg-boss": "12.38.1"
   },
   "devDependencies": {
     "@types/pg": "8.23.1",
