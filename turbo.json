@@ -1,15 +1,22 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "stream",
+  "globalDependencies": ["tsconfig.base.json", "scripts/**"],
   "tasks": {
+    "transit": {
+      "dependsOn": ["^transit"]
+    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
     "typecheck": {
+      "dependsOn": ["transit"],
       "outputs": []
     },
     "test": {
+      "cache": false,
+      "passThroughEnv": ["CI", "TEST_DATABASE_URL", "TEST_SMTP_URL", "TEST_MAILPIT_URL"],
       "outputs": []
     },
     "dev": {

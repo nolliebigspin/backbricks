@@ -33,6 +33,8 @@ export async function scenario(
     db: ReturnType<typeof createDatabase>['db'];
     logs: string[];
     origin: string;
+    manifest: () => ApiRoutes['manifest'];
+    authInventory: () => Promise<{ path: string; method: string }[]>;
     capabilities: (values: Pick<Config, 'mailer' | 'signupPolicy'>) => Promise<void>;
   }) => Promise<void>,
   overrides: Record<string, string> = {},
@@ -100,6 +102,14 @@ export async function scenario(
       db: handle.db,
       origin,
       logs,
+      manifest: () => {
+        if (!app) throw new Error('Expected mounted fixture');
+        return app.apiRoutes.manifest;
+      },
+      authInventory: () => {
+        if (!auth) throw new Error('Expected mounted authentication');
+        return auth.organizationEndpointInventory();
+      },
       capabilities: async (values) => {
         await auth?.close();
         mount({ ...result.config, ...values });

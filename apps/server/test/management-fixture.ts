@@ -21,7 +21,11 @@ const principalBody = z.object({
 });
 
 /** Synthetic routes only, never mounted by the production composition root. */
-export function managementFixtureRoutes(api: ApiRoutes, db: Database) {
+export function managementFixtureRoutes(
+  api: ApiRoutes,
+  db: Database,
+  options: { unsafeList?: boolean } = {},
+) {
   const withTenant = createWithTenant(db);
   const audit = createAuditService({ clock: systemClock, ids: createIds(systemClock) });
   api.register(
@@ -118,9 +122,12 @@ export function managementFixtureRoutes(api: ApiRoutes, db: Database) {
       isolationCase: 'fixture.projects',
     },
     async (c) => {
-      const data = await withTenant(requireTenantContext(c), ({ repositories }) =>
-        repositories.projects.list({ limit: 100 }),
-      );
+      const context = requireTenantContext(c);
+      const data = options.unsafeList
+        ? await unsafeFixtureProjectList(db)
+        : await withTenant(context, ({ repositories }) =>
+            repositories.projects.list({ limit: 100 }),
+          );
       return c.json({ data: data.map(({ id, name }) => ({ id, name })) }, 200);
     },
   );
@@ -149,6 +156,13 @@ export function managementFixtureRoutes(api: ApiRoutes, db: Database) {
       return c.json({ count: records.length }, 200);
     },
   );
+}
+
+/** Deliberately broken real repository for the isolation detector's negative control. Never production. */
+async function unsafeFixtureProjectList(db: Database) {
+  const result = await db.execute('select id, name from projects order by id');
+  if (Array.isArray(result)) throw new Error('Expected one statement result');
+  return z.array(projectBody).parse(result.rows);
 }
 
 /** Repository-backed fixture setup; these records are not production domain APIs. */

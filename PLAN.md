@@ -251,14 +251,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Cross-org/project principal substitution, conflicting credentials, removed memberships, role hierarchy and CSRF failures.
 - **Risks/notes:** I2 is about existence leaks, not a blanket requirement that list endpoints always return 404.
 
-### [ ] P1.13a – Start the automatic isolation suite (est. 4 h)
+### [x] P1.13a – Start the automatic isolation suite (est. 4 h)
 - **Description:** Build real DB fixtures for 2 orgs × 2 projects × roles, with typed per-route resource builders and assertions generated from the registered management surface.
-- **Files/packages:** `apps/server/src/test/`, `apps/server/src/tenant-isolation.test.ts`, auth endpoint inventory.
+- **Files/packages:** `apps/server/test/isolation/`, `apps/server/src/tenant-isolation.test.ts`, auth endpoint inventory.
 - **Depends on:** P1.3b.
 - **Reuses:** P0 integration service availability checks and P1.11a route metadata.
 - **Acceptance criteria:**
-  - [ ] Suite fails if an exposed management operation has no policy/fixture. Include tenant-bearing Better Auth paths, not just `/v1` routes.
-  - [ ] Resource paths test foreign 404, collections test filtering/non-disclosure, creation tests tenant binding, and denied mutations assert unchanged DB/audit state.
+  - [x] Suite fails if an exposed management operation has no policy/fixture. Include tenant-bearing Better Auth paths, not just `/v1` routes.
+  - [x] Resource paths test foreign 404, collections test filtering/non-disclosure, creation tests tenant binding, and denied mutations assert unchanged DB/audit state.
 - **Tests:** Deliberately omit one route and deliberately un-scope a fixture repository to prove the suite detects both failures; no DB mocks.
 - **Risks/notes:** Every later route task adds cases here before completion. Test runtime inspection guards against a manifest that omits mounted routes. Correct Turbo dependency/shared-script inputs and avoid caching service-unavailable skips; P1.3b verification uses `TURBO_FORCE=true` until this is addressed.
 
@@ -581,7 +581,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.1a/b/c, P1.11a, P1.2a/b, P1.3a/b and P1.8a/b/c complete. ADRs 0021–0028 record the implemented boundaries. Real DB suite: 30 pass across 7 files; auth/organization/authorization HTTP suites run with real services. `TURBO_FORCE=true bun run check` passes with zero cache hits/skips. Key resolution is an interface until P1.4c; complete dashboard flows remain P1.12/P1.13. Next task: P1.13a (automatic isolation coverage and reliable test inputs). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
+P1.1a/b/c, P1.11a, P1.2a/b, P1.3a/b, P1.8a/b/c and P1.13a complete. ADRs 0021–0029 record the implemented boundaries. `bun run check` passes; all six package test tasks rerun uncached, including 65 server tests and 30 real DB tests, with no skips. Key resolution is an interface until P1.4c; complete dashboard flows remain P1.12/P1.13. Next task: P1.5a (projects/origins); Q7/Q9 confirmation requested in the execution session. Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 

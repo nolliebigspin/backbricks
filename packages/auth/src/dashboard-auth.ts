@@ -247,6 +247,22 @@ export function createDashboardAuth(options: DashboardAuthOptions) {
         return auth.api.getSession({ headers });
       });
     },
+    /** Runtime library inventory for coverage checks; never returns a handler or identity data. */
+    async organizationEndpointInventory() {
+      return options.transaction(async (persistence) => {
+        const auth = betterAuth(createDashboardAuthOptions(options, persistence, []));
+        return Object.values(auth.api).flatMap((endpoint) => {
+          const path = endpoint.path;
+          if (!path?.startsWith('/organization/')) return [];
+          const method = endpoint.options.method;
+          const methods = Array.isArray(method) ? method : [method];
+          return methods.map((value) => ({
+            path: `${AUTH_BASE_PATH}${path}`,
+            method: value.toUpperCase(),
+          }));
+        });
+      });
+    },
     basePath: AUTH_BASE_PATH,
   };
 }

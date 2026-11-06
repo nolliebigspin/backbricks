@@ -38,3 +38,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0026](0026-dashboard-auth-runtime.md) | Dashboard auth runtime | accepted |
 | [0027](0027-organization-policy-and-invitations.md) | Organization policy and invitations | accepted |
 | [0028](0028-management-principals-and-permissions.md) | Management principals and permissions | accepted |
+| [0029](0029-automatic-isolation-coverage.md) | Automatic isolation coverage | accepted |
