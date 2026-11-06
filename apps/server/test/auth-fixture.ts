@@ -5,6 +5,7 @@ import {
   createIpIdentity,
   systemClock,
   type Config,
+  type Clock,
   type SecretKeyResolver,
 } from '@backbricks/core';
 import { createDatabase, runMigrations } from '@backbricks/db';
@@ -15,6 +16,7 @@ import { mailpitAvailable, receivedMail, TEST_SMTP_URL } from '../../../scripts/
 import { createApp } from '../src/app.ts';
 import { createServerAuth } from '../src/auth.ts';
 import type { ApiRoutes } from '../src/http/api-routes.ts';
+import { createServerKeyAuth } from '../src/key-auth.ts';
 import { registerKeys } from '../src/keys.ts';
 import { createLogger } from '../src/logger.ts';
 import { createApiAuthorization } from '../src/middleware/authorization.ts';
@@ -38,12 +40,14 @@ export async function scenario(
     origin: string;
     manifest: () => ApiRoutes['manifest'];
     authInventory: () => Promise<{ path: string; method: string }[]>;
+    drainSecurity: () => Promise<void>;
     capabilities: (values: Pick<Config, 'mailer' | 'signupPolicy'>) => Promise<void>;
   }) => Promise<void>,
   overrides: Record<string, string> = {},
   apiOptions: {
     configure?: (api: ApiRoutes, db: ReturnType<typeof createDatabase>['db']) => void;
     resolveKey?: SecretKeyResolver;
+    keyClock?: Clock;
   } = {},
 ) {
   const database = await createTestDatabase();
@@ -51,6 +55,7 @@ export async function scenario(
   const handle = createDatabase(database.url);
   const logs: string[] = [];
   let auth: ReturnType<typeof createServerAuth> | undefined;
+  let keyAuth: ReturnType<typeof createServerKeyAuth> | undefined;
   let app: ReturnType<typeof createApp> | undefined;
   const server = Bun.serve({
     hostname: '127.0.0.1',
@@ -78,6 +83,7 @@ export async function scenario(
     const log = createLogger('debug', { write: (line) => logs.push(line) });
     const mount = (config: Config) => {
       auth = createServerAuth(config, handle.db, log);
+      keyAuth = createServerKeyAuth(config, handle.db, log, apiOptions.keyClock);
       app = createApp(
         {
           log,
@@ -100,7 +106,7 @@ export async function scenario(
           config,
           db: handle.db,
           auth,
-          resolveKey: apiOptions.resolveKey,
+          resolveKey: apiOptions.resolveKey ?? keyAuth.resolveKey,
         }),
       );
     };
@@ -117,7 +123,11 @@ export async function scenario(
         if (!auth) throw new Error('Expected mounted authentication');
         return auth.organizationEndpointInventory();
       },
+      drainSecurity: async () => {
+        await keyAuth?.drain();
+      },
       capabilities: async (values) => {
+        await keyAuth?.close();
         await auth?.close();
         mount({ ...result.config, ...values });
       },
@@ -140,6 +150,7 @@ export async function scenario(
     });
   } finally {
     await server.stop(true);
+    await keyAuth?.close();
     await auth?.close();
     await handle.close();
     await database.drop();

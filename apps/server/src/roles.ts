@@ -4,6 +4,7 @@ import { createDatabase, runMigrations } from '@backbricks/db';
 import { createApp } from './app.ts';
 import { createServerAuth } from './auth.ts';
 import { findDashboard } from './dashboard.ts';
+import { createServerKeyAuth } from './key-auth.ts';
 import { registerKeys } from './keys.ts';
 import type { Logger } from './logger.ts';
 import { createApiAuthorization } from './middleware/authorization.ts';
@@ -24,6 +25,7 @@ export function startServe(config: Config, log: Logger): RunningRole {
   const database = createDatabase(config.databaseUrl, { applicationName: 'backbricks-serve' });
   const dashboardDir = findDashboard();
   const auth = createServerAuth(config, database.db, log);
+  const keyAuth = createServerKeyAuth(config, database.db, log);
   const app = createApp(
     {
       log,
@@ -41,7 +43,7 @@ export function startServe(config: Config, log: Logger): RunningRole {
       registerProjects(api, database.db);
       registerKeys(api, database.db, config.modules);
     },
-    createApiAuthorization({ config, db: database.db, auth }),
+    createApiAuthorization({ config, db: database.db, auth, resolveKey: keyAuth.resolveKey }),
   );
   const server = Bun.serve({ port: config.port, fetch: app.fetch, development: false });
   log.info(
@@ -51,6 +53,7 @@ export function startServe(config: Config, log: Logger): RunningRole {
   return {
     async stop() {
       await server.stop(); // stops accepting, waits for in-flight requests
+      await keyAuth.close();
       await auth.close();
       await database.close();
     },

@@ -60,6 +60,12 @@ Decisions for the maintainer, started in P0 planning (2026-11-04), extended for 
 - **Needed by:** P1.3b/P1.4a, before project/key routes.
 - **Answer (2026-11-06):** The maintainer explicitly approved the recommended permission matrix in the execution session: session-only organization administration, project listing/creation/removal and key management; project-bound keys only for explicitly scoped project operations.
 
+### Q10 – Clarify the key-authentication bootstrap boundary in I1?
+- **Context:** Random key strings contain no tenant selector. ADR-0024 anticipated credential bootstrap, but I1 literally requires a known tenant before every tenant-table read. The prepared implementation's only initial read accepts a SHA-256 hash and returns key/organization/project IDs from an active-key/active-project exact match; no metadata or scopes. Everything thereafter uses `withTenant`. See ADR-0034 and `packages/db/src/repositories/credential-bootstrap.ts`.
+- **Recommendation:** Approve the narrow authentication-only hash/ID projection as an explicit I1 clarification. Keep it unavailable to handlers/modules/capabilities, with no general query API or HTTP endpoint. Do not create a duplicated global credential index or silently require new tenant hints in the key protocol.
+- **Needed by:** P1.4c completion/commit. AGENTS §1.7 requires explicit invariant-change approval; code and real-service tests are prepared for review.
+- **Answer (2026-11-06):** The maintainer explicitly approved the narrow bootstrap clarification in the execution session: “Approve the narrow bootstrap clarification.” Update I1 and its architecture/ADR wording for this sole exact-hash/ID projection; no unscoped metadata or general query access is permitted.
+
 ## Decided in planning, please confirm
 
 - **D0 – TypeScript:** stay on TypeScript 7 if it works; TypeScript 6.0.3 is an acceptable fallback (maintainer guidance in the planning session). The decision rule in `PLAN.md` applies: tool-local fallback first, repo-wide TS 6 only as a last resort, recorded in ADR-0020.

@@ -10,3 +10,6 @@ export { createPostgresRateLimitStore } from './repositories/rate-limits.ts';
 export { createAuthReplayStore } from './repositories/auth-replay.ts';
 export { createOrganizationIdentityStore } from './repositories/organization-identity.ts';
 export * as authSchema from './schema/auth.generated.ts';
+
+export { createSecretKeyLookup } from './repositories/credential-bootstrap.ts';
+export { securityRecipients } from './repositories/security-recipients.ts';

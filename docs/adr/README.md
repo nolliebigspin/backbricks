@@ -43,3 +43,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0031](0031-key-material-and-scope-catalog.md) | Key material and scope catalog | accepted |
 | [0032](0032-session-only-key-management.md) | Session-only key management | accepted |
 | [0033](0033-credential-safe-diagnostic-boundaries.md) | Credential-safe diagnostic boundaries | accepted |
+| [0034](0034-key-authentication-and-exposure.md) | Key authentication and exposure handling | accepted |

@@ -291,6 +291,7 @@ CREATE INDEX reviews_queue_idx  ON reviews (instance_id, moderation_status, crea
 
 ### B.6 Tenant isolation in the data layer
 
+- **Approved authentication bootstrap exception (I1 / Q10):** [exact secret-key hash lookup](../packages/db/src/repositories/credential-bootstrap.ts) returns only active key/organization/project IDs before a tenant is known. It exposes no unscoped metadata/query endpoint; all subsequent access uses `withTenant` (ADR-0034).
 - **Access layer:** every request creates a `TenantContext { organizationId, projectId?, principal, scopes }`. Tenant tables are accessed only through `withTenant(ctx, async (tx) => …)`, which
   1. opens a transaction,
   2. sets `app.org_id` / `app.project_id` as transaction-local settings (prepares RLS),
@@ -449,7 +450,7 @@ Every module can be switched on or off per installation. A self-hoster who only 
 
 **Scopes (secret keys):**
 
-Implemented management principal/selector/permission behavior: [ADR-0028](adr/0028-management-principals-and-permissions.md), with linked core schemas and server composition as the source of truth. Key discovery and audited exposure handling are completed in P1.4c.
+Implemented management principal/selector/permission behavior: [ADR-0028](adr/0028-management-principals-and-permissions.md), with linked core schemas and server composition as the source of truth. Production [key resolution](../packages/core/src/keys/authentication.ts) and [server delivery composition](../apps/server/src/key-auth.ts) implement scoped lookup, audited exposure rejection and throttled notification intent (ADR-0034).
 
 The implemented [scope catalog and presets](../packages/core/src/keys/scopes.ts) are the source of truth (ADR-0031). Issuance rejects unknown/disabled-module grants. The agent preset excludes personal-data and destructive/deletion rights. [Key material](../packages/core/src/keys/material.ts) separates the one-time credential from hashed secret persistence; [management metadata](../packages/core/src/keys/metadata.ts) never redisplays a secret.
 
@@ -918,7 +919,7 @@ Milestones, scope, exit criteria and effort: `docs/MILESTONES.md`. Tasks: `PLAN.
 
 ### J.2 Get right from the start (expensive to change)
 
-1. `organization_id`/`project_id` on every tenant table and `withTenant` as the only access path
+1. `organization_id`/`project_id` on every tenant table and `withTenant` as the access path, with only the approved authentication hash/ID bootstrap exception (I1, ADR-0034)
 2. ID format (TypeID as `text`)
 3. Public vs. management API separation and the key model (publishable/secret + scopes)
 4. Module contract, config-as-code format with `$schema`/`module_version`, revisions

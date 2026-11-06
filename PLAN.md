@@ -295,14 +295,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Owner/admin/member/key matrix, foreign key IDs, concurrent revoke and failed-audit rollback; public snapshots.
 - **Risks/notes:** I4/I7; clipboard/UI behavior belongs to P1.12c.
 
-### [ ] P1.4c – Authenticate keys and reject exposed secrets (est. 4 h)
+### [x] P1.4c – Authenticate keys and reject exposed secrets (est. 4 h)
 - **Description:** Finish the key resolver, project binding, scope enforcement, throttled last-used updates and foreign-Origin security handling.
 - **Files/packages:** server credential middleware, key service/repository, mail/security event integration.
 - **Depends on:** P1.4b, P1.8b/c, P1.3b.
 - **Reuses:** SHA-256 lookup, normalized origins, audit/event transactions and limiter.
 - **Acceptance criteria:**
-  - [ ] Expired/revoked/inactive-project keys fail; publishable keys only reach approved public routes. Exact dashboard origin is the documented secret-key exception.
-  - [ ] Foreign Origin with a valid secret returns `403 secret_key_exposed`, commits redacted audit/security notification intent and never executes the business action; incident emails are deduplicated/throttled.
+  - [x] Expired/revoked/inactive-project keys fail; publishable keys only reach approved public routes. Exact dashboard origin is the documented secret-key exception.
+  - [x] Foreign Origin with a valid secret returns `403 secret_key_exposed`, commits redacted audit/security notification intent and never executes the business action; incident emails are deduplicated/throttled.
 - **Tests:** Origin variants including `null`, invalid/revoked secrets, cross-project resource IDs, concurrent last-used updates and audit failure path.
 - **Risks/notes:** The rejection audit must survive the HTTP error; a rolled-back business transaction cannot be its only write. Also cover secret-shaped values in caller-controlled request IDs/paths and error/log strings; name-based field redaction and activity validation alone do not protect those HTTP sinks.
 
@@ -581,7 +581,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.1a/b/c, P1.11a, P1.2a/b, P1.3a/b, P1.8a/b/c, P1.13a, P1.5a and P1.4a/b complete. ADRs 0021–0032 record the implemented boundaries. `bun run check`, build and 4 Playwright smoke tests pass; all package test tasks rerun uncached with no skips (70 server tests, 32 real DB tests). Q5–Q9 are explicitly approved. Production project routes are mounted, audited and covered by isolation cases; archive closes project-bound access. Key resolution remains an interface until P1.4c; complete dashboard flows remain P1.12/P1.13. Key list/create/revoke routes are session-only, reveal once, and covered by the isolation suite including key-state snapshots. Concurrent revoke and audit/outbox rollback tests pass. P1.4c in progress: HTTP/log secret-sink regressions reproduced and fixed (ADR-0033); request IDs, route templates, problem text and final serialized log lines are protected. Production key discovery, exposure audit/notification intent and last-used updates remain next; keep P1.4c unticked. Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
+P1.1a/b/c, P1.11a, P1.2a/b, P1.3a/b, P1.8a/b/c, P1.13a, P1.5a and P1.4a/b/c complete. ADRs 0021–0034 record implemented boundaries. Q5–Q10 are explicitly approved; I1 now states the sole exact-hash/ID authentication bootstrap exception. `bun run check` passes with no skipped tests (75 server tests, 32 real DB tests). Production key resolution, exposure audit/notification intent and owner/admin SMTP delivery pass real HTTP/Postgres/Mailpit tests, including failure rollback of notification throttling. Durable worker retries remain P1.10b; complete dashboard flows remain P1.12/P1.13. Next: P1.8d (usage, entitlements and shared service composition). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 

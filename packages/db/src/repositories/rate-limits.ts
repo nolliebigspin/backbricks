@@ -5,7 +5,7 @@ import type { Database } from '../client.ts';
 import { rateLimitBuckets } from '../schema/technical.ts';
 
 /** Global, non-tenant abuse buckets. One upsert serializes concurrent attempts across processes. */
-export function createPostgresRateLimitStore(db: Database): RateLimitStore {
+export function createPostgresRateLimitStore(db: Pick<Database, 'insert'>): RateLimitStore {
   return {
     async increment(input) {
       const rows = await db

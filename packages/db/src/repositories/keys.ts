@@ -1,5 +1,5 @@
 import { apiKeyRecordSchema, type KeyRepository } from '@backbricks/core';
-import { and, desc, eq, gt, isNull, lt, or } from 'drizzle-orm';
+import { and, desc, eq, gt, isNull, lte, or } from 'drizzle-orm';
 
 import type { DbTransaction } from '../client.ts';
 import { apiKeys } from '../schema/projects.ts';
@@ -70,7 +70,9 @@ export function createKeyRepository(tx: DbTransaction, scope: RepositoryScope): 
           and(
             where(),
             eq(apiKeys.id, id),
-            or(isNull(apiKeys.lastUsedAt), lt(apiKeys.lastUsedAt, before)),
+            isNull(apiKeys.revokedAt),
+            or(isNull(apiKeys.expiresAt), gt(apiKeys.expiresAt, now)),
+            or(isNull(apiKeys.lastUsedAt), lte(apiKeys.lastUsedAt, before)),
           ),
         );
     },

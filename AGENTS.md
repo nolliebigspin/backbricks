@@ -73,7 +73,7 @@ packages/sdk, packages/cli ─► packages/api-contract (types only). NEVER serv
 These are canonical (cited as I1–I19 everywhere). Violations block merges.
 
 **Tenancy**
-- **I1** Every tenant table has `organization_id` and, if project-scoped, `project_id`. Tenant tables are accessed only via `withTenant(ctx, fn)` and its repositories.
+- **I1** Every tenant table has `organization_id` and, if project-scoped, `project_id`. Tenant tables are accessed only via `withTenant(ctx, fn)` and its repositories. The sole authentication-bootstrap exception is an exact SHA-256 lookup of an active secret key joined to its active project, returning only key/organization/project IDs; all further access is scoped (approved Q10, ADR-0034).
 - **I2** Resources of other tenants return `404`, never `403`.
 - **I3** Every management route declares its requirements (`role` and/or `scope`); a test fails for undeclared routes. Every route is covered by the tenant isolation suite.
 

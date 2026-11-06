@@ -190,3 +190,13 @@ export {
   type ApiKeyCreate,
 } from './keys/creation.ts';
 export { createKeyService, type KeyService } from './keys/service.ts';
+
+export {
+  createSecretKeyResolver,
+  secretKeyReferenceSchema,
+  KEY_LAST_USED_INTERVAL_MS,
+  KEY_EXPOSURE_NOTIFICATION_WINDOW_MS,
+  type SecretKeyReference,
+  type SecretKeyLookup,
+  type KeyExposureNotice,
+} from './keys/authentication.ts';

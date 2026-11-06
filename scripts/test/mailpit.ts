@@ -38,11 +38,7 @@ export async function receivedMail(
   attempt = 0,
   subject?: string,
 ): Promise<z.infer<typeof messageSchema>> {
-  const query = new URLSearchParams({
-    query: `to:${recipient}${subject ? ` subject:${subject}` : ''}`,
-  });
-  const response = await fetch(`${baseUrl}/api/v1/search?${query.toString()}`);
-  const result = summarySchema.parse(await response.json());
+  const result = await searchMail(recipient, subject);
   const id = result.messages[0]?.ID;
   if (id)
     return messageSchema.parse(
@@ -51,4 +47,17 @@ export async function receivedMail(
   if (attempt >= 20) throw new Error('Expected test mail was not received.');
   await Bun.sleep(50);
   return receivedMail(recipient, attempt + 1, subject);
+}
+
+async function searchMail(recipient: string, subject?: string) {
+  const query = new URLSearchParams({
+    query: `to:${recipient}${subject ? ` subject:${subject}` : ''}`,
+  });
+  const response = await fetch(`${baseUrl}/api/v1/search?${query.toString()}`);
+  return summarySchema.parse(await response.json());
+}
+
+/** Count only this fixture's unique recipient/subject; mailboxes belonging to others are untouched. */
+export async function receivedMailCount(recipient: string, subject: string): Promise<number> {
+  return (await searchMail(recipient, subject)).messages.length;
 }
