@@ -22,8 +22,8 @@ blob-report/
 !.env.example
 *.pem
 
-# Local Claude Code settings (shared settings live in .claude/settings.json)
-.claude/settings.local.json
+# Claude Code settings and commands are personal, not shared
+.claude/
 CLAUDE.local.md
 
 # OS / editor
