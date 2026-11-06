@@ -3,16 +3,10 @@ import { expect, test } from 'bun:test';
 import { z } from 'zod';
 
 import {
-  createAuditService,
-  createEventService,
-  createIds,
-  createRateLimiter,
-  createServiceContainer,
-  createUnlimitedEntitlements,
-  createUsageService,
-  defineModule,
-  defineRegistry,
-} from '../index.ts';
+  createTestContainer as container,
+  testClock as clock,
+} from '../../test/service-fixture.ts';
+import { defineModule, defineRegistry } from '../index.ts';
 
 const label = { en: 'Fixture', de: 'Test' };
 const configSchema = z
@@ -39,19 +33,6 @@ function other() {
     resourceName: { singular: 'other', plural: 'others' },
   });
 }
-const clock = { now: () => new Date('2026-11-06T00:00:00Z') };
-function container() {
-  const common = { clock, ids: createIds(clock) };
-  return createServiceContainer({
-    ...common,
-    audit: createAuditService(common),
-    events: createEventService(common),
-    usage: createUsageService(clock),
-    entitlements: createUnlimitedEntitlements(),
-    rateLimiter: createRateLimiter({ increment: async () => 1 }, clock),
-  });
-}
-
 test('static registries reject duplicate identities, resources, scopes, events, providers and routes', () => {
   const first = defineModule(base);
   expect(() => defineRegistry([first, first])).toThrow('Duplicate module type');

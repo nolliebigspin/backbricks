@@ -301,3 +301,14 @@ export { defineRegistry, type ModuleRegistry } from './modules/registry.ts';
 export type { RegisteredModule, RegisteredRoute, RegisteredJob } from './modules/registered.ts';
 
 export { CORE_EVENTS } from './services/event-types.ts';
+
+export {
+  defineModuleDescriptor,
+  defineModuleCatalog,
+  unavailableModuleAtPath,
+  moduleAvailabilitySchema,
+  platformMetaSchema,
+  type ModuleDescriptor,
+  type ModuleCatalogEntry,
+  type SelectedModules,
+} from './modules/catalog.ts';

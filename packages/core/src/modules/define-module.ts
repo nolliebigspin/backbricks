@@ -11,7 +11,7 @@ import type {
   RequiredInfrastructure,
   OptionalInfrastructure,
 } from './contract.ts';
-import type { InfraRequirement } from './infrastructure.ts';
+import { infraRequirementSchema, type InfraRequirement } from './infrastructure.ts';
 import type { RegisteredModule } from './registered.ts';
 import { jobRegistrar, routeRegistrar } from './registrars.ts';
 import { moduleServices } from './services.ts';
@@ -34,13 +34,7 @@ export function defineModule<
   const I extends readonly InfraRequirement[] = readonly [],
 >(definition: ModuleDefinition<T, R, O, SR, SO, I, MT>): RegisteredModule {
   const { type, configSchema } = definition;
-  const infrastructure = z
-    .array(
-      z
-        .object({ service: z.enum(['storage', 'scanner']), optional: z.boolean().optional() })
-        .strict(),
-    )
-    .parse(definition.infrastructure);
+  const infrastructure = z.array(infraRequirementSchema).parse(definition.infrastructure);
   const services = serviceDeclarations(infrastructure, definition.services);
   const factories = { ...definition.provides };
   if (Object.values(factories).some((factory) => typeof factory !== 'function'))

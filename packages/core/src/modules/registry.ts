@@ -11,12 +11,10 @@ import {
 } from './capabilities.ts';
 import type { ModuleExecution } from './contract.ts';
 import type { RegisteredModule } from './registered.ts';
+import { uniqueModuleValues as unique } from './validation.ts';
 
 function fail(detail: string): never {
   throw new AppError('invalid_request', { detail });
-}
-function unique(values: readonly string[], label: string) {
-  if (new Set(values).size !== values.length) fail(`Duplicate module ${label}.`);
 }
 function checkDefinitions(modules: readonly RegisteredModule[]) {
   unique(

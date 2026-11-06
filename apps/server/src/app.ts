@@ -5,7 +5,7 @@ import { bodyLimit } from 'hono/body-limit';
 
 import type { AppDependencies } from './context.ts';
 import { dashboardRoutes } from './dashboard.ts';
-import { handleError, handleNotFound } from './errors.ts';
+import { handleError, handleNotFound, moduleAwareNotFound } from './errors.ts';
 import { healthRoutes } from './health.ts';
 import { ApiRoutes, type ApiAuthorization, createOpenApiApp } from './http/api-routes.ts';
 import { clientIdentity } from './middleware/client-identity.ts';
@@ -78,7 +78,7 @@ export function createApp(
   if (deps.dashboardDir !== null) app.route('/', dashboardRoutes(deps.dashboardDir));
 
   app.onError(handleError);
-  app.notFound(handleNotFound);
+  app.notFound(deps.modules ? moduleAwareNotFound(deps.modules) : handleNotFound);
   api.assertCoverage();
   return Object.assign(app, { apiRoutes: api });
 }

@@ -388,6 +388,7 @@ apps/server/src/modules.ts       # one line: add waitlistModule
 
 Every module can be switched on or off per installation. A self-hoster who only needs uploads runs only what uploads needs.
 
+- **Implemented M1 availability:** [ADR-0038](adr/0038-module-catalog-and-availability.md) and the [catalog](../packages/core/src/modules/catalog.ts) distinguish selected descriptors from operational definitions. `/v1/meta` and project integration metadata expose only this safe availability projection. Domain descriptors become operational in M2–M4.
 - **One image, runtime selection.** All modules ship in the same image; `BACKBRICKS_MODULES=uploads` (comma-separated, default: all) decides which are active. Enabling a module later is an env change plus a restart, no rebuild.
 - **Filtered registry.** `defineRegistry` registers only enabled modules: their routes, jobs, scopes, events, MCP tools and dashboard navigation. Disabled modules are inert.
 - **Dependencies are validated at startup.** Unsatisfied hard `requires` fail startup with a clear message (nothing in v1 hard-requires another module). `optional` capabilities degrade gracefully: without Uploads, the forms field type `file` is unavailable and configs using it are rejected with `capability_unavailable`.

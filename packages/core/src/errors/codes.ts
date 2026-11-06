@@ -6,6 +6,7 @@ export const ERROR_CODES = {
   internal_error: { status: 500, title: 'Internal server error' },
   invalid_request: { status: 400, title: 'Invalid request' },
   conflict: { status: 409, title: 'Conflict' },
+  module_not_enabled: { status: 404, title: 'Module is not available' },
   not_found: { status: 404, title: 'Not found' },
   unauthorized: { status: 401, title: 'Authentication required' },
   forbidden: { status: 403, title: 'Access denied' },

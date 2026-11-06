@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { pageQuerySchema } from '../http/pagination.ts';
 import { publishableKeyTokenSchema } from '../keys/protocol.ts';
+import { moduleAvailabilitySchema } from '../modules/catalog.ts';
 import { auditFiltersSchema } from '../platform/activity-fields.ts';
 import { auditEntrySchema, projectSchema } from '../platform/models.ts';
 import { activityMetadataSchema } from '../services/activity.ts';
@@ -26,5 +27,6 @@ export const integrationResponseSchema = z
     baseUrl: z.url().describe('API v1 base URL, ending in /v1.'),
     project: projectSchema.pick({ id: true, name: true, slug: true, allowedOrigins: true }),
     publicKey: publishableKeyTokenSchema.nullable(),
+    modules: z.array(moduleAvailabilitySchema),
   })
   .strict();

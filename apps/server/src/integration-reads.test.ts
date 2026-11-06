@@ -5,6 +5,7 @@ import {
   createIds,
   createUsageService,
   integrationResponseSchema,
+  platformMetaSchema,
   MAX_USAGE_VALUE,
   monthlyUsagePeriod,
   usageResponseSchema,
@@ -33,6 +34,7 @@ test.skipIf(!available)(
           baseUrl: `${f.origin}/v1`,
           project: { id: f.a1.id, name: 'A1', slug: 'a1', allowedOrigins: [] },
           publicKey: null,
+          modules: platformMetaSchema.parse(await (await f.request('/v1/meta')).json()).modules,
         });
         expect(
           await withTenant(context, ({ repositories }) => repositories.keys.list({ limit: 100 })),

@@ -19,6 +19,7 @@ import { registerKeys } from '../src/keys.ts';
 import { createLogger } from '../src/logger.ts';
 import { createApiAuthorization } from '../src/middleware/authorization.ts';
 import { registerProjects } from '../src/projects.ts';
+import { metaRoutes } from '../src/routes/meta.ts';
 import { platformReadRoutes } from '../src/routes/platform-reads.ts';
 import { createServerServices } from '../src/services.ts';
 
@@ -93,6 +94,7 @@ export async function scenario(
           log,
           auth,
           ids: runtime.container.core.ids,
+          modules: runtime.modules,
           dashboardDir: null,
           readinessChecks: [],
           ipIdentity: createIpIdentity({
@@ -105,6 +107,7 @@ export async function scenario(
           registerProjects(api, runtime);
           registerKeys(api, runtime, config.modules);
           platformReadRoutes(api, runtime);
+          metaRoutes(api, runtime.modules);
           apiOptions.configure?.(api, handle.db);
         },
         createApiAuthorization({

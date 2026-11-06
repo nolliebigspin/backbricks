@@ -1,4 +1,9 @@
-import { AppError, toProblemDetails } from '@backbricks/core';
+import {
+  AppError,
+  toProblemDetails,
+  unavailableModuleAtPath,
+  type SelectedModules,
+} from '@backbricks/core';
 import type { Context, ErrorHandler, NotFoundHandler } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 
@@ -29,3 +34,16 @@ export const handleError: ErrorHandler<AppEnv> = (error, c) => {
 
 export const handleNotFound: NotFoundHandler<AppEnv> = (c) =>
   problemResponse(c, new AppError('not_found', { detail: 'No route matches this request.' }));
+
+/** Known unavailable module paths expose only the installation-wide metadata already public at /meta. */
+export function moduleAwareNotFound(modules: SelectedModules): NotFoundHandler<AppEnv> {
+  return (c) =>
+    unavailableModuleAtPath(modules, c.req.path)
+      ? problemResponse(
+          c,
+          new AppError('module_not_enabled', {
+            hint: 'Enable an implemented module to use this API.',
+          }),
+        )
+      : handleNotFound(c);
+}

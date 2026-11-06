@@ -47,3 +47,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0035](0035-services-usage-and-entitlements.md) | Services, usage and entitlements | accepted |
 | [0036](0036-platform-read-contracts.md) | Platform read contracts | accepted |
 | [0037](0037-static-module-contracts.md) | Static module contracts and borrowed capabilities | accepted |
+| [0038](0038-module-catalog-and-availability.md) | Module catalog and availability metadata | accepted |

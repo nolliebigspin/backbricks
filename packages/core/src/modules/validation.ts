@@ -72,3 +72,8 @@ export function freezeDeclaration<T>(value: T): T {
   }
   return value;
 }
+
+export function uniqueModuleValues(values: readonly string[], label: string) {
+  if (new Set(values).size !== values.length)
+    throw new AppError('invalid_request', { detail: `Duplicate module ${label}.` });
+}

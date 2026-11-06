@@ -2,6 +2,7 @@ import type { z } from 'zod';
 
 import { AppError } from '../errors/app-error.ts';
 import { pageResult, repositoryPage } from '../http/pagination.ts';
+import type { SelectedModules } from '../modules/catalog.ts';
 import { monthlyUsagePeriod, type UsageService } from '../services/usage.ts';
 import type { TenantTransaction } from '../tenancy/tenant-context.ts';
 import type { Clock } from '../time/clock.ts';
@@ -16,6 +17,7 @@ export function createPlatformQueries(deps: {
   clock: Clock;
   usage: UsageService;
   publicUrl: string;
+  modules?: SelectedModules;
 }) {
   const baseUrl = new URL('/v1', new URL(deps.publicUrl).origin).href;
   return {
@@ -73,6 +75,7 @@ export function createPlatformQueries(deps: {
           allowedOrigins: project.allowedOrigins,
         },
         publicKey: await tx.repositories.keys.publishable(deps.clock.now()),
+        modules: deps.modules?.metadata.modules ?? [],
       });
     },
   };

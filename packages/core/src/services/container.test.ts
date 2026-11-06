@@ -1,30 +1,16 @@
 import { expect, test } from 'bun:test';
 
 import {
-  createAuditService,
-  createEventService,
-  createIds,
-  createRateLimiter,
+  createTestCoreServices as coreServices,
+  testClock as clock,
+} from '../../test/service-fixture.ts';
+import {
   createServiceContainer,
-  createUnlimitedEntitlements,
-  createUsageService,
   type Mailer,
-  type OptionalServiceName,
   type OptionalServices,
+  type OptionalServiceName,
 } from '../index.ts';
 
-const clock = { now: () => new Date('2026-11-06T00:00:00Z') };
-function coreServices() {
-  const activity = { clock, ids: createIds(clock) };
-  return {
-    ...activity,
-    audit: createAuditService(activity),
-    events: createEventService(activity),
-    usage: createUsageService(clock),
-    entitlements: createUnlimitedEntitlements(),
-    rateLimiter: createRateLimiter({ increment: async () => 1 }, clock),
-  };
-}
 const mailer: Mailer = { send: async () => {}, close: async () => {} };
 
 test('service views preserve shared instances and provide only declared optional/required providers', () => {

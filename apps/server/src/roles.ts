@@ -9,6 +9,7 @@ import { registerKeys } from './keys.ts';
 import type { Logger } from './logger.ts';
 import { createApiAuthorization } from './middleware/authorization.ts';
 import { registerProjects } from './projects.ts';
+import { metaRoutes } from './routes/meta.ts';
 import { platformReadRoutes } from './routes/platform-reads.ts';
 import { createServerServices } from './services.ts';
 
@@ -33,6 +34,7 @@ export function startServe(config: Config, log: Logger): RunningRole {
     {
       log,
       ids: services.container.core.ids,
+      modules: services.modules,
       ipIdentity: createIpIdentity({
         appSecret: config.appSecret,
         clock: services.container.core.clock,
@@ -46,6 +48,7 @@ export function startServe(config: Config, log: Logger): RunningRole {
       registerProjects(api, services);
       registerKeys(api, services, config.modules);
       platformReadRoutes(api, services);
+      metaRoutes(api, services.modules);
     },
     createApiAuthorization({ config, db: database.db, auth, resolveKey: keyAuth.resolveKey }),
   );
@@ -72,12 +75,20 @@ export function startServe(config: Config, log: Logger): RunningRole {
 export async function startWorker(config: Config, log: Logger): Promise<RunningRole> {
   const database = createDatabase(config.databaseUrl, { applicationName: 'backbricks-worker' });
   await database.ping();
+  const services = createServerServices(config, database.db);
   // Keeps the event loop alive while there are no jobs to poll yet.
   const idle = setInterval(() => {}, 60_000);
-  log.info({ modules: config.modules }, 'worker ready');
+  log.info(
+    {
+      modules: config.modules,
+      jobs: services.modules.registry.modules.flatMap((module) => module.jobs).length,
+    },
+    'worker ready',
+  );
   return {
     async stop() {
       clearInterval(idle);
+      await services.close();
       await database.close();
     },
   };

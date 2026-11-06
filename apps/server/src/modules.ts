@@ -1,14 +1,12 @@
-import type { AvailableModules } from '@backbricks/core';
-import { formsInfrastructure } from '@backbricks/module-forms';
-import { reviewsInfrastructure } from '@backbricks/module-reviews';
-import { uploadsInfrastructure } from '@backbricks/module-uploads';
+import { defineModuleCatalog } from '@backbricks/core';
+import { formsDescriptor } from '@backbricks/module-forms';
+import { reviewsDescriptor } from '@backbricks/module-reviews';
+import { uploadsDescriptor } from '@backbricks/module-uploads';
 
-/**
- * The modules this image ships, in registry order (ARCHITECTURE §C.2). `BACKBRICKS_MODULES`
- * picks the enabled subset. P1.6 replaces this with `defineRegistry` over full definitions.
- */
-export const availableModules: AvailableModules = {
-  uploads: uploadsInfrastructure,
-  forms: formsInfrastructure,
-  reviews: reviewsInfrastructure,
-};
+/** Domain descriptors remain non-operational until their own milestone supplies a full definition. */
+export const moduleCatalog = defineModuleCatalog([
+  uploadsDescriptor,
+  formsDescriptor,
+  reviewsDescriptor,
+]);
+export const availableModules = moduleCatalog.available;

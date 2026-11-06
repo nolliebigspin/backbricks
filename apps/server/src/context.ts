@@ -1,5 +1,10 @@
 import type { createDashboardAuth } from '@backbricks/auth';
-import type { AuthenticatedTenantContext, createIpIdentity, Ids } from '@backbricks/core';
+import type {
+  AuthenticatedTenantContext,
+  createIpIdentity,
+  Ids,
+  SelectedModules,
+} from '@backbricks/core';
 
 import type { Logger } from './logger.ts';
 
@@ -23,6 +28,7 @@ export type ReadinessCheck = {
 export type AppDependencies = {
   log: Logger;
   ids: Ids;
+  modules?: SelectedModules;
   /** Omitted only by apps/tests that do not mount auth or public-write handlers. */
   ipIdentity?: ReturnType<typeof createIpIdentity>;
   auth?: Pick<ReturnType<typeof createDashboardAuth>, 'handle' | 'basePath'>;

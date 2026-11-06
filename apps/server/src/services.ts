@@ -14,15 +14,19 @@ import {
   type Clock,
   type Config,
   type Entitlements,
+  type SelectedModules,
 } from '@backbricks/core';
 import { createPostgresRateLimitStore, createWithTenant, type Database } from '@backbricks/db';
+
+import { moduleCatalog } from './modules.ts';
 
 /** One provider/service lifetime per server runtime. Modules receive only the core's restricted views. */
 export function createServerServices(
   config: Config,
   db: Database,
-  options: { clock?: Clock; entitlements?: Entitlements } = {},
+  options: { clock?: Clock; entitlements?: Entitlements; modules?: SelectedModules } = {},
 ) {
+  const modules = options.modules ?? moduleCatalog.select(config.modules);
   const clock = options.clock ?? systemClock;
   const ids = createIds(clock);
   const activity = { clock, ids };
@@ -40,9 +44,11 @@ export function createServerServices(
   );
   return Object.freeze({
     container,
+    modules,
+    moduleRuntime: modules.registry.bind(container),
     withTenant: createWithTenant(db),
     projects: createProjectService(container.core),
-    queries: createPlatformQueries({ ...container.core, publicUrl: config.publicUrl }),
+    queries: createPlatformQueries({ ...container.core, publicUrl: config.publicUrl, modules }),
     keys: createKeyService({ ...container.core, enabledModules: config.modules }),
     async close() {
       await mailer?.close();
