@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { scopeNameSchema } from '../keys/protocol.ts';
+
 /** Global HTTP ceiling; individual routes must declare an equal or smaller body limit. */
 export const DEFAULT_BODY_LIMIT_BYTES = 1024 * 1024;
 
@@ -24,10 +26,7 @@ export const managementRoutePolicySchema = z
     kind: z.literal('management'),
     bodyLimitBytes,
     session: z.object({ role: organizationRoleSchema }).strict().optional(),
-    secretKey: z
-      .object({ scope: z.string().min(1) })
-      .strict()
-      .optional(),
+    secretKey: z.object({ scope: scopeNameSchema }).strict().optional(),
     isolationCase: z.string().min(1),
   })
   .strict()

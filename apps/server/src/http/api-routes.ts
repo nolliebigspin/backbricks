@@ -13,9 +13,16 @@ import type { AppEnv } from '../context.ts';
 export type ApiAuthorization = (
   policy: Extract<RoutePolicy, { kind: 'management' }>,
   context: Context<AppEnv>,
+  tenant: TenantPathSelector,
 ) => void | Promise<void>;
 
-type RegisteredRoute = Readonly<{ method: string; path: string; policy: RoutePolicy }>;
+export type TenantPathSelector = Readonly<{ organizationParam?: string; projectParam?: string }>;
+type RegisteredRoute = Readonly<{
+  method: string;
+  path: string;
+  policy: RoutePolicy;
+  tenant: TenantPathSelector;
+}>;
 type RuntimeRoute = OpenAPIHono<AppEnv>['routes'][number];
 
 /** A declared API surface; bypasses are detected against Hono's actual registered handlers. */
@@ -57,6 +64,13 @@ export class ApiRoutes {
       throw new Error('API routes must be visible OpenAPI operations under /v1/.');
     }
     const method = route.method.toUpperCase();
+    const tenant = Object.freeze({
+      organizationParam: /\/organizations\/\{([^}]+)\}/.exec(route.path)?.[1],
+      projectParam: /\/projects\/\{([^}]+)\}/.exec(route.path)?.[1],
+    });
+    if (parsed.kind === 'management' && parsed.secretKey && !tenant.projectParam) {
+      throw new Error('Secret-key management routes must be project-scoped.');
+    }
     const key = `${method} ${route.path}`;
     if (this.#operations.has(key)) throw new Error(`Duplicate API operation: ${key}`);
     const start = this.#app.routes.length;
@@ -69,7 +83,7 @@ export class ApiRoutes {
     });
     this.#app.use(path, async (c, next) => {
       if (c.req.method !== method && !(c.req.method === 'HEAD' && method === 'GET')) return next();
-      if (parsed.kind === 'management') await this.#authorize(parsed, c);
+      if (parsed.kind === 'management') await this.#authorize(parsed, c, tenant);
       return limit(c, next);
     });
     this.#app.openapi(
@@ -88,7 +102,12 @@ export class ApiRoutes {
     for (const registered of this.#app.routes.slice(start)) this.#handlers.add(registered);
     this.#operations.add(key);
     this.#manifest.push(
-      Object.freeze({ method: route.method.toUpperCase(), path: route.path, policy: parsed }),
+      Object.freeze({
+        method: route.method.toUpperCase(),
+        path: route.path,
+        policy: parsed,
+        tenant,
+      }),
     );
   }
 

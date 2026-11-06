@@ -142,7 +142,7 @@ describe('declared API routes', () => {
     const app = setup(
       (api) =>
         api.register(
-          example,
+          createRoute({ ...example, path: '/v1/projects/{id}/examples' }),
           {
             kind: 'management',
             bodyLimitBytes: 128,
@@ -151,14 +151,32 @@ describe('declared API routes', () => {
           },
           (c) => c.json({ id: c.req.valid('param').id }, 200),
         ),
-      (policy) => {
+      (policy, _context, tenant) => {
         expect(policy.secretKey?.scope).toBe('config:read');
+        expect(tenant.projectParam).toBe('id');
         authorized = true;
       },
     );
-    const response = await app.request('/v1/examples/example', { method: 'POST' });
+    const response = await app.request('/v1/projects/example/examples', { method: 'POST' });
     expect(authorized).toBe(true);
     expect(response.status).toBe(422);
+  });
+
+  test('secret-key operations cannot be registered without a project path', () => {
+    expect(() =>
+      setup((api) =>
+        api.register(
+          example,
+          {
+            kind: 'management',
+            bodyLimitBytes: 128,
+            secretKey: { scope: 'config:read' },
+            isolationCase: 'unbound',
+          },
+          (c) => c.json({ id: c.req.valid('param').id }, 200),
+        ),
+      ),
+    ).toThrow('must be project-scoped');
   });
 
   test('implicit HEAD requests cannot bypass GET authorization', async () => {

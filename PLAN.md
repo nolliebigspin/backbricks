@@ -240,14 +240,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Real DB rollback injection, concurrent last-owner changes, role matrix and raw-plugin bypass attempts.
 - **Risks/notes:** Organization deletion/ownership transfer exposure follows Q7; disabled endpoints must reject direct calls, not merely disappear from the UI.
 
-### [ ] P1.3b – Resolve principals and enforce declared permissions (est. 4 h)
+### [x] P1.3b – Resolve principals and enforce declared permissions (est. 4 h)
 - **Description:** Bind trusted session principals/membership to TenantContext; implement role/scope policies and credential precedence. Define the key-resolver interface for P1.4c.
 - **Files/packages:** core principal/policy contracts, server auth/tenant middleware, route manifest.
 - **Depends on:** P1.1c, P1.3a, P1.11a; Q9 route policy.
 - **Reuses:** Better Auth sessions, scoped repositories, AppError and request context.
 - **Acceptance criteria:**
-  - [ ] Requested organization/project is authorized through membership or project-bound key; never trust a client organization header or stale active-org claim alone.
-  - [ ] Foreign resources give 404; missing credentials give 401; insufficient permissions on owned resources give the documented denial. Unsafe session requests require the CSRF header; publishable keys cannot manage data.
+  - [x] Current membership and scoped project lookup bind a frozen principal/context. Headers and active-org claims are selectors only. Path-derived tenant metadata constrains key identities; real key discovery is the P1.4c resolver implementation.
+  - [x] Real HTTP/DB cases prove foreign 404, unauthenticated 401, owned-resource denial 403, role changes/removal, origin/CSRF and publishable-key denial. Explicit bearer credentials never fall back to cookies. Principal scopes remain immutable through repository transactions.
 - **Tests:** Cross-org/project principal substitution, conflicting credentials, removed memberships, role hierarchy and CSRF failures.
 - **Risks/notes:** I2 is about existence leaks, not a blanket requirement that list endpoints always return 404.
 
@@ -260,7 +260,7 @@ All tasks are done; the task details are in the git history of this file, the re
   - [ ] Suite fails if an exposed management operation has no policy/fixture. Include tenant-bearing Better Auth paths, not just `/v1` routes.
   - [ ] Resource paths test foreign 404, collections test filtering/non-disclosure, creation tests tenant binding, and denied mutations assert unchanged DB/audit state.
 - **Tests:** Deliberately omit one route and deliberately un-scope a fixture repository to prove the suite detects both failures; no DB mocks.
-- **Risks/notes:** Every later route task adds cases here before completion. Test runtime inspection guards against a manifest that omits mounted routes.
+- **Risks/notes:** Every later route task adds cases here before completion. Test runtime inspection guards against a manifest that omits mounted routes. Correct Turbo dependency/shared-script inputs and avoid caching service-unavailable skips; P1.3b verification uses `TURBO_FORCE=true` until this is addressed.
 
 ### [ ] P1.5a – Implement projects and origins (est. 4 h)
 - **Description:** Add project list/create/detail/update/delete behavior and normalized allowed origins under the Q7/Q9 policy.
@@ -581,7 +581,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.1a/b/c, P1.11a, P1.2a/b, P1.3a and P1.8a/b/c complete. ADRs 0021–0027 record the implemented boundaries. Real DB suite: 30 pass across 7 files; auth/organization HTTP/DB/Mailpit suite: 14 scenarios, including commit/audit rollback and owner concurrency. Full checks pass with services running; complete dashboard flows remain P1.12/P1.13. Next task: P1.3b (trusted principals and declared permissions). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
+P1.1a/b/c, P1.11a, P1.2a/b, P1.3a/b and P1.8a/b/c complete. ADRs 0021–0028 record the implemented boundaries. Real DB suite: 30 pass across 7 files; auth/organization/authorization HTTP suites run with real services. `TURBO_FORCE=true bun run check` passes with zero cache hits/skips. Key resolution is an interface until P1.4c; complete dashboard flows remain P1.12/P1.13. Next task: P1.13a (automatic isolation coverage and reliable test inputs). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 

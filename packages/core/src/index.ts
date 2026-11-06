@@ -26,12 +26,34 @@ export {
   parseTypeId,
   type TypeId,
 } from './ids/type-id.ts';
-export type { TenantContext, TenantTransaction, WithTenant } from './tenancy/tenant-context.ts';
+export type {
+  TenantContext,
+  AuthenticatedTenantContext,
+  TenantTransaction,
+  WithTenant,
+} from './tenancy/tenant-context.ts';
 export * from './tenancy/repositories.ts';
 export * from './platform/models.ts';
 export { MAX_PAGE_SIZE } from './http/pagination.ts';
 export { AUTH_BASE_PATH } from './http/auth-path.ts';
 export { API_KEY_PREFIXES } from './keys/constants.ts';
+export { API_KEY_TOKEN_LENGTH, scopeNameSchema, secretKeyTokenSchema } from './keys/protocol.ts';
+export {
+  principalSchema,
+  sessionIdentitySchema,
+  secretKeyIdentitySchema,
+  type Principal,
+  type SessionIdentity,
+  type SecretKeyIdentity,
+  type SecretKeyResolver,
+  type CredentialRequest,
+} from './identity/principal.ts';
+export {
+  createManagementAuthorizer,
+  ORGANIZATION_SELECTION_HEADER,
+  CSRF_HEADER,
+  type ManagementRequest,
+} from './identity/management-authorization.ts';
 export { canonicalIp, resolveClientIp, createIpIdentity } from './privacy/ip-identity.ts';
 export type { AuthReplayStore } from './privacy/auth-replay.ts';
 export {

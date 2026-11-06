@@ -5,6 +5,7 @@ import {
   createIpIdentity,
   systemClock,
   type Config,
+  type SecretKeyResolver,
 } from '@backbricks/core';
 import { createDatabase, runMigrations } from '@backbricks/db';
 import { z } from '@hono/zod-openapi';
@@ -13,7 +14,9 @@ import { createTestDatabase, postgresAvailable } from '../../../scripts/test/dat
 import { mailpitAvailable, receivedMail, TEST_SMTP_URL } from '../../../scripts/test/mailpit.ts';
 import { createApp } from '../src/app.ts';
 import { createServerAuth } from '../src/auth.ts';
+import type { ApiRoutes } from '../src/http/api-routes.ts';
 import { createLogger } from '../src/logger.ts';
+import { createApiAuthorization } from '../src/middleware/authorization.ts';
 
 export const available = (await postgresAvailable()) && (await mailpitAvailable());
 export const AUTH_TEST_SECRET = 'auth-test-only-not-a-real-secret-000000000000';
@@ -33,6 +36,10 @@ export async function scenario(
     capabilities: (values: Pick<Config, 'mailer' | 'signupPolicy'>) => Promise<void>;
   }) => Promise<void>,
   overrides: Record<string, string> = {},
+  apiOptions: {
+    configure?: (api: ApiRoutes, db: ReturnType<typeof createDatabase>['db']) => void;
+    resolveKey?: SecretKeyResolver;
+  } = {},
 ) {
   const database = await createTestDatabase();
   await runMigrations(database.url);
@@ -66,18 +73,27 @@ export async function scenario(
     const log = createLogger('debug', { write: (line) => logs.push(line) });
     const mount = (config: Config) => {
       auth = createServerAuth(config, handle.db, log);
-      app = createApp({
-        log,
-        auth,
-        ids: createIds(systemClock),
-        dashboardDir: null,
-        readinessChecks: [],
-        ipIdentity: createIpIdentity({
-          appSecret: config.appSecret,
-          clock: systemClock,
-          trustedProxies: [],
+      app = createApp(
+        {
+          log,
+          auth,
+          ids: createIds(systemClock),
+          dashboardDir: null,
+          readinessChecks: [],
+          ipIdentity: createIpIdentity({
+            appSecret: config.appSecret,
+            clock: systemClock,
+            trustedProxies: [],
+          }),
+        },
+        (api) => apiOptions.configure?.(api, handle.db),
+        createApiAuthorization({
+          config,
+          db: handle.db,
+          auth,
+          resolveKey: apiOptions.resolveKey,
         }),
-      });
+      );
     };
     mount(result.config);
     await run({
@@ -97,7 +113,7 @@ export async function scenario(
           headers.set('content-type', 'application/json');
         }
         if (cookie) headers.set('cookie', cookie);
-        return fetch(`${origin}/api/auth${path}`, {
+        return fetch(`${origin}${path.startsWith('/v1/') ? path : `/api/auth${path}`}`, {
           method: body === undefined ? 'GET' : 'POST',
           headers,
           body: body === undefined ? undefined : JSON.stringify(body),
@@ -125,7 +141,7 @@ export function actionLink(html: string): URL {
   return new URL(match[1].replaceAll('&amp;', '&'));
 }
 
-type AuthFixture = Parameters<Parameters<typeof scenario>[0]>[0];
+export type AuthFixture = Parameters<Parameters<typeof scenario>[0]>[0];
 /** Real registration and email verification, shared by organization/isolation scenarios. */
 export async function createVerifiedUser(fixture: AuthFixture) {
   const email = `member-${crypto.randomUUID()}@example.invalid`;

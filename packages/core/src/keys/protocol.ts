@@ -1,0 +1,19 @@
+import { z } from 'zod';
+
+import { API_KEY_PREFIXES } from './constants.ts';
+
+export const API_KEY_TOKEN_LENGTH = 32;
+/** Scope syntax is shared by policies, persisted credentials and safe audit metadata. */
+export const scopeNameSchema = z
+  .string()
+  .max(128)
+  .regex(/^[a-z][a-z0-9_-]*:[a-z][a-z0-9_-]*$/)
+  .refine((value) => !value.includes(API_KEY_PREFIXES.secret));
+export const secretKeyTokenSchema = z.string().refine((value) => {
+  const token = value.slice(API_KEY_PREFIXES.secret.length);
+  return (
+    value.startsWith(API_KEY_PREFIXES.secret) &&
+    token.length === API_KEY_TOKEN_LENGTH &&
+    /^[A-Za-z0-9]+$/.test(token)
+  );
+});

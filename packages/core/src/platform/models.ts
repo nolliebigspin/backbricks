@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { scopeNameSchema } from '../keys/protocol.ts';
 import { actorTypeSchema, apiKeyKindSchema, moduleInstanceStatusSchema } from './values.ts';
 
 const identity = { organizationId: z.string().min(1), projectId: z.string().min(1) };
@@ -40,7 +41,7 @@ export const apiKeyRecordSchema = z
     lookupHash: z.instanceof(Uint8Array),
     displayPrefix: z.string(),
     publicToken: z.string().nullable(),
-    scopes: z.array(z.string()),
+    scopes: z.array(scopeNameSchema),
     createdBy: z.string().nullable(),
     lastUsedAt: z.date().nullable(),
     expiresAt: z.date().nullable(),

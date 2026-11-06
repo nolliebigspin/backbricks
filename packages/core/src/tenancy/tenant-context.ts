@@ -1,3 +1,4 @@
+import type { Principal } from '../identity/principal.ts';
 /**
  * Trusted tenant scope of a request or job (ARCHITECTURE §B.6, I1). P1.3b adds the
  * authenticated principal and scopes; `withTenant` never grants membership or permissions.
@@ -7,7 +8,9 @@ import type { ModuleRepositories, TenantRepositories } from './repositories.ts';
 export type TenantContext = {
   readonly organizationId: string;
   readonly projectId?: string;
+  readonly principal?: Principal;
 };
+export type AuthenticatedTenantContext = TenantContext & { readonly principal: Principal };
 
 /**
  * The only way to reach tenant tables: runs `fn` in a transaction whose settings

@@ -1,5 +1,5 @@
 import type { createDashboardAuth } from '@backbricks/auth';
-import type { createIpIdentity, Ids } from '@backbricks/core';
+import type { AuthenticatedTenantContext, createIpIdentity, Ids } from '@backbricks/core';
 
 import type { Logger } from './logger.ts';
 
@@ -8,6 +8,7 @@ export type AppEnv = {
   Variables: {
     requestId: string;
     ipHash?: string;
+    tenant?: AuthenticatedTenantContext;
     log: Logger;
   };
 };

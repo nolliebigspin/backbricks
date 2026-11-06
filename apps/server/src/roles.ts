@@ -5,6 +5,7 @@ import { createApp } from './app.ts';
 import { createServerAuth } from './auth.ts';
 import { findDashboard } from './dashboard.ts';
 import type { Logger } from './logger.ts';
+import { createApiAuthorization } from './middleware/authorization.ts';
 
 /** A started role; `stop` drains it for a graceful shutdown. */
 export type RunningRole = { stop: () => Promise<void> };
@@ -21,18 +22,22 @@ export function startServe(config: Config, log: Logger): RunningRole {
   const database = createDatabase(config.databaseUrl, { applicationName: 'backbricks-serve' });
   const dashboardDir = findDashboard();
   const auth = createServerAuth(config, database.db, log);
-  const app = createApp({
-    log,
-    ids: createIds(systemClock),
-    ipIdentity: createIpIdentity({
-      appSecret: config.appSecret,
-      clock: systemClock,
-      trustedProxies: config.trustedProxies,
-    }),
-    readinessChecks: [{ name: 'database', check: database.ping }],
-    dashboardDir,
-    auth,
-  });
+  const app = createApp(
+    {
+      log,
+      ids: createIds(systemClock),
+      ipIdentity: createIpIdentity({
+        appSecret: config.appSecret,
+        clock: systemClock,
+        trustedProxies: config.trustedProxies,
+      }),
+      readinessChecks: [{ name: 'database', check: database.ping }],
+      dashboardDir,
+      auth,
+    },
+    undefined,
+    createApiAuthorization({ config, db: database.db, auth }),
+  );
   const server = Bun.serve({ port: config.port, fetch: app.fetch, development: false });
   log.info(
     { port: server.port, modules: config.modules, dashboard: dashboardDir !== null },

@@ -1,4 +1,10 @@
-import type { ModuleRepositories, TenantContext, WithTenant } from '@backbricks/core';
+import {
+  principalSchema,
+  AppError,
+  type ModuleRepositories,
+  type TenantContext,
+  type WithTenant,
+} from '@backbricks/core';
 import { sql } from 'drizzle-orm';
 
 import type { Database, DbTransaction } from './client.ts';
@@ -22,7 +28,10 @@ export function createWithTenant(
 ): WithTenant {
   return (ctx, fn) => {
     if (ctx.organizationId === '') throw new Error('withTenant needs an organizationId');
-    const context = Object.freeze({ ...ctx });
+    const context = Object.freeze({
+      ...ctx,
+      ...(ctx.principal ? { principal: principalSchema.parse(ctx.principal) } : {}),
+    });
     return db.transaction(async (tx) => {
       await tx.execute(
         sql`select set_config('app.org_id', ${context.organizationId}, true),
@@ -35,7 +44,11 @@ export function createWithTenant(
       try {
         const scope = createRepositoryScope(context, assertActive);
         const repositories = createTenantRepositories(tx, scope);
-        if (context.projectId) await repositories.projects.get(context.projectId);
+        if (context.projectId) {
+          const project = await repositories.projects.get(context.projectId);
+          if (project.organizationId !== context.organizationId || project.id !== context.projectId)
+            throw new AppError('not_found');
+        }
         return await fn(
           Object.freeze({
             context,

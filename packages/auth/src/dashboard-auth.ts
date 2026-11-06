@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 
-import { AppError, type MailMessage } from '@backbricks/core';
+import { AppError, CSRF_HEADER, type MailMessage } from '@backbricks/core';
 import { betterAuth } from 'better-auth';
 import { isAPIError } from 'better-auth/api';
 import { z } from 'zod';
@@ -52,8 +52,7 @@ export function createDashboardAuth(options: DashboardAuthOptions) {
     if (
       (request.headers.has('origin') && request.headers.get('origin') !== origin) ||
       (unsafe &&
-        (request.headers.get('origin') !== origin ||
-          request.headers.get('x-backbricks-csrf') !== '1')) ||
+        (request.headers.get('origin') !== origin || request.headers.get(CSRF_HEADER) !== '1')) ||
       (request.headers.get('sec-fetch-site') === 'cross-site' && !emailNavigation)
     )
       return authFailure(403, 'INVALID_ORIGIN');

@@ -55,4 +55,18 @@ describe('TypeIDs', () => {
     expect(isTypeId('sub_01h455vb4pex5vsknk084sn02q', 'rev')).toBe(false);
     expect(isTypeId(42, 'sub')).toBe(false);
   });
+
+  test('rejects trailing line terminators instead of decoding them as base32', () => {
+    fc.assert(
+      fc.property(
+        fc.constantFrom(...ID_PREFIXES),
+        fc.constantFrom('\n', '\r', '\r\n', '\u2028', '\u2029'),
+        (prefix, ending) => {
+          const input = `${prefix}_01h455vb4pex5vsknk084sn02q${ending}`;
+          expect(parseTypeId(input)).toBeNull();
+          expect(isTypeId(input, prefix)).toBe(false);
+        },
+      ),
+    );
+  });
 });

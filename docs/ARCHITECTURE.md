@@ -449,6 +449,8 @@ Every module can be switched on or off per installation. A self-hoster who only 
 
 **Scopes (secret keys):**
 
+Implemented management principal/selector/permission behavior: [ADR-0028](adr/0028-management-principals-and-permissions.md), with linked core schemas and server composition as the source of truth. Key discovery and audited exposure handling are completed in P1.4c.
+
 | Scope | Meaning | Preset "AI agent / CLI" | Preset "Server integration" | Preset "Data access" |
 |---|---|---|---|---|
 | `integration:read` | Project info, publishable key, snippets | ✔ | | |

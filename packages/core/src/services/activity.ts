@@ -4,6 +4,7 @@ import { AppError } from '../errors/app-error.ts';
 import { organizationRoleSchema } from '../http/route-policy.ts';
 import type { Ids, TypeId } from '../ids/type-id.ts';
 import { API_KEY_PREFIXES } from '../keys/constants.ts';
+import { scopeNameSchema } from '../keys/protocol.ts';
 import { auditEntrySchema, eventRecordSchema } from '../platform/models.ts';
 import type { TenantTransaction } from '../tenancy/tenant-context.ts';
 import type { Clock } from '../time/clock.ts';
@@ -33,10 +34,7 @@ export const activityMetadataSchema = z
       .optional(),
     previousVersion: z.number().int().positive().optional(),
     configVersion: z.number().int().positive().optional(),
-    scopes: z
-      .array(metadataString.regex(/^[a-z][a-z0-9_-]*:[a-z][a-z0-9_-]*$/))
-      .max(MAX_METADATA_ITEMS)
-      .optional(),
+    scopes: z.array(scopeNameSchema).max(MAX_METADATA_ITEMS).optional(),
     preset: tag.optional(),
     reason: tag.optional(),
     status: tag.optional(),
