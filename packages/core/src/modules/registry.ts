@@ -72,6 +72,9 @@ function checkDefinitions(modules: readonly RegisteredModule[]) {
         'route',
       );
       for (const route of routes) {
+        const quota = route.access?.kind === 'write' ? route.access.quota : undefined;
+        if (quota && !module.usageMetrics.some((metric) => metric.name === quota.metric))
+          fail('A public quota uses an undeclared metric.');
         const scope =
           route.policy.kind === 'management'
             ? route.policy.secretKey?.scope

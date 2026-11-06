@@ -59,7 +59,7 @@ test.skipIf(!available)(
           ).status,
         ).toBe(404);
         expect(await readBody()).toEqual({ total: '5', scale: 2 });
-        expect((await f.request('/v1/public/counters/demo/summary')).status).toBe(503);
+        expect((await f.request('/v1/public/counters/demo/summary')).status).toBe(401);
         const inventory = f.manifest().filter((route) => route.path.includes('/counters/'));
         expect(
           inventory

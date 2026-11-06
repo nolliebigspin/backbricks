@@ -1,5 +1,6 @@
 import type { z } from 'zod';
 
+import type { PublicAccessInput } from '../abuse/policy.ts';
 import type { ManagementRoutePolicy, RoutePolicy } from '../http/route-policy.ts';
 import type { JsonValue } from './values.ts';
 
@@ -30,7 +31,7 @@ export interface ModuleAdminRouter<Runtime> {
 export interface ModulePublicRouter<Runtime> {
   register<I extends ModuleInputSchema>(
     spec: ModuleRouteSpec<I, Extract<RoutePolicy, { kind: 'public' }>> & {
-      access: { kind: 'read' } | { kind: 'write'; secretScope: string };
+      access: PublicAccessInput;
     },
     handler: (runtime: Runtime, input: z.output<I>) => Promise<Response>,
   ): void;

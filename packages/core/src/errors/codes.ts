@@ -16,6 +16,8 @@ export const ERROR_CODES = {
   unsupported_media_type: { status: 415, title: 'Unsupported media type' },
   service_unavailable: { status: 503, title: 'Service unavailable' },
   rate_limited: { status: 429, title: 'Too many requests' },
+  proof_invalid: { status: 400, title: 'Verification failed' },
+  quota_exceeded: { status: 402, title: 'Usage limit reached' },
 } as const satisfies Record<string, { status: number; title: string }>;
 
 export type ErrorCode = keyof typeof ERROR_CODES;

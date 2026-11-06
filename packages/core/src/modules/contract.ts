@@ -1,5 +1,6 @@
 import type { z } from 'zod';
 
+import type { PublicWriteContext, PublicWritePolicyInput } from '../abuse/policy.ts';
 import type { ModuleInstance } from '../platform/models.ts';
 import type { OptionalServiceName } from '../services/container.ts';
 import type { ModuleRepositories } from '../tenancy/repositories.ts';
@@ -52,6 +53,7 @@ export type ModuleRuntime<
   config(input: unknown): T;
   capabilities: ReturnType<typeof capabilityView<R, O>>;
   services: ModuleServices<SR, SO>;
+  publicWrite?: Readonly<PublicWriteContext>;
 }>;
 export type { ModuleExecution } from './execution.ts';
 
@@ -75,6 +77,7 @@ export type ModuleDefinition<
   migrateConfig?(fromVersion: number, config: unknown): T;
   validateConfigChange?(previous: T, next: T): ConfigChangeReport;
   codegen?(instance: ConfiguredInstance<T>): string;
+  publicWritePolicy?(config: T): PublicWritePolicyInput;
   scopes: readonly ScopeDefinition[];
   events: readonly EventDefinition[];
   usageMetrics: readonly MetricDefinition[];

@@ -416,14 +416,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Tamper/expiry/wrong-secret/wrong-project cases, concurrent replay, fixed-clock difficulty checks and public response snapshot.
 - **Risks/notes:** Tune difficulty with measured solve time and record it; no third-party captcha dependency.
 
-### [ ] P1.9b – Compose AbuseGuard and public CORS (est. 6 h)
+### [x] P1.9b – Compose AbuseGuard and public CORS (est. 6 h)
 - **Description:** Implement §D.5's cheap-first pipeline with body/rate/origin checks, honeypot short circuit, PoW, strict validation, heuristics and quota hooks.
 - **Files/packages:** core abuse pipeline, server public router/middleware, test-only public-write fixture.
 - **Depends on:** P1.9a, P1.8d.
 - **Reuses:** Shared limiter, IP identity, normalized origins, module config/schema and entitlements.
 - **Acceptance criteria:**
-  - [ ] Public write fixture proves ordering and size overrides; honeypot success persists nothing; schema errors are structured; heuristics return verdicts rather than dropping accepted data.
-  - [ ] CORS reflects only permitted origins with correct Vary/preflight behavior and no credential reflection; management routes gain no CORS. Quota rejection occurs before persistence.
+  - [x] Public write fixture proves ordering and size overrides; honeypot success persists nothing; schema errors are structured; heuristics return verdicts rather than dropping accepted data.
+  - [x] CORS reflects only permitted origins with correct Vary/preflight behavior and no credential reflection; management routes gain no CORS. Quota rejection occurs before persistence.
 - **Tests:** Oversized/chunked bodies, denied/empty/null origins, honeypot, PoW skip scope, limiter/quota failures and full public response snapshots.
 - **Risks/notes:** Real domain writes arrive P2–P4; fixture route must not be mounted in production.
 
@@ -684,3 +684,5 @@ P1.9a provider, atomic replay store and rate-limited challenge composition are i
 | R7 | ClamAV: arm64 only in `-debian` images; 1.5–2 GB RAM | P0.3a, P3 | `-debian` tag, profile `scan` | open |
 | R8 | File watching across the macOS bind mount | P0.3b | Polling options, documented | open |
 | R9 | Garage may not enforce signed `Content-Length` on presigned PUTs | P0.9b, P3 | Enforced (403 on mismatch); needs the checksum setting (ADR-0020); P3.10 keeps it under test | resolved |
+
+P1.9b implements the shared guard and public CORS (ADR-0046), verified through real HTTP/PG fixtures including quota/provider failure and atomic rollback. Production publishable bootstrap remains the separate Q11/P1.9a gate; no new unscoped lookup was introduced. JSON transport is in M1; HTML form adaptation stays M2.

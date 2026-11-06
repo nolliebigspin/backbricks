@@ -1,11 +1,11 @@
 import { createHash } from 'node:crypto';
 
 import { AppError } from '../errors/app-error.ts';
-import { isOriginAllowed } from '../http/origins.ts';
 import type { CredentialRequest } from '../identity/principal.ts';
 import type { CaptchaProvider } from '../services/providers.ts';
 import type { WithTenant } from '../tenancy/tenant-context.ts';
 import type { Clock } from '../time/clock.ts';
+import { assertPublicOrigin } from './guard.ts';
 import type { PublicCredentialResolver } from './public-credentials.ts';
 import { publicCredentialSchema } from './public-credentials.ts';
 import type { RateLimiter } from './rate-limiter.ts';
@@ -22,7 +22,11 @@ export function createChallengeService(deps: {
   withTenant: WithTenant;
   resolve: PublicCredentialResolver;
 }) {
-  return async (credential: string, request: CredentialRequest) => {
+  return async (
+    credential: string,
+    request: CredentialRequest,
+    allowOrigin?: (origin: string) => void,
+  ) => {
     if (!request.ipHash) throw new AppError('service_unavailable');
     const ip = await deps.limiter.consume({
       namespace: 'public.challenge_ip',
@@ -38,18 +42,8 @@ export function createChallengeService(deps: {
       { organizationId: identity.organizationId, projectId: identity.projectId },
       async (tx) => {
         const project = await tx.repositories.projects.get(identity.projectId);
-        if (
-          identity.kind === 'publishable' &&
-          request.origin !== null &&
-          !isOriginAllowed(project.allowedOrigins, request.origin)
-        )
-          throw new AppError('forbidden');
-        if (
-          identity.kind === 'publishable' &&
-          project.allowedOrigins.length > 0 &&
-          request.origin === null
-        )
-          throw new AppError('forbidden');
+        assertPublicOrigin(identity.kind, project.allowedOrigins, request.origin);
+        if (request.origin !== null) allowOrigin?.(request.origin);
       },
     );
     const project = await deps.limiter.consume({

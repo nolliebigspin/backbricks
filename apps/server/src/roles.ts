@@ -10,6 +10,7 @@ import type { Logger } from './logger.ts';
 import { createApiAuthorization } from './middleware/authorization.ts';
 import { registerProjects } from './projects.ts';
 import { createPublicCredentialResolver } from './public-auth.ts';
+import { createPublicExecutor } from './public-executor.ts';
 import { challengeRoutes } from './routes/challenge.ts';
 import { configurationRoutes } from './routes/configuration.ts';
 import { instanceRoutes } from './routes/instances.ts';
@@ -68,8 +69,13 @@ export function startServe(config: Config, log: Logger): RunningRole {
       metaRoutes(api, services.modules);
       instanceRoutes(api, services);
       configurationRoutes(api, services);
-      challengeRoutes(api, { captcha: services.captcha, issue: issueChallenge });
-      moduleRoutes(api, services);
+      challengeRoutes(api, {
+        captcha: services.captcha,
+        issue: issueChallenge,
+        resolve: resolvePublic,
+        withTenant: services.withTenant,
+      });
+      moduleRoutes(api, services, createPublicExecutor(services, resolvePublic), resolvePublic);
     },
     createApiAuthorization({ config, db: database.db, auth, resolveKey: keyAuth.resolveKey }),
   );

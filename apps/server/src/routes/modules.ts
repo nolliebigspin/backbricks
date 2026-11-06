@@ -1,4 +1,13 @@
-import { AppError, type RegisteredRoute, type TenantContext } from '@backbricks/core';
+import {
+  AppError,
+  type RegisteredRoute,
+  type PublicWriteContext,
+  type TenantTransaction,
+  publicWriteEnvelopeSchema,
+  honeypotResponseSchema,
+  publishableKeyTokenSchema,
+  type PublicCredentialResolver,
+} from '@backbricks/core';
 import { createRoute, z, type RouteConfig } from '@hono/zod-openapi';
 import type { Context } from 'hono';
 
@@ -6,17 +15,19 @@ import type { AppEnv } from '../context.ts';
 import type { ApiRoutes } from '../http/api-routes.ts';
 import { requireTenantContext } from '../middleware/authorization.ts';
 import type { ServerServices } from '../services.ts';
+import { publicPreflight } from './public-cors.ts';
 
 const methods = { GET: 'get', POST: 'post', PATCH: 'patch', PUT: 'put', DELETE: 'delete' } as const;
 /** P1.9 supplies credential/origin/abuse checks before any public module transaction is opened. */
-export type ModulePublicAuthorization = (
+export type ModulePublicExecutor = (
   context: Context<AppEnv>,
   moduleType: string,
   route: RegisteredRoute,
-) => Promise<TenantContext>;
+  run: (tx: TenantTransaction, input: unknown, context?: PublicWriteContext) => Promise<Response>,
+) => Promise<Response>;
 
 function responses(route: RegisteredRoute): RouteConfig['responses'] {
-  return Object.fromEntries(
+  const declarations: RouteConfig['responses'] = Object.fromEntries(
     Object.entries(route.responses).map(([status, response]) => {
       const content =
         response.kind === 'json'
@@ -27,15 +38,47 @@ function responses(route: RegisteredRoute): RouteConfig['responses'] {
       return [status, { description: response.description, ...(content ? { content } : {}) }];
     }),
   );
+  if (route.access?.kind === 'write') {
+    const response = route.responses[200];
+    if (response && response.kind !== 'json')
+      throw new AppError('invalid_request', {
+        detail: 'Public write acknowledgements must be JSON.',
+      });
+    declarations[200] = {
+      description: 'Accepted.',
+      content: {
+        'application/json': {
+          schema: response
+            ? z.union([response.schema, honeypotResponseSchema])
+            : honeypotResponseSchema,
+        },
+      },
+    };
+  }
+  return declarations;
 }
 
 /** Mount selected typed hooks through the same policy/OpenAPI inventory as platform routes. */
 export function moduleRoutes(
   api: ApiRoutes,
   services: Pick<ServerServices, 'modules' | 'moduleRuntime' | 'withTenant'>,
-  authorizePublic?: ModulePublicAuthorization,
+  executePublic?: ModulePublicExecutor,
+  resolvePublic?: PublicCredentialResolver,
 ) {
   for (const module of services.modules.registry.modules) {
+    if (resolvePublic) {
+      const paths = new Set(module.publicRoutes.map((route) => route.path));
+      for (const [index, path] of [...paths].entries())
+        publicPreflight(api, {
+          path: `/v1/public/${module.resourceName.plural}${path === '/' ? '' : path}`,
+          operationId: `${module.type}.preflight.${index}`,
+          methods: module.publicRoutes
+            .filter((route) => route.path === path)
+            .map((route) => route.method),
+          resolve: resolvePublic,
+          withTenant: services.withTenant,
+        });
+    }
     for (const route of [...module.adminRoutes, ...module.publicRoutes]) {
       if (/\{(?:projectId|organizationId)\}/.test(route.path))
         throw new AppError('invalid_request', {
@@ -55,40 +98,56 @@ export function moduleRoutes(
           params: management
             ? route.input.shape.params.extend({ projectId: z.string() })
             : route.input.shape.params,
-          query: route.input.shape.query,
+          query: management
+            ? route.input.shape.query
+            : route.input.shape.query.extend({ key: publishableKeyTokenSchema.optional() }),
           ...(hasBody
             ? {
                 body: {
                   required: true,
-                  content: { 'application/json': { schema: route.input.shape.body } },
+                  content: {
+                    'application/json': {
+                      schema: management
+                        ? route.input.shape.body
+                        : publicWriteEnvelopeSchema(route.input.shape.body),
+                    },
+                  },
                 },
               }
             : {}),
         },
         responses: responses(route),
       });
-      api.register(definition, route.policy, async (c) => {
-        if (!management && !authorizePublic) throw new AppError('service_unavailable');
-        const tenant = management
-          ? requireTenantContext(c)
-          : await authorizePublic?.(c, module.type, route);
-        if (!tenant) throw new AppError('unauthorized');
-        const input = {
-          // Give the contract raw values so schema transforms run once for the domain callback.
-          params: c.req.param(),
-          query: Object.fromEntries(
-            Object.entries(c.req.queries()).map(([name, values]) => [
-              name,
-              values.length === 1 ? values[0] : values,
-            ]),
-          ),
-          body: hasBody ? await c.req.json<unknown>() : null,
-        };
-        const response = await services.withTenant(tenant, (tx) =>
-          route.run(services.moduleRuntime.forTenant(tx).execution(module.type), input),
-        );
-        return response;
-      });
+      api.register(
+        definition,
+        route.policy,
+        async (c) => {
+          const run = (tx: TenantTransaction, input: unknown, context?: PublicWriteContext) =>
+            route.run(
+              {
+                ...services.moduleRuntime.forTenant(tx).execution(module.type),
+                ...(context ? { publicWrite: context } : {}),
+              },
+              input,
+            );
+          if (!management) {
+            if (!executePublic) throw new AppError('service_unavailable');
+            return executePublic(c, module.type, route, run);
+          }
+          const input = {
+            params: c.req.param(),
+            query: Object.fromEntries(
+              Object.entries(c.req.queries()).map(([name, values]) => [
+                name,
+                values.length === 1 ? values[0] : values,
+              ]),
+            ),
+            body: hasBody ? await c.req.json<unknown>() : null,
+          };
+          return services.withTenant(requireTenantContext(c), (tx) => run(tx, input));
+        },
+        { deferPublicBodyValidation: !management && hasBody },
+      );
     }
   }
 }

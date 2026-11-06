@@ -72,6 +72,20 @@ export type { AuthReplayStore } from './privacy/auth-replay.ts';
 export type { ReplayStore } from './privacy/replay.ts';
 export { createChallengeService, POW_TTL_SECONDS } from './abuse/challenge.ts';
 export {
+  publicAccessSchema,
+  publicWritePolicySchema,
+  publicWriteEnvelopeSchema,
+  publicWriteContextSchema,
+  honeypotResponseSchema,
+  spamVerdict,
+  spamVerdictSchema,
+  type PublicAccess,
+  type PublicAccessInput,
+  type PublicWritePolicy,
+  type PublicWritePolicyInput,
+  type PublicWriteContext,
+} from './abuse/policy.ts';
+export {
   publicCredentialSchema,
   publicRequestCredential,
   type PublicCredential,
@@ -363,3 +377,4 @@ export {
   type ModuleCatalogEntry,
   type SelectedModules,
 } from './modules/catalog.ts';
+export { createAbuseGuard, assertPublicOrigin } from './abuse/guard.ts';

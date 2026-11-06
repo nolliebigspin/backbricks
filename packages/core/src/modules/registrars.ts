@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { publicAccessSchema, type PublicAccessInput } from '../abuse/policy.ts';
 import { AppError } from '../errors/app-error.ts';
 import { routePolicySchema, type RoutePolicy } from '../http/route-policy.ts';
 import { redactSecretText } from '../logging/redact.ts';
@@ -50,7 +51,7 @@ export function routeRegistrar<Runtime>(
 ) {
   const routes: RegisteredRoute[] = [];
   function register<I extends ModuleInputSchema>(
-    spec: ModuleRouteSpec<I, RoutePolicy> & { access?: RegisteredRoute['access'] },
+    spec: ModuleRouteSpec<I, RoutePolicy> & { access?: PublicAccessInput },
     handler: (runtime: Runtime, input: z.output<I>) => Promise<Response>,
   ) {
     const policy = freezeDeclaration(routePolicySchema.parse(spec.policy));
@@ -85,8 +86,18 @@ export function routeRegistrar<Runtime>(
         ]),
       ),
     );
-    const access = spec.access ? Object.freeze({ ...spec.access }) : undefined;
+    const access = spec.access
+      ? freezeDeclaration(publicAccessSchema.parse(spec.access))
+      : undefined;
+    if (kind === 'public' && Object.hasOwn(spec.input.shape.query.shape, 'key'))
+      throw new AppError('invalid_request', {
+        detail: 'The public credential query parameter is reserved.',
+      });
     if (kind === 'public' && !access) throw new AppError('invalid_request');
+    if (kind === 'public' && !['GET', 'POST'].includes(spec.method))
+      throw new AppError('invalid_request');
+    if (kind === 'public' && (spec.method === 'GET') !== (access?.kind === 'read'))
+      throw new AppError('invalid_request');
     routes.push(
       Object.freeze({
         ...spec,

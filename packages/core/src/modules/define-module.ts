@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { publicWriteContextSchema, publicWritePolicySchema } from '../abuse/policy.ts';
 import { AppError } from '../errors/app-error.ts';
 import type { OptionalServiceName } from '../services/container.ts';
 import { capabilityView, type CapabilityName } from './capabilities.ts';
@@ -70,6 +71,9 @@ export function defineModule<
       config: (input: unknown) => configSchema.parse(input),
       capabilities: capabilityView(execution.handle, execution.capability, { required, optional }),
       services: moduleServices(execution, { ...metadata, jobs: jobs.jobs }),
+      publicWrite: execution.publicWrite
+        ? Object.freeze(publicWriteContextSchema.parse(execution.publicWrite))
+        : undefined,
     });
   }
   const admin = routeRegistrar(runtime, 'management');
@@ -83,6 +87,10 @@ export function defineModule<
     ...metadata,
     infrastructure: Object.freeze(infrastructure),
     ...config,
+    publicWritePolicy: (input) =>
+      publicWritePolicySchema.parse(
+        definition.publicWritePolicy?.(configSchema.parse(input)) ?? {},
+      ),
     provide(name, execution) {
       if (!Object.hasOwn(factories, name)) return undefined;
       return factories[name]?.(runtime(execution));

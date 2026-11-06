@@ -1,5 +1,6 @@
 import type { z } from 'zod';
 
+import type { PublicAccess, PublicWritePolicy } from '../abuse/policy.ts';
 import type { RoutePolicy } from '../http/route-policy.ts';
 import type { OptionalServiceName } from '../services/container.ts';
 import type { Capability, CapabilityName } from './capabilities.ts';
@@ -22,7 +23,7 @@ export type RegisteredRoute = {
   input: ModuleInputSchema;
   responses: Readonly<Record<number, ModuleResponseDefinition>>;
   policy: RoutePolicy;
-  access?: { kind: 'read' } | { kind: 'write'; secretScope: string };
+  access?: PublicAccess;
   run(execution: ModuleExecution, input: unknown): Promise<Response>;
 };
 export type RegisteredJob = ModuleJobSpec & {
@@ -51,6 +52,7 @@ export type RegisteredModule = Readonly<{
   migrateConfig(fromVersion: number, config: unknown): JsonValue;
   validateConfigChange(previous: unknown, next: unknown): ConfigChangeReport;
   codegen(instance: unknown): string | null;
+  publicWritePolicy(config: unknown): PublicWritePolicy;
   provide<K extends CapabilityName>(name: K, execution: ModuleExecution): Capability<K> | undefined;
   adminRoutes: readonly RegisteredRoute[];
   publicRoutes: readonly RegisteredRoute[];

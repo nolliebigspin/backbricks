@@ -24,11 +24,12 @@ import { createApiAuthorization } from '../src/middleware/authorization.ts';
 import { moduleCatalog } from '../src/modules.ts';
 import { registerProjects } from '../src/projects.ts';
 import { createPublicCredentialResolver } from '../src/public-auth.ts';
+import { createPublicExecutor } from '../src/public-executor.ts';
 import { challengeRoutes } from '../src/routes/challenge.ts';
 import { configurationRoutes } from '../src/routes/configuration.ts';
 import { instanceRoutes } from '../src/routes/instances.ts';
 import { metaRoutes } from '../src/routes/meta.ts';
-import { moduleRoutes, type ModulePublicAuthorization } from '../src/routes/modules.ts';
+import { moduleRoutes, type ModulePublicExecutor } from '../src/routes/modules.ts';
 import { platformReadRoutes } from '../src/routes/platform-reads.ts';
 import { createServerServices } from '../src/services.ts';
 
@@ -66,7 +67,8 @@ export async function scenario(
     moduleRepositories?: NonNullable<
       Parameters<typeof createServerServices>[2]
     >['moduleRepositories'];
-    authorizePublic?: ModulePublicAuthorization;
+    executePublic?: ModulePublicExecutor;
+    entitlements?: NonNullable<Parameters<typeof createServerServices>[2]>['entitlements'];
   } = {},
 ) {
   const catalog = apiOptions.catalog ?? moduleCatalog;
@@ -105,6 +107,7 @@ export async function scenario(
     const mount = (config: Config) => {
       const runtime = createServerServices(config, handle.db, {
         clock: apiOptions.keyClock,
+        entitlements: apiOptions.entitlements,
         modules: catalog.select(config.modules),
         moduleRepositories: apiOptions.moduleRepositories,
       });
@@ -145,8 +148,18 @@ export async function scenario(
           metaRoutes(api, runtime.modules);
           instanceRoutes(api, runtime);
           configurationRoutes(api, runtime);
-          challengeRoutes(api, { captcha: runtime.captcha, issue: issueChallenge });
-          moduleRoutes(api, runtime, apiOptions.authorizePublic);
+          challengeRoutes(api, {
+            captcha: runtime.captcha,
+            issue: issueChallenge,
+            resolve: resolvePublic,
+            withTenant: runtime.withTenant,
+          });
+          moduleRoutes(
+            api,
+            runtime,
+            apiOptions.executePublic ?? createPublicExecutor(runtime, resolvePublic),
+            resolvePublic,
+          );
           apiOptions.configure?.(api, handle.db);
         },
         createApiAuthorization({

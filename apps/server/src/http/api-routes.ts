@@ -59,6 +59,7 @@ export class ApiRoutes {
     route: R,
     policy: RoutePolicy,
     handler: RouteHandler<R, AppEnv>,
+    options: { deferPublicBodyValidation?: boolean } = {},
   ): void {
     const parsed = routePolicySchema.parse(policy);
     if (!route.path.startsWith('/v1/') || route.hide) {
@@ -93,19 +94,25 @@ export class ApiRoutes {
       await limit(c, next);
       if (parsed.kind === 'management') c.header('Cache-Control', 'no-store');
     });
-    this.#app.openapi(
-      {
-        ...route,
-        responses: {
-          default: {
-            description: 'A structured API error.',
-            content: { 'application/problem+json': { schema: problemDetailsSchema } },
-          },
-          ...route.responses,
+    if (options.deferPublicBodyValidation && parsed.kind !== 'public')
+      throw new Error('Only public body validation may be deferred to AbuseGuard.');
+    const declared = {
+      ...route,
+      responses: {
+        default: {
+          description: 'A structured API error.',
+          content: { 'application/problem+json': { schema: problemDetailsSchema } },
         },
+        ...route.responses,
       },
-      handler,
-    );
+    };
+    const runtime = { ...declared, request: { ...declared.request } };
+    if (options.deferPublicBodyValidation) {
+      this.#app.openAPIRegistry.registerPath(declared);
+      delete runtime.request.body;
+      runtime.hide = true;
+    }
+    this.#app.openapi(runtime, handler);
     for (const registered of this.#app.routes.slice(start)) this.#handlers.add(registered);
     this.#operations.add(key);
     if (route.operationId) this.#operationIds.add(route.operationId);

@@ -511,6 +511,8 @@ Assumption: an attacker knows the publishable key and every form key and can sen
 
 Origin validation and exact matching live in [`origins.ts`](../packages/core/src/http/origins.ts). Project write payloads use [`project schemas`](../packages/core/src/projects/schemas.ts); settings currently accept only the empty reserved object until typed settings are introduced. Management routes and their permissions live in [`project routes`](../apps/server/src/routes/projects.ts); lifecycle/audit logic lives in the [core service](../packages/core/src/projects/service.ts) (ADR-0030).
 
+The implemented [shared guard](../packages/core/src/abuse/guard.ts), [policy schemas](../packages/core/src/abuse/policy.ts) and [public host executor](../apps/server/src/public-executor.ts) follow [ADR-0046](adr/0046-public-write-guard-and-cors.md). JSON transport wraps module data in `{data, proof?, honeypot?}`; the module schema remains the sole domain payload contract.
+
 **CORS:** public routes reflect `Origin` when it is in `allowed_origins` (if the list is empty: "all", with a warning in the dashboard). Management routes have **no** CORS.
 
 ### D.6 Upload flow
