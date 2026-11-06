@@ -40,7 +40,7 @@ AI coding agents are welcome. [AGENTS.md](AGENTS.md) is written for them, and mo
 - **Disclose it.** Tick the AI box in the pull request template and name the tool.
 - **No unattended agent PRs.** Pull requests that were clearly not reviewed by a human (wrong scope, invented APIs, ignored review comments) get closed.
 - **Keep the scope small.** One issue per PR, as AGENTS.md §1 says. Agents tend to "improve" nearby code; leave it out of the PR.
-- The `.claude/commands/bb-*` workflows and `docs/PLANNING_PROMPT.md` are for maintainers working through the roadmap. For an issue you don't need them.
+- The roadmap workflow (AGENTS.md §9, `PLAN.md`) is for maintainers working through the milestones. For an issue you don't need it.
 
 ## Reviewing pull requests locally
 

@@ -2,13 +2,10 @@
 
 Backbricks is an open-source (AGPL-3.0) headless platform that gives websites managed backend features (forms, file uploads, reviews). AI coding agents integrate it via API/SDK/CLI/MCP, and non-technical site owners manage data in a dashboard. Self-hostable first; a managed EU cloud follows after 1.0.
 
-**Read before working:**
-- `docs/ARCHITECTURE.md` explains *what* we build and *why* (decisions, data model, API, roadmap).
-- `docs/MILESTONES.md` says *where* we are going.
-- `PLAN.md` (after the planning run) lists the tasks; `docs/adr/` records decisions that deviate from or refine the architecture.
-- This file sets the rules for *how* we work. It applies to every session and every agent (Claude Code reads it via `CLAUDE.md`, Codex and others directly).
-- **Maintainer workflows** (`bb-plan`, `bb-phase`, `bb-resume`, `bb-review`, `bb-new-module`) live in `.claude/commands/bb-*.md`, together with `docs/PLANNING_PROMPT.md`. They drive the roadmap phase by phase from `PLAN.md`. Agents without slash commands read the file and follow it, with `$ARGUMENTS` replaced by the user's input. The `bb-` prefix keeps them from clashing with built-in or personal commands of the same name.
-- **Contributors** working from a GitHub issue don't need these workflows: follow this file and `CONTRIBUTING.md`.
+This file sets the rules for *how* we work, for every session and every agent (Claude Code reads it via `CLAUDE.md`, Codex and others directly). The other sources:
+- `docs/ARCHITECTURE.md`: *what* we build (contracts, data model, API, security). `docs/adr/`: *why* (one ADR per key decision or deviation).
+- `docs/MILESTONES.md`: *where* we are going (scope and exit criteria). `PLAN.md`: the tasks. `OPEN_QUESTIONS.md`: decisions waiting for the maintainer.
+- Contributors working from a GitHub issue: this file and `CONTRIBUTING.md`; the roadmap workflow (§9) is for maintainers.
 
 ---
 
@@ -16,7 +13,7 @@ Backbricks is an open-source (AGPL-3.0) headless platform that gives websites ma
 
 1. **Think in the whole system, not the file.** Before changing anything, understand where it sits: which module, which layer, who calls it, what depends on it. A local fix that breaks a contract elsewhere is not a fix.
 2. **Search before you write.** Before creating a function, type, schema, component, hook, util or constant, look for an existing one (use the code graph first, see §6). If something similar exists, **reuse it, extend it, or generalize it**, in that order. Create new code only when nothing fits.
-3. **One source of truth for everything.** Each concept (schema, type, constant, error code, config, UI pattern, environment definition) lives in exactly one place and is imported everywhere else. Derive, don't duplicate: types come from Zod schemas, API types from OpenAPI, the dashboard client from the same contract as the SDK.
+3. **One source of truth for everything.** Each concept (schema, type, constant, error code, config, UI pattern, environment definition) lives in exactly one place and is imported everywhere else. Derive, don't duplicate: types come from Zod schemas, API types from OpenAPI, the dashboard client from the same contract as the SDK. The same goes for docs: once something is built, the code is the source of truth and the docs link to it.
 4. **Respect boundaries.** Modules talk to the core through contracts and to each other only through capabilities. Never reach across a boundary because it is quicker.
 5. **Small, coherent changes.** One task per change, tests included, nothing unrelated mixed in. If you notice something else that is broken, note it (`PLAN.md` or a TODO with an issue reference); don't silently fix it in the same change.
 6. **Leave it cleaner, not bigger.** Prefer deleting and consolidating over adding. Dead code, unused exports and stale comments go.
@@ -62,20 +59,18 @@ packages/sdk, packages/cli ─► packages/api-contract (types only). NEVER serv
 - **Same meaning, second occurrence → extract.** If the same *concept* appears twice, consolidate before or as part of your change.
 - **Similar shape, different meaning → keep separate.** Don't merge code that merely looks alike (e.g. a form field limit and an upload size limit). Wrong abstractions are worse than duplication.
 - **Generalize through the contract.** If a module needs something the core lacks, extend the core contract once (with an ADR when it changes `ModuleDefinition`) instead of working around it locally.
-- Before finishing a task, scan your diff: did you add something that already exists? Did you leave two ways of doing the same thing?
 
 ### 2.4 Design rules
 
 - Pure functions for logic; side effects at the edges (adapters, routes, jobs).
 - Dependency injection via the service container (`ctx.services`), no module-level singletons with hidden state.
 - Validate at boundaries (HTTP, env, config files, job payloads), then trust typed data inside.
-- Explicit over clever: readable names, early returns, no premature abstractions or generic "manager" classes.
 - Files stay focused (rough guide: < 300 lines). Split by responsibility, not arbitrarily.
 - Public functions of a package are exported through its `index.ts`; deep imports into other packages are not allowed.
 
 ## 3. Non-negotiable invariants
 
-These are canonical (the planning prompt refers to them). Violations block merges.
+These are canonical (cited as I1–I19 everywhere). Violations block merges.
 
 **Tenancy**
 - **I1** Every tenant table has `organization_id` and, if project-scoped, `project_id`. Tenant tables are accessed only via `withTenant(ctx, fn)` and its repositories.
@@ -108,7 +103,7 @@ These are canonical (the planning prompt refers to them). Violations block merge
 
 ## 4. Stack and commands
 
-Stack: **Bun** (runtime, package manager, tests) · **TypeScript 7** · **Turborepo** · **Hono** · **Drizzle + PostgreSQL 18** · **pg-boss** · **Better Auth** · **React 19 + Vite + TanStack + shadcn/ui + Tailwind v4** · **oxlint/oxfmt** · **Playwright** · **Docker Compose** · **mise** · **lefthook**. Full rationale: `docs/ARCHITECTURE.md` §H.
+Stack: **Bun** (runtime, package manager, tests) · **TypeScript 7** · **Turborepo** · **Hono** · **Drizzle + PostgreSQL 18** · **pg-boss** · **Better Auth** · **React 19 + Vite + TanStack + shadcn/ui + Tailwind v4** · **oxlint/oxfmt** · **Playwright** · **Docker Compose** · **mise** · **lefthook**. Full list: `docs/ARCHITECTURE.md` §H; reasons in the ADRs.
 
 | Task | Command |
 |---|---|
@@ -125,7 +120,7 @@ Stack: **Bun** (runtime, package manager, tests) · **TypeScript 7** · **Turbor
 | DB migrations | `bun run db:generate` / `bun run db:migrate` |
 | Regenerate OpenAPI contract + check drift | `bun run api:generate` / `bun run api:check` |
 
-Scripts that don't exist yet are created in milestone M0. Add new scripts to the root `package.json` (Turborepo pipelines) or `mise.toml` (environment orchestration), never both for the same thing.
+Add new scripts to the root `package.json` (Turborepo pipelines) or `mise.toml` (environment orchestration), never both for the same thing.
 
 ## 5. Conventions
 
@@ -141,14 +136,7 @@ Scripts that don't exist yet are created in milestone M0. Add new scripts to the
 
 ## 6. Code graph (CodeGraph)
 
-The repo ships a local semantic code graph (`.codegraph/`, gitignored) exposed through the `codegraph` MCP server (`.mcp.json`, used by Claude Code) and the `codegraph` CLI. Index setup: `mise run setup` (or `codegraph init`). The MCP server keeps the index in sync while you work.
-
-Use it **before reading files or grepping**:
-- `codegraph_explore` with a question or symbol ("where is the tenant context created", "AbuseGuard pipeline", "who calls withTenant") returns the relevant source, call paths and blast radius in one call.
-- **Before adding** a helper/type/component: explore for existing implementations (golden rule 2).
-- **Before changing** a shared function, schema or contract: explore its callers and impact, and update all affected call sites in the same change.
-- If a response flags a file as pending sync, read that file directly.
-- Agents and subagents without the MCP server (e.g. Codex) use the CLI: `codegraph explore "<query>"`.
+A local semantic code graph (`.codegraph/`, gitignored; built by `mise run setup` or `codegraph init`) is exposed through the `codegraph` MCP server (`.mcp.json`) and the `codegraph` CLI. Use it **before reading files or grepping**: to find existing code before adding something (golden rule 2), and to see callers and impact before changing a shared function, schema or contract (update all affected call sites in the same change). Agents without the MCP server (e.g. Codex) use `codegraph explore "<query>"`.
 
 ## 7. Testing
 
@@ -168,17 +156,25 @@ Use it **before reading files or grepping**:
 - The `pre-push` hook (lefthook) runs format check, lint, typecheck and affected tests. Don't bypass hooks with `--no-verify`.
 - Agents: commit on a feature branch after each completed task (or logical step of an issue). Don't push or open PRs unless asked. Never rewrite published history.
 
-## 9. Definition of done
+## 9. Roadmap workflow and definition of done
 
-**Change (every PR):** code + tests + `bun run check` green + docs updated where behavior changed + no new duplication (§2.3) + signed-off commits + PR linked to its issue or task ID.
-**Task (maintainer phase run):** the above + `PLAN.md` checkbox ticked.
-**Phase/milestone:** all tasks done, acceptance criteria demonstrated with commands, isolation suite and OpenAPI drift check green, report written to `docs/progress/phase-N.md`.
+The maintainer drives the roadmap phase by phase with requests like "plan P1", "execute P1", "review P1". Each runs in a fresh session.
+
+- **Plan a phase:** refine the phase's stub in `PLAN.md` into tasks of 2–6 h in the task format at the top of `PLAN.md`. Check current versions of new dependencies (`npm view <pkg> version`) and add them to the version list. Record weaknesses or gaps in the architecture under "Proposed deviations" (never change the architecture silently) and decisions the maintainer must make in `OPEN_QUESTIONS.md`, each with a recommendation and the task that needs the answer. No application code. End with a summary: tasks, estimate, top risks, open questions.
+- **Execute a phase** (or a given task range): create a feature branch if on `main`. Read the `PLAN.md` phase section, `OPEN_QUESTIONS.md`, the ADR index plus the ADRs and ARCHITECTURE sections the tasks cite, and the latest `docs/progress/` report. Work in `PLAN.md` order; per task: code graph → implement → tests → `bun run check` green → tick the checkbox → signed-off commit. A decision the architecture doesn't cover: take the simplest option that satisfies all invariants, write an ADR, list it in `OPEN_QUESTIONS.md` under "Decided, please confirm", keep going. When resuming, start at the first unticked task and check `git status`/`git diff` for partial work. At the end, demonstrate every exit criterion of the milestone with commands, write `docs/progress/phase-N.md` (done, deviations, known gaps, new risks, evidence) and stop. Don't push.
+- **Review a phase:** only in a session that didn't implement it. Run `bun run check`; check every invariant with concrete locations (file:line) or missing tests; look for unscoped queries, undeclared routes, private fields in public responses, secrets in logs, mutations without audit, cross-module imports, `dangerouslySetInnerHTML`, unchecked uploads; look for duplication and drift (concepts built twice, helpers that belong in core, hand-written types that should be derived, copy-pasted UI). Write `docs/progress/review-phase-N.md` with findings by severity (location, scenario, fix). Change no code.
+- **New module:** follow "Rules for new modules" in `docs/MODULES.md`.
+
+**Done means:**
+- **Change (every PR):** code + tests + `bun run check` green + docs updated where behavior changed + no new duplication (§2.3) + signed-off commits + PR linked to its issue or task ID.
+- **Task:** the above + `PLAN.md` checkbox ticked.
+- **Phase:** all tasks done, exit criteria demonstrated with commands, isolation suite and OpenAPI drift check green, report in `docs/progress/phase-N.md`.
 
 ## 10. Don'ts
 
 - Don't add features outside the current task or milestone scope (see "Out of scope for v1" in `docs/ARCHITECTURE.md` §1 and `docs/MILESTONES.md`).
 - Don't introduce new infrastructure (Redis, queues, services) without an ADR.
 - Don't build generic engines (workflow, CMS, no-code DB) "for later".
-- Don't guess library APIs. Read the current docs or types (versions change fast: Bun, Better Auth, Drizzle, oxlint, TS 7).
+- Don't guess library APIs or versions. Read the current docs or types, check current stable versions and pin exactly (versions change fast: Bun, Better Auth, Drizzle, oxlint, TS 7).
 - Don't commit secrets, `.env` files or generated local state (`.codegraph/`, `.turbo/`).
 - Don't edit generated files by hand (`packages/api-contract/*`, migrations after they're applied); regenerate them.

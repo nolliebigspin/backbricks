@@ -2,11 +2,11 @@
 
 **Priority: the open-source project comes first.** The open-source track (M0–M6) ends with `v1.0.0`, a self-hostable release that is genuinely useful on its own. The managed cloud track (C1–C3) starts only after M6.
 
-- Task-level breakdown: `docs/PLANNING_PROMPT.md` → `PLAN.md`
-- Architecture and rationale: `docs/ARCHITECTURE.md` §I
+- Tasks per phase: `PLAN.md`; acceptance of a phase = the exit criteria of its milestone below
+- Architecture: `docs/ARCHITECTURE.md`; cloud background: `docs/CLOUD.md`
 - GitHub milestones are created from `.github/milestones.json` with `mise run gh:milestones` (idempotent; titles and one-line summaries only, this file holds the detail)
 
-Effort is in person-days (PD) for one experienced developer working with AI coding agents.
+Effort is in person-days (PD, 8 h) for one experienced developer working with AI coding agents, including tests and reviewing agent output. At 15–20 h/week, calendar time grows by roughly 2–2.5×. Total to 1.0: **≈ 57–73 PD**; cloud afterwards: **≈ 15–21 PD**.
 
 ```mermaid
 flowchart LR
@@ -25,8 +25,8 @@ flowchart LR
 
 ## Open-source track
 
-### M0 · Foundation
-- **Phase:** P0 · **Effort:** 4–5 PD · **Release:** –
+### M0 · Foundation · ✅ done
+- **Phase:** P0 · **Effort:** 4–5 PD · **Release:** – · **Report:** [`progress/phase-0.md`](progress/phase-0.md) (open: CI green on a PR)
 - **Goal:** A runnable, tested skeleton every later phase builds on.
 - **Scope:** workspace packages, architecture rules (dependency-cruiser), Docker Compose dev environment (infra + app services), env config, server/worker/migrate entry points, Drizzle + migration runner, dashboard skeleton reusing `packages/ui` (shadcn theme and components, already created with the website, ADR-0001), dependency-cruiser rule that `apps/www` imports only `packages/ui`, production Dockerfile, CI completion, library spike on Bun/TS 7.
 - **Exit criteria:**
@@ -42,6 +42,7 @@ flowchart LR
 - **Exit criteria:**
   - Sign-up → org → project → keys → invite works end to end (Playwright)
   - Isolation suite covers 100 % of management routes
+  - Audit entries visible for key and member actions
   - Secret key with foreign origin → `403` + audit entry
   - OpenAPI drift check enforced in CI
 
@@ -51,8 +52,10 @@ flowchart LR
 - **Scope:** form config + templates, runtime validation, public submit (JSON + plain HTML), idempotency, spam handling, admin API (list, search, status, bulk, CSV), notifications, retention + GDPR handlers, dashboard inbox, minimal SDK `forms.submit`, HTML example.
 - **Exit criteria:**
   - Plain HTML and fetch examples create entries visible in the dashboard
-  - Spam/honeypot handled; notifications content-free by default
-  - CSV export is injection-safe; expired entries are purged
+  - Validation errors are structured problem details
+  - Spam/honeypot handled; notification arrives in Mailpit without content
+  - CSV export is injection-safe (a field `=SUM(1)` is exported defused); expired entries are purged
+  - Isolation suite covers the new routes
 - **Release:** `v0.1.0` image + dev-setup quickstart in README
 
 ### M3 · Uploads → `v0.2.0`
@@ -60,17 +63,20 @@ flowchart LR
 - **Goal:** Safe direct-to-storage uploads, linked to forms.
 - **Scope:** upload zones, presigned PUT with signed size/type, copy-then-scan with ClamAV, magic-byte checks, `files` capability + form file fields, admin API + downloads, cleanup jobs, dashboard files view, SDK `uploads.upload`, storage contract suite.
 - **Exit criteria:**
-  - EICAR → quarantined; spoofed file types rejected; oversized uploads rejected by storage
-  - Overwrite after `complete` cannot change the scanned file
-  - Downloads only as attachments; orphans deleted after 24 h
+  - EICAR → `quarantined`, object deleted, notification sent
+  - An upload larger than declared is rejected by storage; PDF extension with EXE content → `rejected`
+  - A second PUT to the upload URL after `complete` doesn't change the final file
+  - A foreign or already claimed `fileRef` → error
+  - Downloads have `Content-Disposition: attachment`; orphans deleted after 24 h
 
 ### M4 · Reviews → `v0.3.0`
 - **Phase:** P4 · **Effort:** 5–7 PD
 - **Goal:** Collect, moderate and publish reviews; the first module that serves data publicly.
 - **Scope:** collection config, submit, public list + stats with caching, moderation API, dashboard moderation queue, SDK methods.
 - **Exit criteria:**
-  - Only approved + published reviews are public; snapshot tests prove private fields never leak
-  - `ETag`/`304` works; stats correct
+  - Only `approved` + published + `is_test=false` reviews are public
+  - Snapshot tests prove email, private fields and `source` never appear in public responses
+  - `If-None-Match` → `304`; stats match fixtures
 
 ### M5 · Agent-ready → `v0.4.0`
 - **Phase:** P5 · **Effort:** 12–15 PD
@@ -78,8 +84,9 @@ flowchart LR
 - **Scope:** full SDK (+ admin client), CLI (`init`, `pull`, `diff`, `push`, `validate`, `codegen`, `test`, `doctor`, `docs`), stdio MCP server, agent skill, `llms.txt`, docs site (Starlight at `backbricks.app/docs` inside `apps/www`, plus `/errors/*` and `/schema/*`), examples (Next.js, Astro, HTML), "Connect an AI agent" wizard.
 - **Exit criteria:**
   - Scenario A E2E green in CI
-  - MCP server works in Claude Code; `doctor` catches misplaced secret keys
-  - SDK < 8 KB gz; CLI/SDK work on Node and Bun
+  - The MCP server registers in Claude Code and creates a form via `form_upsert`
+  - `doctor` reports a key deliberately set as `NEXT_PUBLIC_BACKBRICKS_SECRET`
+  - SDK < 8 KB gz; CLI works with `npx` (Node) and `bunx`; SDK tests pass on Node and Bun
 - **Release:** npm packages `@backbricks/sdk` and `backbricks` published
 
 ### M6 · Open Source 1.0 → `v1.0.0`

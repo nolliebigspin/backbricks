@@ -4,7 +4,7 @@
 
 Your AI agent builds the frontend. Backbricks handles the functionality behind it: data processing, storage, security and a dashboard where non-technical site owners manage what comes in. No database, backend or storage to configure. Bring your own UI; Backbricks ships no widgets, iframes or CSS.
 
-> **Status: pre-alpha.** Architecture and roadmap are done; implementation starts with milestone M0. See [`docs/MILESTONES.md`](docs/MILESTONES.md).
+> **Status: pre-alpha.** Milestone M0 (foundation) is done; M1 (platform core) is next. See [`docs/MILESTONES.md`](docs/MILESTONES.md).
 
 ## What it does (v1 scope)
 
@@ -32,7 +32,7 @@ Requirements: [mise](https://mise.jdx.dev) and Docker (Docker Desktop or OrbStac
 ```bash
 mise install        # pinned tools: bun, node, lefthook, codegraph, gh
 mise run setup      # dependencies, git hooks, local code graph
-mise run dev        # full dev environment in Docker Compose (available from M0)
+mise run dev        # full dev environment in Docker Compose
 bun run check       # everything CI checks
 ```
 
@@ -41,10 +41,9 @@ Stack: Bun · TypeScript 7 · Turborepo · Hono · PostgreSQL + Drizzle · pg-bo
 ## Documentation
 
 - [backbricks.app](https://backbricks.app): website (source in [`apps/www`](apps/www))
-- [Architecture](docs/ARCHITECTURE.md): decisions, data model, API, security, stack
-- [Milestones](docs/MILESTONES.md): roadmap (open source first, then cloud)
-- [Planning prompt](docs/PLANNING_PROMPT.md): how the MVP is planned and built with AI coding agents
-- [AGENTS.md](AGENTS.md): engineering rules and invariants for humans and agents
+- [Architecture](docs/ARCHITECTURE.md): decisions, data model, API, security, stack; reasons per decision in [ADRs](docs/adr/)
+- [Milestones](docs/MILESTONES.md): roadmap (open source first, then cloud); tasks in [PLAN.md](PLAN.md)
+- [AGENTS.md](AGENTS.md): engineering rules, invariants and the roadmap workflow for humans and agents
 
 ## Contributing
 

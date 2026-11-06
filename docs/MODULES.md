@@ -49,7 +49,7 @@ Every module follows the module contract (`docs/ARCHITECTURE.md` §C). If a modu
 1. **Reuse before adding.** Surveys extend Forms; job applications are Forms + Uploads; comments reuse the review moderation flow. A new module must not duplicate an existing module's storage or workflow (see `AGENTS.md` §2).
 2. **Capabilities are built once.** If a module needs a missing capability, propose it in an ADR, implement it in the core, and design it so the other modules in the "Unlocks" column can use it too.
 3. **Same guarantees as v1.** Tenant isolation, abuse protection on public endpoints, retention and GDPR export/erasure handlers, audit logging, config-as-code, CLI/MCP support.
-4. **Start with the plan.** In Claude Code: `/bb-new-module <name> "<purpose>"` produces a plan in `docs/modules/<name>.md` for review before any code is written.
+4. **Start with the plan.** Write `docs/modules/<name>.md` and get it approved before any code is written. It covers: config schema, tables + migration, public and admin routes, jobs, `retention` and `privacy` handlers, usage metrics, dashboard pages, SDK method, tests (incl. the isolation suite) and docs, reusing the core helpers (pagination, CSV, audit, events, retention). Changes to `packages/core` or existing modules need an approved ADR first. The hypothetical "Waitlist" in `docs/ARCHITECTURE.md` §C.5 shows the shape.
 
 ## Suggested order (to be validated with users)
 
