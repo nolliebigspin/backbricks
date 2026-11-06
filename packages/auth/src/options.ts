@@ -1,17 +1,14 @@
-import { renderAuthMail, type MailMessage } from '@backbricks/core';
+import { renderAuthMail, type AuthInvitation, type MailMessage } from '@backbricks/core';
 import type { BetterAuthOptions } from 'better-auth';
 
+import {
+  AUTH_BASE_PATH,
+  AUTH_MIN_PASSWORD_LENGTH,
+  AUTH_TOKEN_LIFETIME_SECONDS,
+} from './constants.ts';
 import type { AuthPersistence, DashboardAuthOptions } from './contracts.ts';
+import { createOrganizationOptions } from './organizations/options.ts';
 import { createAuthSchemaOptions } from './schema-options.ts';
-
-export const AUTH_TOKEN_LIFETIME_SECONDS = 3600;
-export const AUTH_BODY_LIMIT_BYTES = 64 * 1024;
-export const AUTH_RATE_WINDOW_MS = 60_000;
-export const AUTH_REQUEST_LIMIT = 100;
-export const AUTH_CREDENTIAL_LIMIT = 10;
-export const AUTH_RESPONSE_FLOOR_MS = 500;
-export const AUTH_MAX_TOKEN_LENGTH = 4096;
-const AUTH_MIN_PASSWORD_LENGTH = 12;
 
 /** Request-scoped options keep hooks, transaction and deferred mail bound to this request. */
 export function createDashboardAuthOptions(
@@ -19,14 +16,15 @@ export function createDashboardAuthOptions(
   persistence: AuthPersistence,
   pending: MailMessage[],
   ipHash?: string,
-): BetterAuthOptions {
+  invitation?: AuthInvitation,
+) {
   const { config } = options;
   const secure = config.nodeEnv === 'production' || new URL(config.publicUrl).protocol === 'https:';
   return {
-    ...createAuthSchemaOptions(),
+    ...createAuthSchemaOptions(createOrganizationOptions(options, pending)),
     appName: 'Backbricks',
     baseURL: config.publicUrl,
-    basePath: '/api/auth',
+    basePath: AUTH_BASE_PATH,
     secret: config.appSecret,
     database: persistence.database,
     trustedOrigins: [new URL(config.publicUrl).origin],
@@ -42,9 +40,9 @@ export function createDashboardAuthOptions(
     verification: { storeIdentifier: 'hashed' },
     emailAndPassword: {
       enabled: true,
-      disableSignUp: config.signupPolicy !== 'open',
-      requireEmailVerification: true,
-      autoSignIn: false,
+      disableSignUp: !invitation && config.signupPolicy !== 'open',
+      requireEmailVerification: !invitation,
+      autoSignIn: Boolean(invitation),
       minPasswordLength: AUTH_MIN_PASSWORD_LENGTH,
       resetPasswordTokenExpiresIn: AUTH_TOKEN_LIFETIME_SECONDS,
       revokeSessionsOnPasswordReset: true,
@@ -63,7 +61,7 @@ export function createDashboardAuthOptions(
     },
     emailVerification: {
       expiresIn: AUTH_TOKEN_LIFETIME_SECONDS,
-      sendOnSignUp: true,
+      sendOnSignUp: !invitation,
       sendOnSignIn: false,
       autoSignInAfterVerification: false,
       sendVerificationEmail: async ({ user, url }) => {
@@ -73,6 +71,11 @@ export function createDashboardAuthOptions(
       },
     },
     databaseHooks: {
+      user: {
+        create: {
+          before: async (user) => ({ data: invitation ? { ...user, emailVerified: true } : user }),
+        },
+      },
       session: {
         create: {
           before: async (session) => ({
@@ -86,5 +89,5 @@ export function createDashboardAuthOptions(
         },
       },
     },
-  };
+  } satisfies BetterAuthOptions;
 }

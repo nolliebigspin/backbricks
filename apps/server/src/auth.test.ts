@@ -58,6 +58,7 @@ test.skipIf(!available)(
       expect(await (await request('/get-session', undefined, cookie)).json()).toBeNull();
       expect(logs.join('')).not.toContain(email);
       expect(logs.join('')).not.toContain('private-full-user-agent');
+      expect(logs.join('')).toContain('auth.signed_in');
       expect(logs.join('')).not.toContain('127.0.0.1');
       expect(logs.join('')).not.toContain(verification.searchParams.get('token')!);
     });

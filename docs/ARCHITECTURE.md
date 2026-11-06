@@ -121,7 +121,7 @@ flowchart LR
 | Reverse proxy/TLS | Recommended | Caddy | Caddy |
 | Redis, CDN | No | – | only with measured need (§J.3) |
 
-Dashboard authentication runtime, endpoint policy, signup and missing-SMTP behavior: [ADR-0026](adr/0026-dashboard-auth-runtime.md), with its linked code as the source of truth. Development's public URL points to Vite, which proxies the API; production auth requires HTTPS.
+Dashboard authentication runtime: [ADR-0026](adr/0026-dashboard-auth-runtime.md). Organization roles, constrained invitation signup and missing-SMTP links: [ADR-0027](adr/0027-organization-policy-and-invitations.md), with linked code as the source of truth. Development's public URL points to Vite, which proxies the API; production auth requires HTTPS.
 
 ---
 
@@ -816,7 +816,7 @@ See §B.6 and invariants I1–I3.
 
 ### F.6 Audit logging
 
-Logged: login events (Better Auth hooks), member and role changes, key creation/revocation, config changes (changed field paths and revision numbers; values stay in authorized revision reads), exports, downloads, deletions (single and bulk), GDPR requests, secret-key exposure, retention runs. **Not** logged: submission content or readable actor/key labels. Audit logs are append-only (trigger), kept for 1 year, filterable and exportable in the dashboard.
+Logged: member and role changes, key creation/revocation, config changes (changed field paths and revision numbers; values stay in authorized revision reads), exports, downloads, deletions (single and bulk), GDPR requests, secret-key exposure, retention runs. Committed logins emit a metadata-only operational signal before organization selection; no account-level login history is claimed ([ADR-0027](adr/0027-organization-policy-and-invitations.md)). **Not** logged: submission content or readable actor/key labels. Tenant audit logs are append-only (trigger), kept for 1 year, filterable and exportable in the dashboard.
 
 The [activity services and metadata schemas](../packages/core/src/services/activity.ts) write through the caller's scoped repositories, never a second transaction. Audit retention is one year; outbox metadata expires after 30 days. Payloads are structural metadata/identifiers/counters only; token-bearing email delivery is a separate restricted lifecycle (ADR-0022). P1.10 supplies dispatch, and later route tasks supply their action records and dashboard queries.
 

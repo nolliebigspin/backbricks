@@ -36,3 +36,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0024](0024-tenant-repository-boundary.md) | Tenant repository boundary | accepted |
 | [0025](0025-abuse-identity-and-rate-limits.md) | Private abuse identity and shared rate limits | accepted |
 | [0026](0026-dashboard-auth-runtime.md) | Dashboard auth runtime | accepted |
+| [0027](0027-organization-policy-and-invitations.md) | Organization policy and invitations | accepted |

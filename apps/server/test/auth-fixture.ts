@@ -4,17 +4,20 @@ import {
   createIds,
   createIpIdentity,
   systemClock,
+  type Config,
 } from '@backbricks/core';
 import { createDatabase, runMigrations } from '@backbricks/db';
+import { z } from '@hono/zod-openapi';
 
 import { createTestDatabase, postgresAvailable } from '../../../scripts/test/database.ts';
-import { mailpitAvailable, TEST_SMTP_URL } from '../../../scripts/test/mailpit.ts';
+import { mailpitAvailable, receivedMail, TEST_SMTP_URL } from '../../../scripts/test/mailpit.ts';
 import { createApp } from '../src/app.ts';
 import { createServerAuth } from '../src/auth.ts';
 import { createLogger } from '../src/logger.ts';
 
 export const available = (await postgresAvailable()) && (await mailpitAvailable());
 export const AUTH_TEST_SECRET = 'auth-test-only-not-a-real-secret-000000000000';
+export const idResponseSchema = z.object({ id: z.string() });
 
 export async function scenario(
   run: (fixture: {
@@ -27,6 +30,7 @@ export async function scenario(
     db: ReturnType<typeof createDatabase>['db'];
     logs: string[];
     origin: string;
+    capabilities: (values: Pick<Config, 'mailer' | 'signupPolicy'>) => Promise<void>;
   }) => Promise<void>,
   overrides: Record<string, string> = {},
 ) {
@@ -60,23 +64,30 @@ export async function scenario(
     );
     if (!result.ok) throw new Error(formatConfigIssues(result.issues));
     const log = createLogger('debug', { write: (line) => logs.push(line) });
-    auth = createServerAuth(result.config, handle.db, log);
-    app = createApp({
-      log,
-      auth,
-      ids: createIds(systemClock),
-      dashboardDir: null,
-      readinessChecks: [],
-      ipIdentity: createIpIdentity({
-        appSecret: result.config.appSecret,
-        clock: systemClock,
-        trustedProxies: [],
-      }),
-    });
+    const mount = (config: Config) => {
+      auth = createServerAuth(config, handle.db, log);
+      app = createApp({
+        log,
+        auth,
+        ids: createIds(systemClock),
+        dashboardDir: null,
+        readinessChecks: [],
+        ipIdentity: createIpIdentity({
+          appSecret: config.appSecret,
+          clock: systemClock,
+          trustedProxies: [],
+        }),
+      });
+    };
+    mount(result.config);
     await run({
       db: handle.db,
       origin,
       logs,
+      capabilities: async (values) => {
+        await auth?.close();
+        mount({ ...result.config, ...values });
+      },
       request: (path, body, cookie, extraHeaders) => {
         const headers = new Headers(extraHeaders);
         if (body !== undefined) {
@@ -112,4 +123,20 @@ export function actionLink(html: string): URL {
   const match = /href="([^"]+)"/.exec(html);
   if (!match?.[1]) throw new Error('Expected one action link');
   return new URL(match[1].replaceAll('&amp;', '&'));
+}
+
+type AuthFixture = Parameters<Parameters<typeof scenario>[0]>[0];
+/** Real registration and email verification, shared by organization/isolation scenarios. */
+export async function createVerifiedUser(fixture: AuthFixture) {
+  const email = `member-${crypto.randomUUID()}@example.invalid`;
+  const credentials = { email, password: 'a-long-test-password-1234' };
+  const signup = await fixture.request('/sign-up/email', { ...credentials, name: 'Fixture' });
+  if (signup.status !== 200) throw new Error(`Registration failed: ${signup.status}`);
+  const link = actionLink((await receivedMail(email)).HTML);
+  const verification = await fixture.request(`/verify-email${link.search}`);
+  if (verification.status !== 302) throw new Error(`Verification failed: ${verification.status}`);
+  const signin = await fixture.request('/sign-in/email', credentials);
+  if (signin.status !== 200) throw new Error(`Sign-in failed: ${signin.status}`);
+  const body = z.object({ user: z.object({ id: z.string() }) }).parse(await signin.json());
+  return { id: body.user.id, email, cookie: cookies(signin) };
 }

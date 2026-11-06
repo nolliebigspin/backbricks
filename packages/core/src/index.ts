@@ -30,9 +30,17 @@ export type { TenantContext, TenantTransaction, WithTenant } from './tenancy/ten
 export * from './tenancy/repositories.ts';
 export * from './platform/models.ts';
 export { MAX_PAGE_SIZE } from './http/pagination.ts';
+export { AUTH_BASE_PATH } from './http/auth-path.ts';
 export { API_KEY_PREFIXES } from './keys/constants.ts';
 export { canonicalIp, resolveClientIp, createIpIdentity } from './privacy/ip-identity.ts';
 export type { AuthReplayStore } from './privacy/auth-replay.ts';
+export {
+  membershipSchema,
+  authInvitationSchema,
+  type Membership,
+  type AuthInvitation,
+  type OrganizationIdentityStore,
+} from './identity/organization.ts';
 export {
   createRateLimiter,
   rateLimitInputSchema,
@@ -92,6 +100,7 @@ export {
   managementRoutePolicySchema,
   type OrganizationRole,
   organizationRoleSchema,
+  meetsOrganizationRole,
   type RoutePolicy,
   routePolicySchema,
 } from './http/route-policy.ts';

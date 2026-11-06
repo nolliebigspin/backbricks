@@ -4,7 +4,17 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { AppError, type MailMessage } from '@backbricks/core';
 import { betterAuth } from 'better-auth';
 import { isAPIError } from 'better-auth/api';
+import { z } from 'zod';
 
+import {
+  AUTH_BODY_LIMIT_BYTES,
+  AUTH_TOKEN_LIFETIME_SECONDS,
+  AUTH_RATE_WINDOW_MS,
+  AUTH_REQUEST_LIMIT,
+  AUTH_CREDENTIAL_LIMIT,
+  AUTH_RESPONSE_FLOOR_MS,
+  AUTH_MAX_TOKEN_LENGTH,
+} from './constants.ts';
 import type { DashboardAuthOptions } from './contracts.ts';
 import {
   AUTH_BASE_PATH,
@@ -14,16 +24,12 @@ import {
   authFailure,
   publicAuthResponse,
 } from './http.ts';
+import { createDashboardAuthOptions } from './options.ts';
 import {
-  AUTH_BODY_LIMIT_BYTES,
-  AUTH_TOKEN_LIFETIME_SECONDS,
-  AUTH_RATE_WINDOW_MS,
-  AUTH_REQUEST_LIMIT,
-  AUTH_CREDENTIAL_LIMIT,
-  AUTH_RESPONSE_FLOOR_MS,
-  AUTH_MAX_TOKEN_LENGTH,
-  createDashboardAuthOptions,
-} from './options.ts';
+  prepareInvitationSignup,
+  completeInvitationSignup,
+} from './organizations/invitation-signup.ts';
+import { prepareOrganizationOperation } from './organizations/operation.ts';
 
 /** The only public runtime boundary; never export an unguarded singleton or raw auth handler. */
 export function createDashboardAuth(options: DashboardAuthOptions) {
@@ -38,6 +44,8 @@ export function createDashboardAuth(options: DashboardAuthOptions) {
     const url = new URL(request.url);
     const endpoint = authEndpoint(url.pathname, request.method);
     if (!endpoint) return authFailure(404, 'NOT_FOUND');
+    const queryKeys = [...url.searchParams.keys()];
+    if (new Set(queryKeys).size !== queryKeys.length) return authFailure(400, 'INVALID_REQUEST');
     const unsafe = request.method !== 'GET';
     const emailNavigation =
       !unsafe && ['/verify-email', '/reset-password/:token'].includes(endpoint);
@@ -73,9 +81,7 @@ export function createDashboardAuth(options: DashboardAuthOptions) {
         return response;
       }
     }
-    if (endpoint === '/sign-up/email' && options.config.signupPolicy !== 'open')
-      return authFailure(403, 'SIGNUP_DISABLED');
-    if (!options.mailer && AUTH_EMAIL_ACTIONS.includes(endpoint))
+    if (!options.mailer && AUTH_EMAIL_ACTIONS.includes(endpoint) && endpoint !== '/sign-up/email')
       return authFailure(503, 'EMAIL_UNAVAILABLE');
     let body: Uint8Array | undefined;
     if (unsafe && request.body) {
@@ -101,12 +107,57 @@ export function createDashboardAuth(options: DashboardAuthOptions) {
         offset += chunk.length;
       }
     }
-    if (!authCallbacksAllowed(url, body, origin)) return authFailure(403, 'INVALID_CALLBACK');
+    let input: Record<string, unknown>;
+    try {
+      input =
+        request.method === 'GET'
+          ? Object.fromEntries(url.searchParams)
+          : body?.length
+            ? z.record(z.string(), z.unknown()).parse(JSON.parse(new TextDecoder().decode(body)))
+            : {};
+    } catch {
+      return authFailure(400, 'INVALID_REQUEST');
+    }
+    if (!authCallbacksAllowed(url, input, origin)) return authFailure(403, 'INVALID_CALLBACK');
+    if (endpoint === '/sign-up/email' && input['invitationId'] === undefined) {
+      if (options.config.signupPolicy !== 'open') return authFailure(403, 'SIGNUP_DISABLED');
+      if (!options.mailer) return authFailure(503, 'EMAIL_UNAVAILABLE');
+    }
     const pending: MailMessage[] = [];
     let response: Response;
     try {
       response = await options.transaction(async (persistence) => {
-        const auth = betterAuth(createDashboardAuthOptions(options, persistence, pending, ipHash));
+        const invitation =
+          endpoint === '/sign-up/email'
+            ? await prepareInvitationSignup(input, persistence, options)
+            : undefined;
+        const auth = betterAuth(
+          createDashboardAuthOptions(options, persistence, pending, ipHash, invitation),
+        );
+        const actor = async (headers: Headers) => {
+          const session = await auth.api.getSession({ headers });
+          return session
+            ? {
+                id: session.user.id,
+                email: session.user.email,
+                emailVerified: session.user.emailVerified,
+                activeOrganizationId: session.session.activeOrganizationId ?? null,
+              }
+            : null;
+        };
+        let finish: ((response: Response) => Promise<Response>) | undefined;
+        if (endpoint.startsWith('/organization/')) {
+          const operation = await prepareOrganizationOperation(
+            endpoint,
+            input,
+            await actor(request.headers),
+            persistence,
+            options,
+            ipHash,
+          );
+          finish = operation.finish;
+          if (unsafe) body = new TextEncoder().encode(JSON.stringify(operation.input));
+        }
         if (endpoint === '/verify-email') {
           const token = url.searchParams.get('token');
           if (!token || token.length > AUTH_MAX_TOKEN_LENGTH)
@@ -127,7 +178,16 @@ export function createDashboardAuth(options: DashboardAuthOptions) {
           (location && new URL(location, origin).searchParams.has('error'))
         )
           throw result;
-        return result;
+        if (invitation)
+          return completeInvitationSignup(invitation, result, {
+            request,
+            persistence,
+            options,
+            ipHash,
+            actor,
+            dispatch: (internalRequest) => auth.handler(internalRequest),
+          });
+        return finish ? finish(result) : result;
       });
     } catch (error) {
       if (error instanceof Response && error.status < 500) {
@@ -139,6 +199,12 @@ export function createDashboardAuth(options: DashboardAuthOptions) {
         return authFailure(error.statusCode, error.body?.code ?? 'AUTH_REQUEST_FAILED');
       options.report('auth.request_failed');
       return authFailure(503, 'AUTH_UNAVAILABLE');
+    }
+    if (
+      endpoint === '/sign-in/email' ||
+      (endpoint === '/sign-up/email' && response.headers.getSetCookie().length > 0)
+    ) {
+      options.report('auth.signed_in');
     }
     // SMTP latency must not reveal whether an anonymous account exists. Drain on shutdown.
     if (pending.length > 0) {

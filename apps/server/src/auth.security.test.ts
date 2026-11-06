@@ -24,9 +24,9 @@ test.skipIf(!available)(
       expect(
         (await request('/sign-in/email', body, undefined, { 'x-backbricks-csrf': 'wrong' })).status,
       ).toBe(403);
-      expect(
-        (await request('/organization/create', { name: 'Bypass', slug: 'bypass' })).status,
-      ).toBe(404);
+      expect((await request('/organization/delete', { organizationId: 'bypass' })).status).toBe(
+        404,
+      );
       expect((await request('/sign-up/email', { ...body, name: 'x'.repeat(65_536) })).status).toBe(
         413,
       );
@@ -124,6 +124,7 @@ test.skipIf(!available)(
       expect((await request(`/verify-email${foreign.search}`)).status).toBe(403);
       expect((await request(`/verify-email${link.search}`)).status).toBe(302);
       expect((await request('/verify-email?token=invalid-token')).status).toBe(401);
+      expect((await request(`/verify-email${link.search}&token=other`)).status).toBe(400);
     });
   },
   15_000,
@@ -150,6 +151,7 @@ test.skipIf(!available)(
       expect(mail).toBeInstanceOf(Error);
       expect(logs.join('')).toContain('auth.request_failed');
       expect(logs.join('')).not.toContain('private-commit-diagnostic');
+      expect(logs.join('')).not.toContain('auth.signed_in');
       expect(logs.join('')).not.toContain(email);
     });
   },

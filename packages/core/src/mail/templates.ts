@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { AppError } from '../errors/app-error.ts';
+import { AUTH_BASE_PATH } from '../http/auth-path.ts';
 import type { MailMessage } from './contract.ts';
 
 const mailKindSchema = z.enum([
@@ -102,9 +103,10 @@ function trustedLink(publicUrl: string, input: string, kind: AuthMailInput['kind
       throw new Error();
     const allowed =
       kind === 'verify_email'
-        ? url.pathname === '/api/auth/verify-email'
+        ? url.pathname === `${AUTH_BASE_PATH}/verify-email`
         : kind === 'reset_password'
-          ? /^\/api\/auth\/reset-password\/[A-Za-z0-9_-]+$/.test(url.pathname)
+          ? url.pathname.startsWith(`${AUTH_BASE_PATH}/reset-password/`) &&
+            /^[A-Za-z0-9_-]+$/.test(url.pathname.slice(`${AUTH_BASE_PATH}/reset-password/`.length))
           : kind === 'invitation'
             ? url.pathname === '/accept-invitation'
             : url.pathname === '/activity';

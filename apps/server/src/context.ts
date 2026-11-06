@@ -24,7 +24,7 @@ export type AppDependencies = {
   ids: Ids;
   /** Omitted only by apps/tests that do not mount auth or public-write handlers. */
   ipIdentity?: ReturnType<typeof createIpIdentity>;
-  auth?: Pick<ReturnType<typeof createDashboardAuth>, 'handle'>;
+  auth?: Pick<ReturnType<typeof createDashboardAuth>, 'handle' | 'basePath'>;
   readinessChecks: readonly ReadinessCheck[];
   /** Built dashboard to serve, or `null` (development: Vite serves it; API-only setups). */
   dashboardDir: string | null;

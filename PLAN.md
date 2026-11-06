@@ -228,15 +228,15 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Real HTTP/DB signup/login/logout/reset/verification, invalid/expired tokens, cross-origin mutations, cookie flags and no token logging.
 - **Risks/notes:** Do not build the M6 setup wizard. Auth error bodies may follow Better Auth's contract; `/v1` errors remain RFC 9457.
 
-### [ ] P1.1c – Implement organizations, members and invitations (est. 6 h)
+### [x] P1.1c – Implement organizations, members and invitations (est. 6 h)
 - **Description:** Expose the approved organization lifecycle/member/invitation surface with owner/admin/member policy and transactional auditing, using Better Auth rather than parallel membership tables.
 - **Files/packages:** auth organization integration, server organization routes/policies.
 - **Depends on:** P1.1b; proven P1.1a integration.
 - **Reuses:** Better Auth organization plugin, audit/event services, mailer, auth schema.
 - **Acceptance criteria:**
-  - [ ] Create org, select membership, invite/accept/cancel, remove member and change role work; admins cannot change owners, last-owner removal/demotion is rejected, removed members lose access immediately.
-  - [ ] Every administrative mutation audits atomically; direct `/api/auth/organization/*` calls obey the same rules or are disabled. Invitation identity/expiry/replay checks prevent joining a foreign organization.
-  - [ ] Without SMTP, invitation links are available only to the inviting owner/admin; anonymous verification/reset endpoints never disclose tokens (P1.8b dependency correction).
+  - [x] Create/select, invite/accept/cancel, removal and role changes work; admins cannot change owners. Concurrent owner demotions preserve an owner; removed members' next request is rejected. New owner grants and deletion/leave/transfer routes remain disabled per D19.
+  - [x] Every tenant administrative mutation audits and publishes metadata before commit through the same outer transaction. Role/input/isolation declarations govern the closed raw-plugin surface. Invitation identity/expiry/replay/foreign-parent checks fail closed; account/session creation rolls back with failed membership audit.
+  - [x] No-SMTP links are returned only to the authorized inviting owner/admin. New signup is constrained to live matching invitation proof and cannot replace an existing account/password; reset/verification endpoints still disclose no anonymous tokens. ADR-0027 records the Q6/Q7 baseline and tenantless-login clarification.
 - **Tests:** Real DB rollback injection, concurrent last-owner changes, role matrix and raw-plugin bypass attempts.
 - **Risks/notes:** Organization deletion/ownership transfer exposure follows Q7; disabled endpoints must reject direct calls, not merely disappear from the UI.
 
@@ -581,7 +581,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.1a/b, P1.11a, P1.2a/b, P1.3a and P1.8a/b/c complete. ADRs 0021–0026 record the implemented boundaries. Real DB suite: 30 pass across 7 files; auth HTTP/DB/Mailpit suite: 7 scenarios including commit/verification rollback. Full checks, build and existing browser smoke pass with services running; complete dashboard flows remain P1.12/P1.13. Next task: P1.1c (organizations, members and invitations). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
+P1.1a/b/c, P1.11a, P1.2a/b, P1.3a and P1.8a/b/c complete. ADRs 0021–0027 record the implemented boundaries. Real DB suite: 30 pass across 7 files; auth/organization HTTP/DB/Mailpit suite: 14 scenarios, including commit/audit rollback and owner concurrency. Full checks pass with services running; complete dashboard flows remain P1.12/P1.13. Next task: P1.3b (trusted principals and declared permissions). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 

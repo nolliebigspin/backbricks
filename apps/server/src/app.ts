@@ -1,3 +1,4 @@
+import { AUTH_BODY_LIMIT_BYTES } from '@backbricks/auth';
 import { AppError, DEFAULT_BODY_LIMIT_BYTES } from '@backbricks/core';
 import { createRoute, z } from '@hono/zod-openapi';
 import { bodyLimit } from 'hono/body-limit';
@@ -34,7 +35,16 @@ export function createApp(
   app.route('/', healthRoutes(deps.readinessChecks));
   if (deps.auth) {
     const auth = deps.auth;
-    app.all('/api/auth/*', (c) => {
+    app.use(
+      `${auth.basePath}/*`,
+      bodyLimit({
+        maxSize: AUTH_BODY_LIMIT_BYTES,
+        onError: () => {
+          throw new AppError('payload_too_large');
+        },
+      }),
+    );
+    app.all(`${auth.basePath}/*`, (c) => {
       const ipHash = c.get('ipHash');
       if (!ipHash) throw new AppError('service_unavailable');
       return auth.handle(c.req.raw, ipHash);

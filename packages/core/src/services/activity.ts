@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { AppError } from '../errors/app-error.ts';
+import { organizationRoleSchema } from '../http/route-policy.ts';
 import type { Ids, TypeId } from '../ids/type-id.ts';
 import { API_KEY_PREFIXES } from '../keys/constants.ts';
 import { auditEntrySchema, eventRecordSchema } from '../platform/models.ts';
@@ -39,6 +40,8 @@ export const activityMetadataSchema = z
     preset: tag.optional(),
     reason: tag.optional(),
     status: tag.optional(),
+    previousRole: organizationRoleSchema.optional(),
+    role: organizationRoleSchema.optional(),
     isTest: z.boolean().optional(),
     count: z.number().int().nonnegative().optional(),
   })

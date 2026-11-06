@@ -1,6 +1,9 @@
 import { z } from 'zod';
 
-export const AUTH_BASE_PATH = '/api/auth';
+import { AUTH_BASE_PATH } from './constants.ts';
+import { organizationPolicy } from './organizations/policies.ts';
+
+export { AUTH_BASE_PATH } from './constants.ts';
 export const AUTH_EMAIL_ACTIONS: readonly string[] = [
   '/sign-up/email',
   '/request-password-reset',
@@ -21,6 +24,7 @@ const endpoints: Readonly<Record<string, string>> = {
 export function authEndpoint(path: string, method: string): string | null {
   if (!path.startsWith(`${AUTH_BASE_PATH}/`)) return null;
   const relative = path.slice(AUTH_BASE_PATH.length);
+  if (organizationPolicy(relative)?.method === method) return relative;
   if (endpoints[relative] === method) return relative;
   if (method === 'GET' && /^\/reset-password\/[A-Za-z0-9_-]+$/.test(relative))
     return '/reset-password/:token';
@@ -48,21 +52,16 @@ const callbackFields = ['callbackURL', 'redirectTo', 'errorCallbackURL', 'newUse
 /** Validate every redirect before library dispatch, including duplicate query parameters. */
 export function authCallbacksAllowed(
   url: URL,
-  body: Uint8Array | undefined,
+  body: Record<string, unknown>,
   origin: string,
 ): boolean {
   try {
     const values = callbackFields.flatMap((field) => url.searchParams.getAll(field));
-    if (body?.length) {
-      const record = z
-        .record(z.string(), z.unknown())
-        .parse(JSON.parse(new TextDecoder().decode(body)));
-      for (const field of callbackFields) {
-        const value = record[field];
-        if (value === undefined) continue;
-        if (typeof value !== 'string') return false;
-        values.push(value);
-      }
+    for (const field of callbackFields) {
+      const value = body[field];
+      if (value === undefined) continue;
+      if (typeof value !== 'string') return false;
+      values.push(value);
     }
     return values.every((value) => {
       const target = new URL(value, origin);
@@ -84,7 +83,8 @@ export async function publicAuthResponse(response: Response): Promise<Response> 
   )
     return new Response(response.body, { status: response.status, headers });
   const data: unknown = await response.json();
-  if (data === null) return Response.json(null, { status: response.status, headers });
+  if (data === null || Array.isArray(data))
+    return Response.json(data, { status: response.status, headers });
   const record = z.record(z.string(), z.unknown()).parse(data);
   delete record['token'];
   const session = z.record(z.string(), z.unknown()).safeParse(record['session']);

@@ -6,6 +6,15 @@ export const DEFAULT_BODY_LIMIT_BYTES = 1024 * 1024;
 /** Organization roles understood by the platform and its auth integration. */
 export const organizationRoleSchema = z.enum(['owner', 'admin', 'member']);
 export type OrganizationRole = z.infer<typeof organizationRoleSchema>;
+const organizationRoleRanks: Record<OrganizationRole, number> = { member: 0, admin: 1, owner: 2 };
+
+/** Compare the platform's single organization role against a declared minimum. */
+export function meetsOrganizationRole(
+  actual: OrganizationRole,
+  minimum: OrganizationRole,
+): boolean {
+  return organizationRoleRanks[actual] >= organizationRoleRanks[minimum];
+}
 
 const bodyLimitBytes = z.number().int().positive().max(DEFAULT_BODY_LIMIT_BYTES);
 
