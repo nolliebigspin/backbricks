@@ -4,8 +4,12 @@ import { AppError } from '../errors/app-error.ts';
 import { organizationRoleSchema } from '../http/route-policy.ts';
 import type { Principal } from '../identity/principal.ts';
 import type { Ids, TypeId } from '../ids/type-id.ts';
-import { API_KEY_PREFIXES } from '../keys/constants.ts';
 import { scopeNameSchema } from '../keys/protocol.ts';
+import {
+  activityTextSchema as metadataString,
+  activityIdentifierSchema as identifier,
+  activityNameSchema as tag,
+} from '../platform/activity-fields.ts';
 import { auditEntrySchema, eventRecordSchema } from '../platform/models.ts';
 import type { TenantTransaction } from '../tenancy/tenant-context.ts';
 import type { Clock } from '../time/clock.ts';
@@ -14,17 +18,6 @@ import { expiresAfterDays } from '../time/retention.ts';
 export const AUDIT_RETENTION_DAYS = 365;
 export const EVENT_RETENTION_DAYS = 30;
 const MAX_METADATA_ITEMS = 100;
-const MAX_METADATA_TEXT_LENGTH = 128;
-
-const metadataString = z
-  .string()
-  .max(MAX_METADATA_TEXT_LENGTH)
-  .refine((value) => !value.includes(API_KEY_PREFIXES.secret), {
-    error: 'Secret-shaped metadata is not permitted.',
-  });
-const identifier = metadataString.regex(/^[A-Za-z0-9_.-]+$/);
-const tag = identifier.regex(/^[a-z][a-z0-9_-]*(?:\.[a-z0-9_-]+)*$/i);
-
 /** Structural changes only: full configuration values and user content belong in neither log. */
 export const activityMetadataSchema = z
   .object({

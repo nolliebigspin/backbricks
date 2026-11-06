@@ -5,6 +5,7 @@ import {
   createIds,
   createKeyService,
   createProjectService,
+  createPlatformQueries,
   createRateLimiter,
   createServiceContainer,
   createUnlimitedEntitlements,
@@ -41,6 +42,7 @@ export function createServerServices(
     container,
     withTenant: createWithTenant(db),
     projects: createProjectService(container.core),
+    queries: createPlatformQueries({ ...container.core, publicUrl: config.publicUrl }),
     keys: createKeyService({ ...container.core, enabledModules: config.modules }),
     async close() {
       await mailer?.close();

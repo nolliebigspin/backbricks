@@ -1,5 +1,6 @@
 import type { z } from 'zod';
 
+import type { AuditFilters } from '../platform/activity-fields.ts';
 import type {
   ApiKeyRecord,
   AuditEntry,
@@ -31,6 +32,7 @@ export interface KeyRepository {
   list(page: RepositoryPage): Promise<ApiKeyRecord[]>;
   get(id: string, options?: { lock?: boolean }): Promise<ApiKeyRecord>;
   findByHash(hash: Uint8Array, now: Date): Promise<ApiKeyRecord | null>;
+  publishable(now: Date): Promise<string | null>;
   insert(input: ProjectChild<ApiKeyRecord>): Promise<ApiKeyRecord>;
   revoke(id: string, now: Date): Promise<void>;
   touch(id: string, now: Date, before: Date): Promise<void>;
@@ -56,7 +58,8 @@ export interface RevisionRepository {
 }
 
 export interface AuditRepository {
-  list(page: RepositoryPage): Promise<AuditEntry[]>;
+  /** API reads supply validAt; maintenance may inspect expired history before hard purging. */
+  list(page: RepositoryPage, filters?: AuditFilters, validAt?: Date): Promise<AuditEntry[]>;
   insert(input: ProjectChild<AuditEntry>): Promise<void>;
 }
 

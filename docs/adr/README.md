@@ -45,3 +45,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0033](0033-credential-safe-diagnostic-boundaries.md) | Credential-safe diagnostic boundaries | accepted |
 | [0034](0034-key-authentication-and-exposure.md) | Key authentication and exposure handling | accepted |
 | [0035](0035-services-usage-and-entitlements.md) | Services, usage and entitlements | accepted |
+| [0036](0036-platform-read-contracts.md) | Platform read contracts | accepted |

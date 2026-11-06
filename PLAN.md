@@ -317,14 +317,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Concurrent counter increments/rollback, period boundary, unlimited checks and absent optional services.
 - **Risks/notes:** No billing/plan implementation in M1; no replacement clock/ID abstractions.
 
-### [ ] P1.5b – Add organization activity and integration reads (est. 4 h)
+### [x] P1.5b – Add organization activity and integration reads (est. 4 h)
 - **Description:** Expose session organization/project switcher data, paginated activity and usage reads, plus project integration metadata for permitted keys.
 - **Files/packages:** server organization/audit/usage/integration routes, core query services.
 - **Depends on:** P1.8d, P1.4c, P1.13a; Q9.
 - **Reuses:** Better Auth membership, audit/usage repositories, declared schemas and cursor pagination.
 - **Acceptance criteria:**
-  - [ ] Dashboard sees only its organizations/projects and permitted activity; integration output contains publishable credentials, never secret tokens or personal data.
-  - [ ] Pagination is bounded, stable and filter validation is shared; permission metadata and isolation fixtures cover every route.
+  - [x] Dashboard sees only its organizations/projects and permitted activity; integration output contains publishable credentials, never secret tokens or personal data.
+  - [x] Pagination is bounded, stable and filter validation is shared; permission metadata and isolation fixtures cover every route.
 - **Tests:** Foreign cursor/filter tampering, role/scope matrix, public-safe integration response and audit redaction snapshots.
 - **Risks/notes:** No billing UI, notification CRUD or personal-data export endpoints in this task.
 
@@ -581,7 +581,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.1a/b/c, P1.11a, P1.2a/b, P1.3a/b, P1.8a/b/c/d, P1.13a, P1.5a and P1.4a/b/c complete. ADRs 0021–0035 record implemented boundaries. Q5–Q10 are explicitly approved; I1 now states the sole exact-hash/ID authentication bootstrap exception. `bun run check` passes with no skipped tests (75 server tests, 33 real DB tests). Production key resolution, exposure audit/notification intent and owner/admin SMTP delivery pass real HTTP/Postgres/Mailpit tests, including failure rollback of notification throttling. Durable worker retries remain P1.10b; complete dashboard flows remain P1.12/P1.13. Shared provider lifetimes, restricted module service views, usage and UnlimitedEntitlements are implemented and tested. Next: P1.5b (organization activity, usage and integration reads). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
+P1.1a/b/c, P1.11a, P1.2a/b, P1.3a/b, P1.8a/b/c/d, P1.13a, P1.5a/b and P1.4a/b/c complete. ADRs 0021–0036 record implemented boundaries. Q5–Q10 are explicitly approved; I1 now states the sole exact-hash/ID authentication bootstrap exception. `bun run check` passes with no skipped tests (78 server tests, 34 real DB tests). Production key resolution, exposure audit/notification intent and owner/admin SMTP delivery pass real HTTP/Postgres/Mailpit tests, including failure rollback of notification throttling. Durable worker retries remain P1.10b; complete dashboard flows remain P1.12/P1.13. Shared provider lifetimes, restricted module service views, usage and UnlimitedEntitlements are implemented and tested. Activity/usage/integration reads are scoped, covered by isolation cases and privacy/expiry/precision tests; build and 4 browser smoke tests pass. Next: P1.6a (module definitions/capabilities). Record only unfinished-task handoffs here; completed-task evidence belongs in commits and the phase report.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 

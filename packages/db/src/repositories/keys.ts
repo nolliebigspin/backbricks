@@ -1,4 +1,8 @@
-import { apiKeyRecordSchema, type KeyRepository } from '@backbricks/core';
+import {
+  publishableKeyTokenSchema,
+  apiKeyRecordSchema,
+  type KeyRepository,
+} from '@backbricks/core';
 import { and, desc, eq, gt, isNull, lte, or } from 'drizzle-orm';
 
 import type { DbTransaction } from '../client.ts';
@@ -42,6 +46,22 @@ export function createKeyRepository(tx: DbTransaction, scope: RepositoryScope): 
         )
         .limit(1);
       return rows[0] ? apiKeyRecordSchema.parse(rows[0]) : null;
+    },
+    async publishable(now) {
+      const rows = await tx
+        .select({ token: apiKeys.publicToken })
+        .from(apiKeys)
+        .where(
+          and(
+            where(),
+            eq(apiKeys.kind, 'publishable'),
+            isNull(apiKeys.revokedAt),
+            or(isNull(apiKeys.expiresAt), gt(apiKeys.expiresAt, now)),
+          ),
+        )
+        .orderBy(desc(apiKeys.createdAt), desc(apiKeys.id))
+        .limit(1);
+      return rows[0] ? publishableKeyTokenSchema.parse(rows[0].token) : null;
     },
     async insert(input) {
       return requiredRow(

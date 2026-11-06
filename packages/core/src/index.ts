@@ -234,3 +234,19 @@ export type {
   BillingProvider,
   BillingPlanChange,
 } from './services/providers.ts';
+
+export {
+  auditFiltersSchema,
+  activityIdentifierSchema,
+  activityNameSchema,
+  type AuditFilters,
+} from './platform/activity-fields.ts';
+export {
+  auditQuerySchema,
+  auditResponseSchema,
+  auditPageSchema,
+  usageQuerySchema,
+  usageResponseSchema,
+  integrationResponseSchema,
+} from './queries/schemas.ts';
+export { createPlatformQueries, type PlatformQueries } from './queries/platform.ts';

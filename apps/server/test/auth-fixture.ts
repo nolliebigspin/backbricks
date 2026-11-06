@@ -19,6 +19,7 @@ import { registerKeys } from '../src/keys.ts';
 import { createLogger } from '../src/logger.ts';
 import { createApiAuthorization } from '../src/middleware/authorization.ts';
 import { registerProjects } from '../src/projects.ts';
+import { platformReadRoutes } from '../src/routes/platform-reads.ts';
 import { createServerServices } from '../src/services.ts';
 
 export const available = (await postgresAvailable()) && (await mailpitAvailable());
@@ -37,6 +38,7 @@ export async function scenario(
     db: ReturnType<typeof createDatabase>['db'];
     logs: string[];
     origin: string;
+    now: () => Date;
     manifest: () => ApiRoutes['manifest'];
     authInventory: () => Promise<{ path: string; method: string }[]>;
     drainSecurity: () => Promise<void>;
@@ -102,6 +104,7 @@ export async function scenario(
         (api) => {
           registerProjects(api, runtime);
           registerKeys(api, runtime, config.modules);
+          platformReadRoutes(api, runtime);
           apiOptions.configure?.(api, handle.db);
         },
         createApiAuthorization({
@@ -116,6 +119,10 @@ export async function scenario(
     await run({
       db: handle.db,
       origin,
+      now: () => {
+        if (!services) throw new Error('Expected runtime services');
+        return services.container.core.clock.now();
+      },
       logs,
       manifest: () => {
         if (!app) throw new Error('Expected mounted fixture');

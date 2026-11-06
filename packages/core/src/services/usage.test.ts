@@ -20,7 +20,14 @@ test('usage month boundaries use UTC rather than the host or supplied offset', (
 });
 
 test('usage requires a valid month start, namespaced metric and positive lossless amount', () => {
-  for (const period of ['2026-11', '2026-11-02', '2026-13-01', '2026-02-30', 'yesterday'])
+  for (const period of [
+    '0000-01-01',
+    '2026-11',
+    '2026-11-02',
+    '2026-13-01',
+    '2026-02-30',
+    'yesterday',
+  ])
     expect(usagePeriodSchema.safeParse(period).success).toBe(false);
   expect(
     usageIncrementSchema.parse({ metric: 'uploads.bytes_ingested', delta: MAX_USAGE_VALUE }).delta,

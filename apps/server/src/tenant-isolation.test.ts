@@ -6,6 +6,7 @@ import { available, scenario } from '../test/auth-fixture.ts';
 import { apiIsolationCases } from '../test/isolation/api-cases.ts';
 import { authIsolationCases } from '../test/isolation/auth-cases.ts';
 import { keyIsolationCases } from '../test/isolation/key-cases.ts';
+import { platformReadIsolationCases } from '../test/isolation/platform-read-cases.ts';
 import { projectIsolationCases } from '../test/isolation/project-cases.ts';
 import { prepareIsolationFixture } from '../test/isolation/setup.ts';
 import { assertIsolationCoverage, exerciseIsolation } from '../test/isolation/suite.ts';
@@ -32,6 +33,7 @@ test.skipIf(!available)(
           ...authIsolationCases(f),
           ...projectIsolationCases(f),
           ...(await keyIsolationCases(f)),
+          ...(await platformReadIsolationCases(f)),
         };
         assertIsolationCoverage(operations, cases);
         const missing = Object.fromEntries(

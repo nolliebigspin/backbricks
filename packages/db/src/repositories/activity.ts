@@ -4,7 +4,7 @@ import {
   type AuditRepository,
   type EventRepository,
 } from '@backbricks/core';
-import { and, asc, desc, eq, isNull } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, isNull } from 'drizzle-orm';
 
 import type { DbTransaction } from '../client.ts';
 import { auditLogs, events } from '../schema/platform.ts';
@@ -22,11 +22,21 @@ export function createActivityRepositories(
     };
   };
   const audit: AuditRepository = {
-    async list(page) {
+    async list(page, filters = {}, validAt) {
       const rows = await tx
         .select()
         .from(auditLogs)
-        .where(and(scope.where(auditLogs), beforeCursor(auditLogs, page)))
+        .where(
+          and(
+            scope.where(auditLogs),
+            beforeCursor(auditLogs, page),
+            validAt ? gt(auditLogs.expiresAt, validAt) : undefined,
+            filters.projectId ? eq(auditLogs.projectId, filters.projectId) : undefined,
+            filters.action ? eq(auditLogs.action, filters.action) : undefined,
+            filters.actorType ? eq(auditLogs.actorType, filters.actorType) : undefined,
+            filters.actorId ? eq(auditLogs.actorId, filters.actorId) : undefined,
+          ),
+        )
         .orderBy(desc(auditLogs.createdAt), desc(auditLogs.id))
         .limit(scope.limit(page));
       return rows.map((row) => auditEntrySchema.parse(row));

@@ -11,9 +11,11 @@ export const metricNameSchema = z
   .max(128)
   .regex(/^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+$/)
   .refine((name) => !name.includes(API_KEY_PREFIXES.secret));
-export const usagePeriodSchema = z.iso.date().refine((period) => period.endsWith('-01'), {
-  message: 'Expected the first day of a UTC month.',
-});
+export const usagePeriodSchema = z.iso
+  .date()
+  .refine((period) => period.endsWith('-01') && !period.startsWith('0000-'), {
+    message: 'Expected the first day of a UTC month.',
+  });
 export const usageIncrementSchema = z
   .object({ metric: metricNameSchema, delta: z.bigint().positive().max(MAX_USAGE_VALUE) })
   .strict();
