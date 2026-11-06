@@ -177,16 +177,23 @@ export function createDashboardAuth(options: DashboardAuthOptions) {
           (location && new URL(location, origin).searchParams.has('error'))
         )
           throw result;
-        if (invitation)
-          return completeInvitationSignup(invitation, result, {
-            request,
-            persistence,
-            options,
-            ipHash,
-            actor,
-            dispatch: (internalRequest) => auth.handler(internalRequest),
-          });
-        return finish ? finish(result) : result;
+        const completed = invitation
+          ? await completeInvitationSignup(invitation, result, {
+              request,
+              persistence,
+              options,
+              ipHash,
+              actor,
+              dispatch: (internalRequest) => auth.handler(internalRequest),
+            })
+          : finish
+            ? await finish(result)
+            : result;
+        if (persistence.enqueueMail && pending.length > 0) {
+          await persistence.enqueueMail(pending);
+          pending.length = 0;
+        }
+        return completed;
       });
     } catch (error) {
       if (error instanceof Response && error.status < 500) {

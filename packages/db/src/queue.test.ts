@@ -3,6 +3,7 @@ import { expect, test } from 'bun:test';
 import { type TenantTransaction } from '@backbricks/core';
 import { z } from 'zod';
 
+import { eventually } from '../../../scripts/test/eventually.ts';
 import { createTenantFixture } from '../test/tenant-fixtures.ts';
 import { postgresAvailable } from '../test/test-database.ts';
 import { databasePool } from './client.ts';
@@ -19,15 +20,6 @@ const payload = z
   })
   .strict();
 const definition = { name: 'fixture.add', retries: 2, retentionSeconds: 3600, payload };
-async function until(condition: () => Promise<boolean>) {
-  for (let attempt = 0; attempt < 200; attempt++) {
-    // oxlint-disable-next-line no-await-in-loop -- Polls depend on the previous observed state.
-    if (await condition()) return;
-    // oxlint-disable-next-line no-await-in-loop -- Avoid a busy loop while waiting for a real worker.
-    await Bun.sleep(25);
-  }
-  throw new Error('Queue condition did not become true.');
-}
 
 test.skipIf(!available)(
   'pg-boss enlists enqueue/completion in real tenant transactions with rollback, validation and safe retries',
@@ -106,7 +98,7 @@ test.skipIf(!available)(
         ],
         withTenant,
       );
-      await until(
+      await eventually(
         async () =>
           (
             await pool.query<Record<string, unknown>>(

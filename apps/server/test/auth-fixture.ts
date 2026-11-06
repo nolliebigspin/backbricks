@@ -9,7 +9,7 @@ import {
   createChallengeService,
   type defineModuleCatalog,
 } from '@backbricks/core';
-import { createDatabase, runMigrations } from '@backbricks/db';
+import { createDatabase, createPostgresQueue, runMigrations } from '@backbricks/db';
 import { z } from '@hono/zod-openapi';
 
 import { createTestDatabase, postgresAvailable } from '../../../scripts/test/database.ts';
@@ -21,7 +21,9 @@ import { createServerKeyAuth } from '../src/key-auth.ts';
 import { registerKeys } from '../src/keys.ts';
 import { createLogger } from '../src/logger.ts';
 import { createApiAuthorization } from '../src/middleware/authorization.ts';
+import { moduleJobDefinitions } from '../src/module-jobs.ts';
 import { moduleCatalog } from '../src/modules.ts';
+import { createServerOutbox } from '../src/outbox.ts';
 import { registerProjects } from '../src/projects.ts';
 import { createPublicCredentialResolver } from '../src/public-auth.ts';
 import { createPublicExecutor } from '../src/public-executor.ts';
@@ -55,10 +57,12 @@ export async function scenario(
     instances: () => ReturnType<typeof createServerServices>['instances'];
     authInventory: () => Promise<{ path: string; method: string }[]>;
     drainSecurity: () => Promise<void>;
+    dispatchOutbox: () => Promise<void>;
     capabilities: (values: Pick<Config, 'mailer' | 'signupPolicy'>) => Promise<void>;
   }) => Promise<void>,
   overrides: Record<string, string> = {},
   apiOptions: {
+    durableDelivery?: boolean;
     configure?: (api: ApiRoutes, db: ReturnType<typeof createDatabase>['db']) => void;
     resolveKey?: SecretKeyResolver;
     lookupPublishable?: SecretKeyLookup;
@@ -80,6 +84,8 @@ export async function scenario(
   let keyAuth: ReturnType<typeof createServerKeyAuth> | undefined;
   let services: ReturnType<typeof createServerServices> | undefined;
   let app: ReturnType<typeof createApp> | undefined;
+  let queue: ReturnType<typeof createPostgresQueue> | undefined;
+  let outbox: ReturnType<typeof createServerOutbox> | undefined;
   const server = Bun.serve({
     hostname: '127.0.0.1',
     port: 0,
@@ -104,16 +110,32 @@ export async function scenario(
     );
     if (!result.ok) throw new Error(formatConfigIssues(result.issues));
     const log = createLogger('debug', { write: (line) => logs.push(line) });
-    const mount = (config: Config) => {
+    const mount = async (config: Config) => {
+      const modules = catalog.select(config.modules);
+      if (apiOptions.durableDelivery) {
+        queue = createPostgresQueue(
+          handle.db,
+          moduleJobDefinitions(modules),
+          (name) => log.warn({ job: name }, 'queue operation failed'),
+          apiOptions.keyClock,
+        );
+        await queue.start();
+      }
       const runtime = createServerServices(config, handle.db, {
         clock: apiOptions.keyClock,
         entitlements: apiOptions.entitlements,
-        modules: catalog.select(config.modules),
+        modules,
+        queue: queue?.queue,
         moduleRepositories: apiOptions.moduleRepositories,
       });
       services = runtime;
-      auth = createServerAuth(config, handle.db, log, runtime);
-      keyAuth = createServerKeyAuth(config, handle.db, log, runtime);
+      auth = createServerAuth(config, handle.db, log, runtime, queue);
+      keyAuth = createServerKeyAuth(config, handle.db, log, runtime, apiOptions.durableDelivery);
+      if (queue) {
+        await queue.consume(runtime.jobs, runtime.withTenant);
+        await queue.consumeMail(runtime.container.optional('mailer'));
+        outbox = createServerOutbox(config, handle.db, runtime, queue);
+      }
       const resolvePublic = createPublicCredentialResolver({
         clock: runtime.container.core.clock,
         withTenant: runtime.withTenant,
@@ -170,7 +192,7 @@ export async function scenario(
         }),
       );
     };
-    mount(result.config);
+    await mount(result.config);
     await run({
       db: handle.db,
       origin,
@@ -195,14 +217,18 @@ export async function scenario(
         if (!auth) throw new Error('Expected mounted authentication');
         return auth.organizationEndpointInventory();
       },
+      dispatchOutbox: async () => {
+        await outbox?.tick();
+      },
       drainSecurity: async () => {
         await keyAuth?.drain();
       },
       capabilities: async (values) => {
         await keyAuth?.close();
         await auth?.close();
+        await queue?.stop();
         await services?.close();
-        mount({ ...result.config, ...values });
+        await mount({ ...result.config, ...values });
       },
       request: (path, body, cookie, extraHeaders, method = body === undefined ? 'GET' : 'POST') => {
         const headers = new Headers(extraHeaders);
@@ -225,6 +251,7 @@ export async function scenario(
     await server.stop(true);
     await keyAuth?.close();
     await auth?.close();
+    await queue?.stop();
     await services?.close();
     await handle.close();
     await database.drop();

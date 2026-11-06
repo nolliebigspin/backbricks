@@ -68,7 +68,10 @@ export interface AuditRepository {
 }
 
 export interface EventRepository {
-  pending(limit: number): Promise<EventRecord[]>;
+  pending(
+    limit: number,
+    options?: { excludeTypes?: readonly string[]; validAt?: Date },
+  ): Promise<EventRecord[]>;
   insert(input: ProjectChild<EventRecord>): Promise<void>;
   markDispatched(id: string, at: Date): Promise<void>;
 }

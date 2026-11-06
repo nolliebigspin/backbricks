@@ -6,7 +6,10 @@ import { member, user } from '../schema/auth.generated.ts';
 
 const recipient = z.object({ email: z.email() });
 /** Identity-table exception: resolve current verified owner/admin recipients only at delivery time. */
-export async function securityRecipients(db: Database, organizationId: string): Promise<string[]> {
+export async function securityRecipients(
+  db: Pick<Database, 'select'>,
+  organizationId: string,
+): Promise<string[]> {
   const rows = await db
     .select({ email: user.email })
     .from(member)

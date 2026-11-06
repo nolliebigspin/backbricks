@@ -129,6 +129,7 @@ export function jobRegistrar<Runtime>(context: (execution: ModuleExecution) => R
           retentionSeconds: z.number().int().positive().max(MAX_JOB_RETENTION_SECONDS),
           retries: z.number().int().min(0).max(10),
           cron: z.string().min(1).max(128).optional(),
+          consumes: z.array(activityNameSchema).max(100).readonly().optional(),
         })
         .strict()
         .parse(spec);

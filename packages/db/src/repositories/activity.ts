@@ -4,7 +4,7 @@ import {
   type AuditRepository,
   type EventRepository,
 } from '@backbricks/core';
-import { and, asc, desc, eq, gt, isNull } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, isNull, notInArray } from 'drizzle-orm';
 
 import type { DbTransaction } from '../client.ts';
 import { auditLogs, events } from '../schema/platform.ts';
@@ -50,11 +50,20 @@ export function createActivityRepositories(
     },
   };
   const outbox: EventRepository = {
-    async pending(limit) {
+    async pending(limit, options = {}) {
       const rows = await tx
         .select()
         .from(events)
-        .where(and(scope.where(events), isNull(events.dispatchedAt)))
+        .where(
+          and(
+            scope.where(events),
+            isNull(events.dispatchedAt),
+            options.validAt ? gt(events.expiresAt, options.validAt) : undefined,
+            options.excludeTypes?.length
+              ? notInArray(events.type, [...options.excludeTypes])
+              : undefined,
+          ),
+        )
         .orderBy(asc(events.createdAt), asc(events.id))
         .limit(scope.limit({ limit }))
         .for('update', { skipLocked: true });

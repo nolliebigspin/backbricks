@@ -22,6 +22,7 @@ export function createServerKeyAuth(
   db: Database,
   log: Logger,
   services: ServerServices,
+  durableDelivery = false,
 ) {
   const mailer = services.container.optional('mailer');
   const { clock, audit, events } = services.container.core;
@@ -59,6 +60,7 @@ export function createServerKeyAuth(
         ),
       ),
     notify: (notice) => {
+      if (durableDelivery) return;
       const delivery = deliver(notice).catch(() => {
         log.warn({ event: 'security.mail_failed' }, 'security service event');
       });

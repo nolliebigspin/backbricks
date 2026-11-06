@@ -1,11 +1,12 @@
 import { createDashboardAuth, bindAuthDatabase } from '@backbricks/auth';
-import type { Config } from '@backbricks/core';
+import type { Config, MailMessage } from '@backbricks/core';
 import {
   authSchema,
   createAuthReplayStore,
   createOrganizationIdentityStore,
   createWithTenant,
   type Database,
+  type DbTransaction,
 } from '@backbricks/db';
 
 import type { Logger } from './logger.ts';
@@ -17,6 +18,7 @@ export function createServerAuth(
   db: Database,
   log: Logger,
   services: ServerServices,
+  delivery?: { enqueueMail(tx: DbTransaction, messages: readonly MailMessage[]): Promise<void> },
 ) {
   const { clock, audit, events, rateLimiter } = services.container.core;
   const mailer = services.container.optional('mailer');
@@ -34,6 +36,7 @@ export function createServerAuth(
           replay: createAuthReplayStore(tx),
           identity: createOrganizationIdentityStore(tx),
           withTenant: createWithTenant(tx),
+          enqueueMail: delivery ? (messages) => delivery.enqueueMail(tx, messages) : undefined,
         }),
       ),
     report: (event) => {

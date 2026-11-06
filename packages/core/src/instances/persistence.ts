@@ -60,7 +60,10 @@ export function instanceView(module: RegisteredModule, instance: ModuleInstance)
   };
 }
 
-export function instancePersistence(deps: InstanceDependencies) {
+export function instancePersistence(
+  deps: InstanceDependencies,
+  authority: 'request' | 'system' = 'request',
+) {
   async function record(
     tx: TenantTransaction,
     action: string,
@@ -69,7 +72,10 @@ export function instancePersistence(deps: InstanceDependencies) {
     previousVersion?: number,
     requestId?: string,
   ) {
-    const actor = principalActor(requireConfigAccess(tx, 'write'));
+    const actor =
+      authority === 'system'
+        ? { actorType: 'system' as const, actorId: null }
+        : principalActor(requireConfigAccess(tx, 'write'));
     await tx.repositories.revisions.insert({
       id: deps.ids.generate('rvn'),
       instanceId: instance.id,
@@ -117,12 +123,13 @@ export function instancePersistence(deps: InstanceDependencies) {
       const changedConfig =
         migrating ||
         canonicalJson(jsonValueSchema.parse(previous.config)) !== canonicalJson(next.config);
-      requireConfigAccess(
-        tx,
-        'write',
-        migrating ||
-          (changedConfig && module.validateConfigChange(before, next.config).destructive),
-      );
+      if (authority === 'request')
+        requireConfigAccess(
+          tx,
+          'write',
+          migrating ||
+            (changedConfig && module.validateConfigChange(before, next.config).destructive),
+        );
       const changedFields = [
         ...(next.name !== undefined && next.name !== previous.name ? ['name'] : []),
         ...(next.status !== undefined && next.status !== previous.status ? ['status'] : []),

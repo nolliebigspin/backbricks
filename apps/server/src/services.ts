@@ -1,6 +1,8 @@
 import { createSmtpMailer, createS3Storage, createAltchaProvider } from '@backbricks/adapters';
 import {
   createAuditService,
+  createPlatformJobHandlers,
+  PLATFORM_JOB_DEFINITIONS,
   createEventService,
   createIds,
   createKeyService,
@@ -16,6 +18,7 @@ import {
   systemClock,
   type Clock,
   type Queue,
+  type TenantContext,
   type Config,
   type Entitlements,
   type SelectedModules,
@@ -79,7 +82,26 @@ export function createServerServices(
     modules,
     scopeCatalog,
     moduleRuntime,
-    jobs: moduleJobs(modules, moduleRuntime, withTenant),
+    jobs: [
+      ...moduleJobs(modules, moduleRuntime, withTenant),
+      ...createPlatformJobHandlers({
+        ...container.core,
+        registry: modules.registry,
+        runtime: moduleRuntime,
+      }).map((handler) => {
+        const definition = PLATFORM_JOB_DEFINITIONS.find((job) => job.name === handler.name);
+        if (!definition) throw new Error('Missing platform job definition');
+        return Object.freeze({
+          ...definition,
+          moduleType: 'core',
+          cron: undefined,
+          consumes: undefined,
+          runInTransaction: handler.runInTransaction,
+          run: (context: TenantContext, input: unknown) =>
+            withTenant(context, (tx) => handler.runInTransaction(tx, input)),
+        });
+      }),
+    ],
     withTenant,
     projects: createProjectService(container.core),
     instances,

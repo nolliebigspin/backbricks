@@ -5,6 +5,7 @@ import type {
   Clock,
   Config,
   Mailer,
+  MailMessage,
   RateLimiter,
   OrganizationIdentityStore,
   WithTenant,
@@ -16,6 +17,7 @@ export type AuthPersistence = {
   replay: AuthReplayStore;
   identity: OrganizationIdentityStore;
   withTenant: WithTenant;
+  enqueueMail?: (messages: readonly MailMessage[]) => Promise<void>;
 };
 export type AuthTransactions = <T>(
   operation: (persistence: AuthPersistence) => Promise<T>,

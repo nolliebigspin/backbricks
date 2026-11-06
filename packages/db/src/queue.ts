@@ -1,7 +1,9 @@
-import { createHash } from 'node:crypto';
-
 import {
   AppError,
+  systemClock,
+  type Clock,
+  type EventRecord,
+  type TenantTransaction,
   QUEUE_STOP_TIMEOUT_MS,
   queueEnvelopeSchema,
   queueJobDefinitionSchema,
@@ -15,22 +17,23 @@ import { sql } from 'drizzle-orm';
 import { PgBoss, fromDrizzle } from 'pg-boss';
 
 import { databasePool, type Database } from './client.ts';
+import { queueSingletonId } from './queue-identities.ts';
+import { createMailQueue } from './queue-mail.ts';
+import { createQueueSchedules } from './queue-schedules.ts';
+import { securityRecipients } from './repositories/security-recipients.ts';
 import { transactionFor } from './transaction-binding.ts';
 
 const WORKER_CONCURRENCY = 2;
 const WORKER_POLL_INTERVAL_SECONDS = 0.5;
 const JOB_TIMEOUT_SECONDS = 60;
 const RETRY_DELAY_SECONDS = 1;
-const singletonId = (value: string) => {
-  const hex = createHash('sha256').update(value).digest('hex');
-  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-5${hex.slice(13, 16)}-a${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
-};
 
 /** PostgreSQL owns the opaque-handle binding so no driver crosses the core/module boundary. */
 export function createPostgresQueue(
   db: Database,
   definitions: readonly QueueJobDefinition[],
   report: (name: string) => void = () => {},
+  clock: Clock = systemClock,
 ) {
   const registered = new Map(
     definitions.map((definition) => {
@@ -45,6 +48,14 @@ export function createPostgresQueue(
   boss.on('error', () => report('core.queue'));
   boss.on('warning', () => report('core.queue_warning'));
   let started = false;
+  const mail = createMailQueue(
+    boss,
+    clock,
+    report,
+    () => started,
+    async (organizationId, to) => (await securityRecipients(db, organizationId)).includes(to),
+  );
+  const schedules = createQueueSchedules(boss, report);
   const queue: Queue = {
     async enqueue(tx, name, input, options) {
       if (!started) throw new AppError('service_unavailable');
@@ -64,16 +75,46 @@ export function createPostgresQueue(
         startAfter: options?.notBefore,
         ...(options?.singletonKey
           ? {
-              id: singletonId(
-                `${envelope.organizationId}:${envelope.projectId ?? ''}:${name}:${options.singletonKey}`,
-              ),
+              id: queueSingletonId([
+                envelope.organizationId,
+                envelope.projectId ?? '',
+                name,
+                options.singletonKey,
+              ]),
             }
           : {}),
       });
     },
   };
   return {
+    ...mail,
+    ...schedules,
     queue,
+    async enqueueEvent(
+      this: void,
+      tx: TenantTransaction,
+      event: EventRecord,
+      name: string,
+      payload: unknown,
+    ) {
+      const definition = registered.get(name);
+      if (!started || !definition) throw new AppError('service_unavailable');
+      if (
+        event.organizationId !== tx.context.organizationId ||
+        (tx.context.projectId && tx.context.projectId !== event.projectId)
+      )
+        throw new AppError('not_found');
+      if (!definition.payload.safeParse(payload).success) throw new AppError('validation_failed');
+      return boss.send(
+        name,
+        queueEnvelopeSchema.parse({
+          organizationId: event.organizationId,
+          projectId: event.projectId ?? undefined,
+          payload,
+        }),
+        { id: queueSingletonId([event.id, name]), db: fromDrizzle(transactionFor(tx), sql) },
+      );
+    },
     async start() {
       await boss.start();
       try {
@@ -91,6 +132,7 @@ export function createPostgresQueue(
             await boss.updateQueue(definition.name, policy);
           }),
         );
+        await mail.startMail();
         started = true;
       } catch (error) {
         await boss.stop({ graceful: true, close: false });

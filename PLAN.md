@@ -449,14 +449,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Real Postgres enqueue/rollback/retry, fresh process role start/stop and disabled job registrations.
 - **Risks/notes:** Verify pg-boss 12.38.1 on Bun; do not assume the Drizzle transaction is compatible without the adapter smoke test.
 
-### [ ] P1.10b – Dispatch the outbox and retry mail (est. 4 h)
+### [x] P1.10b – Dispatch the outbox and retry mail (est. 4 h)
 - **Description:** Dispatch pending events to registered consumers via transactional job enqueue; wire durable auth/security mail delivery and module retention/privacy/config-migration job hooks.
 - **Files/packages:** outbox repositories/dispatcher, worker core handlers, auth mail integration.
 - **Depends on:** P1.10a, P1.8a/b, P1.7d.
 - **Reuses:** Events table, pg-boss transaction adapter, module job/event registry and Mailpit.
 - **Acceptance criteria:**
-  - [ ] Claim/enqueue/dispatched marker share a transaction; concurrent dispatchers cannot lose events. Stable consumer identities deduplicate retries with documented at-least-once semantics.
-  - [ ] Rolled-back auth actions send nothing; committed invitations/exposure alerts retry after SMTP failure. Email recipient/token jobs use bounded retention and sanitized logging per Q8.
+  - [x] Claim/enqueue/dispatched marker share a transaction; concurrent dispatchers cannot lose events. Stable consumer identities deduplicate retries with documented at-least-once semantics.
+  - [x] Rolled-back auth actions send nothing; committed invitations/exposure alerts retry after SMTP failure. Email recipient/token jobs use bounded retention and sanitized logging per Q8.
 - **Tests:** Crash before/after enqueue, parallel dispatch, SMTP retry and failure recovery; module hooks tested with fixtures.
 - **Risks/notes:** External SMTP delivery cannot be made exactly-once by a DB transaction; document possible duplicate delivery and limit repeat alerts.
 
@@ -690,3 +690,5 @@ P1.9b implements the shared guard and public CORS (ADR-0046), verified through r
 P1.9c is implemented with shared, acknowledgement-only transactional caching (ADR-0047). Real HTTP/PG tests prove twelve concurrent duplicates persist usage/outbox once, project separation, mismatch/expiry, spent-proof replay and rollback on both domain/cache failure. Full `bun run check` passes with no service skips.
 
 P1.10a replaces the idle worker with pg-boss 12.38.1 (ADR-0048). One-connection real PG tests prove transactional enqueue/completion, rollback/retry, scoped deduplication and graceful active-job drain. Fresh serve/worker/all process smoke tests pass; all shares one provider/queue/pool lifetime. Full `bun run check` passes.
+
+P1.10b implements locked transactional outbox dispatch, stable selected consumers, restricted durable auth/security delivery and worker-bound migration/retention/module-erasure hooks (ADR-0049). Real PG/Mailpit tests prove parallel claims, failure rollback, SMTP outage/restart recovery, no mail after deferred commit failure, no personal audit fields and system migration atomicity. Full `bun run check` passes with real services. P1.10c adds the absolute-expiry housekeeping and scheduled fan-out.

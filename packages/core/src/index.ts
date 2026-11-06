@@ -388,6 +388,7 @@ export {
 } from './abuse/idempotency.ts';
 
 export {
+  MAX_MAINTENANCE_BATCH,
   QUEUE_STOP_TIMEOUT_MS,
   PROCESS_SHUTDOWN_TIMEOUT_MS,
   queueEnvelopeSchema,
@@ -395,3 +396,17 @@ export {
   type QueueJobDefinition,
   type QueueJobHandler,
 } from './jobs/contract.ts';
+
+export {
+  MAIL_JOB_NAME,
+  MAIL_JOB_RETENTION_SECONDS,
+  mailDeliverySchema,
+  systemJobPayloadSchema,
+} from './jobs/delivery.ts';
+export {
+  createOutboxDispatcher,
+  outboxJobPayloadSchema,
+  type OutboxConsumer,
+} from './jobs/outbox.ts';
+
+export { PLATFORM_JOB_DEFINITIONS, createPlatformJobHandlers } from './jobs/platform.ts';

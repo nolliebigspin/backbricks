@@ -64,6 +64,11 @@ function checkDefinitions(modules: readonly RegisteredModule[]) {
     for (const entry of [...module.events, ...module.usageMetrics, ...module.jobs])
       if (!entry.name.startsWith(`${module.type}.`))
         fail('Module names must use their own namespace.');
+    for (const job of module.jobs) {
+      for (const type of job.consumes ?? [])
+        if (!coreEvents.has(type) && !module.events.some((event) => event.name === type))
+          fail('An event consumer must use a core or its own declared event.');
+    }
     for (const routes of [module.adminRoutes, module.publicRoutes]) {
       unique(
         routes.map(

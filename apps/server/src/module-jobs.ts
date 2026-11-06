@@ -1,3 +1,4 @@
+import { PLATFORM_JOB_DEFINITIONS } from '@backbricks/core';
 import type {
   SelectedModules,
   TenantContext,
@@ -21,6 +22,7 @@ export function moduleJobs(
           retries: job.retries,
           retentionSeconds: job.retentionSeconds,
           cron: job.cron,
+          consumes: job.consumes,
           runInTransaction: (tx: TenantTransaction, input: unknown) =>
             job.run(runtime.forTenant(tx).execution(module.type), input),
           run: (context: TenantContext, input: unknown) =>
@@ -31,4 +33,19 @@ export function moduleJobs(
       ),
     ),
   );
+}
+
+/** Queue storage policies are projected from the same selected registrations as worker callbacks. */
+export function moduleJobDefinitions(modules: SelectedModules) {
+  return [
+    ...PLATFORM_JOB_DEFINITIONS,
+    ...modules.registry.modules.flatMap((module) =>
+      module.jobs.map((job) => ({
+        name: job.name,
+        retries: job.retries,
+        retentionSeconds: job.retentionSeconds,
+        payload: job.payload,
+      })),
+    ),
+  ];
 }

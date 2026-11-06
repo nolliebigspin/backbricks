@@ -58,3 +58,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0046](0046-public-write-guard-and-cors.md) | Public write guard and CORS | accepted; production publishable bootstrap gated by Q11 |
 | [0047](0047-atomic-public-idempotency.md) | Atomic public idempotency | accepted |
 | [0048](0048-transactional-postgres-jobs.md) | Transactional PostgreSQL jobs | accepted |
+| [0049](0049-outbox-and-restricted-delivery.md) | Outbox dispatch and restricted delivery | accepted |

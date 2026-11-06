@@ -6,6 +6,7 @@ export type ModuleJobSpec = {
   retentionSeconds: number;
   retries: number;
   cron?: string;
+  consumes?: readonly string[];
 };
 /** Registration captures each payload schema's type before heterogeneous jobs are collected. */
 export interface ModuleJobRegistrar<Runtime> {

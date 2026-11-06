@@ -8,7 +8,9 @@ import { createServerKeyAuth } from './key-auth.ts';
 import { registerKeys } from './keys.ts';
 import type { Logger } from './logger.ts';
 import { createApiAuthorization } from './middleware/authorization.ts';
+import { moduleJobDefinitions } from './module-jobs.ts';
 import { moduleCatalog } from './modules.ts';
+import { createServerOutbox } from './outbox.ts';
 import { registerProjects } from './projects.ts';
 import { createPublicCredentialResolver } from './public-auth.ts';
 import { createPublicExecutor } from './public-executor.ts';
@@ -38,17 +40,8 @@ async function startRuntime(
 ): Promise<RunningRole> {
   const database = createDatabase(config.databaseUrl, { applicationName: `backbricks-${role}` });
   const modules = moduleCatalog.select(config.modules);
-  const queue = createPostgresQueue(
-    database.db,
-    modules.registry.modules.flatMap((module) =>
-      module.jobs.map((job) => ({
-        name: job.name,
-        retries: job.retries,
-        retentionSeconds: job.retentionSeconds,
-        payload: job.payload,
-      })),
-    ),
-    (name) => log.error({ job: name }, 'queue operation failed'),
+  const queue = createPostgresQueue(database.db, moduleJobDefinitions(modules), (name) =>
+    log.error({ job: name }, 'queue operation failed'),
   );
   let services: ReturnType<typeof createServerServices> | undefined;
   let auth: ReturnType<typeof createServerAuth> | undefined;
@@ -68,9 +61,9 @@ async function startRuntime(
     services = runtime;
     if (role !== 'worker') {
       const dashboardDir = findDashboard();
-      const dashboardAuth = createServerAuth(config, database.db, log, runtime);
+      const dashboardAuth = createServerAuth(config, database.db, log, runtime, queue);
       auth = dashboardAuth;
-      const keys = createServerKeyAuth(config, database.db, log, runtime);
+      const keys = createServerKeyAuth(config, database.db, log, runtime, true);
       keyAuth = keys;
       const resolvePublic = createPublicCredentialResolver({
         clock: runtime.container.core.clock,
@@ -128,6 +121,9 @@ async function startRuntime(
     }
     if (role !== 'serve') {
       await queue.consume(runtime.jobs, runtime.withTenant);
+      await queue.consumeMail(runtime.container.optional('mailer'));
+      const outbox = createServerOutbox(config, database.db, runtime, queue);
+      await queue.scheduleSystem('core.outbox.dispatch', '* * * * *', () => outbox.tick());
       log.info({ modules: config.modules, jobs: runtime.jobs.length }, 'worker ready');
     }
     return { stop };
