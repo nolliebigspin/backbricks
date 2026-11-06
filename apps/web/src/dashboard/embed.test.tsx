@@ -33,6 +33,19 @@ test('creation responses never enter Query caches and navigation unmounts the re
     createdAt: '2026-11-06T00:00:00Z',
     updatedAt: '2026-11-06T00:00:00Z',
   };
+  const expired: AdminOperations['listKeys']['responses'][200]['content']['application/json']['data'][number] =
+    {
+      id: 'key_expired',
+      name: 'Expired fixture',
+      kind: 'secret',
+      displayPrefix: 'expired',
+      publicToken: null,
+      scopes: [],
+      expiresAt: '2020-01-01T00:00:00Z',
+      revokedAt: null,
+      lastUsedAt: null,
+      createdAt: project.createdAt,
+    };
   const token = 'one-time-private-test-value';
   const fetcher: typeof fetch = Object.assign(
     async (input: string | URL | Request, init?: RequestInit) => {
@@ -56,7 +69,10 @@ test('creation responses never enter Query caches and navigation unmounts the re
           { status: 201 },
         );
       if (path.endsWith('/keys') || path === '/v1/projects')
-        return Response.json({ data: path.endsWith('/keys') ? [] : [project], nextCursor: null });
+        return Response.json({
+          data: path.endsWith('/keys') ? [expired] : [project],
+          nextCursor: null,
+        });
       if (path.endsWith('/integration'))
         return Response.json({
           baseUrl: 'http://localhost/v1',
@@ -94,6 +110,7 @@ test('creation responses never enter Query caches and navigation unmounts the re
     </QueryClientProvider>,
   );
   await waitFor(() => expect(screen.getByLabelText('Name')).toBeDefined());
+  expect(screen.getByText(/Secret key · Expired/)).toBeDefined();
   fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Agent' } });
   fireEvent.change(screen.getByLabelText('Key type'), { target: { value: 'secret' } });
   fireEvent.click(screen.getByLabelText('No expiration'));

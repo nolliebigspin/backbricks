@@ -1,9 +1,8 @@
 import { randomUUID } from 'node:crypto';
 
-import { expect, test } from '@playwright/test';
-
 import { receivedMail } from '../scripts/test/mailpit.ts';
 import { accountPassword, createAccount, createOrganization, createProject } from './accounts.ts';
+import { expect, test, testHeaders } from './fixtures.ts';
 
 test('invitations, membership permissions, last owner and safe activity', async ({
   page,
@@ -32,7 +31,7 @@ test('invitations, membership permissions, last owner and safe activity', async 
       return link;
     })
     .toContain('/accept-invitation');
-  const context = await browser.newContext();
+  const context = await browser.newContext({ extraHTTPHeaders: testHeaders() });
   const member = await context.newPage();
   await member.goto(link);
   await member.getByLabel('Your name').fill('Invited teammate');

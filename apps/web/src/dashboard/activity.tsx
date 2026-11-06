@@ -15,7 +15,7 @@ const actionLabels: Readonly<Record<string, string>> = {
   'project.archived': 'projectArchived',
   'key.created': 'keyCreated',
   'key.revoked': 'keyRevoked',
-  'security.secret_key_exposed': 'secretExposed',
+  'key.exposed': 'secretExposed',
   'invitation.created': 'invitationCreated',
   'invitation.resent': 'invitationResent',
   'invitation.canceled': 'invitationCanceled',

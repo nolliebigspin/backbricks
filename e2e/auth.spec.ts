@@ -1,14 +1,13 @@
 import { randomUUID } from 'node:crypto';
 
-import { expect, test } from '@playwright/test';
-
 import { receivedMail } from '../scripts/test/mailpit.ts';
+import { expect, test } from './fixtures.ts';
 
 const password = 'test-password-for-e2e-1234';
 test('signup, verification, password reset and safe account navigation', async ({ page }) => {
   const email = `auth-${randomUUID()}@example.test`;
   await page.goto('/');
-  await expect(page).toHaveURL(/\/login$/);
+  await expect(page).toHaveURL(/\/login(?:\?.*)?$/);
   await page.getByRole('link', { name: 'Create an account' }).click();
   await page.getByLabel('Your name').fill('Website owner');
   await page.getByLabel('Email address').fill(email);
@@ -24,7 +23,7 @@ test('signup, verification, password reset and safe account navigation', async (
     })
     .toContain('/verify-email');
   await page.goto(verification);
-  await expect(page).toHaveURL(/\/login$/);
+  await expect(page).toHaveURL(/\/login(?:\?.*)?$/);
   await page.getByLabel('Email address').fill(email);
   await page.getByLabel('Password', { exact: true }).fill(password);
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();

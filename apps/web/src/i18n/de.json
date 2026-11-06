@@ -202,5 +202,9 @@
       "featureArchived": "Website-Funktion archiviert",
       "generic": "Verwaltungsänderung"
     }
+  },
+  "languages": {
+    "en": "English",
+    "de": "Deutsch"
   }
 }

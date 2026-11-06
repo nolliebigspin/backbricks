@@ -4,7 +4,7 @@ import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { detectLanguage, initI18n } from './i18n/index.ts';
+import { initialLanguage, initI18n } from './i18n/index.ts';
 import { routeTree } from './routeTree.gen.ts';
 
 const router = createRouter({ routeTree });
@@ -16,7 +16,7 @@ declare module '@tanstack/react-router' {
   }
 }
 
-const i18n = await initI18n(detectLanguage(navigator.languages));
+const i18n = await initI18n(initialLanguage(navigator.languages));
 document.documentElement.lang = i18n.language;
 
 const root = document.getElementById('root');

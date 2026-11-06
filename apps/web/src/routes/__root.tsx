@@ -1,6 +1,8 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
+import { rememberLanguage } from '../i18n/index.ts';
+
 export const Route = createRootRoute({ component: RootLayout, notFoundComponent: MissingPage });
 
 function RootLayout() {
@@ -16,16 +18,18 @@ function RootLayout() {
           value={i18n.language}
           onChange={(e) => {
             const language = e.target.value;
+            if (language !== 'en' && language !== 'de') return;
+            rememberLanguage(language);
             void i18n.changeLanguage(language);
             document.documentElement.lang = language;
           }}
           className="rounded-md border bg-background px-2 py-1 text-sm"
         >
           <option value="en" lang="en">
-            English
+            {t('languages.en')}
           </option>
           <option value="de" lang="de">
-            Deutsch
+            {t('languages.de')}
           </option>
         </select>
       </header>

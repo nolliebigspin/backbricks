@@ -1,6 +1,5 @@
-import { expect, test } from '@playwright/test';
-
 import { createAccount, createOrganization, createProject } from './accounts.ts';
+import { expect, test } from './fixtures.ts';
 
 test('secret reveal is ephemeral, clipboard denial is safe and revocation is enforced', async ({
   page,
@@ -59,4 +58,16 @@ test('secret reveal is ephemeral, clipboard denial is safe and revocation is enf
       })
     ).status(),
   ).toBe(401);
+  const signedOut = await page.request.post('/api/auth/sign-out', {
+    headers: { origin: new URL(page.url()).origin, 'x-backbricks-csrf': '1' },
+  });
+  expect(signedOut.ok()).toBe(true);
+  await page.locator('summary').filter({ hasText: 'Create key' }).click();
+  await page.getByLabel('Name', { exact: true }).fill('Expired session attempt');
+  await page.getByLabel('No expiration', { exact: true }).check();
+  await page.getByRole('button', { name: 'Create key', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('session has expired');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.reload();
+  await expect(page).toHaveURL(/\/login\?/);
 });

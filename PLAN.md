@@ -548,14 +548,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** `CI=true bunx turbo run test --force` with compose services; full matrix must run fresh with zero service-related skips.
 - **Risks/notes:** Collection/list/create semantics use P1.13a's non-disclosure assertions; never weaken foreign-resource 404 to match a library default.
 
-### [ ] P1.13c – Demonstrate M1 and record the handoff (est. 6 h)
+### [x] P1.13c – Demonstrate M1 and record the handoff (est. 6 h)
 - **Description:** Complete Playwright owner workflow, run every acceptance command fresh and write the phase report with evidence, deviations and unresolved gaps.
 - **Files/packages:** `e2e/`, `docs/progress/phase-1.md`, PLAN checkboxes and relevant run guides.
 - **Depends on:** P1.12a–d, P1.13b, P1.11c, P1.10c.
 - **Reuses:** Existing E2E server/build setup and P0 report format; Mailpit test helpers from auth tasks.
 - **Acceptance criteria:**
-  - [ ] Signup → verified account → org → project → key → invitation/acceptance works end to end; key/member audit visible, key revoke enforced and foreign tenant denied.
-  - [ ] Fresh check/build/E2E/isolation/drift/image commands pass with real services; report records exact commands/counts and identifies any remaining limitation. No skipped integration result is claimed as milestone proof.
+  - [x] Signup → verified account → org → project → key → invitation/acceptance works end to end; key/member audit visible, key revoke enforced and foreign tenant denied.
+  - [x] Fresh check/build/E2E/isolation/drift/image commands pass with real services; report records exact commands/counts and identifies any remaining limitation. No skipped integration result is claimed as milestone proof.
 - **Tests:** Playwright en/de owner journey, second-browser invited member and foreign-origin secret rejection; full acceptance below.
 - **Risks/notes:** A different fresh session can review M1 per AGENTS §9. Maintainer pushes/opens PR; CI proof is required before M1 is declared accepted.
 
@@ -563,14 +563,15 @@ All tasks are done; the task details are in the git history of this file, the re
 
 Commands are the intended post-implementation interface; `api:*` scripts are created in P1.11. Run after `mise install && mise run infra`, using isolated test tenants/database and Mailpit. M1 E2E setup applies migrations and sets `SIGNUP_POLICY=open` explicitly (Q6); production defaults remain separately tested. Bring up Docker before recording integration evidence.
 
-- [ ] **Owner workflow:** `bun run build && bun run test:e2e` proves signup/verification → org → project → key → invite/accept, including en/de and separate users.
-- [ ] **100% management isolation:** `CI=true bunx turbo run test --force` runs the automatic route-policy/isolation suites, auth plugin coverage and all real DB/adapter tests with no service-related skips; `bun run test:scripts` runs architecture fixtures. New endpoints without policy/fixture fail.
-- [ ] **Visible audit:** the E2E command shows key create/revoke and invitation/member role actions in Activity; DB tests prove mutation/audit rollback together.
-- [ ] **Foreign-origin secret:** server tests and E2E assert `403 secret_key_exposed`, committed safe audit, notification intent, and no business mutation. No raw key appears in logs/audit/events.
-- [ ] **Contract CI:** `bun run api:generate && bun run api:check` leaves no generated diff; `bun run api:breaking` compares the PR base spec with the working spec using pinned oasdiff. CI runs both and a negative fixture proves the gates reject drift/breaking changes.
-- [ ] **Full quality:** `bun run check && bun run build` green; fresh tests above avoid cached service availability. `docker build -t backbricks/server:m1 .` plus the CI image smoke runs migrate/serve/worker and serves dashboard/health (extend P0's smoke to cover the now-functional worker).
-- [ ] **Optionality:** registry test matrix passes core-only and all synthetic subsets; disabled modules have no routes/jobs and storage-free cases boot without S3/scanner configuration. M1 contains no production domain implementation.
+- [x] **Owner workflow:** `bun run build && bun run test:e2e` proves signup/verification → org → project → key → invite/accept, including en/de and separate users.
+- [x] **100% management isolation:** `CI=true bunx turbo run test --force` runs the automatic route-policy/isolation suites, auth plugin coverage and all real DB/adapter tests with no service-related skips; `bun run test:scripts` runs architecture fixtures. New endpoints without policy/fixture fail.
+- [x] **Visible audit:** the E2E command shows key create/revoke and invitation/member role actions in Activity; DB tests prove mutation/audit rollback together.
+- [x] **Foreign-origin secret:** server tests and E2E assert `403 secret_key_exposed`, committed safe audit, notification intent, and no business mutation. No raw key appears in logs/audit/events.
+- [x] **Contract CI:** `bun run api:generate && bun run api:check` leaves no generated diff; `bun run api:breaking` compares the PR base spec with the working spec using pinned oasdiff. CI runs both and a negative fixture proves the gates reject drift/breaking changes.
+- [x] **Full quality:** `bun run check && bun run build` green; fresh tests above avoid cached service availability. `docker build -t backbricks/server:m1 .` plus the CI image smoke runs migrate/serve/worker and serves dashboard/health (extend P0's smoke to cover the now-functional worker).
+- [x] **Optionality:** registry test matrix passes core-only and all synthetic subsets; disabled modules have no routes/jobs and storage-free cases boot without S3/scanner configuration. M1 contains no production domain implementation.
 - [ ] **Report and review:** `docs/progress/phase-1.md` records evidence, accepted ADRs and known gaps; all tasks checked, human-reviewed signed-off commits, green CI on maintainer-created PR. No push is implied by phase execution.
+
 
 ### Planning risks and sources
 
@@ -581,7 +582,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.13c follow-up: the key list currently labels unrevoked expired keys as active; expiry is enforced by the API. Use the shared display clock and add an expiry-label regression before final acceptance.
+P1.13c acceptance resolved the key expiry display regression with a failing-then-passing component test and the shared display clock. Owner/image acceptance and the handoff are recorded in docs/progress/phase-1.md. All local acceptance commands passed (256 package + 92 script + 10 browser tests, Node 20/24, image worker consumption); Q11 and remote CI/fresh review remain pending.
 
 P1.9a provider, atomic replay store and rate-limited challenge composition are implemented and verified (ADR-0045). P1.9a remains unticked: production publishable-key bootstrap is deliberately absent pending Q11 approval. Fixture lookup is followed by real scoped DB validation; the production port fails closed. Continue independent AbuseGuard/CORS work through the injected port while awaiting the answer, then finish the public-auth gate before milestone acceptance.
 

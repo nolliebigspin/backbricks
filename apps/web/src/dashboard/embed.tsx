@@ -9,6 +9,7 @@ import { canManage, tenantHeaders, useTenant } from './context.tsx';
 import { Feedback, unwrap, useAction } from './feedback.tsx';
 import { KeyForm } from './key-form.tsx';
 import { useProject } from './project-shell.tsx';
+import { useBrowserTime } from './use-browser-time.ts';
 
 export function EmbedPage() {
   const { t } = useTranslation();
@@ -54,6 +55,7 @@ export function EmbedPage() {
 }
 
 function KeyManagement() {
+  const now = useBrowserTime();
   const { t, i18n } = useTranslation();
   const { organizationId } = useTenant();
   const { id: projectId } = useProject();
@@ -104,7 +106,14 @@ function KeyManagement() {
                   </p>
                   <p className="text-sm text-muted-foreground">
                     {t(key.kind === 'secret' ? 'keys.secret' : 'keys.publishable')} ·{' '}
-                    {key.revokedAt ? t('keys.revoked') : t('keys.active')} ·{' '}
+                    {t(
+                      key.revokedAt
+                        ? 'keys.revoked'
+                        : key.expiresAt && new Date(key.expiresAt) <= now
+                          ? 'keys.expired'
+                          : 'keys.active',
+                    )}{' '}
+                    ·{' '}
                     {key.expiresAt
                       ? new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' }).format(
                           new Date(key.expiresAt),

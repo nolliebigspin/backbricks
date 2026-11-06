@@ -100,24 +100,8 @@ jobs:
           cache-to: type=gha,mode=max
       - name: Start services
         run: mise run infra
-      # The image must serve /healthz and the dashboard, read-only and as non-root (M0).
-      - name: Smoke test
-        run: |
-          env=(-e DATABASE_URL=postgres://backbricks:backbricks@postgres:5432/backbricks
-               -e PUBLIC_URL=https://ci.backbricks.invalid
-               -e APP_SECRET=ci-secret-ci-secret-ci-secret-ci-secret-0
-               -e BACKBRICKS_MODULES=forms)
-          docker run --rm --read-only --tmpfs /tmp --network backbricks_default "${env[@]}" backbricks/server:ci migrate
-          docker run -d --name app --read-only --tmpfs /tmp --network backbricks_default -p 3000:3000 "${env[@]}" backbricks/server:ci serve
-          for attempt in $(seq 1 30); do curl -fsS http://127.0.0.1:3000/healthz && break; sleep 1; done
-          curl -fsS http://127.0.0.1:3000/readyz
-          curl -fsS http://127.0.0.1:3000/ | grep -q '<div id="root">'
-          test "$(docker exec app id -u)" != 0
-          docker stop -t 10 app
-          test "$(docker inspect app --format '{{.State.ExitCode}}')" = 0
-      - name: App logs
-        if: failure()
-        run: docker logs app || true
+      - name: Smoke test (real worker consumption, non-root/read-only roles)
+        run: bun scripts/image/smoke.ts backbricks/server:ci
 
   dco:
     name: DCO sign-off

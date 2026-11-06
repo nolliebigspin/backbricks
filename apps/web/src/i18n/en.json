@@ -202,5 +202,9 @@
       "featureArchived": "Website feature archived",
       "generic": "Administrative change"
     }
+  },
+  "languages": {
+    "en": "English",
+    "de": "Deutsch"
   }
 }

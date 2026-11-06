@@ -1,6 +1,5 @@
-import { expect, test } from '@playwright/test';
-
 import { createAccount, createOrganization, createProject } from './accounts.ts';
+import { expect, test } from './fixtures.ts';
 
 test('organization and project isolation, origin settings and mobile navigation', async ({
   page,

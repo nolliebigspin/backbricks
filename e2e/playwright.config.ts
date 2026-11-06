@@ -30,6 +30,7 @@ export default defineConfig({
       BACKBRICKS_MODULES: 'forms',
       LOG_LEVEL: 'warn',
       SIGNUP_POLICY: 'open',
+      TRUSTED_PROXIES: '127.0.0.1,::1',
       SMTP_URL: process.env['TEST_SMTP_URL'] ?? 'smtp://127.0.0.1:1025',
       MAIL_FROM: 'e2e@backbricks.test',
     },
