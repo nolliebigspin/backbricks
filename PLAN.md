@@ -361,14 +361,14 @@ All tasks are done; the task details are in the git history of this file, the re
 - **Tests:** Synthetic modules through public service/HTTP interfaces; foreign IDs/keys, invalid config, concurrent update and forced rollback.
 - **Risks/notes:** I7/I12/I19; no production domain routes solely to demonstrate generic CRUD.
 
-### [ ] P1.7b – Add revision reads, rollback and config migration (est. 4 h)
+### [x] P1.7b – Add revision reads, rollback and config migration (est. 4 h)
 - **Description:** Expose bounded revision history/rollback; define deterministic module_version upgrades through migrateConfig and write a new revision when persisted.
 - **Files/packages:** core instance versioning service, db revision queries, server revision routes.
 - **Depends on:** P1.7a.
 - **Reuses:** Instance mutation path and destructive-change classifier; never update historical revisions in place.
 - **Acceptance criteria:**
-  - [ ] Rollback creates a new config_version and checks current permissions/destructive changes; a foreign revision cannot be applied.
-  - [ ] Unsupported future/old formats fail safely; repeated lazy migration is idempotent and no read silently mutates configuration without transactional audit/revision semantics.
+  - [x] Rollback creates a new config_version and checks current permissions/destructive changes; a foreign revision cannot be applied.
+  - [x] Unsupported future/old formats fail safely; repeated lazy migration is idempotent and no read silently mutates configuration without transactional audit/revision semantics.
 - **Tests:** Old-config fixture migration, failed migration, rollback after schema changes and concurrent config update.
 - **Risks/notes:** Define lazy read vs. persisted migration explicitly in the module ADR; background migration hooks are registered in P1.10b.
 
@@ -581,7 +581,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.7a is complete; see ADR-0040 and its signed-off task commit for implementation and verification evidence. The existing feature branch remains the sequential Claude/Codex handoff checkout. No partial task is left in the working tree. Next: P1.7b (revision reads, rollback and config migration). M1 remains in progress; complete the remaining tasks before writing the phase report or claiming milestone acceptance.
+P1.7b complete; ADR-0041 and the task commit contain evidence. Next: P1.7c (config-as-code planning). M1 remains in progress.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 

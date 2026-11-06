@@ -14,16 +14,21 @@ export const sampleConfig = z
   .strict();
 
 /** Synthetic configuration only; no domain tables or production API. */
-export function instanceCatalog(classify = true) {
+export function instanceCatalog(classify = true, moduleVersion = 1) {
   return defineModuleCatalog([
     defineModule({
       type: 'sample',
-      moduleVersion: 1,
+      moduleVersion,
       displayName: label,
       resourceName: { singular: 'sample', plural: 'samples' },
       infrastructure: [],
       configSchema: sampleConfig,
       defaultConfig: () => sampleConfig.parse({}),
+      migrateConfig(fromVersion, input) {
+        if (fromVersion !== 1) throw new Error('Unsupported fixture format');
+        const old = z.object({ legacyTitle: z.string() }).strict().parse(input);
+        return sampleConfig.parse({ title: old.legacyTitle });
+      },
       scopes: [],
       events: [],
       usageMetrics: [{ name: 'sample.recomputed', kind: 'counter', unit: 'count', label }],

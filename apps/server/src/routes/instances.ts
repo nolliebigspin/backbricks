@@ -17,6 +17,7 @@ import { createRoute, z } from '@hono/zod-openapi';
 
 import type { ApiRoutes } from '../http/api-routes.ts';
 import { requireTenantContext } from '../middleware/authorization.ts';
+import { instanceVersionRoutes } from './instance-versions.ts';
 
 const projectParams = z.object({ projectId: z.string() }).strict();
 const instanceParams = projectParams.extend({ key: instanceKeySchema });
@@ -45,6 +46,7 @@ export function instanceRoutes(
   deps: { modules: SelectedModules; instances: InstanceService; withTenant: WithTenant },
 ) {
   for (const module of deps.modules.registry.modules) {
+    instanceVersionRoutes(api, deps, module);
     const type = module.type;
     const root = `/v1/projects/{projectId}/${module.resourceName.plural}`;
     const path = `${root}/{key}`;

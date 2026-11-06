@@ -3,6 +3,8 @@ export const CORE_EVENTS = {
   instanceCreated: 'instance.created',
   instanceUpdated: 'instance.updated',
   instanceArchived: 'instance.archived',
+  instanceRolledBack: 'instance.rolled_back',
+  instanceMigrated: 'instance.migrated',
   projectCreated: 'project.created',
   projectUpdated: 'project.updated',
   projectArchived: 'project.archived',

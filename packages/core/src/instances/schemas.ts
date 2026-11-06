@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { jsonValueSchema } from '../modules/values.ts';
-import { moduleInstanceSchema } from '../platform/models.ts';
+import { moduleInstanceSchema, instanceRevisionSchema } from '../platform/models.ts';
 import { moduleInstanceStatusSchema } from '../platform/values.ts';
 
 export const MAX_INSTANCE_VERSION = 2_147_483_647;
@@ -47,7 +47,17 @@ export type InstancePatch = z.infer<typeof instancePatchSchema>;
 
 /** Authorized management projection; config is never included in public metadata. */
 export const instanceResponseSchema = moduleInstanceSchema.extend({
+  storedModuleVersion: instanceVersionSchema.optional(),
   config: configValue,
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });
+export const revisionResponseSchema = instanceRevisionSchema
+  .omit({ actorId: true })
+  .strip()
+  .extend({
+    createdAt: z.iso.datetime(),
+  });
+export const instancePreconditionSchema = z
+  .object({ configVersion: instanceVersionSchema })
+  .strict();

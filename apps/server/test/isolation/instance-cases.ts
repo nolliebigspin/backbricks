@@ -18,7 +18,72 @@ export async function instanceIsolationCases(f: IsolationFixture): Promise<Cases
   const own = await seed(root, 'contact', f.owner.cookie);
   const foreign = await seed(foreignRoot, 'foreign-only', f.other.cookie);
   const sibling = await seed(siblingRoot, 'sibling-only', f.owner.cookie);
+  await seed(root, 'history', f.owner.cookie);
   return {
+    'sample.instance.revisions': {
+      kind: 'collection',
+      read: { path: `${root}/history/revisions`, cookie: f.member.cookie },
+      present: [],
+      absent: [foreign.id, sibling.id],
+      foreign: { path: `${foreignRoot}/foreign-only/revisions`, cookie: f.owner.cookie },
+    },
+    'sample.instance.revision': {
+      kind: 'resource',
+      own: { path: `${root}/history/revisions/1`, cookie: f.member.cookie },
+      foreign: { path: `${root}/foreign-only/revisions/1`, cookie: f.owner.cookie },
+    },
+    'sample.instance.rollback': {
+      kind: 'mutation',
+      denied: [
+        {
+          request: {
+            path: `${foreignRoot}/foreign-only/revisions/1/rollback`,
+            body: { configVersion: 1 },
+            cookie: f.owner.cookie,
+          },
+          status: 404,
+        },
+        {
+          request: {
+            path: `${root}/history/revisions/1/rollback`,
+            body: { configVersion: 1 },
+            cookie: f.member.cookie,
+          },
+          status: 403,
+        },
+      ],
+      allowed: {
+        path: `${root}/history/revisions/1/rollback`,
+        body: { configVersion: 1 },
+        cookie: f.admin.cookie,
+      },
+    },
+    'sample.instance.migrate': {
+      kind: 'mutation',
+      denied: [
+        {
+          request: {
+            path: `${foreignRoot}/foreign-only/migrate`,
+            body: { configVersion: 1 },
+            cookie: f.owner.cookie,
+          },
+          status: 404,
+        },
+        {
+          request: {
+            path: `${root}/history/migrate`,
+            body: { configVersion: 2 },
+            cookie: f.member.cookie,
+          },
+          status: 403,
+        },
+      ],
+      allowed: {
+        path: `${root}/history/migrate`,
+        body: { configVersion: 2 },
+        cookie: f.admin.cookie,
+      },
+    },
     'sample.instance.list': {
       kind: 'collection',
       read: { path: root, cookie: f.member.cookie },

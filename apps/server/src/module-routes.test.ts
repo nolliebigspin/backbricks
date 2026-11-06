@@ -63,15 +63,13 @@ test.skipIf(!available)(
         const inventory = f.manifest().filter((route) => route.path.includes('/counters/'));
         expect(
           inventory
-            .filter((route) => route.policy.kind === 'management')
+            .filter(
+              (route) =>
+                route.policy.kind === 'management' &&
+                !route.policy.isolationCase.includes('.instance.'),
+            )
             .map((route) => (route.policy.kind === 'management' ? route.policy.isolationCase : '')),
-        ).toEqual([
-          'counter.instance.read',
-          'counter.instance.update',
-          'counter.instance.archive',
-          'counter.increment',
-          'counter.read',
-        ]);
+        ).toEqual(['counter.increment', 'counter.read']);
         const document = await f.request('/v1/openapi.json');
         expect(document.status).toBe(200);
         expect(await document.text()).toContain('counter.increment');

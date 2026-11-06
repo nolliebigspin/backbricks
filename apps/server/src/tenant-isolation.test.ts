@@ -29,7 +29,7 @@ test.skipIf(!available)(
               : [],
           );
         const cases = await instanceIsolationCases(f);
-        expect(operations).toHaveLength(5);
+        expect(operations).toHaveLength(9);
         assertIsolationCoverage(operations, cases);
         for (const operation of operations) {
           const entry = cases[operation.isolationCase];

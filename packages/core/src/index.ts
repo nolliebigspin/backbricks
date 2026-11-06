@@ -165,6 +165,7 @@ export {
 
 export { createProjectService, type ProjectService } from './projects/service.ts';
 export { createInstanceService, type InstanceService } from './instances/service.ts';
+export { revisionResponseSchema, instancePreconditionSchema } from './instances/schemas.ts';
 export {
   CONFIG_ACCESS,
   CONFIG_DESTRUCTIVE_SCOPE,

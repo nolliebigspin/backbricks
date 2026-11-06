@@ -286,7 +286,7 @@ CREATE INDEX reviews_queue_idx  ON reviews (instance_id, moderation_status, crea
 - **One migration history** (`packages/db/migrations/`), generated with `drizzle-kit generate`, reviewed by hand and committed. Module tables are defined in module packages but migrated centrally (no ordering problems).
 - **Forward-only** in production. Breaking changes follow *expand → migrate → contract* across two releases.
 - `migrate` holds a Postgres advisory lock. In compose it runs as a one-shot service before `serve`/`worker`.
-- **Module config formats:** `module_version` per instance. When a module changes its config format it ships `migrateConfig(fromVersion, config)`; configs are migrated lazily on read, and a job migrates all instances after deployment.
+- **Module config formats:** `module_version` per instance. Modules ship deterministic `migrateConfig(fromVersion, config)` hooks. [Lazy reads](../packages/core/src/instances/persistence.ts) migrate only the returned view and disclose `storedModuleVersion`; explicit writes persist a new audited revision (ADR-0041). A deployment job uses the same persistence path.
 - **Form schema evolution:** every change creates `config_version + 1` and a revision. Submissions store `config_version`; the dashboard renders each submission with the field definitions of its version and shows unknown/removed fields under "Additional data". CSV export uses the union of all fields.
 
 ### B.6 Tenant isolation in the data layer

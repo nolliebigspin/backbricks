@@ -1,59 +1,29 @@
-import { ZodError } from 'zod';
-
 import { AppError } from '../errors/app-error.ts';
 import { pageResult } from '../http/pagination.ts';
-import type { Ids } from '../ids/type-id.ts';
-import type { RegisteredModule } from '../modules/registered.ts';
-import type { ModuleRegistry } from '../modules/registry.ts';
-import { canonicalJson, jsonValueSchema } from '../modules/values.ts';
-import type { ModuleInstance } from '../platform/models.ts';
-import { principalActor, type AuditService, type EventService } from '../services/activity.ts';
+import { jsonValueSchema } from '../modules/values.ts';
 import { CORE_EVENTS } from '../services/event-types.ts';
 import type { RepositoryPage } from '../tenancy/repositories.ts';
 import type { TenantTransaction } from '../tenancy/tenant-context.ts';
-import type { Clock } from '../time/clock.ts';
 import { mergeConfigPatch } from './merge-patch.ts';
 import { requireConfigAccess } from './permissions.ts';
 import {
+  activeInstance,
+  checkInstanceVersion,
+  instancePersistence,
+  instanceView,
+  validatedConfig,
+  type InstanceDependencies,
+} from './persistence.ts';
+import {
   instanceCreateSchema,
   instancePatchSchema,
-  instanceVersionSchema,
-  MAX_INSTANCE_VERSION,
   type InstanceCreate,
   type InstancePatch,
 } from './schemas.ts';
 
-function parseConfig(module: RegisteredModule, config: unknown) {
-  try {
-    return module.parseConfig(config);
-  } catch (error) {
-    if (error instanceof ZodError)
-      throw new AppError('validation_failed', { detail: 'The module configuration is invalid.' });
-    throw error;
-  }
-}
-
-async function current(tx: TenantTransaction, type: string, key: string) {
-  const value = await tx.repositories.instances.getByKey(type, key);
-  if (value.status === 'archived') throw new AppError('not_found');
-  return value;
-}
-
-function checkVersion(previous: ModuleInstance, version: number) {
-  instanceVersionSchema.parse(version);
-  if (previous.configVersion !== version || version === MAX_INSTANCE_VERSION)
-    throw new AppError('conflict');
-}
-
-/** Registry-driven lifecycle. All data, revision, audit and outbox writes use the caller transaction. */
-export function createInstanceService(deps: {
-  registry: ModuleRegistry;
-  runtime: ReturnType<ModuleRegistry['bind']>;
-  clock: Clock;
-  ids: Ids;
-  audit: AuditService;
-  events: EventService;
-}) {
+/** Registry-driven lifecycle; all writes enlist in the caller's transaction. */
+export function createInstanceService(deps: InstanceDependencies) {
+  const { record, save } = instancePersistence(deps);
   async function moduleFor(tx: TenantTransaction, type: string, access: 'read' | 'write') {
     if (!tx.context.projectId) throw new AppError('not_found');
     // Serialize mutations with project archival and config-as-code's future project-wide apply.
@@ -63,57 +33,18 @@ export function createInstanceService(deps: {
     requireConfigAccess(tx, access);
     return module;
   }
-  async function record(
-    tx: TenantTransaction,
-    action: string,
-    instance: ModuleInstance,
-    changedFields: string[],
-    previousVersion?: number,
-    requestId?: string,
-  ) {
-    const principal = requireConfigAccess(tx, 'write');
-    const actor = principalActor(principal);
-    await tx.repositories.revisions.insert({
-      id: deps.ids.generate('rvn'),
-      instanceId: instance.id,
-      configVersion: instance.configVersion,
-      moduleVersion: instance.moduleVersion,
-      config: instance.config,
-      ...actor,
-      actorId: actor.actorId ?? null,
-      createdAt: deps.clock.now(),
-    });
-    const changes = {
-      changedFields,
-      configVersion: instance.configVersion,
-      ...(previousVersion ? { previousVersion } : {}),
-    };
-    await deps.audit.record(tx, {
-      ...actor,
-      action,
-      targetType: 'module_instance',
-      targetId: instance.id,
-      changes,
-      requestId,
-    });
-    await deps.events.publish(tx, {
-      type: action,
-      subjectType: 'module_instance',
-      subjectId: instance.id,
-      payload: changes,
-    });
-  }
   return {
     async list(tx: TenantTransaction, type: string, page: RepositoryPage) {
-      await moduleFor(tx, type, 'read');
-      return pageResult(
+      const module = await moduleFor(tx, type, 'read');
+      const pageData = pageResult(
         await tx.repositories.instances.list(page, type, { includeArchived: false }),
         page.limit,
       );
+      return { ...pageData, data: pageData.data.map((row) => instanceView(module, row)) };
     },
     async get(tx: TenantTransaction, type: string, key: string) {
-      await moduleFor(tx, type, 'read');
-      return current(tx, type, key);
+      const module = await moduleFor(tx, type, 'read');
+      return instanceView(module, await activeInstance(tx, type, key));
     },
     async create(tx: TenantTransaction, type: string, input: InstanceCreate, requestId?: string) {
       const module = await moduleFor(tx, type, 'write');
@@ -122,7 +53,7 @@ export function createInstanceService(deps: {
       const instance = await tx.repositories.instances.insert({
         ...data,
         config:
-          data.config === undefined ? module.defaultConfig() : parseConfig(module, data.config),
+          data.config === undefined ? module.defaultConfig() : validatedConfig(module, data.config),
         id: deps.ids.generate('mod'),
         moduleType: type,
         configVersion: 1,
@@ -149,56 +80,72 @@ export function createInstanceService(deps: {
     ) {
       const module = await moduleFor(tx, type, 'write');
       const data = instancePatchSchema.parse(input);
-      const previous = await current(tx, type, key);
-      checkVersion(previous, data.configVersion);
-      if (previous.moduleVersion !== module.moduleVersion)
-        throw new AppError('conflict', { detail: 'A configuration migration is required.' });
+      const previous = await activeInstance(tx, type, key);
+      checkInstanceVersion(previous, data.configVersion);
+      const before = validatedConfig(module, previous.config, previous.moduleVersion);
       const config =
         data.config === undefined
-          ? jsonValueSchema.parse(previous.config)
-          : parseConfig(
-              module,
-              mergeConfigPatch(
-                jsonValueSchema.parse(previous.config),
-                jsonValueSchema.parse(data.config),
-              ),
-            );
-      const configChanged =
-        canonicalJson(jsonValueSchema.parse(previous.config)) !== canonicalJson(config);
-      if (configChanged)
-        requireConfigAccess(
-          tx,
-          'write',
-          module.validateConfigChange(previous.config, config).destructive,
-        );
-      const changedFields = [
-        ...(data.name !== undefined && data.name !== previous.name ? ['name'] : []),
-        ...(data.status !== undefined && data.status !== previous.status ? ['status'] : []),
-        ...(configChanged ? ['config'] : []),
-      ];
-      if (!changedFields.length) return previous;
-      const instance = await tx.repositories.instances.update(previous.id, data.configVersion, {
-        name: data.name ?? previous.name,
-        status: data.status ?? previous.status,
-        config,
-        configVersion: previous.configVersion + 1,
-        updatedAt: deps.clock.now(),
-      });
-      if (configChanged)
-        await module.retention.recomputeExpiry(
-          deps.runtime.forTenant(tx).execution(type),
-          instance,
-          deps.clock.now(),
-        );
-      await record(
+          ? before
+          : validatedConfig(module, mergeConfigPatch(before, jsonValueSchema.parse(data.config)));
+      return save(
         tx,
-        CORE_EVENTS.instanceUpdated,
-        instance,
-        changedFields,
-        previous.configVersion,
+        module,
+        previous,
+        { config, name: data.name, status: data.status },
         requestId,
       );
-      return instance;
+    },
+    async revisions(tx: TenantTransaction, type: string, key: string, page: RepositoryPage) {
+      await moduleFor(tx, type, 'read');
+      const instance = await activeInstance(tx, type, key);
+      return pageResult(await tx.repositories.revisions.list(instance.id, page), page.limit);
+    },
+    async revision(tx: TenantTransaction, type: string, key: string, version: number) {
+      await moduleFor(tx, type, 'read');
+      const instance = await activeInstance(tx, type, key);
+      return tx.repositories.revisions.get(instance.id, version);
+    },
+    async rollback(
+      tx: TenantTransaction,
+      type: string,
+      key: string,
+      version: number,
+      expected: number,
+      requestId?: string,
+    ) {
+      const module = await moduleFor(tx, type, 'write');
+      const previous = await activeInstance(tx, type, key);
+      checkInstanceVersion(previous, expected);
+      const revision = await tx.repositories.revisions.get(previous.id, version);
+      const config = validatedConfig(module, revision.config, revision.moduleVersion);
+      return save(
+        tx,
+        module,
+        previous,
+        { config },
+        requestId,
+        CORE_EVENTS.instanceRolledBack,
+        true,
+      );
+    },
+    async migrate(
+      tx: TenantTransaction,
+      type: string,
+      key: string,
+      expected: number,
+      requestId?: string,
+    ) {
+      const module = await moduleFor(tx, type, 'write');
+      const previous = await activeInstance(tx, type, key);
+      checkInstanceVersion(previous, expected);
+      return save(
+        tx,
+        module,
+        previous,
+        { config: validatedConfig(module, previous.config, previous.moduleVersion) },
+        requestId,
+        CORE_EVENTS.instanceMigrated,
+      );
     },
     async archive(
       tx: TenantTransaction,
@@ -208,9 +155,9 @@ export function createInstanceService(deps: {
       requestId?: string,
     ) {
       await moduleFor(tx, type, 'write');
-      const previous = await current(tx, type, key);
+      const previous = await activeInstance(tx, type, key);
       requireConfigAccess(tx, 'write', true);
-      checkVersion(previous, version);
+      checkInstanceVersion(previous, version);
       const instance = await tx.repositories.instances.update(previous.id, version, {
         status: 'archived',
         configVersion: previous.configVersion + 1,
