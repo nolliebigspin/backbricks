@@ -1,4 +1,4 @@
-import { createSmtpMailer, createS3Storage } from '@backbricks/adapters';
+import { createSmtpMailer, createS3Storage, createAltchaProvider } from '@backbricks/adapters';
 import {
   createAuditService,
   createEventService,
@@ -19,7 +19,12 @@ import {
   type Entitlements,
   type SelectedModules,
 } from '@backbricks/core';
-import { createPostgresRateLimitStore, createWithTenant, type Database } from '@backbricks/db';
+import {
+  createPostgresRateLimitStore,
+  createWithTenant,
+  createPowReplayStore,
+  type Database,
+} from '@backbricks/db';
 
 import { moduleJobs } from './module-jobs.ts';
 import { moduleCatalog } from './modules.ts';
@@ -42,6 +47,11 @@ export function createServerServices(
   const activity = { clock, ids };
   const mailer = config.mailer ? createSmtpMailer(config.mailer) : null;
   const storage = config.storage ? createS3Storage(config.storage, clock) : null;
+  const captcha = createAltchaProvider({
+    appSecret: config.appSecret,
+    clock,
+    replay: createPowReplayStore(db),
+  });
   const container = createServiceContainer(
     {
       ...activity,
@@ -51,7 +61,7 @@ export function createServerServices(
       entitlements: options.entitlements ?? createUnlimitedEntitlements(),
       rateLimiter: createRateLimiter(createPostgresRateLimitStore(db), clock),
     },
-    { mailer, storage },
+    { mailer, storage, captcha },
   );
   const withTenant = createWithTenant(db, options.moduleRepositories);
   const moduleRuntime = modules.registry.bind(container);
@@ -62,6 +72,7 @@ export function createServerServices(
   });
   return Object.freeze({
     container,
+    captcha,
     readinessChecks: storage ? [{ name: 'storage', check: () => storage.check() }] : [],
     modules,
     scopeCatalog,

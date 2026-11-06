@@ -1,0 +1,16 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`challenge HTTP validates scoped credentials, origin, output and bounded generation 1`] = `
+{
+  "parameters": {
+    "algorithm": "SHA-256",
+    "cost": 1000,
+    "expiresAt": "[expiry]",
+    "keyLength": 32,
+    "keyPrefix": "00",
+    "nonce": "[nonce]",
+    "salt": "[salt]",
+  },
+  "signature": "[signature]",
+}
+`;

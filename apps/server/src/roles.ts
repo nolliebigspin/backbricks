@@ -1,4 +1,4 @@
-import { type Config, createIpIdentity } from '@backbricks/core';
+import { type Config, createIpIdentity, createChallengeService } from '@backbricks/core';
 import { createDatabase, runMigrations } from '@backbricks/db';
 
 import { createApp } from './app.ts';
@@ -9,6 +9,8 @@ import { registerKeys } from './keys.ts';
 import type { Logger } from './logger.ts';
 import { createApiAuthorization } from './middleware/authorization.ts';
 import { registerProjects } from './projects.ts';
+import { createPublicCredentialResolver } from './public-auth.ts';
+import { challengeRoutes } from './routes/challenge.ts';
 import { configurationRoutes } from './routes/configuration.ts';
 import { instanceRoutes } from './routes/instances.ts';
 import { metaRoutes } from './routes/meta.ts';
@@ -33,6 +35,18 @@ export function startServe(config: Config, log: Logger): RunningRole {
   const services = createServerServices(config, database.db);
   const auth = createServerAuth(config, database.db, log, services);
   const keyAuth = createServerKeyAuth(config, database.db, log, services);
+  const resolvePublic = createPublicCredentialResolver({
+    clock: services.container.core.clock,
+    withTenant: services.withTenant,
+    resolveSecret: keyAuth.resolveKey,
+  });
+  const issueChallenge = createChallengeService({
+    clock: services.container.core.clock,
+    captcha: services.captcha,
+    limiter: services.container.core.rateLimiter,
+    withTenant: services.withTenant,
+    resolve: resolvePublic,
+  });
   const app = createApp(
     {
       log,
@@ -54,6 +68,7 @@ export function startServe(config: Config, log: Logger): RunningRole {
       metaRoutes(api, services.modules);
       instanceRoutes(api, services);
       configurationRoutes(api, services);
+      challengeRoutes(api, { captcha: services.captcha, issue: issueChallenge });
       moduleRoutes(api, services);
     },
     createApiAuthorization({ config, db: database.db, auth, resolveKey: keyAuth.resolveKey }),

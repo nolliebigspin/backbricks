@@ -5,6 +5,8 @@ import {
   type Config,
   type Clock,
   type SecretKeyResolver,
+  type SecretKeyLookup,
+  createChallengeService,
   type defineModuleCatalog,
 } from '@backbricks/core';
 import { createDatabase, runMigrations } from '@backbricks/db';
@@ -21,6 +23,8 @@ import { createLogger } from '../src/logger.ts';
 import { createApiAuthorization } from '../src/middleware/authorization.ts';
 import { moduleCatalog } from '../src/modules.ts';
 import { registerProjects } from '../src/projects.ts';
+import { createPublicCredentialResolver } from '../src/public-auth.ts';
+import { challengeRoutes } from '../src/routes/challenge.ts';
 import { configurationRoutes } from '../src/routes/configuration.ts';
 import { instanceRoutes } from '../src/routes/instances.ts';
 import { metaRoutes } from '../src/routes/meta.ts';
@@ -56,6 +60,7 @@ export async function scenario(
   apiOptions: {
     configure?: (api: ApiRoutes, db: ReturnType<typeof createDatabase>['db']) => void;
     resolveKey?: SecretKeyResolver;
+    lookupPublishable?: SecretKeyLookup;
     keyClock?: Clock;
     catalog?: ReturnType<typeof defineModuleCatalog>;
     moduleRepositories?: NonNullable<
@@ -106,6 +111,19 @@ export async function scenario(
       services = runtime;
       auth = createServerAuth(config, handle.db, log, runtime);
       keyAuth = createServerKeyAuth(config, handle.db, log, runtime);
+      const resolvePublic = createPublicCredentialResolver({
+        clock: runtime.container.core.clock,
+        withTenant: runtime.withTenant,
+        resolveSecret: keyAuth.resolveKey,
+        lookupPublishable: apiOptions.lookupPublishable,
+      });
+      const issueChallenge = createChallengeService({
+        clock: runtime.container.core.clock,
+        captcha: runtime.captcha,
+        limiter: runtime.container.core.rateLimiter,
+        withTenant: runtime.withTenant,
+        resolve: resolvePublic,
+      });
       app = createApp(
         {
           log,
@@ -127,6 +145,7 @@ export async function scenario(
           metaRoutes(api, runtime.modules);
           instanceRoutes(api, runtime);
           configurationRoutes(api, runtime);
+          challengeRoutes(api, { captcha: runtime.captcha, issue: issueChallenge });
           moduleRoutes(api, runtime, apiOptions.authorizePublic);
           apiOptions.configure?.(api, handle.db);
         },

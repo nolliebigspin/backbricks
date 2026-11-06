@@ -54,3 +54,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0042](0042-config-documents-and-bound-plans.md) | Configuration documents and bound plans | accepted |
 | [0043](0043-atomic-config-apply-and-exports.md) | Atomic configuration apply and exports | accepted |
 | [0044](0044-private-s3-storage.md) | Private S3 storage | accepted |
+| [0045](0045-proof-of-work-and-replay.md) | Proof-of-work and replay protection | accepted; publishable bootstrap gated by Q11 |

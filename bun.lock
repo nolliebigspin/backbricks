@@ -36,6 +36,9 @@
         "hono": "4.13.16",
         "pino": "10.4.0",
       },
+      "devDependencies": {
+        "altcha-lib": "2.8.0",
+      },
     },
     "apps/web": {
       "name": "@backbricks/web",
@@ -89,7 +92,9 @@
         "@aws-sdk/client-s3": "3.1163.0",
         "@aws-sdk/s3-request-presigner": "3.1163.0",
         "@backbricks/core": "workspace:*",
+        "altcha-lib": "2.8.0",
         "nodemailer": "10.3.1",
+        "zod": "4.6.7",
       },
       "devDependencies": {
         "@types/nodemailer": "8.0.2",
@@ -1049,6 +1054,8 @@
 
     "ajv-formats": ["ajv-formats@2.1.1", "", { "dependencies": { "ajv": "^8.0.0" } }, "sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA=="],
 
+    "altcha-lib": ["altcha-lib@2.8.0", "", { "peerDependencies": { "@fastify/cookie": "^11.0.0", "@fastify/cors": "^11.0.0", "@fastify/formbody": "^8.0.0 || ^9.0.0", "@nestjs/common": "^10.0.0 || ^11.0.0 || ^12.0.0", "@nestjs/core": "^10.0.0 || ^11.0.0 || ^12.0.0", "@nestjs/platform-express": "^10.0.0 || ^11.0.0 || ^12.0.0", "@nestjs/platform-fastify": "^10.0.0 || ^11.0.0 || ^12.0.0", "@sveltejs/kit": "^2.0.0 || ^3.0.0", "cookie-parser": "^1.0.0", "cors": "^2.0.0", "express": "^4.0.0 || ^5.0.0", "fastify": "^5.0.0", "h3": "^1.15.0 || ^2.0.0", "hono": "^4.0.0" }, "optionalPeers": ["@fastify/cookie", "@fastify/cors", "@fastify/formbody", "@nestjs/common", "@nestjs/core", "@nestjs/platform-express", "@nestjs/platform-fastify", "@sveltejs/kit", "cookie-parser", "cors", "express", "fastify", "h3", "hono"], "bin": { "altcha-lib": "bin/cli.mjs" } }, "sha512-at1DAqS8u6Z+XbPV2xQd/oATDTxYN83gITqIfsCSz7a2ENqUNIvn9h9xPuAbjeQ3JFqrW8KCjinphhm+bUrRzQ=="],
+
     "am-i-vibing": ["am-i-vibing@0.5.0", "", { "dependencies": { "process-ancestry": "^0.1.0" }, "bin": { "am-i-vibing": "dist/cli.mjs" } }, "sha512-KLcsDhqf1XRrJmJr+9I/C0EX2K+sGrAGZFgkmd84c8TJO9zJBu+/kFInjazu1KfJWFhWDKdRWkpBzEs7s35DVA=="],
 
     "ansi-colors": ["ansi-colors@4.1.3", "", {}, "sha512-/6w/C21Pm1A7aZitlI5Ni/2J6FFQN8i1Cvz3kHABAAbw93v/NlvKdVOqz7CCWz/3iv/JplRSEEZ83XION15ovw=="],
@@ -1157,7 +1164,7 @@
 
     "cookie": ["cookie@2.0.1", "", {}, "sha512-yuToqVvRrj6pfDXREyQAAv8SkAEk/8GS3jQRTiUMm66TVtBYmqQeoEjL2Lmq8Rpo6271vH76InTChTitEAm65w=="],
 
-    "cookie-es": ["cookie-es@3.1.1", "", {}, "sha512-UaXxwISYJPTr9hwQxMFYZ7kNhSXboMXP+Z3TRX6f1/NyaGPfuNUZOWP1pUEb75B2HjfklIYLVRfWiFZJyC6Npg=="],
+    "cookie-es": ["cookie-es@1.2.3", "", {}, "sha512-lXVyvUvrNXblMqzIRrxHb57UUVmqsSWlxqt3XIjCkUP0wDAf6uicO6KMbEgYrMNtEvWgWHwe42CKxPu9MYAnWw=="],
 
     "cross-spawn": ["cross-spawn@7.0.6", "", { "dependencies": { "path-key": "^3.1.0", "shebang-command": "^2.0.0", "which": "^2.0.1" } }, "sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA=="],
 
@@ -1923,6 +1930,8 @@
 
     "@tailwindcss/oxide-wasm32-wasi/tslib": ["tslib@2.9.1", "", { "bundled": true }, "sha512-a4Ux9VKuIMHsOS7ENbEq6hK2ZGYIT27Rtl0E4eD9KqwxhKiQeMZE/9xb3IdYwWaSOyIBQLExhQgXDTYoiCxnWA=="],
 
+    "@tanstack/router-core/cookie-es": ["cookie-es@3.1.1", "", {}, "sha512-UaXxwISYJPTr9hwQxMFYZ7kNhSXboMXP+Z3TRX6f1/NyaGPfuNUZOWP1pUEb75B2HjfklIYLVRfWiFZJyC6Npg=="],
+
     "@tanstack/router-generator/magic-string": ["magic-string@0.30.21", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.5" } }, "sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ=="],
 
     "@tanstack/router-utils/diff": ["diff@9.0.0", "", {}, "sha512-svtcdpS8CgJyqAjEQIXdb3OjhFVVYjzGAPO8WGCmRbrml64SPw/jJD4GoE98aR7r25A0XcgrK3F02yw9R/vhQw=="],
@@ -1944,8 +1953,6 @@
     "dot-prop/is-obj": ["is-obj@2.0.0", "", {}, "sha512-drqDG3cbczxxEJRoOXcOjtdp1J/lyp1mNn0xaznRs8+muBhgQcrnbspox5X5fOw0HnMnbfDzvnEMEtqDEJEo8w=="],
 
     "enquirer/strip-ansi": ["strip-ansi@6.0.1", "", { "dependencies": { "ansi-regex": "^5.0.1" } }, "sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A=="],
-
-    "h3/cookie-es": ["cookie-es@1.2.3", "", {}, "sha512-lXVyvUvrNXblMqzIRrxHb57UUVmqsSWlxqt3XIjCkUP0wDAf6uicO6KMbEgYrMNtEvWgWHwe42CKxPu9MYAnWw=="],
 
     "is-inside-container/is-docker": ["is-docker@3.0.0", "", { "bin": { "is-docker": "cli.js" } }, "sha512-eljcgEDlEns/7AXFosB5K/2nCM4P7FQPkGc/DWLy5rmFEWvZayGrik1d9/QIY5nJ4f9YsVvBkA6kJpHn9rISdQ=="],
 

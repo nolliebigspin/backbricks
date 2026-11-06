@@ -66,6 +66,12 @@ Decisions for the maintainer, started in P0 planning (2026-11-04), extended for 
 - **Needed by:** P1.4c completion/commit. AGENTS §1.7 requires explicit invariant-change approval; code and real-service tests are prepared for review.
 - **Answer (2026-11-06):** The maintainer explicitly approved the narrow bootstrap clarification in the execution session: “Approve the narrow bootstrap clarification.” Update I1 and its architecture/ADR wording for this sole exact-hash/ID projection; no unscoped metadata or general query access is permitted.
 
+### Q11 – Extend the exact-hash authentication bootstrap to publishable keys?
+- **Context:** Public requests carry an opaque publishable credential without a trusted tenant selector. I1/Q10 currently permit the narrow active-secret-key hash/ID bootstrap only. The public challenge/auth tasks need the equivalent lookup for publishable credentials before scoped access can begin.
+- **Recommendation:** Extend the same exact SHA-256, active-key/active-project, IDs-only authentication projection to publishable keys. Keep kind selection trusted and separate from HTTP input; all metadata/origin/instance/scope/business access still goes through `withTenant`. No general query API or unscoped HTTP endpoint. Alternative: change the public protocol to require an explicit project-ID header on every request.
+- **Needed by:** Public-key challenge/auth composition in P1.9a/b. Provider/replay work does not depend on this answer.
+- **Answer:** Pending; requested from the maintainer in this execution chat. Do not widen I1 or the lookup before explicit approval.
+
 ## Decided in planning, please confirm
 
 - **D0 – TypeScript:** stay on TypeScript 7 if it works; TypeScript 6.0.3 is an acceptable fallback (maintainer guidance in the planning session). The decision rule in `PLAN.md` applies: tool-local fallback first, repo-wide TS 6 only as a last resort, recorded in ADR-0020.

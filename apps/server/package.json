@@ -21,5 +21,8 @@
     "@hono/zod-openapi": "1.6.3",
     "hono": "4.13.16",
     "pino": "10.4.0"
+  },
+  "devDependencies": {
+    "altcha-lib": "2.8.0"
   }
 }

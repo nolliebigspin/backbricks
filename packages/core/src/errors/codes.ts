@@ -15,6 +15,7 @@ export const ERROR_CODES = {
   payload_too_large: { status: 413, title: 'Payload too large' },
   unsupported_media_type: { status: 415, title: 'Unsupported media type' },
   service_unavailable: { status: 503, title: 'Service unavailable' },
+  rate_limited: { status: 429, title: 'Too many requests' },
 } as const satisfies Record<string, { status: number; title: string }>;
 
 export type ErrorCode = keyof typeof ERROR_CODES;

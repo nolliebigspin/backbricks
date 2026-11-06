@@ -581,7 +581,7 @@ Commands are the intended post-implementation interface; `api:*` scripts are cre
 
 ### Execution notes
 
-P1.8e complete; see ADR-0044 and its task commit. Next: P1.9a (PoW provider/replay/challenge). Public publishable-key bootstrap awaits an explicit I1 clarification; provider/replay work can proceed independently. M1 remains in progress.
+P1.9a provider, atomic replay store and rate-limited challenge composition are implemented and verified (ADR-0045). P1.9a remains unticked: production publishable-key bootstrap is deliberately absent pending Q11 approval. Fixture lookup is followed by real scoped DB validation; the production port fails closed. Continue independent AbuseGuard/CORS work through the injected port while awaiting the answer, then finish the public-auth gate before milestone acceptance.
 
 ## Phase P2 – Forms (M2 · v0.1.0) · stub
 
