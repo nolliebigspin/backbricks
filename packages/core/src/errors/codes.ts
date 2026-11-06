@@ -4,10 +4,21 @@
  */
 export const ERROR_CODES = {
   internal_error: { status: 500, title: 'Internal server error' },
+  invalid_request: { status: 400, title: 'Invalid request' },
+  conflict: { status: 409, title: 'Conflict' },
+  module_not_enabled: { status: 404, title: 'Module is not available' },
   not_found: { status: 404, title: 'Not found' },
+  method_not_allowed: { status: 405, title: 'Method is not available' },
+  unauthorized: { status: 401, title: 'Authentication required' },
+  forbidden: { status: 403, title: 'Access denied' },
+  secret_key_exposed: { status: 403, title: 'Secret key exposed' },
   validation_failed: { status: 422, title: 'Validation failed' },
   payload_too_large: { status: 413, title: 'Payload too large' },
+  unsupported_media_type: { status: 415, title: 'Unsupported media type' },
   service_unavailable: { status: 503, title: 'Service unavailable' },
+  rate_limited: { status: 429, title: 'Too many requests' },
+  proof_invalid: { status: 400, title: 'Verification failed' },
+  quota_exceeded: { status: 402, title: 'Usage limit reached' },
 } as const satisfies Record<string, { status: number; title: string }>;
 
 export type ErrorCode = keyof typeof ERROR_CODES;

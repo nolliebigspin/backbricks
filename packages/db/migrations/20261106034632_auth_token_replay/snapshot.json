@@ -1,0 +1,140 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "a6ae2a14-36b8-45a1-a61a-da6d4de1ca1d",
+  "prevIds": [
+    "23e44012-c9ff-4889-9b37-c1c9ece78c08"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "auth_token_replays"
+      ],
+      "writes": [
+        "s|tbl|public.auth_token_replays",
+        "n|tbl|public.auth_token_replays",
+        "e|tbl|public.auth_token_replays",
+        "n|rel|public.auth_token_replays",
+        "n|type|public.auth_token_replays",
+        "n|rel|public.auth_token_replays_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "auth_token_replays",
+        "auth_token_replays_expiry_idx"
+      ],
+      "writes": [
+        "s|idx|public.auth_token_replays_expiry_idx",
+        "n|idx|public.auth_token_replays_expiry_idx",
+        "e|idx|public.auth_token_replays_expiry_idx",
+        "n|rel|public.auth_token_replays_expiry_idx"
+      ],
+      "reads": [
+        "n|tbl|public.auth_token_replays",
+        "n|sch|public",
+        "n|col|public.auth_token_replays.expires_at"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "auth_token_replays",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "auth_token_replays",
+        "name": "digest",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "auth_token_replays",
+        "name": "expires_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "auth_token_replays",
+        "name": "auth_token_replays_expiry_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "expires_at",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "auth_token_replays",
+        "name": "auth_token_replays_pkey",
+        "columns": [
+          "digest"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "auth_token_replays",
+        "name": "auth_token_replays_digest",
+        "value": "\"digest\" ~ '^[a-f0-9]{64}$'",
+        "entityType": "checks"
+      }
+    }
+  ]
+}

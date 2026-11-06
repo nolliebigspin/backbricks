@@ -24,6 +24,7 @@ COPY --from=manifests /manifests ./
 RUN bun install --frozen-lockfile --ignore-scripts --filter @backbricks/web
 COPY tsconfig.base.json ./
 COPY packages/ui packages/ui
+COPY packages/sdk packages/sdk
 COPY apps/web apps/web
 RUN cd apps/web && bun --bun vite build
 
@@ -34,6 +35,8 @@ COPY --from=manifests /manifests ./
 RUN bun install --frozen-lockfile --ignore-scripts --production --filter @backbricks/server
 COPY tsconfig.base.json ./
 COPY packages/core packages/core
+COPY packages/auth packages/auth
+COPY packages/adapters packages/adapters
 COPY packages/db packages/db
 COPY packages/modules packages/modules
 COPY apps/server apps/server

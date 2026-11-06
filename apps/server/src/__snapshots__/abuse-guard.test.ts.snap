@@ -1,0 +1,14 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`public guard enforces cheap-first checks, proof, scopes, CORS, strict schema and transaction safety 1`] = `
+{
+  "accepted": true,
+}
+`;
+
+exports[`public guard enforces cheap-first checks, proof, scopes, CORS, strict schema and transaction safety 2`] = `
+{
+  "accepted": true,
+  "status": "clean",
+}
+`;

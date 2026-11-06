@@ -1,11 +1,11 @@
-import { redactFields } from '@backbricks/core';
+import { redactSecrets } from '@backbricks/core';
 import { type DestinationStream, type Logger, pino } from 'pino';
 
 export type { Logger };
 
 /**
- * Structured JSON logs (pino). Every log object passes through `redactFields`, so secrets
- * never reach the output even if a caller logs a whole header or config object (I4).
+ * Structured JSON logs (pino). Sanitize the final JSON boundary, including child bindings,
+ * serializer output and formatted message strings, before any transport receives a line (I4).
  * For readable local output, pipe through `bunx pino-pretty`.
  */
 export function createLogger(level: string, destination?: DestinationStream): Logger {
@@ -15,7 +15,9 @@ export function createLogger(level: string, destination?: DestinationStream): Lo
       base: { service: 'backbricks' },
       formatters: {
         level: (label) => ({ level: label }),
-        log: (object) => redactFields(object),
+      },
+      hooks: {
+        streamWrite: (line) => `${JSON.stringify(redactSecrets(JSON.parse(line)))}\n`,
       },
       timestamp: pino.stdTimeFunctions.isoTime,
     },

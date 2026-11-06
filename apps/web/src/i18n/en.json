@@ -2,9 +2,209 @@
   "app": {
     "name": "Backbricks"
   },
-  "home": {
-    "title": "Welcome to Backbricks",
-    "description": "Your dashboard is being set up. Forms, files and reviews will show up here.",
-    "status": "The dashboard is running."
+  "common": {
+    "loading": "Loading…",
+    "working": "Working…",
+    "signOut": "Sign out",
+    "language": "Language",
+    "saved": "Saved.",
+    "name": "Name",
+    "address": "Short name",
+    "addressHint": "Use lowercase letters, numbers and single hyphens.",
+    "create": "Create",
+    "save": "Save changes",
+    "more": "Load more",
+    "invalid": "Check the fields and try again.",
+    "conflict": "This short name is already in use. Choose another.",
+    "missing": "This page is unavailable.",
+    "copy": "Copy key",
+    "close": "Close",
+    "copied": "Copied.",
+    "copyError": "Copying was blocked. Select the key above and copy it manually.",
+    "cancel": "Cancel"
+  },
+  "auth": {
+    "name": "Your name",
+    "email": "Email address",
+    "password": "Password",
+    "passwordHint": "Use at least {{count}} characters.",
+    "navigation": "Account options",
+    "login": {
+      "title": "Sign in",
+      "description": "Manage your websites with Backbricks.",
+      "submit": "Sign in",
+      "success": "You are signed in."
+    },
+    "signup": {
+      "title": "Create an account",
+      "description": "Start with your email address.",
+      "submit": "Create account",
+      "success": "Check your email for a verification link, then sign in."
+    },
+    "checkEmail": {
+      "title": "Verify your email",
+      "description": "Request a new verification link if the previous one expired.",
+      "submit": "Send verification link",
+      "success": "If the address can be verified, a link is on its way. Check your inbox."
+    },
+    "forgot": {
+      "title": "Forgot password?",
+      "description": "We will email you a link to choose a new password.",
+      "submit": "Send reset link",
+      "success": "If the address belongs to an account, a reset link is on its way."
+    },
+    "reset": {
+      "title": "Choose a new password",
+      "description": "This link can be used once.",
+      "submit": "Save password",
+      "success": "Your password has been changed. Sign in with your new password."
+    },
+    "invitation": {
+      "title": "Join your team",
+      "description": "Sign in with the invited email address, or create your account here.",
+      "submit": "Join team",
+      "success": "You have joined the team.",
+      "account": "Accept this invitation as {{email}}."
+    },
+    "errors": {
+      "generic": "We could not complete this request. Please try again.",
+      "unverified": "Verify your email before signing in. You can request a new link below.",
+      "inviteOnly": "Account creation requires an invitation. Ask your team for a link.",
+      "noEmail": "Email is unavailable on this installation. Contact the administrator.",
+      "rateLimit": "Too many attempts. Please wait a minute and try again.",
+      "expired": "This link is invalid, expired, or belongs to a different account. Request a new link.",
+      "lastOwner": "A team must have at least one owner. Keep another owner before removing this role.",
+      "session": "Your session has expired. Please sign in again.",
+      "credentials": "Check your email address and password and try again."
+    }
+  },
+  "dashboard": {
+    "organization": "Organization",
+    "project": "Project",
+    "selectOrganization": "Choose an organization",
+    "newOrganization": "New organization",
+    "chooseOrganization": "Choose an organization above, or create one to get started.",
+    "accessLost": "This organization or project is unavailable. Your access may have changed. Choose another organization or contact an owner.",
+    "forbidden": "Only owners and administrators can change these settings.",
+    "navigation": "Organization navigation",
+    "projectNavigation": "Project navigation",
+    "projects": "Projects",
+    "members": "Members",
+    "activity": "Activity",
+    "overview": "Overview",
+    "settings": "Settings",
+    "embed": "Embed"
+  },
+  "projects": {
+    "create": "Create project",
+    "empty": "No projects yet. Create one for your website.",
+    "domains": "Allowed websites",
+    "domainsHint": "One website origin per line, including https:// (or http:// for local development). Include the port when needed; do not include paths.",
+    "anyOrigin": "Allow submissions from any website. Leaving this list empty allows all websites.",
+    "overview": "Manage this website’s backend features and integration settings.",
+    "noModules": "No website features are available yet on this installation.",
+    "allDomains": "All websites are allowed. Restrict this in Settings before sharing a publishable key.",
+    "invalid": "Check the fields and use a full website origin such as https://example.com, without a path."
+  },
+  "keys": {
+    "title": "Access keys",
+    "kind": "Key type",
+    "publishable": "Publishable key",
+    "secret": "Secret key",
+    "publicHint": "Use this key in your website. It only allows supported public actions. Restrict allowed websites in Settings.",
+    "secretHint": "Keep this key on your server or in your coding agent’s private settings. Never add it to website code.",
+    "access": "Access preset",
+    "expiry": "Expires at",
+    "noExpiry": "No expiration",
+    "create": "Create key",
+    "active": "Active",
+    "expired": "Expired",
+    "revoked": "Revoked",
+    "revoke": "Revoke key",
+    "revokeTitle": "Revoke this key?",
+    "revokeDescription": "Any integration using this key will stop working immediately. This cannot be undone.",
+    "guidance": "Use a publishable key for your website and a secret key only for private integrations. Allowed websites protect public requests; they do not make a secret key safe to publish.",
+    "baseUrl": "API address",
+    "noPublicKey": "No active publishable key. Ask an owner or administrator to create one.",
+    "noPermission": "Only owners and administrators can create or revoke keys.",
+    "revealTitle": "Save your new key",
+    "revealDescription": "Copy it to a safe place now. A secret key is shown only once. Closing this window clears it from the dashboard.",
+    "presets": {
+      "agent": {
+        "title": "Coding agent",
+        "description": "Reads integration and configuration details, updates configuration, and reads usage. No personal records, deletion, or key management."
+      },
+      "server": {
+        "title": "Server integration",
+        "description": "Allows submissions to enabled website features. No personal record reads, deletion, or key management."
+      },
+      "data": {
+        "title": "Data access",
+        "description": "Explicitly grants reading and editing personal records plus usage reads. No deletion or key management. Share only with a trusted private integration."
+      }
+    }
+  },
+  "roles": {
+    "owner": "Owner",
+    "admin": "Administrator",
+    "member": "Member"
+  },
+  "members": {
+    "total": "{{count}} team members",
+    "role": "Role",
+    "remove": "Remove member",
+    "invite": "Invite member",
+    "invitations": "Invitations",
+    "roleHint": "Members can view project settings and integration details. Administrators can also manage projects, keys, team members and activity. Ownership transfer is unavailable.",
+    "resend": "Resend invitation",
+    "cancel": "Cancel invitation",
+    "expired": "Expired",
+    "status": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "canceled": "Canceled"
+    },
+    "changeTitle": "Change this role?",
+    "changeDescription": "The new permissions take effect immediately. A team must keep at least one owner.",
+    "removeTitle": "Remove this member?",
+    "removeDescription": "This person will immediately lose access to this organization. Their account and access to other organizations remain available.",
+    "linkTitle": "Share invitation link",
+    "linkDescription": "Email is unavailable. Share this link privately with the invited person. It only works with their matching email address and expires.",
+    "copyLink": "Copy invitation link",
+    "copyError": "Copying was blocked. Select the invitation link and copy it manually."
+  },
+  "activity": {
+    "description": "Administrative actions from the last year. Names, personal records and secret keys are never included.",
+    "empty": "No activity yet.",
+    "actor": {
+      "user": "Team member",
+      "api_key": "Private integration",
+      "mcp": "Coding agent",
+      "system": "Background service"
+    },
+    "actions": {
+      "organizationCreated": "Organization created",
+      "projectCreated": "Project created",
+      "projectUpdated": "Project settings changed",
+      "projectArchived": "Project archived",
+      "keyCreated": "Key created",
+      "keyRevoked": "Key revoked",
+      "secretExposed": "Secret key exposure blocked",
+      "invitationCreated": "Invitation created",
+      "invitationResent": "Invitation resent",
+      "invitationCanceled": "Invitation canceled",
+      "memberJoined": "Member joined",
+      "memberRemoved": "Member removed",
+      "roleChanged": "Member role changed",
+      "featureCreated": "Website feature created",
+      "featureUpdated": "Website feature configuration changed",
+      "featureArchived": "Website feature archived",
+      "generic": "Administrative change"
+    }
+  },
+  "languages": {
+    "en": "English",
+    "de": "Deutsch"
   }
 }

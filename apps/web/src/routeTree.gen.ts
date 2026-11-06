@@ -9,50 +9,369 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardRouteImport } from './routes/_dashboard'
+import { Route as AcceptInvitationRouteImport } from './routes/accept-invitation'
+import { Route as CheckEmailRouteImport } from './routes/check-email'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as DashboardIndexRouteImport } from './routes/_dashboard.index'
+import { Route as DashboardActivityRouteImport } from './routes/_dashboard.activity'
+import { Route as DashboardMembersRouteImport } from './routes/_dashboard.members'
+import { Route as DashboardOrganizationsNewRouteImport } from './routes/_dashboard.organizations.new'
+import { Route as DashboardProjectsProjectIdRouteImport } from './routes/_dashboard.projects.$projectId'
+import { Route as DashboardProjectsProjectIdIndexRouteImport } from './routes/_dashboard.projects.$projectId.index'
+import { Route as DashboardProjectsProjectIdEmbedRouteImport } from './routes/_dashboard.projects.$projectId.embed'
+import { Route as DashboardProjectsProjectIdSettingsRouteImport } from './routes/_dashboard.projects.$projectId.settings'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/_dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AcceptInvitationRoute = AcceptInvitationRouteImport.update({
+  id: '/accept-invitation',
+  path: '/accept-invitation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckEmailRoute = CheckEmailRouteImport.update({
+  id: '/check-email',
+  path: '/check-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardActivityRoute = DashboardActivityRouteImport.update({
+  id: '/activity',
+  path: '/activity',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardMembersRoute = DashboardMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardOrganizationsNewRoute =
+  DashboardOrganizationsNewRouteImport.update({
+    id: '/organizations/new',
+    path: '/organizations/new',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardProjectsProjectIdRoute =
+  DashboardProjectsProjectIdRouteImport.update({
+    id: '/projects/$projectId',
+    path: '/projects/$projectId',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardProjectsProjectIdIndexRoute =
+  DashboardProjectsProjectIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => DashboardProjectsProjectIdRoute,
+  } as any)
+const DashboardProjectsProjectIdEmbedRoute =
+  DashboardProjectsProjectIdEmbedRouteImport.update({
+    id: '/embed',
+    path: '/embed',
+    getParentRoute: () => DashboardProjectsProjectIdRoute,
+  } as any)
+const DashboardProjectsProjectIdSettingsRoute =
+  DashboardProjectsProjectIdSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => DashboardProjectsProjectIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof DashboardIndexRoute
+  '/accept-invitation': typeof AcceptInvitationRoute
+  '/check-email': typeof CheckEmailRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/signup': typeof SignupRoute
+  '/activity': typeof DashboardActivityRoute
+  '/members': typeof DashboardMembersRoute
+  '/organizations/new': typeof DashboardOrganizationsNewRoute
+  '/projects/$projectId': typeof DashboardProjectsProjectIdRouteWithChildren
+  '/projects/$projectId/embed': typeof DashboardProjectsProjectIdEmbedRoute
+  '/projects/$projectId/settings': typeof DashboardProjectsProjectIdSettingsRoute
+  '/projects/$projectId/': typeof DashboardProjectsProjectIdIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/accept-invitation': typeof AcceptInvitationRoute
+  '/check-email': typeof CheckEmailRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/signup': typeof SignupRoute
+  '/activity': typeof DashboardActivityRoute
+  '/members': typeof DashboardMembersRoute
+  '/': typeof DashboardIndexRoute
+  '/organizations/new': typeof DashboardOrganizationsNewRoute
+  '/projects/$projectId/embed': typeof DashboardProjectsProjectIdEmbedRoute
+  '/projects/$projectId/settings': typeof DashboardProjectsProjectIdSettingsRoute
+  '/projects/$projectId': typeof DashboardProjectsProjectIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_dashboard': typeof DashboardRouteWithChildren
+  '/accept-invitation': typeof AcceptInvitationRoute
+  '/check-email': typeof CheckEmailRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/signup': typeof SignupRoute
+  '/_dashboard/activity': typeof DashboardActivityRoute
+  '/_dashboard/members': typeof DashboardMembersRoute
+  '/_dashboard/': typeof DashboardIndexRoute
+  '/_dashboard/organizations/new': typeof DashboardOrganizationsNewRoute
+  '/_dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRouteWithChildren
+  '/_dashboard/projects/$projectId/embed': typeof DashboardProjectsProjectIdEmbedRoute
+  '/_dashboard/projects/$projectId/settings': typeof DashboardProjectsProjectIdSettingsRoute
+  '/_dashboard/projects/$projectId/': typeof DashboardProjectsProjectIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/accept-invitation'
+    | '/check-email'
+    | '/forgot-password'
+    | '/login'
+    | '/reset-password'
+    | '/signup'
+    | '/activity'
+    | '/members'
+    | '/organizations/new'
+    | '/projects/$projectId'
+    | '/projects/$projectId/embed'
+    | '/projects/$projectId/settings'
+    | '/projects/$projectId/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/accept-invitation'
+    | '/check-email'
+    | '/forgot-password'
+    | '/login'
+    | '/reset-password'
+    | '/signup'
+    | '/activity'
+    | '/members'
+    | '/'
+    | '/organizations/new'
+    | '/projects/$projectId/embed'
+    | '/projects/$projectId/settings'
+    | '/projects/$projectId'
+  id:
+    | '__root__'
+    | '/_dashboard'
+    | '/accept-invitation'
+    | '/check-email'
+    | '/forgot-password'
+    | '/login'
+    | '/reset-password'
+    | '/signup'
+    | '/_dashboard/activity'
+    | '/_dashboard/members'
+    | '/_dashboard/'
+    | '/_dashboard/organizations/new'
+    | '/_dashboard/projects/$projectId'
+    | '/_dashboard/projects/$projectId/embed'
+    | '/_dashboard/projects/$projectId/settings'
+    | '/_dashboard/projects/$projectId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRouteWithChildren
+  AcceptInvitationRoute: typeof AcceptInvitationRoute
+  CheckEmailRoute: typeof CheckEmailRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
+  LoginRoute: typeof LoginRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
+  SignupRoute: typeof SignupRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_dashboard': {
+      id: '/_dashboard'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/accept-invitation': {
+      id: '/accept-invitation'
+      path: '/accept-invitation'
+      fullPath: '/accept-invitation'
+      preLoaderRoute: typeof AcceptInvitationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/check-email': {
+      id: '/check-email'
+      path: '/check-email'
+      fullPath: '/check-email'
+      preLoaderRoute: typeof CheckEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_dashboard/': {
+      id: '/_dashboard/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/activity': {
+      id: '/_dashboard/activity'
+      path: '/activity'
+      fullPath: '/activity'
+      preLoaderRoute: typeof DashboardActivityRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/members': {
+      id: '/_dashboard/members'
+      path: '/members'
+      fullPath: '/members'
+      preLoaderRoute: typeof DashboardMembersRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/organizations/new': {
+      id: '/_dashboard/organizations/new'
+      path: '/organizations/new'
+      fullPath: '/organizations/new'
+      preLoaderRoute: typeof DashboardOrganizationsNewRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/projects/$projectId': {
+      id: '/_dashboard/projects/$projectId'
+      path: '/projects/$projectId'
+      fullPath: '/projects/$projectId'
+      preLoaderRoute: typeof DashboardProjectsProjectIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/projects/$projectId/': {
+      id: '/_dashboard/projects/$projectId/'
+      path: '/'
+      fullPath: '/projects/$projectId/'
+      preLoaderRoute: typeof DashboardProjectsProjectIdIndexRouteImport
+      parentRoute: typeof DashboardProjectsProjectIdRoute
+    }
+    '/_dashboard/projects/$projectId/embed': {
+      id: '/_dashboard/projects/$projectId/embed'
+      path: '/embed'
+      fullPath: '/projects/$projectId/embed'
+      preLoaderRoute: typeof DashboardProjectsProjectIdEmbedRouteImport
+      parentRoute: typeof DashboardProjectsProjectIdRoute
+    }
+    '/_dashboard/projects/$projectId/settings': {
+      id: '/_dashboard/projects/$projectId/settings'
+      path: '/settings'
+      fullPath: '/projects/$projectId/settings'
+      preLoaderRoute: typeof DashboardProjectsProjectIdSettingsRouteImport
+      parentRoute: typeof DashboardProjectsProjectIdRoute
     }
   }
 }
 
+interface DashboardProjectsProjectIdRouteChildren {
+  DashboardProjectsProjectIdEmbedRoute: typeof DashboardProjectsProjectIdEmbedRoute
+  DashboardProjectsProjectIdSettingsRoute: typeof DashboardProjectsProjectIdSettingsRoute
+  DashboardProjectsProjectIdIndexRoute: typeof DashboardProjectsProjectIdIndexRoute
+}
+
+const DashboardProjectsProjectIdRouteChildren: DashboardProjectsProjectIdRouteChildren =
+  {
+    DashboardProjectsProjectIdEmbedRoute: DashboardProjectsProjectIdEmbedRoute,
+    DashboardProjectsProjectIdSettingsRoute:
+      DashboardProjectsProjectIdSettingsRoute,
+    DashboardProjectsProjectIdIndexRoute: DashboardProjectsProjectIdIndexRoute,
+  }
+
+const DashboardProjectsProjectIdRouteWithChildren =
+  DashboardProjectsProjectIdRoute._addFileChildren(
+    DashboardProjectsProjectIdRouteChildren,
+  )
+
+interface DashboardRouteChildren {
+  DashboardActivityRoute: typeof DashboardActivityRoute
+  DashboardMembersRoute: typeof DashboardMembersRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardOrganizationsNewRoute: typeof DashboardOrganizationsNewRoute
+  DashboardProjectsProjectIdRoute: typeof DashboardProjectsProjectIdRouteWithChildren
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardActivityRoute: DashboardActivityRoute,
+  DashboardMembersRoute: DashboardMembersRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+  DashboardOrganizationsNewRoute: DashboardOrganizationsNewRoute,
+  DashboardProjectsProjectIdRoute: DashboardProjectsProjectIdRouteWithChildren,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  DashboardRoute: DashboardRouteWithChildren,
+  AcceptInvitationRoute: AcceptInvitationRoute,
+  CheckEmailRoute: CheckEmailRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
+  LoginRoute: LoginRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
+  SignupRoute: SignupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

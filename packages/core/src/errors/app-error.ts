@@ -1,12 +1,8 @@
+import { redactSecrets } from '../logging/redact.ts';
 import { ERROR_CODES, ERROR_TYPE_BASE_URL, type ErrorCode, type ErrorStatus } from './codes.ts';
+import { problemDetailsSchema, type FieldError, type ProblemDetails } from './schema.ts';
 
-/** One invalid field or parameter in a `validation_failed` problem. */
-export type FieldError = {
-  path: string;
-  code: string;
-  message: string;
-  meta?: Record<string, unknown>;
-};
+export type { FieldError, ProblemDetails } from './schema.ts';
 
 export type AppErrorOptions = {
   /** Human-readable explanation of this occurrence. Never put secrets or personal data here. */
@@ -35,27 +31,17 @@ export class AppError extends Error {
   }
 }
 
-/** RFC 9457 problem details with the agent-friendly extensions from ARCHITECTURE §D.3. */
-export type ProblemDetails = {
-  type: string;
-  title: string;
-  status: ErrorStatus;
-  code: ErrorCode;
-  detail?: string;
-  errors?: FieldError[];
-  hint?: string;
-  requestId: string;
-};
-
 export function toProblemDetails(error: AppError, requestId: string): ProblemDetails {
-  return {
-    type: `${ERROR_TYPE_BASE_URL}${error.code}`,
-    title: ERROR_CODES[error.code].title,
-    status: error.status,
-    code: error.code,
-    ...(error.detail === undefined ? {} : { detail: error.detail }),
-    ...(error.errors === undefined ? {} : { errors: error.errors }),
-    ...(error.hint === undefined ? {} : { hint: error.hint }),
-    requestId,
-  };
+  return problemDetailsSchema.parse(
+    redactSecrets({
+      type: `${ERROR_TYPE_BASE_URL}${error.code}`,
+      title: ERROR_CODES[error.code].title,
+      status: error.status,
+      code: error.code,
+      ...(error.detail === undefined ? {} : { detail: error.detail }),
+      ...(error.errors === undefined ? {} : { errors: error.errors }),
+      ...(error.hint === undefined ? {} : { hint: error.hint }),
+      requestId,
+    }),
+  );
 }
