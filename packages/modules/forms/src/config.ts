@@ -185,17 +185,6 @@ export const formsConfigSchema = z
 export type FormsConfig = z.output<typeof formsConfigSchema>;
 export type FormsConfigInput = z.input<typeof formsConfigSchema>;
 
-/** The default form is a contact form, so a new form is usable before the owner edits it. */
-export function defaultFormsConfig(): FormsConfig {
-  return formsConfigSchema.parse({
-    fields: [
-      { key: 'name', type: 'text', label: 'Name', required: true, maxLength: 200 },
-      { key: 'email', type: 'email', label: 'Email', required: true, identifiesSubject: true },
-      { key: 'message', type: 'textarea', label: 'Message', required: true },
-    ],
-  });
-}
-
 /** Maps the form's spam settings onto the shared public write guard (ADR-0046). */
 export function formsPublicWritePolicy(config: FormsConfig): PublicWritePolicyInput {
   const perMinute =

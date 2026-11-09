@@ -633,15 +633,15 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 - **Tests:** unit + fast-check (generated configs round-trip, bounds hold).
 - **Risks/notes:** Field keys are API surface for websites and CSV columns; keep them `[a-z][a-z0-9_]*`, max 64.
 
-### [ ] P2.1b – Add templates, change classification, migrations and codegen (est. 4 h)
+### [x] P2.1b – Add templates, change classification, migrations and codegen (est. 4 h)
 - **Description:** Four templates (contact, quote request, job application with a `file` field only when uploads exists, event sign-up). `validateConfigChange`: removing a field or changing its type is destructive; renaming labels, adding optional fields, reordering and limit changes are not; tightening a rule is a warning. `migrateConfig` for module version 1 (identity). `codegen` emits a `BackbricksSchema` augmentation for the submit payload (§D.7).
 - **Files/packages:** `packages/modules/forms/src/{templates,changes,codegen}.ts`.
 - **Depends on:** P2.1a.
 - **Reuses:** `configuration()` normalization, `configChangeReportSchema`.
 - **Acceptance criteria:**
-  - [ ] Every template validates and is offered in en/de; the job-application template degrades without `files`.
-  - [ ] Classifier table tests cover every field-level change kind; unclassified changes stay destructive.
-  - [ ] Codegen output typechecks in a fixture compiled with TS 7.
+  - [x] Every template validates and is offered in en/de; the job-application template degrades without `files`.
+  - [x] Classifier table tests cover every field-level change kind; unclassified changes stay destructive.
+  - [x] Codegen output typechecks in a fixture compiled with TS 7.
 - **Tests:** unit; codegen fixture typecheck.
 - **Risks/notes:** The classifier decides when `config:destructive` is needed (D30); err on destructive.
 
@@ -907,6 +907,8 @@ P2.0a: [`docs/modules/forms.md`](docs/modules/forms.md) approved by the maintain
 P2.0b: key probes are derived from the existing cookie cases (`exerciseKeyIsolation`): each project-scoped key route is probed with a session-issued key for its own project (reads must succeed) and the same request moved to the sibling and foreign projects (404, no writes); mutations get denial probes only, so stateful allowed steps still run once. The I5 gate (`public-responses.test.ts`) found the challenge preflight uncovered on its first run; every current public operation now has a field-allowlist, static-document or empty-body case. L4: the two applied migrations already start with explanatory comments and AGENTS §10 forbids editing applied migrations, so the guard is a schema-integrity assertion plus pointer comments next to the Drizzle tables. `CI=true bun run check`: 265 package + 92 script tests, no skips.
 
 P2.1a: [`config.ts`](packages/modules/forms/src/config.ts) is a strict per-type field union plus one form-level `superRefine` (no transforms, so the JSON Schema export works); it reuses the core honeypot schema and leaves the PoW-on per-minute default to the shared guard. New catalog code `capability_unavailable` (422; OpenAPI regenerated, additive). The module contract has no capability-aware validation hook, so `assertFieldCapabilities(config, { files })` is a pure check that P2.3c must call wherever forms configs are written (instance create/update, config apply). `listFields` stays optional; the list route (P2.5a) applies the "first two visible fields" fallback. New dependencies for the forms package: `zod` 4.6.7 (runtime, same pinned version as the rest of the workspace) and `fast-check` 4.10.2 (dev).
+
+P2.1b: templates come from one source per form and are registered as `<template>-<language>` keys (the core template record has one `name` string), so en/de needs no core change; `defaultFormsConfig()` is the English contact template. `formsTemplates({ files })` and `assertFieldCapabilities` both need to know whether the `files` capability exists; P2.3c decides how the definition gets that (M2 has no uploads, so `files: false`). No `migrateConfig` for version 1: the core parses configs at the current version directly (`FORMS_MODULE_VERSION`). Codegen emits `'forms/<key>'` members of one `BackbricksSchema` interface, so several forms (and later modules) merge; P2.9a's SDK must define `BackbricksSchema` and type `forms.submit` from it. For P2.3c: `validatedConfig` in core replaces config Zod errors with a path-less `validation_failed`, so forms config errors reach clients without field paths until that is fixed.
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · stub
 

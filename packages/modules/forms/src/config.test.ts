@@ -4,13 +4,9 @@ import { AppError, publicWritePolicySchema } from '@backbricks/core';
 import * as fc from 'fast-check';
 import { z } from 'zod';
 
-import {
-  assertFieldCapabilities,
-  defaultFormsConfig,
-  formsConfigSchema,
-  formsPublicWritePolicy,
-} from './config.ts';
+import { assertFieldCapabilities, formsConfigSchema, formsPublicWritePolicy } from './config.ts';
 import { FORM_FIELD_TYPES, FORMS_LIMITS } from './constants.ts';
+import { defaultFormsConfig } from './templates.ts';
 
 const text = (key: string, extra: Record<string, unknown> = {}) => ({
   key,
@@ -35,7 +31,12 @@ describe('forms configuration schema', () => {
     expect(config.spam).toEqual({ honeypotField: '_gotcha', proofOfWork: true });
     expect(config.retentionDays).toBe(180);
     expect(config.limits).toEqual({});
-    expect(config.fields.map((entry) => entry.key)).toEqual(['name', 'email', 'message']);
+    expect(config.fields.map((entry) => entry.key)).toEqual([
+      'name',
+      'email',
+      'message',
+      'privacy',
+    ]);
     expect(formsConfigSchema.parse(config)).toEqual(config);
   });
 

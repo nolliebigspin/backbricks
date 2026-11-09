@@ -2,7 +2,6 @@ import { defineModuleDescriptor, type InfraRequirement } from '@backbricks/core'
 
 export {
   assertFieldCapabilities,
-  defaultFormsConfig,
   fieldKeySchema,
   formFieldSchema,
   formsConfigSchema,
@@ -17,8 +16,12 @@ export {
   FORMS_BODY_LIMIT_BYTES,
   FORMS_DEFAULTS,
   FORMS_LIMITS,
+  FORMS_MODULE_VERSION,
   FORMS_RETENTION_DAYS,
 } from './constants.ts';
+export { classifyFormsChange } from './changes.ts';
+export { formsCodegen } from './codegen.ts';
+export { defaultFormsConfig, formsTemplates, type FormTemplateName } from './templates.ts';
 
 /** Forms needs nothing besides Postgres (ARCHITECTURE §C.7). The full definition arrives in its domain milestone. */
 export const formsInfrastructure = [] as const satisfies readonly InfraRequirement[];

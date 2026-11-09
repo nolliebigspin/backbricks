@@ -1,3 +1,9 @@
+/**
+ * Config format version. Version 1 needs no `migrateConfig`: the core parses configs stored at the
+ * current version directly; a later format change adds the hook (ADR-0041).
+ */
+export const FORMS_MODULE_VERSION = 1;
+
 /** Hard upper bounds for one form's configuration (docs/modules/forms.md §2). */
 export const FORMS_LIMITS = {
   fields: 50,
