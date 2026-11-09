@@ -1,0 +1,2 @@
+ALTER TABLE "projects" ADD COLUMN "erased_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "projects" ADD CONSTRAINT "projects_erased_after_archive" CHECK ("erased_at" is null or "deleted_at" is not null);

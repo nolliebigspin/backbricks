@@ -22,7 +22,11 @@ const registry = defineRegistry([
     events: [],
     usageMetrics: [],
     retention: { purgeExpired: async () => 0, recomputeExpiry: async () => 0 },
-    privacy: { exportSubject: async () => [], deleteSubject: async () => 0 },
+    privacy: {
+      exportSubject: async () => [],
+      deleteSubject: async () => 0,
+      eraseScope: async () => 0,
+    },
   }),
 ]);
 const project = 'prj_01m6r74k53e978tx66drg3tsg5';

@@ -12,6 +12,7 @@ import {
   createInstanceService,
   createNotificationRuleService,
   createSubjectPrivacyService,
+  createProjectErasureService,
   createConfigurationService,
   createPlatformQueries,
   createRateLimiter,
@@ -22,6 +23,7 @@ import {
   type Clock,
   type Queue,
   type NotificationMailEnqueue,
+  type ProjectErasurePorts,
   type ProjectJobEnqueue,
   type TenantContext,
   type Config,
@@ -48,6 +50,7 @@ export function createServerServices(
     queue?: Queue;
     enqueueProject?: ProjectJobEnqueue;
     enqueueNotificationMail?: NotificationMailEnqueue;
+    projectErasure?: ProjectErasurePorts;
     entitlements?: Entitlements;
     modules?: SelectedModules;
     moduleRepositories?: Parameters<typeof createWithTenant>[1];
@@ -105,6 +108,7 @@ export function createServerServices(
         mailer && options.enqueueNotificationMail
           ? { publicUrl: config.publicUrl, enqueueMail: options.enqueueNotificationMail }
           : undefined,
+        options.projectErasure,
       ).map((handler) => {
         const definition = PLATFORM_JOB_DEFINITIONS.find((job) => job.name === handler.name);
         if (!definition) throw new Error('Missing platform job definition');
@@ -132,6 +136,10 @@ export function createServerServices(
       queue: options.queue,
     }),
     projects: createProjectService(container.core),
+    projectErasure: createProjectErasureService({
+      audit: container.core.audit,
+      ports: options.projectErasure,
+    }),
     instances,
     configuration: createConfigurationService({
       ...container.core,

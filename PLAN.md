@@ -791,14 +791,14 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 - **Tests:** real HTTP/Postgres + worker job.
 - **Risks/notes:** Job payload contains the email; its job retention stays bounded (ADR-0048/0050).
 
-### [ ] P2.7c – Implement project hard erasure (release gate) (est. 6 h)
+### [x] P2.7c – Implement project hard erasure (release gate) (est. 6 h)
 - **Description:** The Q7/ADR-0030 gate, scoped by **Q15**: owner-only, type-to-confirm erasure of an archived project; a worker job erases every module's records via a new `privacy.eraseScope` hook (bounded batches, objects through storage when present), then project-scoped transient rows (idempotency, outbox, usage, keys, rules, instances, revisions); audit entries keep only structural IDs and expire on their one-year schedule; the archived project row stays as a tombstone without personal data so audit references remain valid. ADR plus ARCHITECTURE §F.4 update.
 - **Files/packages:** `packages/core/src/modules/contract.ts` (hook, ADR required: changes `ModuleDefinition`), `packages/core/src/projects/erasure.ts`, route + job, forms hook.
 - **Depends on:** P2.3c.
 - **Reuses:** ADR-0050 batch deletion, scheduled jobs, `projects` service lock.
 - **Acceptance criteria:**
-  - [ ] After the job, no personal record, job payload or object for that project remains (queries across all tables in the test); audit rows contain no personal labels.
-  - [ ] Interrupted erasure resumes idempotently; an active (not archived) project can't be erased.
+  - [x] After the job, no personal record, job payload or object for that project remains (queries across all tables in the test); audit rows contain no personal labels.
+  - [x] Interrupted erasure resumes idempotently; an active (not archived) project can't be erased.
 - **Tests:** real Postgres + worker; synthetic module with objects proves the storage path for M3.
 - **Risks/notes:** Organization deletion stays disabled until P6 (Q15). The dashboard offers "delete all entries" before archiving a form (P2.8a).
 
@@ -944,6 +944,9 @@ P2.7a implementation and verification complete: forms retention was already wire
 
 
 P2.7b implementation and verification complete: core `privacy/subjects.ts` (owner/admin session only, email lowercased like stored subject emails) runs every enabled module's `exportSubject` in the caller transaction and audits `privacy.subject_exported` with a module count; erasure enqueues the existing `core.privacy.erase` job in the same transaction as its `privacy.subject_erasure_requested` audit and answers `202 { status: "queued" }`. Both routes allow 20 requests per user and project per hour and joined the isolation suite. A real HTTP/worker test proves project-only export by normalized email, audit-failure rollback (no job left), worker erasure of only that subject in that project, and no email in audit, events or logs; the job payload keeps the email only for its 24 h retention (ADR-0048/0050). Next: P2.7c.
+
+
+P2.7c implementation and verification complete (release gate): required `privacy.eraseScope` hook (forms erases entries in batches and releases linked uploads via the optional files capability; all test fixtures declare it), owner-only `POST /v1/project-erasures` (organization-scoped because archived projects are unreachable through project routes; archived and slug-confirmed only), and a `core.projects.erase` worker in a new worker-only `archivedProject` tenant context. Rounds of 100 per module continue while a batch is full; the last round deletes outbox/idempotency/usage/rules/keys/revisions/instances, every queued or finished job payload of the project (notification mails are now tagged with their project) and leaves a tombstone (`erased_at`, migration `20261109104341_project_erasure`). The Postgres test proves zero rows in every `project_id` table but the audit log, no job payload, no personal labels in audit, rollback and resume, 409/422/403 rejections, an untouched neighbour and 404 afterwards. ADR-0061/D59. Deviation: no synthetic module with stored objects, because no storage-backed module exists before M3; the uploads module must prove the object path through `eraseScope` (noted in the ADR). Next: P2.8a dashboard.
 
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · stub

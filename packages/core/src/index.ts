@@ -456,6 +456,14 @@ export { PLATFORM_JOB_DEFINITIONS, createPlatformJobHandlers } from './jobs/plat
 
 export { PLATFORM_JOBS } from './jobs/platform-names.ts';
 export {
+  createProjectErasureService,
+  erasedProjectSlug,
+  projectErasureRequestSchema,
+  projectErasureResponseSchema,
+  type ProjectErasurePorts,
+  type ProjectErasureService,
+} from './projects/erasure.ts';
+export {
   notificationDispatchPayloadSchema,
   notificationDeliveryPayloadSchema,
   notificationDigestPayloadSchema,

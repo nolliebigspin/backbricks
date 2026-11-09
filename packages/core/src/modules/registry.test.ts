@@ -24,7 +24,11 @@ const base = {
   events: [],
   usageMetrics: [],
   retention: { purgeExpired: async () => 0, recomputeExpiry: async () => 0 },
-  privacy: { exportSubject: async () => [], deleteSubject: async () => 0 },
+  privacy: {
+    exportSubject: async () => [],
+    deleteSubject: async () => 0,
+    eraseScope: async () => 0,
+  },
 } as const;
 function other() {
   return defineModule({

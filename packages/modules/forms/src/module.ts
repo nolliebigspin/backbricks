@@ -15,7 +15,7 @@ export { FORMS_EVENTS, FORMS_METRICS } from './constants.ts';
 import { formsBulkRoutes, formsJobs } from './bulk.ts';
 import { entryExpiry, searchText } from './entries.ts';
 import { formsExportRoutes } from './export.ts';
-import { formsMutationRoutes } from './mutations.ts';
+import { deleteEntryFiles, formsMutationRoutes } from './mutations.ts';
 import { describeEntry } from './notifications.ts';
 import {
   formKeyParams,
@@ -234,6 +234,15 @@ export function createFormsModule(options: { files: boolean } = { files: false }
           total += deleted.length;
           if (deleted.length < SUBJECT_BATCH) return total;
         }
+      },
+      async eraseScope(runtime, { limit }) {
+        const erased = await repositoryOf(runtime).eraseBatch(limit);
+        // Linked uploads go through the optional files capability, as for every other deletion.
+        for (const id of erased) {
+          // oxlint-disable-next-line no-await-in-loop -- File cleanup shares the erasure transaction.
+          await deleteEntryFiles(runtime, id);
+        }
+        return erased.length;
       },
     },
   });

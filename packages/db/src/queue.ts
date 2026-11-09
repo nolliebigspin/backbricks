@@ -14,6 +14,9 @@ import {
   type QueueJobHandler,
   type WithTenant,
   jsonValueSchema,
+  MAIL_JOB_NAME,
+  PLATFORM_JOBS,
+  type ProjectErasurePorts,
 } from '@backbricks/core';
 import { sql } from 'drizzle-orm';
 import { PgBoss, fromDrizzle } from 'pg-boss';
@@ -79,6 +82,7 @@ export function createPostgresQueue(
     const envelope = queueEnvelopeSchema.parse({
       organizationId: context.organizationId,
       projectId: context.projectId,
+      ...(context.archivedProject ? { archivedProject: true } : {}),
       payload: wire.data,
     });
     return boss.send(name, envelope, {
@@ -115,7 +119,34 @@ export function createPostgresQueue(
     );
   };
 
+  const projectErasure: ProjectErasurePorts = {
+    async enqueue(tx, projectId) {
+      if (tx.context.projectId) throw new AppError('not_found');
+      const project = await tx.repositories.projects.get(projectId, { includeArchived: true });
+      if (!project.deletedAt) throw new AppError('conflict');
+      await send(
+        transactionFor(tx),
+        { organizationId: tx.context.organizationId, projectId, archivedProject: true },
+        PLATFORM_JOBS.projectErasure,
+        {},
+      );
+    },
+    async purgeJobs(tx) {
+      const projectId = tx.context.projectId;
+      if (!tx.context.archivedProject || !projectId) throw new AppError('not_found');
+      // Every queued or finished payload of the project, including its notification mail; the
+      // running erasure job completes in this transaction and expires with its retention.
+      const result = await transactionFor(tx).execute<{ id: string }>(
+        sql`delete from ${sql.identifier(QUEUE_SCHEMA)}.job where state <> 'active' and (
+              (data->>'organizationId' = ${tx.context.organizationId} and data->>'projectId' = ${projectId})
+              or (name = ${MAIL_JOB_NAME} and data->>'projectId' = ${projectId})
+            ) returning id`,
+      );
+      return result.rows.length;
+    },
+  };
   return {
+    projectErasure,
     maintenance: createMaintenanceRepository(db),
     purgeExpiredJobs: createQueueCleanup(db),
     ...mail,
@@ -186,7 +217,11 @@ export function createPostgresQueue(
                 const envelope = queueEnvelopeSchema.parse(job.data);
                 definition.payload.parse(envelope.payload);
                 await withTenant(
-                  { organizationId: envelope.organizationId, projectId: envelope.projectId },
+                  {
+                    organizationId: envelope.organizationId,
+                    projectId: envelope.projectId,
+                    ...(envelope.archivedProject ? { archivedProject: true } : {}),
+                  },
                   async (tx) => {
                     await handler.runInTransaction(tx, envelope.payload);
                     await boss.complete(handler.name, job.id, null, {

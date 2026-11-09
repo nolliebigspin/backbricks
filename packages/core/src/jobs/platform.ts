@@ -17,6 +17,11 @@ import {
   NOTIFICATION_JOB_DEFINITIONS,
 } from '../notifications/jobs.ts';
 import { emailAddressSchema } from '../platform/values.ts';
+import {
+  createProjectErasureHandler,
+  PROJECT_ERASURE_JOB_DEFINITION,
+  type ProjectErasurePorts,
+} from '../projects/erasure.ts';
 import type { TenantTransaction } from '../tenancy/tenant-context.ts';
 import { MAX_MAINTENANCE_BATCH, type QueueJobHandler } from './contract.ts';
 import { PLATFORM_JOBS } from './platform-names.ts';
@@ -45,6 +50,7 @@ const erasurePayload = z.object({ email: emailAddressSchema }).strict();
 export const PLATFORM_JOB_DEFINITIONS = Object.freeze([
   ...NOTIFICATION_JOB_DEFINITIONS,
   ...TENANT_MAINTENANCE_DEFINITIONS,
+  PROJECT_ERASURE_JOB_DEFINITION,
   {
     name: PLATFORM_JOBS.instanceMigration,
     payload: migrationPayload,
@@ -70,6 +76,7 @@ export function createPlatformJobHandlers(
   deps: InstanceDependencies,
   scheduling?: MaintenanceScheduling,
   notifications?: NotificationDeliveryOptions,
+  erasure?: ProjectErasurePorts,
 ): readonly QueueJobHandler[] {
   const persistence = instancePersistence(deps, 'system');
   const execution = (tx: TenantTransaction, type: string) =>
@@ -77,6 +84,7 @@ export function createPlatformJobHandlers(
   return [
     createNotificationDispatchHandler(deps.registry, scheduling?.queue),
     ...createNotificationDeliveryHandlers(deps, scheduling?.queue, notifications),
+    createProjectErasureHandler({ ...deps, queue: scheduling?.queue, ports: erasure }),
     ...createTenantMaintenanceHandlers(deps, scheduling),
     {
       name: PLATFORM_JOBS.instanceMigration,

@@ -55,7 +55,11 @@ export function instanceCatalog(classify = true, moduleVersion = 1) {
           return 0;
         },
       },
-      privacy: { exportSubject: async () => [], deleteSubject: async () => 0 },
+      privacy: {
+        exportSubject: async () => [],
+        deleteSubject: async () => 0,
+        eraseScope: async () => 0,
+      },
     }),
   ]);
 }

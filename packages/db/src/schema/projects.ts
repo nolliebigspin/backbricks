@@ -31,10 +31,16 @@ export const projects = pgTable(
     settings: jsonb('settings').$type<Record<string, unknown>>().notNull().default({}),
     ...recordTimestamps(),
     deletedAt: timestampColumn('deleted_at'),
+    // Set when hard erasure finished (ADR-0061); the row stays as a tombstone for audit references.
+    erasedAt: timestampColumn('erased_at'),
   },
   (table) => [
     unique().on(table.organizationId, table.slug),
     unique().on(table.organizationId, table.id),
+    check(
+      'projects_erased_after_archive',
+      sql`${table.erasedAt} is null or ${table.deletedAt} is not null`,
+    ),
   ],
 );
 

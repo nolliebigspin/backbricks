@@ -119,6 +119,7 @@ test.skipIf(!available)(
           await ctx.services.usage.increment(ctx.tx, { metric: 'maintenance.erased', delta: 1n });
           return 1;
         },
+        eraseScope: async () => 0,
       },
     });
     await scenario(

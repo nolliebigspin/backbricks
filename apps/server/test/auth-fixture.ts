@@ -126,6 +126,7 @@ export async function scenario(
         queue: queue?.queue,
         enqueueProject: queue?.enqueueProject,
         enqueueNotificationMail: queue?.enqueueNotificationMail,
+        projectErasure: queue?.projectErasure,
         moduleRepositories: apiOptions.moduleRepositories,
       });
       services = runtime;

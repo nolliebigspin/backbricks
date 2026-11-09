@@ -161,6 +161,13 @@ export function defineModule<
           await privacy.deleteSubject(runtime(execution), emailAddressSchema.parse(email)),
         );
       },
+      async eraseScope(execution, input) {
+        const validated = z
+          .object({ limit: z.number().int().min(1).max(1000) })
+          .strict()
+          .parse(input);
+        return checkedCount(await privacy.eraseScope(runtime(execution), validated));
+      },
     },
   });
 }

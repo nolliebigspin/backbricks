@@ -43,7 +43,11 @@ test.skipIf(!available)(
         }),
       },
       retention: { purgeExpired: async () => 0, recomputeExpiry: async () => 0 },
-      privacy: { exportSubject: async () => ({}), deleteSubject: async () => 0 },
+      privacy: {
+        exportSubject: async () => ({}),
+        deleteSubject: async () => 0,
+        eraseScope: async () => 0,
+      },
     });
     await scenario(
       async (base) => {

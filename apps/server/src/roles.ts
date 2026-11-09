@@ -60,6 +60,7 @@ async function startRuntime(
       queue: queue.queue,
       enqueueProject: queue.enqueueProject,
       enqueueNotificationMail: queue.enqueueNotificationMail,
+      projectErasure: queue.projectErasure,
     });
     services = runtime;
     if (role !== 'worker') {

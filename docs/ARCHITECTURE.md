@@ -720,11 +720,11 @@ See §B.6 and invariants I1–I3.
 |---|---|
 | Retention | `retentionDays` per instance (default 180; 7–3650 or "unlimited" with a warning); `expires_at` on insert, recomputed on change, daily purge (DB + objects), summarized audit entry |
 | Spam | Auto-deleted after 30 days |
-| Access (Art. 15 GDPR) | Search by email across modules (`privacy.exportSubject`) → JSON + files as ZIP, audited |
-| Erasure (Art. 17 GDPR) | `privacy.deleteSubject` across modules incl. files, audited (without content) |
+| Access (Art. 15 GDPR) | Search by email across modules (`privacy.exportSubject`, `POST …/privacy/subject-export`) → JSON (files as ZIP from M3), audited |
+| Erasure (Art. 17 GDPR) | `privacy.deleteSubject` across modules incl. files via `POST …/privacy/subject-delete` (job), audited (without content or email) |
 | Minimization | IP only as rotating HMAC; user agent only as family; notifications without content by default; no tracking cookies |
 | Consent | `consent` field type stores text version and timestamp |
-| Removing projects | Configuration archive disables access immediately; separate hard-erasure workflow required before M2 release (ADR-0030). No restore endpoint in M1 |
+| Removing projects | Configuration archive disables access immediately (ADR-0030); the owner then erases an archived project by typing its slug. A worker erases every module through `privacy.eraseScope`, platform rows and queued job payloads, and keeps a tombstone for audit references ([ADR-0061](adr/0061-project-hard-erasure.md)). No restore endpoint |
 | Deleting organizations | Disabled until the complete audited hard-erasure lifecycle exists; hard, cascading, objects via job; confirmation by typing the name |
 | Backups | Deleted data disappears when backup rotation expires (30 days), disclosed in the privacy documentation |
 

@@ -23,6 +23,15 @@ export interface ProjectRepository {
   get(id: string, options?: { includeArchived?: boolean; lock?: boolean }): Promise<Project>;
   insert(input: Omit<Project, 'organizationId'>): Promise<Project>;
   update(id: string, input: z.infer<typeof projectUpdateSchema>): Promise<Project>;
+  /** When hard erasure finished, or `null`; also reads archived projects (ADR-0061). */
+  erasedAt(id: string): Promise<Date | null>;
+  /**
+   * Erasure worker only (`archivedProject` context): hard-deletes the bound project's platform rows
+   * (outbox events, idempotency, usage, notification rules, keys, revisions, instances).
+   */
+  eraseRecords(): Promise<number>;
+  /** Erasure worker only: keeps the row for audit references, without names or origins. */
+  tombstone(input: { slug: string; now: Date }): Promise<void>;
 }
 
 export interface KeyRepository {

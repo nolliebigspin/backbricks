@@ -18,6 +18,8 @@ export const queueEnvelopeSchema = z
   .object({
     organizationId: activityIdentifierSchema,
     projectId: activityIdentifierSchema.optional(),
+    /** Only the project erasure job runs inside an archived project (ADR-0061). */
+    archivedProject: z.literal(true).optional(),
     payload: z.unknown(),
   })
   .strict();

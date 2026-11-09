@@ -231,5 +231,20 @@ export type ModuleDefinition<
       >,
       email: string,
     ): Promise<number>;
+    /**
+     * Project hard erasure (ADR-0061): delete up to `limit` of the project's records, including
+     * stored objects, and return how many went. The platform calls it until it returns < limit.
+     */
+    eraseScope(
+      runtime: ModuleRuntime<
+        T,
+        R,
+        O,
+        SR | RequiredInfrastructure<I>,
+        SO | OptionalInfrastructure<I>,
+        MT
+      >,
+      input: { limit: number },
+    ): Promise<number>;
   };
 };

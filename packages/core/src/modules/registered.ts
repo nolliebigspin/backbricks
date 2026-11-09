@@ -71,5 +71,6 @@ export type RegisteredModule = Readonly<{
   privacy: {
     exportSubject(execution: ModuleExecution, email: string): Promise<JsonValue>;
     deleteSubject(execution: ModuleExecution, email: string): Promise<number>;
+    eraseScope(execution: ModuleExecution, input: { limit: number }): Promise<number>;
   };
 }>;

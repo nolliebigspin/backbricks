@@ -9,6 +9,11 @@ export type TenantContext = {
   readonly organizationId: string;
   readonly projectId?: string;
   readonly principal?: Principal;
+  /**
+   * Worker-only (ADR-0061): lets the project erasure job enter its archived project. Only the
+   * erasure enqueue sets it; HTTP authorization never does, so requests can't reach archived data.
+   */
+  readonly archivedProject?: true;
 };
 export type AuthenticatedTenantContext = TenantContext & { readonly principal: Principal };
 
