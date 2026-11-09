@@ -30,6 +30,10 @@ export function createDatabase(
     application_name: options.applicationName ?? 'backbricks',
     max: options.max ?? 10,
   });
+  // An idle connection can be killed by the server (restart, failover, admin termination).
+  // pg-pool has already discarded that client; without a listener the event would crash the
+  // process. Queries keep surfacing their own errors, and readiness reports an unreachable database.
+  pool.on('error', () => {});
   const db = drizzle({ client: pool });
   pools.set(db, pool);
   return {
@@ -39,7 +43,19 @@ export function createDatabase(
     },
     close: async () => {
       pools.delete(db);
+      // pg-pool resolves end() before removed clients finish disconnecting; wait for each
+      // 'remove' so callers can safely drop or restart the database right after close().
+      const open = pool.totalCount;
+      const disconnected = new Promise<void>((resolve) => {
+        let removed = 0;
+        if (open === 0) resolve();
+        pool.on('remove', () => {
+          removed++;
+          if (removed >= open) resolve();
+        });
+      });
       await pool.end();
+      await disconnected;
     },
   };
 }
