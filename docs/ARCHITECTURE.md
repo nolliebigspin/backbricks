@@ -280,7 +280,7 @@ CREATE INDEX reviews_queue_idx  ON reviews (instance_id, moderation_status, crea
 
 ### C.1 Module contract
 
-The implemented contract is [`ModuleDefinition`](../packages/core/src/modules/contract.ts), normalized by [`defineModule`](../packages/core/src/modules/define-module.ts); see [ADR-0037](adr/0037-static-module-contracts.md) for the refinements to the initial sketch. It owns typed configuration/defaults/templates/migrations/change classification, localized metadata, resource names, scopes/events/metrics, declared infrastructure/services/capabilities, route/job registration, retention/privacy and codegen hooks. Schemas must have representable JSON output. Changed configurations without a classifier are conservatively destructive.
+The implemented contract is [`ModuleDefinition`](../packages/core/src/modules/contract.ts), normalized by [`defineModule`](../packages/core/src/modules/define-module.ts); see [ADR-0037](adr/0037-static-module-contracts.md) for the refinements to the initial sketch. It owns typed configuration/defaults/templates/migrations/change classification, localized metadata, resource names, scopes/events/metrics, declared infrastructure/services/capabilities, route/job registration, retention/privacy, notification and codegen hooks. Schemas must have representable JSON output. Changed configurations without a classifier are conservatively destructive.
 
 Routes use the framework-neutral [router contract](../packages/core/src/modules/routes.ts), with Zod inputs, response allowlists, explicit policies/body limits and public read/write classification. [Jobs](../packages/core/src/modules/jobs.ts) declare a typed payload, retries and bounded retention. [ADR-0039](adr/0039-module-http-and-worker-wiring.md) defines the implemented [HTTP bridge](../apps/server/src/routes/modules.ts), [worker hand-off](../apps/server/src/module-jobs.ts) and merged scope catalog. Public authorization uses the shared guard (ADR-0046). Durable job delivery uses the [PostgreSQL queue adapter](../packages/db/src/queue.ts) with atomic enqueue/completion and shared process lifetimes ([ADR-0048](adr/0048-transactional-postgres-jobs.md)). The server owns HTTP/auth/OpenAPI/worker wiring; module code imports only the public core contract and its own files. M1 proves complete definitions with [test-only modules](../packages/db/test/module-fixtures.ts); forms/uploads/reviews become operational in M2–M4.
 
@@ -294,7 +294,7 @@ Static, no runtime plugins. `apps/server/src/modules.ts` lists the modules. [`de
 - Viewing and rolling back revisions
 - Config-as-code document `GET/PUT /v1/projects/{id}/config` (all instances of all modules)
 - JSON Schema export for editor autocompletion
-- Notification rules on module events
+- Notification rules on module events; delivery asks the optional `notifications.describe` hook what a mail may say ([ADR-0059](adr/0059-notification-rules-and-dispatch.md), [ADR-0060](adr/0060-notification-delivery-and-throttling.md))
 - Retention cron, GDPR access/erasure via `retention`/`privacy` handlers
 - Usage metering
 

@@ -54,3 +54,21 @@ export const notificationRecipientSchema = z
   .object({ id: membershipSchema.shape.userId, name: z.string(), email: z.email() })
   .strict();
 export type NotificationRecipient = z.infer<typeof notificationRecipientSchema>;
+
+export const MAX_NOTIFICATION_FIELDS = 50;
+/** What a module lets a notification mail say about one event subject; values are plain text. */
+export const notificationSubjectSchema = z
+  .object({
+    fields: z
+      .array(z.object({ label: z.string().max(200), value: z.string().max(100_000) }).strict())
+      .max(MAX_NOTIFICATION_FIELDS),
+  })
+  .strict();
+export type NotificationSubject = z.infer<typeof notificationSubjectSchema>;
+export type NotificationSubjectInput<I> = {
+  eventType: string;
+  subjectId: string;
+  instance: I;
+  /** Only rules with `include_content` receive field values; otherwise return `{ fields: [] }`. */
+  includeContent: boolean;
+};

@@ -6,6 +6,7 @@ import {
   publicWritePolicySchema,
 } from '../abuse/policy.ts';
 import { AppError } from '../errors/app-error.ts';
+import { notificationSubjectSchema } from '../notifications/schemas.ts';
 import { emailAddressSchema } from '../platform/values.ts';
 import type { OptionalServiceName } from '../services/container.ts';
 import { capabilityView, type CapabilityName } from './capabilities.ts';
@@ -60,6 +61,7 @@ export function defineModule<
   const config = configuration(definition);
   const retention = { ...definition.retention };
   const privacy = { ...definition.privacy };
+  const notifications = definition.notifications ? { ...definition.notifications } : null;
   type Runtime = ModuleRuntime<
     T,
     R,
@@ -135,6 +137,19 @@ export function defineModule<
         );
       },
     },
+    notifications: notifications
+      ? {
+          async describe(execution, input) {
+            const subject = await notifications.describe(runtime(execution), {
+              eventType: z.string().parse(input.eventType),
+              subjectId: z.string().parse(input.subjectId),
+              instance: config.instance(input.instance),
+              includeContent: z.boolean().parse(input.includeContent),
+            });
+            return subject === null ? null : notificationSubjectSchema.parse(subject);
+          },
+        }
+      : null,
     privacy: {
       async exportSubject(execution, email) {
         return jsonValueSchema.parse(

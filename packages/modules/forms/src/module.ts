@@ -16,6 +16,7 @@ import { formsBulkRoutes, formsJobs } from './bulk.ts';
 import { entryExpiry, searchText } from './entries.ts';
 import { formsExportRoutes } from './export.ts';
 import { formsMutationRoutes } from './mutations.ts';
+import { describeEntry } from './notifications.ts';
 import {
   formKeyParams,
   publicForm,
@@ -198,6 +199,7 @@ export function createFormsModule(options: { files: boolean } = { files: false }
       recomputeExpiry: (runtime, instance) =>
         repositoryOf(runtime).recomputeExpiry(instance.id, instance.config.retentionDays),
     },
+    notifications: { describe: describeEntry },
     privacy: {
       async exportSubject(runtime, email) {
         const repository = repositoryOf(runtime);

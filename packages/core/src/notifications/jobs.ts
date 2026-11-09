@@ -20,7 +20,12 @@ export const notificationDeliveryPayloadSchema = z
     eventId: activityIdentifierSchema,
     instanceId: activityIdentifierSchema,
     subjectId: activityIdentifierSchema,
+    occurredAt: z.iso.datetime(),
   })
+  .strict();
+/** One content-free digest per rule; the count is read from the rule's throttle state at send time. */
+export const notificationDigestPayloadSchema = z
+  .object({ ruleId: activityIdentifierSchema, windowStart: z.iso.datetime() })
   .strict();
 export const NOTIFICATION_JOB_DEFINITIONS = Object.freeze([
   {
@@ -29,10 +34,15 @@ export const NOTIFICATION_JOB_DEFINITIONS = Object.freeze([
     retries: 3,
     retentionSeconds: 86_400,
   },
-  // The delivery worker is implemented in P2.6b; pending jobs already have bounded retention.
   {
     name: PLATFORM_JOBS.notificationDelivery,
     payload: notificationDeliveryPayloadSchema,
+    retries: 3,
+    retentionSeconds: 86_400,
+  },
+  {
+    name: PLATFORM_JOBS.notificationDigest,
+    payload: notificationDigestPayloadSchema,
     retries: 3,
     retentionSeconds: 86_400,
   },
@@ -84,6 +94,7 @@ export function createNotificationDispatchHandler(
             eventId: data.event.id,
             instanceId: instance.id,
             subjectId: data.event.subjectId,
+            occurredAt: data.event.createdAt,
           },
           { singletonKey: `${data.event.id}:${rule.id}` },
         );

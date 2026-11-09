@@ -758,14 +758,14 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 - **Tests:** real HTTP/Postgres, isolation, outbox consumer test.
 - **Risks/notes:** Recipients are configuration, not personal records: hard-deleted with the rule or on member removal (Q8 lifecycle).
 
-### [ ] P2.6b – Send submission notifications (est. 5 h)
+### [x] P2.6b – Send submission notifications (est. 5 h)
 - **Description:** Delivery job: content-free email by default (form name, time, link to the entry), `include_content` opt-in renders field values HTML-escaped (I8) with a size cap. Throttle: at most N mails per rule per hour, then one hourly content-free digest with the count. Templates en/de via the existing template module; SMTP absent → no-op with a dashboard hint.
 - **Files/packages:** `packages/core/src/mail/templates.ts`, `packages/core/src/notifications/delivery.ts`, job registration.
 - **Depends on:** P2.6a.
 - **Reuses:** mailer, rate limiter for throttling, restricted delivery lifecycle (ADR-0049/0050).
 - **Acceptance criteria:**
-  - [ ] Mailpit receives a mail without submission content by default; with opt-in, `<script>` arrives escaped.
-  - [ ] The 11th mail in an hour becomes part of a digest, not a mail; retries never duplicate.
+  - [x] Mailpit receives a mail without submission content by default; with opt-in, `<script>` arrives escaped.
+  - [x] The 11th mail in an hour becomes part of a digest, not a mail; retries never duplicate.
 - **Tests:** real Postgres + Mailpit.
 - **Risks/notes:** Job payloads carry IDs only; content is read at send time and never stored in the queue.
 
@@ -935,6 +935,9 @@ P2.5c implementation and verification complete: RFC 4180 encoder with formula de
 
 
 P2.6a implementation and verification complete (finished after a Codex handoff; P2.5a–c were committed locally before it): admin-session CRUD and an options route over verified organization members; recipients stored as user IDs (migration `20261109081104_bright_freak` clears pre-API address rows), removed with the member inside the auth transaction (empty rules are disabled). Rule writes share the organization lock with membership changes. A generic outbox consumer (`core.notifications.dispatch`, platform jobs may now declare `consumes`) enqueues one ID-only `core.notifications.deliver` job per matching rule in bounded, deduplicated pages and ignores archived/foreign instances. Real HTTP/Postgres tests cover member selection, unverified/foreign recipients, unknown events, foreign instances, audit rollback for every mutation including member removal, and no addresses in audit/events/logs; dispatch tests cover rollback, duplicates, 102 rules over two pages and archived sources; all five routes join the isolation suite. ADR-0059/D57. `CI=true bun run check` passed (server 128 + 93 script tests, no skips). Next: P2.6b delivery.
+
+
+P2.6b implementation and verification complete: optional `notifications.describe` module hook (forms skips spam/test entries, values only on opt-in, labels from the entry's config version). Delivery re-reads rule, instance, subject and verified members; throttle state on the rule (migration `20261109101500_notification_throttle`) changes in the job transaction, so retries never double-count or double-send. The 11th entry in an hour is counted for one end-of-hour digest that takes and resets the count. en/de templates escape opt-in content and cap it (1,000 per value, 8,000 total) to fit the mail body limit; rendered mail uses the restricted mail channel in the same transaction. Without SMTP delivery is a no-op and the options route reports it. Deviation from "Reuses: rate limiter" recorded in ADR-0060/D58 (the limiter commits outside the job transaction and can't count suppressions). Mails are English until members have a language preference; the dashboard (P2.8) must honor `/projects/{id}/{plural}/{key}?entry={id}`. `CI=true bun run check` passed (server 129, core 93, forms 107, db 58 + 93 script tests, no skips). Next: P2.7a.
 
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · stub

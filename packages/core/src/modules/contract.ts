@@ -5,6 +5,7 @@ import type {
   PublicWriteContext,
   PublicWritePolicyInput,
 } from '../abuse/policy.ts';
+import type { NotificationSubject, NotificationSubjectInput } from '../notifications/schemas.ts';
 import type { ModuleInstance } from '../platform/models.ts';
 import type { InstanceRevision } from '../platform/models.ts';
 import type { OptionalServiceName } from '../services/container.ts';
@@ -191,6 +192,21 @@ export type ModuleDefinition<
       instance: ConfiguredInstance<T>,
       now: Date,
     ): Promise<number>;
+  };
+  /** Optional: lets notification rules on this module's events mail about a subject (ADR-0060). */
+  notifications?: {
+    /** `null` skips the notification (e.g. spam, test entries or a deleted subject). */
+    describe(
+      runtime: ModuleRuntime<
+        T,
+        R,
+        O,
+        SR | RequiredInfrastructure<I>,
+        SO | OptionalInfrastructure<I>,
+        MT
+      >,
+      input: NotificationSubjectInput<ConfiguredInstance<T>>,
+    ): Promise<NotificationSubject | null>;
   };
   privacy: {
     exportSubject(

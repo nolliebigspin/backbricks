@@ -5,7 +5,7 @@ import {
   notificationRecipientSchema,
   type NotificationRuleRepository,
 } from '@backbricks/core';
-import { and, asc, desc, eq, inArray, isNull, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, getColumns, inArray, isNull, or, sql } from 'drizzle-orm';
 
 import type { DbTransaction } from '../client.ts';
 import { member, user } from '../schema/auth.generated.ts';
@@ -14,6 +14,13 @@ import { createOrganizationIdentityStore } from './organization-identity.ts';
 import { beforeCursor, requiredRow, type RepositoryScope } from './scope.ts';
 
 const required = (rows: unknown[]) => requiredRow(rows, notificationRuleSchema);
+// Configuration columns only; delivery throttle state stays internal to the notification jobs.
+const {
+  throttleWindowStart: _windowStart,
+  throttleSent: _sent,
+  throttleSuppressed: _suppressed,
+  ...ruleColumns
+} = getColumns(notificationRules);
 
 /** Tenant configuration queries; auth identities are projected only under the caller's org scope. */
 export function createNotificationRuleRepository(
@@ -32,7 +39,7 @@ export function createNotificationRuleRepository(
       scope.project();
       return (
         await tx
-          .select()
+          .select(ruleColumns)
           .from(t)
           .where(where(beforeCursor(t, page)))
           .orderBy(desc(t.createdAt), desc(t.id))
@@ -43,7 +50,7 @@ export function createNotificationRuleRepository(
       scope.project();
       return required(
         await tx
-          .select()
+          .select(ruleColumns)
           .from(t)
           .where(where(eq(t.id, id)))
           .limit(1),
@@ -54,7 +61,7 @@ export function createNotificationRuleRepository(
         await tx
           .insert(t)
           .values({ ...input, ...scope.project() })
-          .returning(),
+          .returning(ruleColumns),
       );
     },
     async update(id, input) {
@@ -64,7 +71,7 @@ export function createNotificationRuleRepository(
           .update(t)
           .set(input)
           .where(where(eq(t.id, id)))
-          .returning(),
+          .returning(ruleColumns),
       );
     },
     async delete(id) {
@@ -73,7 +80,7 @@ export function createNotificationRuleRepository(
         await tx
           .delete(t)
           .where(where(eq(t.id, id)))
-          .returning(),
+          .returning(ruleColumns),
       );
     },
     async recipients(userIds) {
@@ -97,7 +104,7 @@ export function createNotificationRuleRepository(
       scope.project();
       return (
         await tx
-          .select()
+          .select(ruleColumns)
           .from(t)
           .where(
             where(
@@ -110,6 +117,30 @@ export function createNotificationRuleRepository(
           .orderBy(desc(t.createdAt), desc(t.id))
           .limit(scope.limit(page))
       ).map((row) => notificationRuleSchema.parse(row));
+    },
+    async throttleState(id) {
+      scope.project();
+      const [row] = await tx
+        .select({
+          windowStart: t.throttleWindowStart,
+          sent: t.throttleSent,
+          suppressed: t.throttleSuppressed,
+        })
+        .from(t)
+        .where(where(eq(t.id, id)))
+        .for('update');
+      return row ?? null;
+    },
+    async saveThrottle(id, state) {
+      scope.project();
+      await tx
+        .update(t)
+        .set({
+          throttleWindowStart: state.windowStart,
+          throttleSent: state.sent,
+          throttleSuppressed: state.suppressed,
+        })
+        .where(where(eq(t.id, id)));
     },
     async removeRecipient(userId, now) {
       const next = sql`array_remove(${t.recipientUserIds}, ${userId})`;

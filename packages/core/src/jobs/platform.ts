@@ -9,6 +9,10 @@ import {
 import { instanceCreateSchema, instanceVersionSchema } from '../instances/schemas.ts';
 import { moduleNameSchema } from '../modules/values.ts';
 import {
+  createNotificationDeliveryHandlers,
+  type NotificationDeliveryOptions,
+} from '../notifications/delivery.ts';
+import {
   createNotificationDispatchHandler,
   NOTIFICATION_JOB_DEFINITIONS,
 } from '../notifications/jobs.ts';
@@ -53,12 +57,14 @@ export const PLATFORM_JOB_DEFINITIONS = Object.freeze([
 export function createPlatformJobHandlers(
   deps: InstanceDependencies,
   scheduling?: MaintenanceScheduling,
+  notifications?: NotificationDeliveryOptions,
 ): readonly QueueJobHandler[] {
   const persistence = instancePersistence(deps, 'system');
   const execution = (tx: TenantTransaction, type: string) =>
     deps.runtime.forTenant(tx).execution(type);
   return [
     createNotificationDispatchHandler(deps.registry, scheduling?.queue),
+    ...createNotificationDeliveryHandlers(deps, scheduling?.queue, notifications),
     ...createTenantMaintenanceHandlers(deps, scheduling),
     {
       name: PLATFORM_JOBS.instanceMigration,

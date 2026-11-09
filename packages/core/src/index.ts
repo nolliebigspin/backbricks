@@ -451,7 +451,23 @@ export { PLATFORM_JOBS } from './jobs/platform-names.ts';
 export {
   notificationDispatchPayloadSchema,
   notificationDeliveryPayloadSchema,
+  notificationDigestPayloadSchema,
 } from './notifications/jobs.ts';
+export type {
+  NotificationDeliveryOptions,
+  NotificationMailEnqueue,
+} from './notifications/delivery.ts';
+export {
+  NOTIFICATION_THROTTLE_WINDOW_MS,
+  throttleDecision,
+  type NotificationThrottle,
+} from './notifications/throttle.ts';
+export {
+  NOTIFICATION_CONTENT_LIMIT,
+  NOTIFICATION_VALUE_LIMIT,
+  renderNotificationMail,
+  type NotificationMailInput,
+} from './mail/notifications.ts';
 
 export {
   AUTH_MIN_PASSWORD_LENGTH,

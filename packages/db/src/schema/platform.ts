@@ -89,6 +89,10 @@ export const notificationRules = pgTable(
     channel: notificationChannel('channel').notNull().default('email'),
     recipientUserIds: text('recipient_user_ids').array().notNull(),
     maxPerHour: integer('max_per_hour').notNull().default(DEFAULT_NOTIFICATION_HOURLY_LIMIT),
+    // Delivery throttle state (ADR-0060): mails sent in the current hour and entries waiting for a digest.
+    throttleWindowStart: timestampColumn('throttle_window_start'),
+    throttleSent: integer('throttle_sent').notNull().default(0),
+    throttleSuppressed: integer('throttle_suppressed').notNull().default(0),
     includeContent: boolean('include_content').notNull().default(false),
     enabled: boolean('enabled').notNull().default(true),
     ...recordTimestamps(),
@@ -107,6 +111,10 @@ export const notificationRules = pgTable(
     check(
       'notification_rules_hourly_bound',
       sql`${table.maxPerHour} between 1 and ${sql.raw(String(MAX_NOTIFICATION_HOURLY_LIMIT))}`,
+    ),
+    check(
+      'notification_rules_throttle_counts',
+      sql`${table.throttleSent} >= 0 and ${table.throttleSuppressed} >= 0`,
     ),
     index('notification_rules_event_idx').on(
       table.organizationId,

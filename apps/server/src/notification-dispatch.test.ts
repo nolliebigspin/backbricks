@@ -84,8 +84,20 @@ test.skipIf(!available)(
         expect(deliveries).toHaveLength(2);
         expect(deliveries.map((row) => queueEnvelopeSchema.parse(row.data).payload)).toEqual(
           expect.arrayContaining([
-            { ruleId: global, eventId: event.event.id, instanceId: form.id, subjectId: first },
-            { ruleId: bound, eventId: event.event.id, instanceId: form.id, subjectId: first },
+            {
+              ruleId: global,
+              eventId: event.event.id,
+              instanceId: form.id,
+              subjectId: first,
+              occurredAt: event.event.createdAt,
+            },
+            {
+              ruleId: bound,
+              eventId: event.event.id,
+              instanceId: form.id,
+              subjectId: first,
+              occurredAt: event.event.createdAt,
+            },
           ]),
         );
         expect(JSON.stringify(deliveries)).not.toContain(f.member.email);

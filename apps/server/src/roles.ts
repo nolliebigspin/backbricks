@@ -59,6 +59,7 @@ async function startRuntime(
       modules,
       queue: queue.queue,
       enqueueProject: queue.enqueueProject,
+      enqueueNotificationMail: queue.enqueueNotificationMail,
     });
     services = runtime;
     if (role !== 'worker') {

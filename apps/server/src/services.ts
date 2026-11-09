@@ -20,6 +20,7 @@ import {
   systemClock,
   type Clock,
   type Queue,
+  type NotificationMailEnqueue,
   type ProjectJobEnqueue,
   type TenantContext,
   type Config,
@@ -45,6 +46,7 @@ export function createServerServices(
     clock?: Clock;
     queue?: Queue;
     enqueueProject?: ProjectJobEnqueue;
+    enqueueNotificationMail?: NotificationMailEnqueue;
     entitlements?: Entitlements;
     modules?: SelectedModules;
     moduleRepositories?: Parameters<typeof createWithTenant>[1];
@@ -97,6 +99,10 @@ export function createServerServices(
         { ...container.core, registry: modules.registry, runtime: moduleRuntime },
         options.queue && options.enqueueProject
           ? { queue: options.queue, enqueueProject: options.enqueueProject }
+          : undefined,
+        // Without SMTP, notification delivery is a no-op; the options route reports it (P2.6b).
+        mailer && options.enqueueNotificationMail
+          ? { publicUrl: config.publicUrl, enqueueMail: options.enqueueNotificationMail }
           : undefined,
       ).map((handler) => {
         const definition = PLATFORM_JOB_DEFINITIONS.find((job) => job.name === handler.name);

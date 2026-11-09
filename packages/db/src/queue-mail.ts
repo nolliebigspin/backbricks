@@ -60,6 +60,12 @@ export function createMailQueue(
       await boss.updateQueue(MAIL_JOB_NAME, policy);
     },
     enqueueMail,
+    /** Notification mail to verified members resolved by the delivery job in this transaction. */
+    enqueueNotificationMail: (
+      tx: TenantTransaction,
+      messages: readonly MailMessage[],
+      identity: string,
+    ) => enqueueMail(transactionFor(tx), messages, identity),
     enqueueSecurityMail: (
       tx: TenantTransaction,
       messages: readonly MailMessage[],

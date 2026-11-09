@@ -69,3 +69,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0057](0057-forms-data-mutations-and-batched-erasure.md) | Forms data mutations and batched erasure | accepted during execution; D55 |
 | [0058](0058-audited-paged-csv-exports.md) | Audited paged CSV exports | accepted during execution; D56 |
 | [0059](0059-notification-rules-and-dispatch.md) | Notification rules and outbox dispatch | accepted during execution; D57 |
+| [0060](0060-notification-delivery-and-throttling.md) | Notification delivery and throttling | accepted during execution; D58 |

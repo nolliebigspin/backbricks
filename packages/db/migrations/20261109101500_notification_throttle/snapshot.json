@@ -1,0 +1,145 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "463cbe54-2b19-41b2-9a13-a274aeaa9b07",
+  "prevIds": [
+    "4c670062-63b4-427f-82a5-9fc7566be711"
+  ],
+  "footprints": [
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "notification_rules",
+        "throttle_window_start"
+      ],
+      "writes": [
+        "s|col|public.notification_rules.throttle_window_start",
+        "n|col|public.notification_rules.throttle_window_start",
+        "e|col|public.notification_rules.throttle_window_start"
+      ],
+      "reads": [
+        "n|tbl|public.notification_rules",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "notification_rules",
+        "throttle_sent"
+      ],
+      "writes": [
+        "s|col|public.notification_rules.throttle_sent",
+        "n|col|public.notification_rules.throttle_sent",
+        "e|col|public.notification_rules.throttle_sent"
+      ],
+      "reads": [
+        "n|tbl|public.notification_rules",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "notification_rules",
+        "throttle_suppressed"
+      ],
+      "writes": [
+        "s|col|public.notification_rules.throttle_suppressed",
+        "n|col|public.notification_rules.throttle_suppressed",
+        "e|col|public.notification_rules.throttle_suppressed"
+      ],
+      "reads": [
+        "n|tbl|public.notification_rules",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_check",
+      "statementTarget": [
+        "table",
+        "public",
+        "notification_rules"
+      ],
+      "writes": [
+        "s|ck|public.notification_rules.notification_rules_throttle_counts",
+        "n|ck|public.notification_rules.notification_rules_throttle_counts",
+        "e|ck|public.notification_rules.notification_rules_throttle_counts",
+        "n|con|public.notification_rules.notification_rules_throttle_counts"
+      ],
+      "reads": [
+        "n|tbl|public.notification_rules",
+        "n|sch|public",
+        "n|col|public.notification_rules.throttle_sent",
+        "n|col|public.notification_rules.throttle_suppressed"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "notification_rules",
+        "name": "throttle_window_start",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "notification_rules",
+        "name": "throttle_sent",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "0",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "notification_rules",
+        "name": "throttle_suppressed",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "0",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "notification_rules",
+        "name": "notification_rules_throttle_counts",
+        "value": "\"throttle_sent\" >= 0 and \"throttle_suppressed\" >= 0",
+        "entityType": "checks"
+      }
+    }
+  ]
+}
