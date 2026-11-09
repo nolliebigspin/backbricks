@@ -161,7 +161,7 @@ Hierarchy: **Organization → Project (= website) → Module instance (form `con
 
 ### B.3 PostgreSQL schema (first version)
 
-> **Code is authoritative for implemented tables.** Domain table SQL remains a spec until P2–P4 replaces it with schema links.
+> **Code is authoritative for implemented tables.** Uploads and reviews SQL remains a spec until P3/P4 replaces it with schema links.
 
 Better Auth tables (`user`, `session`, `account`, `verification`, `organization`, `member`, `invitation`) are implemented in the [generated auth schema](../packages/db/src/schema/auth.generated.ts) and the [central migration history](../packages/db/migrations/). Regenerate with `bun run auth:generate`, then `bun run db:generate` and review the resulting SQL. The [schema-only config](../packages/auth/auth.config.ts) has no database connection or import of its own generated output (ADR-0021). All tables specified below belong to the platform.
 
@@ -171,40 +171,12 @@ Implemented core tables are defined in code (ADR-0023), with no parallel SQL spe
 - [Module instances and revisions](../packages/db/src/schema/instances.ts)
 - [Events, audit, notification rules and usage](../packages/db/src/schema/platform.ts)
 - [Idempotency, rate limiting, replay and system settings](../packages/db/src/schema/technical.ts)
+- [Forms entries](../packages/db/src/schema/forms.ts) (`form_submissions`; repository interface in the [forms module](../packages/modules/forms/src/repository.ts), ADR-0055)
 - [Custom audit/membership/UNLOGGED constraints](../packages/db/migrations/20261106024528_audit_immutability/migration.sql)
 
 Live child references include organization/project/instance identity; audit IDs are historical references retained without cascading FKs. Platform timestamps are supplied through the injected clock. Expiry/lifecycle rules follow ADR-0022. The SQL below specifies only the unimplemented domain tables.
 
 ```sql
--- =========================================================
--- Module: forms
--- =========================================================
--- Plan: docs/modules/forms.md. P2.3b replaces this SQL with a schema link.
-CREATE TABLE form_submissions (
-  id               text PRIMARY KEY,                       -- sub_…
-  organization_id  text NOT NULL,
-  project_id       text NOT NULL,
-  instance_id      text NOT NULL REFERENCES module_instances(id) ON DELETE CASCADE,
-  config_version   integer NOT NULL,
-  data             jsonb NOT NULL,                         -- validated, normalized fields
-  status           text NOT NULL DEFAULT 'open' CHECK (status IN ('open','done')),
-  read_at          timestamptz,
-  spam_verdict     text NOT NULL DEFAULT 'ok' CHECK (spam_verdict IN ('ok','suspect','spam')),
-  spam_reasons     text[] NOT NULL DEFAULT '{}',
-  is_test          boolean NOT NULL DEFAULT false,
-  subject_email    text,                                   -- normalized, for GDPR access/erasure
-  source           jsonb NOT NULL DEFAULT '{}',            -- origin, path, ua_family, ip_hash
-  search_vector    tsvector,
-  created_at       timestamptz NOT NULL DEFAULT now(),
-  updated_at       timestamptz NOT NULL DEFAULT now(),
-  expires_at       timestamptz
-);
-CREATE INDEX form_submissions_list_idx    ON form_submissions (instance_id, created_at DESC);
-CREATE INDEX form_submissions_project_idx ON form_submissions (project_id, created_at DESC);
-CREATE INDEX form_submissions_search_idx  ON form_submissions USING gin (search_vector);
-CREATE INDEX form_submissions_subject_idx ON form_submissions (project_id, subject_email) WHERE subject_email IS NOT NULL;
-CREATE INDEX form_submissions_expiry_idx  ON form_submissions (expires_at) WHERE expires_at IS NOT NULL;
-
 -- =========================================================
 -- Module: uploads
 -- =========================================================

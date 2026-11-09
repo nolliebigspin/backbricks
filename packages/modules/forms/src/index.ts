@@ -20,6 +20,17 @@ export {
   FORMS_RETENTION_DAYS,
 } from './constants.ts';
 export { classifyFormsChange } from './changes.ts';
+export type {
+  FormsRepository,
+  SpamStatus,
+  SubmissionChanges,
+  SubmissionCounts,
+  SubmissionFilters,
+  SubmissionInsert,
+  SubmissionRecord,
+  SubmissionSource,
+  SubmissionStatus,
+} from './repository.ts';
 export { formsCodegen } from './codegen.ts';
 export {
   validateSubmission,

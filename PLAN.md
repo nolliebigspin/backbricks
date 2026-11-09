@@ -667,14 +667,14 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 - **Tests:** real-DB capability-boundary and module-registry tests extended to a production repository factory.
 - **Risks/notes:** Changes no invariant. Keep repositories thin: they store and query already-validated values; forms logic (validation, normalization, search text) stays in the module.
 
-### [ ] P2.3b – Add the `form_submissions` table and repository (est. 5 h)
+### [x] P2.3b – Add the `form_submissions` table and repository (est. 5 h)
 - **Description:** Table per §B.3 with ADR-0023 integrity: composite live-parent FKs, `config_version`, normalized `data`, status/read/spam columns using the core verdict enum (`clean|suspect|spam`), `spam_reasons`, `is_test`, `subject_email`, minimized `source` (origin, path, UA family, rotating IP hash; no raw IP or UA), `search_vector` computed on insert from text-like values (`simple` config), clock-supplied timestamps, required `expires_at` unless retention is unlimited. Repository: insert, keyset list with filters and search, get, patch, delete, bulk ops (bounded), purge-expired batch, subject lookup/delete. Replace the forms SQL in §B.3 with a link.
 - **Files/packages:** `packages/db/src/schema/forms.ts`, `packages/db/src/repositories/forms.ts`, migration via `bun run db:generate`.
 - **Depends on:** P2.3a, P2.2.
 - **Reuses:** `pagination.ts` keyset helper, `MAX_PAGE_SIZE`, maintenance-delete batch pattern (ADR-0050), IP identity (ADR-0025).
 - **Acceptance criteria:**
-  - [ ] Constraints reject cross-tenant parents, invalid enums and expiry before creation; indexes match the list/search/subject/expiry queries (checked with `EXPLAIN` in a test).
-  - [ ] Every query is scoped; a project-A handle never reads project-B rows.
+  - [x] Constraints reject cross-tenant parents, invalid enums and expiry before creation; indexes match the list/search/subject/expiry queries (checked with `EXPLAIN` in a test).
+  - [x] Every query is scoped; a project-A handle never reads project-B rows.
 - **Tests:** real-Postgres repository and schema-integrity tests.
 - **Risks/notes:** `search_vector` covers only text field values, never `source`/consent metadata. Migration SQL reviewed by hand (§B.5).
 
@@ -913,6 +913,8 @@ P2.1b: templates come from one source per form and are registered as `<template>
 P2.2: the validator is one normalizer per field type rather than a generated Zod object, because the error codes must be the catalog's (`FIELD_ERROR_CODES` in core, incl. `invalid_file`/`too_many_files`) and both transports share the same rules; it returns `{ data, subjectEmail }` and throws `validation_failed` with `errors[]` and the schema hint, never values. Lengths count code points (like `char_length`). An unchecked HTML checkbox is absent while JSON may send `false`. Core gained `emailAddressSchema` (email ≤ 320), now also used by the module privacy hooks and the subject-erasure job payload. Spam verdicts stay in the shared guard (ADR-0046), not in the validator.
 
 P2.3a: [ADR-0055](docs/adr/0055-module-tables-in-db.md). `moduleRepositoryFactories` in db is still empty; P2.3b adds `forms`, and from then on the typed assignment in `apps/server/src/module-repositories.ts` fails to compile if the forms interface and db's implementation disagree. New arch rule `modules-no-database` (fixture `module-defines-table`); `tenant-tables-only-repositories` no longer allows module-local schema files.
+
+P2.3b: [`schema/forms.ts`](packages/db/src/schema/forms.ts), [`repositories/forms.ts`](packages/db/src/repositories/forms.ts), migration `20261109045220_form_submissions` (generated, reviewed). Spam always has an expiry (CHECK), subject emails must be lowercase (CHECK), and `recomputeExpiry` keeps spam's earlier cap. The module computes `expiresAt` itself when it marks or unmarks spam (`least(current, now + 30 days)` / retention expiry), and passes `searchText` to insert. The composition typecheck caught a real mismatch on its first run (spam verdict typed as `string`). The spam verdict enum is an explicit tuple tied to core by a `satisfies` and a runtime equality test.
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · stub
 
