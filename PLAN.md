@@ -645,14 +645,14 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 - **Tests:** unit; codegen fixture typecheck.
 - **Risks/notes:** The classifier decides when `config:destructive` is needed (D30); err on destructive.
 
-### [ ] P2.2 – Build the runtime submission validator (est. 5 h)
+### [x] P2.2 – Build the runtime submission validator (est. 5 h)
 - **Description:** Config → strict Zod schema per `config_version`: type coercion for urlencoded strings (number, checkbox, multiselect arrays), normalization (trim, lowercase email, collapse empty to absent), unknown fields rejected, `consent` stores text version and accepted timestamp from the clock, `hidden` bounded, `file` delegates to the capability. Errors become RFC 9457 `validation_failed` with `errors[]` (`path`, `code`, `message`, `meta`) and a hint to the public schema (§D.3).
 - **Files/packages:** `packages/modules/forms/src/validator.ts`; codes in `packages/core/src/errors/codes.ts`.
 - **Depends on:** P2.1a.
 - **Reuses:** `AppError` field errors, core email schema, `spamVerdict`.
 - **Acceptance criteria:**
-  - [ ] Every field type has accept/reject cases; error codes are from the catalog, stable and documented.
-  - [ ] Both transports (JSON values and urlencoded strings) produce the same normalized data.
+  - [x] Every field type has accept/reject cases; error codes are from the catalog, stable and documented.
+  - [x] Both transports (JSON values and urlencoded strings) produce the same normalized data.
 - **Tests:** unit + fast-check (no input crashes the validator; normalized output re-validates).
 - **Risks/notes:** No user-provided regex; email/URL/phone checks use fixed core validators.
 
@@ -909,6 +909,8 @@ P2.0b: key probes are derived from the existing cookie cases (`exerciseKeyIsolat
 P2.1a: [`config.ts`](packages/modules/forms/src/config.ts) is a strict per-type field union plus one form-level `superRefine` (no transforms, so the JSON Schema export works); it reuses the core honeypot schema and leaves the PoW-on per-minute default to the shared guard. New catalog code `capability_unavailable` (422; OpenAPI regenerated, additive). The module contract has no capability-aware validation hook, so `assertFieldCapabilities(config, { files })` is a pure check that P2.3c must call wherever forms configs are written (instance create/update, config apply). `listFields` stays optional; the list route (P2.5a) applies the "first two visible fields" fallback. New dependencies for the forms package: `zod` 4.6.7 (runtime, same pinned version as the rest of the workspace) and `fast-check` 4.10.2 (dev).
 
 P2.1b: templates come from one source per form and are registered as `<template>-<language>` keys (the core template record has one `name` string), so en/de needs no core change; `defaultFormsConfig()` is the English contact template. `formsTemplates({ files })` and `assertFieldCapabilities` both need to know whether the `files` capability exists; P2.3c decides how the definition gets that (M2 has no uploads, so `files: false`). No `migrateConfig` for version 1: the core parses configs at the current version directly (`FORMS_MODULE_VERSION`). Codegen emits `'forms/<key>'` members of one `BackbricksSchema` interface, so several forms (and later modules) merge; P2.9a's SDK must define `BackbricksSchema` and type `forms.submit` from it. For P2.3c: `validatedConfig` in core replaces config Zod errors with a path-less `validation_failed`, so forms config errors reach clients without field paths until that is fixed.
+
+P2.2: the validator is one normalizer per field type rather than a generated Zod object, because the error codes must be the catalog's (`FIELD_ERROR_CODES` in core, incl. `invalid_file`/`too_many_files`) and both transports share the same rules; it returns `{ data, subjectEmail }` and throws `validation_failed` with `errors[]` and the schema hint, never values. Lengths count code points (like `char_length`). An unchecked HTML checkbox is absent while JSON may send `false`. Core gained `emailAddressSchema` (email ≤ 320), now also used by the module privacy hooks and the subject-erasure job payload. Spam verdicts stay in the shared guard (ADR-0046), not in the validator.
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · stub
 

@@ -8,6 +8,7 @@ import {
 } from '../instances/persistence.ts';
 import { instanceCreateSchema, instanceVersionSchema } from '../instances/schemas.ts';
 import { moduleNameSchema } from '../modules/values.ts';
+import { emailAddressSchema } from '../platform/values.ts';
 import type { TenantTransaction } from '../tenancy/tenant-context.ts';
 import { MAX_MAINTENANCE_BATCH } from './contract.ts';
 import { PLATFORM_JOBS } from './platform-names.ts';
@@ -25,7 +26,7 @@ const migrationPayload = z
   })
   .strict();
 const emptyPayload = z.object({}).strict();
-const erasurePayload = z.object({ email: z.email() }).strict();
+const erasurePayload = z.object({ email: emailAddressSchema }).strict();
 export const PLATFORM_JOB_DEFINITIONS = Object.freeze([
   ...TENANT_MAINTENANCE_DEFINITIONS,
   {

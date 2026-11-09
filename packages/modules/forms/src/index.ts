@@ -21,6 +21,11 @@ export {
 } from './constants.ts';
 export { classifyFormsChange } from './changes.ts';
 export { formsCodegen } from './codegen.ts';
+export {
+  validateSubmission,
+  type NormalizedSubmission,
+  type SubmissionTransport,
+} from './validator.ts';
 export { defaultFormsConfig, formsTemplates, type FormTemplateName } from './templates.ts';
 
 /** Forms needs nothing besides Postgres (ARCHITECTURE §C.7). The full definition arrives in its domain milestone. */

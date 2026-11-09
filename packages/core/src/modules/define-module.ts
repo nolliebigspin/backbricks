@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { publicWriteContextSchema, publicWritePolicySchema } from '../abuse/policy.ts';
 import { AppError } from '../errors/app-error.ts';
+import { emailAddressSchema } from '../platform/values.ts';
 import type { OptionalServiceName } from '../services/container.ts';
 import { capabilityView, type CapabilityName } from './capabilities.ts';
 import { configuration } from './configuration.ts';
@@ -82,7 +83,6 @@ export function defineModule<
   definition.adminRoutes?.(admin);
   definition.publicRoutes?.(publicRouter);
   definition.jobs?.(jobs);
-  const emailSchema = z.email().max(320);
   return Object.freeze({
     ...metadata,
     infrastructure: Object.freeze(infrastructure),
@@ -119,12 +119,12 @@ export function defineModule<
     privacy: {
       async exportSubject(execution, email) {
         return jsonValueSchema.parse(
-          await privacy.exportSubject(runtime(execution), emailSchema.parse(email)),
+          await privacy.exportSubject(runtime(execution), emailAddressSchema.parse(email)),
         );
       },
       async deleteSubject(execution, email) {
         return checkedCount(
-          await privacy.deleteSubject(runtime(execution), emailSchema.parse(email)),
+          await privacy.deleteSubject(runtime(execution), emailAddressSchema.parse(email)),
         );
       },
     },

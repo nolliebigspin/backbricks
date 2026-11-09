@@ -141,8 +141,10 @@ export {
 export {
   ERROR_CODES,
   ERROR_TYPE_BASE_URL,
+  FIELD_ERROR_CODES,
   type ErrorCode,
   type ErrorStatus,
+  type FieldErrorCode,
 } from './errors/codes.ts';
 export {
   isSecretField,
@@ -155,6 +157,7 @@ export { fieldErrorSchema, problemDetailsSchema } from './errors/schema.ts';
 export {
   actorTypeSchema,
   apiKeyKindSchema,
+  emailAddressSchema,
   moduleInstanceStatusSchema,
   notificationChannelSchema,
 } from './platform/values.ts';
