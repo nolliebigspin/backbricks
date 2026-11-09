@@ -179,6 +179,7 @@ Live child references include organization/project/instance identity; audit IDs 
 -- =========================================================
 -- Module: forms
 -- =========================================================
+-- Plan: docs/modules/forms.md. P2.3b replaces this SQL with a schema link.
 CREATE TABLE form_submissions (
   id               text PRIMARY KEY,                       -- sub_…
   organization_id  text NOT NULL,

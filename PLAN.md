@@ -600,14 +600,14 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 
 **Already done:** review finding H1 (narrowest-first bucket order, origin before body) was fixed on the P1 branch before merge; P2 relies on it and adds no second guard.
 
-### [ ] P2.0a – Write and approve the forms module plan (est. 3 h)
+### [x] P2.0a – Write and approve the forms module plan (est. 3 h)
 - **Description:** `docs/MODULES.md` rule 4 requires an approved module plan before code. Write `docs/modules/forms.md`: config schema, field types and rules, table, public/admin routes with policies, events, metrics, jobs, retention/privacy handlers, dashboard pages, SDK method, tests. It is the durable spec; the tasks below implement it, and its sections are replaced by code links as they land (ARCHITECTURE "once built, code wins").
 - **Files/packages:** `docs/modules/forms.md`; link from `docs/MODULES.md` and ARCHITECTURE §B.3.
 - **Depends on:** –
 - **Reuses:** the §C.5 waitlist shape; ADR-0037/0040/0046/0047 contracts.
 - **Acceptance criteria:**
-  - [ ] Every route has its access policy, scope/role, body limit and response allowlist; every personal field has its lifecycle (ADR-0022 categories).
-  - [ ] The Q12–Q15 answers are reflected; maintainer approval of the doc is recorded in its header.
+  - [x] Every route has its access policy, scope/role, body limit and response allowlist; every personal field has its lifecycle (ADR-0022 categories).
+  - [x] The Q12–Q15 answers are reflected; maintainer approval of the doc is recorded in its header.
 - **Tests:** – (docs only; `bun run format:check`).
 - **Risks/notes:** No code before approval. Keep it short and link ADRs instead of restating them.
 
@@ -902,7 +902,7 @@ Run after `mise install && mise run infra` with isolated test tenants and Mailpi
 
 ### Execution notes
 
-_None yet._
+P2.0a: [`docs/modules/forms.md`](docs/modules/forms.md) approved by the maintainer on 2026-11-09 with open points A–F (§12) as recommended.
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · stub
 
