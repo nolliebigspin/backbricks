@@ -769,14 +769,14 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 - **Tests:** real Postgres + Mailpit.
 - **Risks/notes:** Job payloads carry IDs only; content is read at send time and never stored in the queue.
 
-### [ ] P2.7a – Purge expired and spam entries (est. 4 h)
+### [x] P2.7a – Purge expired and spam entries (est. 4 h)
 - **Description:** Wire forms retention into the existing daily fan-out: bounded `purgeExpired` batches, spam auto-expiry after 30 days (§F.4), `recomputeExpiry` when `retentionDays` changes (inside the config transaction, D30), a summarized audit entry per run (counts only). Archived instances keep purging.
 - **Files/packages:** `packages/modules/forms/src/retention.ts`; job tests.
 - **Depends on:** P2.3c.
 - **Reuses:** ADR-0050 scheduled fan-out and batch pattern, injected clock.
 - **Acceptance criteria:**
-  - [ ] Clock-driven test: an entry past expiry is gone after one run; a spam entry after 30 days; nothing else is touched.
-  - [ ] Shortening retention immediately recomputes `expires_at`; unlimited retention shows a warning in the plan.
+  - [x] Clock-driven test: an entry past expiry is gone after one run; a spam entry after 30 days; nothing else is touched.
+  - [x] Shortening retention immediately recomputes `expires_at`; unlimited retention shows a warning in the plan.
 - **Tests:** real Postgres with injected clock, concurrency (two workers).
 - **Risks/notes:** Exit criterion "expired entries are purged" is proven here and in P2.10b.
 
@@ -938,6 +938,9 @@ P2.6a implementation and verification complete (finished after a Codex handoff; 
 
 
 P2.6b implementation and verification complete: optional `notifications.describe` module hook (forms skips spam/test entries, values only on opt-in, labels from the entry's config version). Delivery re-reads rule, instance, subject and verified members; throttle state on the rule (migration `20261109101500_notification_throttle`) changes in the job transaction, so retries never double-count or double-send. The 11th entry in an hour is counted for one end-of-hour digest that takes and resets the count. en/de templates escape opt-in content and cap it (1,000 per value, 8,000 total) to fit the mail body limit; rendered mail uses the restricted mail channel in the same transaction. Without SMTP delivery is a no-op and the options route reports it. Deviation from "Reuses: rate limiter" recorded in ADR-0060/D58 (the limiter commits outside the job transaction and can't count suppressions). Mails are English until members have a language preference; the dashboard (P2.8) must honor `/projects/{id}/{plural}/{key}?entry={id}`. `CI=true bun run check` passed (server 129, core 93, forms 107, db 58 + 93 script tests, no skips). Next: P2.7a.
+
+
+P2.7a implementation and verification complete: forms retention was already wired through the module hooks (P2.3c) and the hourly project fan-out; the purge job now carries the run ID and, when any module returns a full batch, queues the next round (singleton per run/round, at most 50 rounds per run; the rest waits for the next run). No separate `retention.ts` was needed. A clock-driven real Postgres test proves spam is gone after 31 days (also with unlimited retention), normal and unlimited entries stay, shortening retention recomputes `expires_at` in the config transaction, archived forms keep purging, two concurrent workers purge disjoint batches (`SKIP LOCKED`) and queue continuation rounds, and audit entries hold counts only. The unlimited-retention plan warning is covered by `changes.test.ts`. Next: P2.7b.
 
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · stub

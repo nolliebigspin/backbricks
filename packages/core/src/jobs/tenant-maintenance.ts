@@ -87,7 +87,7 @@ export function createTenantMaintenanceHandlers(
           await scheduling.queue.enqueue(
             tx,
             PLATFORM_JOBS.retentionPurge,
-            {},
+            { runId: data.runId },
             { singletonKey: data.runId },
           );
         const page = pageResult(

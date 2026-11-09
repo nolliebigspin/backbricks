@@ -33,7 +33,14 @@ const migrationPayload = z
     configVersion: instanceVersionSchema,
   })
   .strict();
-const emptyPayload = z.object({}).strict();
+/** A run purges in bounded rounds; a full batch queues the next round, the rest waits for the next run. */
+export const MAX_RETENTION_ROUNDS = 50;
+const retentionPayload = z
+  .object({
+    runId: z.uuid().optional(),
+    round: z.number().int().min(1).max(MAX_RETENTION_ROUNDS).optional(),
+  })
+  .strict();
 const erasurePayload = z.object({ email: emailAddressSchema }).strict();
 export const PLATFORM_JOB_DEFINITIONS = Object.freeze([
   ...NOTIFICATION_JOB_DEFINITIONS,
@@ -44,7 +51,12 @@ export const PLATFORM_JOB_DEFINITIONS = Object.freeze([
     retentionSeconds: 86_400,
     retries: 2,
   },
-  { name: PLATFORM_JOBS.retentionPurge, payload: emptyPayload, retentionSeconds: 3600, retries: 2 },
+  {
+    name: PLATFORM_JOBS.retentionPurge,
+    payload: retentionPayload,
+    retentionSeconds: 3600,
+    retries: 2,
+  },
   {
     name: PLATFORM_JOBS.subjectErasure,
     payload: erasurePayload,
@@ -95,15 +107,18 @@ export function createPlatformJobHandlers(
     {
       name: PLATFORM_JOBS.retentionPurge,
       async runInTransaction(this: void, tx: TenantTransaction, input: unknown) {
-        emptyPayload.parse(input);
+        const data = retentionPayload.parse(input);
         if (!tx.context.projectId) throw new AppError('not_found');
         let count = 0;
+        let full = false;
         for (const module of deps.registry.modules) {
           // oxlint-disable-next-line no-await-in-loop -- Module hooks share this tenant transaction.
-          count += await module.retention.purgeExpired(execution(tx, module.type), {
+          const purged = await module.retention.purgeExpired(execution(tx, module.type), {
             now: deps.clock.now(),
             limit: MAX_MAINTENANCE_BATCH,
           });
+          count += purged;
+          full ||= purged === MAX_MAINTENANCE_BATCH;
         }
         if (count)
           await deps.audit.record(tx, {
@@ -111,6 +126,14 @@ export function createPlatformJobHandlers(
             action: 'retention.purged',
             changes: { count },
           });
+        const round = data.round ?? 1;
+        if (full && data.runId && scheduling && round < MAX_RETENTION_ROUNDS)
+          await scheduling.queue.enqueue(
+            tx,
+            PLATFORM_JOBS.retentionPurge,
+            { runId: data.runId, round: round + 1 },
+            { singletonKey: `${data.runId}:${round + 1}` },
+          );
       },
     },
     {
