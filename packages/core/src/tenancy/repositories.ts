@@ -1,5 +1,9 @@
 import type { z } from 'zod';
 
+import type { NotificationRuleRepository } from '../notifications/repository.ts';
+import type { RepositoryPage } from './page.ts';
+export type { RepositoryPage } from './page.ts';
+
 import type { AuditFilters } from '../platform/activity-fields.ts';
 import type {
   ApiKeyRecord,
@@ -12,13 +16,6 @@ import type {
 } from '../platform/models.ts';
 import type { instanceUpdateSchema, projectUpdateSchema } from '../platform/models.ts';
 
-/** A bounded page query; API-specific cursors are decoded before entering repositories. */
-export type RepositoryPage = {
-  limit: number;
-  /** Internal look-ahead for determining nextCursor; never a client-provided limit override. */
-  lookAhead?: boolean;
-  before?: { createdAt: Date; id: string };
-};
 type ProjectChild<T> = Omit<T, 'organizationId' | 'projectId'>;
 
 export interface ProjectRepository {
@@ -93,6 +90,7 @@ export interface ModuleRepositories {
 
 /** Only repositories, not an unrestricted driver, cross the tenant transaction boundary. */
 export type TenantRepositories = Readonly<{
+  notificationRules: NotificationRuleRepository;
   projects: ProjectRepository;
   keys: KeyRepository;
   instances: InstanceRepository;

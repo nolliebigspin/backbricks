@@ -384,6 +384,54 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/projects/{projectId}/notification-rules': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['notifications.list'];
+    put?: never;
+    post: operations['notifications.create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/notification-rules/options': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['notifications.options'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/notification-rules/{ruleId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['notifications.delete'];
+    options?: never;
+    head?: never;
+    patch: operations['notifications.update'];
+    trace?: never;
+  };
   '/v1/projects/{projectId}/types': {
     parameters: {
       query?: never;
@@ -2739,6 +2787,330 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'notifications.list': {
+    parameters: {
+      query?: {
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Notification configuration. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data: {
+              /** @enum {string} */
+              channel: 'email';
+              /** Format: date-time */
+              createdAt: string;
+              enabled: boolean;
+              eventType: string;
+              id: string;
+              includeContent: boolean;
+              instanceId: string | null;
+              maxPerHour: number;
+              recipientUserIds: string[];
+              /** Format: date-time */
+              updatedAt: string;
+            }[];
+            nextCursor: string | null;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'notifications.create': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @default true */
+          enabled?: boolean;
+          eventType: string;
+          /** @default false */
+          includeContent?: boolean;
+          /** @default null */
+          instanceId?: string | null;
+          /** @default 10 */
+          maxPerHour?: number;
+          recipientUserIds: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Notification rule created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            channel: 'email';
+            /** Format: date-time */
+            createdAt: string;
+            enabled: boolean;
+            eventType: string;
+            id: string;
+            includeContent: boolean;
+            instanceId: string | null;
+            maxPerHour: number;
+            recipientUserIds: string[];
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'notifications.options': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Enabled events and verified organization members. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            emailAvailable: boolean;
+            events: {
+              description: {
+                de: string;
+                en: string;
+              };
+              name: string;
+            }[];
+            recipients: {
+              /** Format: email */
+              email: string;
+              id: string;
+              name: string;
+            }[];
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'notifications.delete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        ruleId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Notification rule removed. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'notifications.update': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        ruleId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          enabled?: boolean;
+          eventType?: string;
+          includeContent?: boolean;
+          instanceId?: string | null;
+          maxPerHour?: number;
+          recipientUserIds?: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Notification rule updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            channel: 'email';
+            /** Format: date-time */
+            createdAt: string;
+            enabled: boolean;
+            eventType: string;
+            id: string;
+            includeContent: boolean;
+            instanceId: string | null;
+            maxPerHour: number;
+            recipientUserIds: string[];
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
       };
       /** @description A structured API error. */
       default: {

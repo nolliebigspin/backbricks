@@ -35,6 +35,10 @@ export type {
 } from './tenancy/tenant-context.ts';
 export * from './tenancy/repositories.ts';
 export { MAX_BULK_ITEMS, bulkIdsSchema } from './http/bulk.ts';
+export { requireSessionRole } from './identity/permissions.ts';
+export { createNotificationRuleService } from './notifications/service.ts';
+export * from './notifications/schemas.ts';
+export type { NotificationRuleRepository } from './notifications/repository.ts';
 export { csvRow } from './export/csv.ts';
 export { createPagedTextStream, type ModuleStreamPage } from './modules/streams.ts';
 export * from './platform/models.ts';
@@ -444,6 +448,10 @@ export {
 export { PLATFORM_JOB_DEFINITIONS, createPlatformJobHandlers } from './jobs/platform.ts';
 
 export { PLATFORM_JOBS } from './jobs/platform-names.ts';
+export {
+  notificationDispatchPayloadSchema,
+  notificationDeliveryPayloadSchema,
+} from './notifications/jobs.ts';
 
 export {
   AUTH_MIN_PASSWORD_LENGTH,

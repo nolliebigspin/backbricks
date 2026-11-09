@@ -747,14 +747,14 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 - **Tests:** fast-check on the encoder; integration export with mixed versions.
 - **Risks/notes:** The encoder is generic (uploads/reviews reuse it); module-specific column logic stays in forms.
 
-### [ ] P2.6a – Manage notification rules (est. 6 h)
+### [x] P2.6a – Manage notification rules (est. 6 h)
 - **Description:** Generic platform feature (§C.2): core service and routes `GET/POST /v1/projects/{id}/notification-rules`, `PATCH/DELETE …/{ruleId}` on the existing table, bound to a module event type and optional instance. Owner/admin session only; recipients are verified organization members picked from a list and are removed with the member (**Q14**); enabling `include_content` is owner/admin only, audited and warned about. An outbox consumer resolves enabled rules for each event and enqueues one delivery job per rule.
 - **Files/packages:** `packages/core/src/notifications/*`, `apps/server/src/routes/notification-rules.ts`, `packages/db/src/repositories/notification-rules.ts`; isolation cases.
 - **Depends on:** P2.3c.
 - **Reuses:** outbox dispatcher and consumers (ADR-0049), event catalog from the registry, audit.
 - **Acceptance criteria:**
-  - [ ] Unknown/disabled event types are rejected; rules for archived instances stop firing.
-  - [ ] Recipient addresses never appear in audit, events or logs (I4/I11 lifecycle per ADR-0022).
+  - [x] Unknown/disabled event types are rejected; rules for archived instances stop firing.
+  - [x] Recipient addresses never appear in audit, events or logs (I4/I11 lifecycle per ADR-0022).
 - **Tests:** real HTTP/Postgres, isolation, outbox consumer test.
 - **Risks/notes:** Recipients are configuration, not personal records: hard-deleted with the rule or on member removal (Q8 lifecycle).
 
@@ -932,6 +932,9 @@ P2.5b implementation and verification complete: metadata-only PATCH, individual 
 
 
 P2.5c implementation and verification complete: RFC 4180 encoder with formula defusing; owner/admin-only CSV over 100-row keyset pages and historical configuration columns. Lists/exports share filter/date handling; `data.<key>` CSV headers avoid metadata collisions. ADR-0058/D56 define CSV-only fresh-frame reads after the initial transaction commits, one started audit before any personal data and a completed audit with the actual row count. Management rate limits run outside tenant transactions (one request per user/form/minute). The 50,000-row Postgres HTTP stress test passes with chunks below 1 MiB and post-GC retained growth below 40 MiB; property/parser tests, cancellation/backpressure, roles/scopes and automatic tenant isolation pass. `CI=true bun run check` passed; the maintainer reviewed the staged diff and explicitly approved DCO sign-off on 2026-11-09. Next: P2.6a notifications.
+
+
+P2.6a implementation and verification complete (finished after a Codex handoff; P2.5a–c were committed locally before it): admin-session CRUD and an options route over verified organization members; recipients stored as user IDs (migration `20261109081104_bright_freak` clears pre-API address rows), removed with the member inside the auth transaction (empty rules are disabled). Rule writes share the organization lock with membership changes. A generic outbox consumer (`core.notifications.dispatch`, platform jobs may now declare `consumes`) enqueues one ID-only `core.notifications.deliver` job per matching rule in bounded, deduplicated pages and ignores archived/foreign instances. Real HTTP/Postgres tests cover member selection, unverified/foreign recipients, unknown events, foreign instances, audit rollback for every mutation including member removal, and no addresses in audit/events/logs; dispatch tests cover rollback, duplicates, 102 rules over two pages and archived sources; all five routes join the isolation suite. ADR-0059/D57. `CI=true bun run check` passed (server 128 + 93 script tests, no skips). Next: P2.6b delivery.
 
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · stub

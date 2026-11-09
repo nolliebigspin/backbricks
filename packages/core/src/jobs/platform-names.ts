@@ -1,4 +1,6 @@
 export const PLATFORM_JOBS = {
+  notificationDispatch: 'core.notifications.dispatch',
+  notificationDelivery: 'core.notifications.deliver',
   instanceMigration: 'core.instances.migrate',
   retentionPurge: 'core.retention.purge',
   subjectErasure: 'core.privacy.erase',

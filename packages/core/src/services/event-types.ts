@@ -1,5 +1,8 @@
 /** Platform-owned events; module registration reserves these exact names. */
 export const CORE_EVENTS = {
+  notificationRuleCreated: 'notification.rule.created',
+  notificationRuleUpdated: 'notification.rule.updated',
+  notificationRuleDeleted: 'notification.rule.deleted',
   instanceCreated: 'instance.created',
   instanceUpdated: 'instance.updated',
   instanceArchived: 'instance.archived',

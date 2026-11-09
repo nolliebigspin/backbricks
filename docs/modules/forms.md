@@ -144,7 +144,7 @@ Mutation implementation: [entry actions](../../packages/modules/forms/src/mutati
 - **Usage metric** `forms.submissions` (counter, count): incremented in the submit transaction; the public route's quota uses it.
 - **Scopes:** `forms:submit` (already in the catalog). Data access uses the core `data:*` scopes (D46).
 
-**Notifications** (platform feature, P2.6a/b; forms only provides the event): rules on `forms.submission.created`, optionally bound to one form. Recipients are verified organization members (Q14); delivery skips `spam` and test entries. Mail is content-free by default (form name, time, link); `include_content` is owner/admin only, audited, warned about, HTML-escaped and size-capped (I8). Throttle: 10 mails per rule per hour, then one hourly content-free digest (D49). Job payloads carry IDs; content is read at send time. Open point F covers how recipients are stored.
+**Notifications** (platform feature, P2.6a/b; forms only provides the event): rules on `forms.submission.created`, optionally bound to one form. Recipients are verified organization members (Q14); delivery skips `spam` and test entries. Mail is content-free by default (form name, time, link); `include_content` is owner/admin only, audited, warned about, HTML-escaped and size-capped (I8). Throttle: 10 mails per rule per hour, then one hourly content-free digest (D49). Job payloads carry IDs; content is read at send time. Recipients are stored as member user IDs ([ADR-0059](../adr/0059-notification-rules-and-dispatch.md)).
 
 ## 7. Jobs, retention, privacy
 

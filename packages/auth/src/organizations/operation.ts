@@ -134,8 +134,21 @@ export async function prepareOrganizationOperation(
       }
       if (action && organizationId) {
         await persistence.withTenant({ organizationId }, async (tx) => {
+          const notificationRulesChanged =
+            target && endpoint === '/organization/remove-member'
+              ? await tx.repositories.notificationRules.removeRecipient(
+                  target.userId,
+                  options.clock.now(),
+                )
+              : 0;
           const changes = {
-            changedFields: endpoint === '/organization/update-member-role' ? ['role'] : [],
+            changedFields:
+              endpoint === '/organization/update-member-role'
+                ? ['role']
+                : notificationRulesChanged
+                  ? ['notificationRecipients']
+                  : [],
+            ...(notificationRulesChanged ? { count: notificationRulesChanged } : {}),
             ...(target && endpoint === '/organization/update-member-role'
               ? {
                   previousRole: target.role,

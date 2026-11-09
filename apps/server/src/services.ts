@@ -10,6 +10,7 @@ import {
   createKeyScopeCatalog,
   createProjectService,
   createInstanceService,
+  createNotificationRuleService,
   createConfigurationService,
   createPlatformQueries,
   createRateLimiter,
@@ -104,7 +105,7 @@ export function createServerServices(
           ...definition,
           moduleType: 'core',
           cron: undefined,
-          consumes: undefined,
+          consumes: handler.consumes,
           runInTransaction: handler.runInTransaction,
           run: (context: TenantContext, input: unknown) =>
             withTenant(context, (tx) => handler.runInTransaction(tx, input)),
@@ -112,6 +113,11 @@ export function createServerServices(
       }),
     ],
     withTenant,
+    notificationRules: createNotificationRuleService({
+      ...container.core,
+      registry: modules.registry,
+      emailAvailable: mailer !== null,
+    }),
     projects: createProjectService(container.core),
     instances,
     configuration: createConfigurationService({

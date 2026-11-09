@@ -138,7 +138,7 @@ describe.skipIf(!available)('platform schema integrity (real Postgres)', () => {
           projectId: projectA2,
           instanceId: instanceA,
           eventType: 'fixture.created',
-          recipients: ['test@example.invalid'],
+          recipientUserIds: ['fixture-user-id'],
           createdAt: now,
           updatedAt: now,
         }),

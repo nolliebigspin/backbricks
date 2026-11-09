@@ -8,9 +8,13 @@ import {
 } from '../instances/persistence.ts';
 import { instanceCreateSchema, instanceVersionSchema } from '../instances/schemas.ts';
 import { moduleNameSchema } from '../modules/values.ts';
+import {
+  createNotificationDispatchHandler,
+  NOTIFICATION_JOB_DEFINITIONS,
+} from '../notifications/jobs.ts';
 import { emailAddressSchema } from '../platform/values.ts';
 import type { TenantTransaction } from '../tenancy/tenant-context.ts';
-import { MAX_MAINTENANCE_BATCH } from './contract.ts';
+import { MAX_MAINTENANCE_BATCH, type QueueJobHandler } from './contract.ts';
 import { PLATFORM_JOBS } from './platform-names.ts';
 import {
   createTenantMaintenanceHandlers,
@@ -28,6 +32,7 @@ const migrationPayload = z
 const emptyPayload = z.object({}).strict();
 const erasurePayload = z.object({ email: emailAddressSchema }).strict();
 export const PLATFORM_JOB_DEFINITIONS = Object.freeze([
+  ...NOTIFICATION_JOB_DEFINITIONS,
   ...TENANT_MAINTENANCE_DEFINITIONS,
   {
     name: PLATFORM_JOBS.instanceMigration,
@@ -48,11 +53,12 @@ export const PLATFORM_JOB_DEFINITIONS = Object.freeze([
 export function createPlatformJobHandlers(
   deps: InstanceDependencies,
   scheduling?: MaintenanceScheduling,
-) {
+): readonly QueueJobHandler[] {
   const persistence = instancePersistence(deps, 'system');
   const execution = (tx: TenantTransaction, type: string) =>
     deps.runtime.forTenant(tx).execution(type);
   return [
+    createNotificationDispatchHandler(deps.registry, scheduling?.queue),
     ...createTenantMaintenanceHandlers(deps, scheduling),
     {
       name: PLATFORM_JOBS.instanceMigration,
