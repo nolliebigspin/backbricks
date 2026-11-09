@@ -30,6 +30,45 @@ function issuesOf(result: ReturnType<typeof loadConfig>) {
 }
 
 describe('loadConfig', () => {
+  test('storage signing endpoint defaults internally, validates safely and is ignored without storage', () => {
+    const defaults = loadConfig({ ...base, ...storage }, modules);
+    expect(defaults.ok && defaults.config.storage?.publicEndpoint).toBe(storage.S3_ENDPOINT);
+    const split = loadConfig(
+      { ...base, ...storage, S3_PUBLIC_ENDPOINT: 'https://files.example.test' },
+      modules,
+    );
+    expect(split.ok && split.config.storage?.publicEndpoint).toBe('https://files.example.test');
+    expect(
+      issuesOf(
+        loadConfig(
+          { ...base, ...storage, S3_PUBLIC_ENDPOINT: 'http://user:secret@files.test' },
+          modules,
+        ),
+      ),
+    ).toMatchObject([{ variable: 'S3_PUBLIC_ENDPOINT' }]);
+    expect(
+      loadConfig({ ...base, BACKBRICKS_MODULES: 'forms', S3_PUBLIC_ENDPOINT: 'invalid' }, modules)
+        .ok,
+    ).toBe(true);
+  });
+  test('forwarded addresses require explicitly configured literal proxy addresses', () => {
+    const defaults = loadConfig({ ...base, BACKBRICKS_MODULES: 'forms' }, modules);
+    if (!defaults.ok) throw new Error(formatConfigIssues(defaults.issues));
+    expect(defaults.config.trustedProxies).toEqual([]);
+    const configured = loadConfig(
+      { ...base, BACKBRICKS_MODULES: 'forms', TRUSTED_PROXIES: '127.0.0.1, ::1' },
+      modules,
+    );
+    if (!configured.ok) throw new Error(formatConfigIssues(configured.issues));
+    expect(configured.config.trustedProxies).toEqual(['127.0.0.1', '::1']);
+    for (const invalid of ['proxy.local', '0.0.0.0/0', '*']) {
+      expect(
+        issuesOf(
+          loadConfig({ ...base, BACKBRICKS_MODULES: 'forms', TRUSTED_PROXIES: invalid }, modules),
+        ),
+      ).toMatchObject([{ variable: 'TRUSTED_PROXIES' }]);
+    }
+  });
   test('applies defaults and enables every module when BACKBRICKS_MODULES is unset', () => {
     const result = loadConfig({ ...base, ...storage }, modules);
     if (!result.ok) throw new Error(formatConfigIssues(result.issues));

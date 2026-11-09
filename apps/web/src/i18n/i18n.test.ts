@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 
 import de from './de.json';
 import en from './en.json';
-import { detectLanguage } from './index.ts';
+import { detectLanguage, initialLanguage, rememberLanguage } from './index.ts';
 
 function keys(object: object, prefix = ''): string[] {
   return Object.entries(object).flatMap(([key, value]) =>
@@ -29,4 +29,16 @@ describe('dashboard translations', () => {
     expect(detectLanguage(['en-GB'])).toBe('en');
     expect(detectLanguage([])).toBe('en');
   });
+});
+
+test('an explicit language choice survives page navigation and invalid values fall back', () => {
+  window.localStorage.clear();
+  expect(initialLanguage(['de-DE'])).toBe('de');
+  rememberLanguage('en');
+  expect(initialLanguage(['de-DE'])).toBe('en');
+  rememberLanguage('de');
+  expect(initialLanguage(['en-US'])).toBe('de');
+  window.localStorage.setItem('backbricks.language', 'invalid');
+  expect(initialLanguage(['en-US'])).toBe('en');
+  window.localStorage.clear();
 });

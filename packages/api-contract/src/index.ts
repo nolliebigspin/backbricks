@@ -1,1 +1,2 @@
-// Generated OpenAPI document and TypeScript types (committed build artifact).
+/** Generated API types only; clients must never import server runtime code. */
+export type { paths, operations, components, webhooks, $defs } from './generated.ts';

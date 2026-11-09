@@ -73,7 +73,7 @@ packages/sdk, packages/cli ─► packages/api-contract (types only). NEVER serv
 These are canonical (cited as I1–I19 everywhere). Violations block merges.
 
 **Tenancy**
-- **I1** Every tenant table has `organization_id` and, if project-scoped, `project_id`. Tenant tables are accessed only via `withTenant(ctx, fn)` and its repositories.
+- **I1** Every tenant table has `organization_id` and, if project-scoped, `project_id`. Tenant tables are accessed only via `withTenant(ctx, fn)` and its repositories. The sole authentication-bootstrap exception is an exact SHA-256 lookup of an active secret or publishable key (kind fixed by trusted authentication composition) joined to its active project, returning only key/organization/project IDs; all further access is scoped (approved Q10/Q11, ADR-0034/0054).
 - **I2** Resources of other tenants return `404`, never `403`.
 - **I3** Every management route declares its requirements (`role` and/or `scope`); a test fails for undeclared routes. Every route is covered by the tenant isolation suite.
 
@@ -89,7 +89,7 @@ These are canonical (cited as I1–I19 everywhere). Violations block merges.
 - **I10** Server-side Zod validation of every input; body size limits on all routes; no user-provided regex.
 
 **Privacy**
-- **I11** IPs only as rotating HMAC hashes. Personal data is hard-deleted. Every record with personal data has `expires_at`. Notification emails contain no submission content by default.
+- **I11** IPs only as rotating HMAC hashes. Personal data is hard-deleted. Personal records, audit and transient security/delivery records have bounded expiry (`expires_at` or the auth library's equivalent). Active auth identities/memberships and notification recipient configuration follow their explicit lifecycle and are hard-deleted on removal/erasure; they do not expire arbitrarily (ADR-0022). Notification emails contain no submission content by default.
 - **I12** Every administrative mutation writes an audit entry in the **same transaction** (never submission content).
 
 **Architecture and open source**

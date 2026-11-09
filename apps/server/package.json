@@ -11,12 +11,19 @@
     "start": "bun src/main.ts"
   },
   "dependencies": {
+    "@backbricks/adapters": "workspace:*",
+    "@backbricks/auth": "workspace:*",
     "@backbricks/core": "workspace:*",
     "@backbricks/db": "workspace:*",
     "@backbricks/module-forms": "workspace:*",
     "@backbricks/module-reviews": "workspace:*",
     "@backbricks/module-uploads": "workspace:*",
+    "@hono/zod-openapi": "1.6.3",
     "hono": "4.13.16",
     "pino": "10.4.0"
+  },
+  "devDependencies": {
+    "@backbricks/sdk": "workspace:*",
+    "altcha-lib": "2.8.0"
   }
 }

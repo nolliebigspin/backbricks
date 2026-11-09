@@ -23,9 +23,22 @@ describe('redactSecrets', () => {
     });
   });
 
-  test('leaves primitives and errors alone', () => {
+  test('keeps harmless primitive text and projects errors safely', () => {
     const error = new Error('boom');
     expect(redactSecrets('bb_sk_plain')).toBe('bb_sk_plain');
-    expect(redactSecrets(error)).toBe(error);
+    expect(redactSecrets(error)).toMatchObject({ type: 'Error', message: 'boom' });
   });
+});
+
+test('key-shaped values are masked in text, error chains, property names and deeply nested values', () => {
+  const secret = `bb_sk_${'A'.repeat(32)}`;
+  const cause = new Error(`provider rejected ${secret}`);
+  const error = new Error(`request used ${secret}`, { cause });
+  const deep = Array.from({ length: 15 }).reduce<unknown>((value) => ({ nested: value }), {
+    label: secret,
+  });
+  const result = JSON.stringify(redactSecrets({ trace: secret, error, deep, [secret]: 'value' }));
+  expect(result).not.toContain(secret);
+  expect(result).toContain('[redacted]');
+  expect(redactSecrets(`Bearer ${secret}`)).toBe('Bearer [redacted]');
 });

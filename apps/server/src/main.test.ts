@@ -31,6 +31,7 @@ function spawnRole(role: string, env: Record<string, string> = {}) {
     cwd: import.meta.dir,
     env: {
       PATH: process.env['PATH'] ?? '',
+      NODE_ENV: 'test',
       DATABASE_URL: databaseUrl,
       APP_SECRET: 'test-secret-test-secret-test-secret-00',
       LOG_LEVEL: 'info',
@@ -83,6 +84,16 @@ describe('entry point', () => {
     const proc = spawnRole('serve', { BACKBRICKS_MODULES: 'uploads' });
     expect(await proc.exited).toBe(1);
     expect(await new Response(proc.stderr).text()).toContain('S3_ENDPOINT');
+  });
+  test('production auth refuses an HTTP public URL', async () => {
+    const proc = spawnRole('serve', {
+      NODE_ENV: 'production',
+      PUBLIC_URL: 'http://localhost:3000',
+    });
+    expect(await proc.exited).toBe(1);
+    expect(await new Response(proc.stdout).text()).toContain(
+      'Production authentication requires HTTPS.',
+    );
   });
 });
 

@@ -1,14 +1,36 @@
+import type { Principal } from '../identity/principal.ts';
 /**
- * Tenant scope of a request or job (ARCHITECTURE §B.6, I1). P1.3 adds the principal and
- * scopes; this skeleton carries what `withTenant` needs to scope the database.
+ * Trusted tenant scope of a request or job (ARCHITECTURE §B.6, I1). P1.3b adds the
+ * authenticated principal and scopes; `withTenant` never grants membership or permissions.
  */
+import type { ModuleRepositories, TenantRepositories } from './repositories.ts';
+
 export type TenantContext = {
   readonly organizationId: string;
   readonly projectId?: string;
+  readonly principal?: Principal;
 };
+export type AuthenticatedTenantContext = TenantContext & { readonly principal: Principal };
 
 /**
  * The only way to reach tenant tables: runs `fn` in a transaction whose settings
  * (`app.org_id`, `app.project_id`) are bound to the tenant. Implemented by @backbricks/db.
  */
-export type WithTenant<Tx> = <T>(ctx: TenantContext, fn: (tx: Tx) => Promise<T>) => Promise<T>;
+export type WithTenant<Tx = TenantTransaction> = <T>(
+  ctx: TenantContext,
+  fn: (tx: Tx) => Promise<T>,
+) => Promise<T>;
+
+/** A module may pass this identity to bound services, but cannot reach other repositories. */
+export type TenantHandle = Readonly<{
+  context: TenantContext;
+  identity: symbol;
+  assertActive: () => void;
+}>;
+
+/** Request-scoped identity and repositories. The driver remains inside repository factories. */
+export type TenantTransaction = TenantHandle &
+  Readonly<{
+    repositories: TenantRepositories;
+    modules: Readonly<Partial<ModuleRepositories>>;
+  }>;

@@ -51,7 +51,7 @@ describe('server app', () => {
       title: 'Not found',
       status: 404,
       code: 'not_found',
-      detail: 'No route for GET /v1/nope.',
+      detail: 'No route matches this request.',
       requestId: response.headers.get('x-request-id'),
     });
   });
@@ -166,4 +166,50 @@ describe('GET /readyz', () => {
       await down.close();
     }
   });
+});
+
+test('secret-shaped request IDs, path parameters, unknown paths and error strings never reach HTTP/log sinks', async () => {
+  const secret = `bb_sk_${'A'.repeat(32)}`;
+  const { app, rawLogs } = setup();
+  app.get('/trace/:id', (c) => c.json({ ok: true }));
+  app.get('/secret-error', () => {
+    throw new AppError('invalid_request', {
+      detail: `Rejected ${secret}`,
+      hint: `Rotate ${secret}`,
+    });
+  });
+  app.get('/provider-error', () => {
+    throw new Error(`Provider rejected ${secret}`, { cause: new Error(secret) });
+  });
+  const responses = await Promise.all([
+    app.request(`/trace/${secret}`, { headers: { 'X-Request-Id': secret } }),
+    app.request(`/unknown/${secret}`),
+    app.request(
+      `/unknown/${Array.from(secret)
+        .map((char) => `%${char.charCodeAt(0).toString(16)}`)
+        .join('')}`,
+    ),
+    app.request('/secret-error'),
+    app.request('/provider-error'),
+  ]);
+  for (const response of responses) {
+    expect(response.headers.get('x-request-id')).not.toContain(secret);
+    // oxlint-disable-next-line no-await-in-loop -- Inspect every response body after all independent requests finish.
+    expect(await response.text()).not.toContain(secret);
+  }
+  expect(rawLogs()).not.toContain(secret);
+  expect(rawLogs()).toContain('/trace/:id');
+});
+
+test('logger masks key-shaped data in messages, child bindings, causes and custom serializers', () => {
+  const secret = `bb_sk_${'B'.repeat(32)}`;
+  const lines: string[] = [];
+  const log = createLogger('info', { write: (line) => lines.push(line) });
+  log.info({ trace: secret }, 'Rejected %s', secret);
+  log.error(new Error(secret, { cause: new Error(secret) }), secret);
+  log.child({ trace: secret, appSecret: 'child-private-value' }).info('child');
+  log.info({ wrapper: { toJSON: () => ({ value: secret }) } }, 'custom object');
+  expect(lines.join('')).not.toContain(secret);
+  expect(lines.join('')).not.toContain('child-private-value');
+  expect(lines.join('')).toContain('[redacted]');
 });

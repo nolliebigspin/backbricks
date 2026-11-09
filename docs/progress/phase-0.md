@@ -4,6 +4,8 @@
 - **Date:** 2026-11-05
 - **Status:** all 13 tasks done. Every M0 exit criterion is demonstrated locally except "CI green on a PR", which needs a push.
 
+**Post-merge update (2026-11-06):** [PR #4](https://github.com/nolliebigspin/backbricks/pull/4) merged on 2026-11-06 with successful quality/build, tests, Playwright, image and DCO checks (verified during P1 planning). The remaining CI criterion is satisfied. The original report below describes the pre-push state on 2026-11-05; its CI gap and push/PR next step are historical, not current blockers.
+
 ## Done
 
 | Task | Result |

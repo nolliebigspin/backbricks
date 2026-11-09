@@ -23,3 +23,22 @@ export async function initI18n(language: Language): Promise<i18n> {
   });
   return instance;
 }
+
+const preferenceKey = 'backbricks.language';
+/** Remember only the language choice; authentication material never enters browser storage. */
+export function rememberLanguage(language: Language) {
+  try {
+    window.localStorage.setItem(preferenceKey, language);
+  } catch {
+    /* Storage may be disabled. */
+  }
+}
+export function initialLanguage(preferred: readonly string[]): Language {
+  try {
+    const saved = window.localStorage.getItem(preferenceKey);
+    if (saved === 'en' || saved === 'de') return saved;
+  } catch {
+    /* Use browser language without persistence. */
+  }
+  return detectLanguage(preferred);
+}

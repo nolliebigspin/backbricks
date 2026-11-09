@@ -7,7 +7,13 @@ import {
   type InfraService,
   requiredInfrastructure,
 } from '../modules/infrastructure.ts';
-import { baseEnvSchema, CONFIG_VARIABLES, scannerEnvSchema, storageEnvSchema } from './schema.ts';
+import {
+  baseEnvSchema,
+  CONFIG_VARIABLES,
+  scannerEnvSchema,
+  storageEnvSchema,
+  type signupPolicySchema,
+} from './schema.ts';
 
 export type Env = Readonly<Record<string, string | undefined>>;
 
@@ -16,6 +22,7 @@ export type ConfigIssue = { variable: string; message: string };
 
 export type StorageConfig = {
   endpoint: string;
+  publicEndpoint?: string;
   region: string;
   bucket: string;
   accessKeyId: string;
@@ -33,6 +40,8 @@ export type Config = {
   databaseUrl: string;
   appSecret: string;
   publicUrl: string;
+  signupPolicy: z.infer<typeof signupPolicySchema>;
+  trustedProxies: readonly string[];
   port: number;
   logLevel: 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'silent';
   mailer: { smtpUrl: string; from: string } | null;
@@ -164,6 +173,8 @@ export function loadConfig(env: Env, modules: AvailableModules, readFile?: ReadF
       databaseUrl: base.DATABASE_URL,
       appSecret: base.APP_SECRET,
       publicUrl: base.PUBLIC_URL,
+      signupPolicy: base.SIGNUP_POLICY,
+      trustedProxies: base.TRUSTED_PROXIES,
       port: base.PORT,
       logLevel: base.LOG_LEVEL,
       mailer:
@@ -172,6 +183,7 @@ export function loadConfig(env: Env, modules: AvailableModules, readFile?: ReadF
           : null,
       storage: storage && {
         endpoint: storage.S3_ENDPOINT,
+        publicEndpoint: storage.S3_PUBLIC_ENDPOINT ?? storage.S3_ENDPOINT,
         region: storage.S3_REGION,
         bucket: storage.S3_BUCKET,
         accessKeyId: storage.S3_ACCESS_KEY_ID,

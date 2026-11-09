@@ -5,11 +5,16 @@
  */
 import { z } from 'zod';
 
+import { canonicalIp } from '../privacy/ip-identity.ts';
+
 const postgresUrl = z
   .string({ error: 'is required' })
   .refine((value) => /^postgres(ql)?:\/\/.+/.test(value), 'must be a postgres:// URL');
 
 const httpUrl = z.url({ protocol: /^https?$/, error: 'must be an http(s) URL' });
+export const signupPolicySchema = z.enum(['open', 'invite_only'], {
+  error: 'must be open or invite_only',
+});
 
 export const baseEnvSchema = z.object({
   NODE_ENV: z
@@ -25,6 +30,26 @@ export const baseEnvSchema = z.object({
     .string({ error: 'is required' })
     .min(32, 'must be at least 32 characters (e.g. `openssl rand -hex 32`)'),
   PUBLIC_URL: httpUrl.default('http://localhost:3000'),
+  SIGNUP_POLICY: signupPolicySchema.default('invite_only'),
+  TRUSTED_PROXIES: z
+    .string()
+    .default('')
+    .transform((value) =>
+      value
+        .split(',')
+        .map((address) => address.trim())
+        .filter(Boolean),
+    )
+    .pipe(
+      z.array(
+        z
+          .string()
+          .refine(
+            (address) => canonicalIp(address) !== null,
+            'must contain only literal proxy IP addresses (no CIDR ranges or hostnames)',
+          ),
+      ),
+    ),
   PORT: z.coerce
     .number({ error: 'must be a port number' })
     .int('must be a port number')
@@ -44,8 +69,13 @@ export const baseEnvSchema = z.object({
   MAIL_FROM: z.email('must be an email address').optional(),
 });
 
+const storageEndpoint = httpUrl.refine((value) => {
+  const url = new URL(value);
+  return !url.username && !url.password && !url.search && !url.hash;
+}, 'must not contain credentials, query parameters or fragments');
 export const storageEnvSchema = z.object({
-  S3_ENDPOINT: httpUrl,
+  S3_ENDPOINT: storageEndpoint,
+  S3_PUBLIC_ENDPOINT: storageEndpoint.optional(),
   S3_REGION: z.string({ error: 'is required' }).min(1, 'is required'),
   S3_BUCKET: z.string({ error: 'is required' }).min(1, 'is required'),
   S3_ACCESS_KEY_ID: z.string({ error: 'is required' }).min(1, 'is required'),

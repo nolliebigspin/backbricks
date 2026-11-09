@@ -30,3 +30,37 @@ Short documents that record significant decisions: deviations from or refinement
 | [0018](0018-open-source-first.md) | Open-source release first, managed cloud afterwards | accepted |
 | [0019](0019-optional-modules.md) | Every module is optional, enabled with BACKBRICKS_MODULES | accepted |
 | [0020](0020-library-compatibility.md) | Library compatibility on Bun and TypeScript 7 | accepted |
+| [0021](0021-auth-transactions-and-schema-ownership.md) | Auth transactions and schema ownership | accepted |
+| [0022](0022-personal-data-lifecycles.md) | Personal data lifecycles | accepted |
+| [0023](0023-platform-schema-integrity.md) | Platform schema integrity | accepted |
+| [0024](0024-tenant-repository-boundary.md) | Tenant repository boundary | accepted |
+| [0025](0025-abuse-identity-and-rate-limits.md) | Private abuse identity and shared rate limits | accepted |
+| [0026](0026-dashboard-auth-runtime.md) | Dashboard auth runtime | accepted |
+| [0027](0027-organization-policy-and-invitations.md) | Organization policy and invitations | accepted |
+| [0028](0028-management-principals-and-permissions.md) | Management principals and permissions | accepted |
+| [0029](0029-automatic-isolation-coverage.md) | Automatic isolation coverage | accepted |
+| [0030](0030-project-lifecycle-and-management.md) | Project lifecycle and management | accepted |
+| [0031](0031-key-material-and-scope-catalog.md) | Key material and scope catalog | accepted |
+| [0032](0032-session-only-key-management.md) | Session-only key management | accepted |
+| [0033](0033-credential-safe-diagnostic-boundaries.md) | Credential-safe diagnostic boundaries | accepted |
+| [0034](0034-key-authentication-and-exposure.md) | Key authentication and exposure handling | accepted |
+| [0035](0035-services-usage-and-entitlements.md) | Services, usage and entitlements | accepted |
+| [0036](0036-platform-read-contracts.md) | Platform read contracts | accepted |
+| [0037](0037-static-module-contracts.md) | Static module contracts and borrowed capabilities | accepted |
+| [0038](0038-module-catalog-and-availability.md) | Module catalog and availability metadata | accepted |
+| [0039](0039-module-http-and-worker-wiring.md) | Module HTTP and worker wiring | accepted |
+| [0040](0040-generic-instance-lifecycle.md) | Generic instance lifecycle | accepted |
+| [0041](0041-revisions-and-config-migrations.md) | Revisions and configuration migrations | accepted |
+| [0042](0042-config-documents-and-bound-plans.md) | Configuration documents and bound plans | accepted |
+| [0043](0043-atomic-config-apply-and-exports.md) | Atomic configuration apply and exports | accepted |
+| [0044](0044-private-s3-storage.md) | Private S3 storage | accepted |
+| [0045](0045-proof-of-work-and-replay.md) | Proof-of-work and replay protection | accepted; Q11 resolved by ADR-0054 |
+| [0046](0046-public-write-guard-and-cors.md) | Public write guard and CORS | accepted; Q11 resolved by ADR-0054 |
+| [0047](0047-atomic-public-idempotency.md) | Atomic public idempotency | accepted |
+| [0048](0048-transactional-postgres-jobs.md) | Transactional PostgreSQL jobs | accepted |
+| [0049](0049-outbox-and-restricted-delivery.md) | Outbox dispatch and restricted delivery | accepted |
+| [0050](0050-bounded-worker-maintenance.md) | Bounded worker maintenance | accepted |
+| [0051](0051-offline-contract-and-admin-client.md) | Offline contract and admin client | accepted |
+| [0052](0052-contract-gates-and-method-handling.md) | Contract gates and method handling | accepted |
+| [0053](0053-dashboard-account-boundary.md) | Dashboard account boundary | accepted |
+| [0054](0054-publishable-key-authentication-bootstrap.md) | Publishable key authentication bootstrap | accepted; Q11 approved |

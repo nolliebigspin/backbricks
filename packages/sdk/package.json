@@ -6,10 +6,27 @@
   "license": "MIT",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./src/index.ts",
+      "browser": "./src/index.ts",
+      "bun": "./src/index.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./admin": {
+      "types": "./admin/index.ts",
+      "browser": "./admin/index.ts",
+      "bun": "./admin/index.ts",
+      "default": "./dist/admin/index.js"
+    }
   },
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "build": "bun tools/build.ts",
+    "test": "bun run build && bun test"
+  },
+  "dependencies": {
+    "@backbricks/api-contract": "workspace:*",
+    "openapi-fetch": "0.17.0"
   },
   "engines": {
     "node": ">=20"
