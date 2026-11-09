@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'bun:test';
 
-import { AppError, publicWritePolicySchema } from '@backbricks/core';
+import { publicWritePolicySchema } from '@backbricks/core';
 import * as fc from 'fast-check';
 import { z } from 'zod';
 
-import { assertFieldCapabilities, formsConfigSchema, formsPublicWritePolicy } from './config.ts';
+import { formsConfigSchema, formsModuleConfigSchema, formsPublicWritePolicy } from './config.ts';
 import { FORM_FIELD_TYPES, FORMS_LIMITS } from './constants.ts';
 import { defaultFormsConfig } from './templates.ts';
 
@@ -204,27 +204,22 @@ describe('public write policy mapping', () => {
 });
 
 describe('field capabilities', () => {
-  const withFile = formsConfigSchema.parse(
-    form([text('name'), { key: 'cv', type: 'file', label: 'CV', zone: 'cv' }]),
-  );
+  const input = form([text('name'), { key: 'cv', type: 'file', label: 'CV', zone: 'cv' }]);
 
-  test('file fields are rejected with capability_unavailable while uploads is absent (§C.7)', () => {
-    const error = (() => {
-      try {
-        assertFieldCapabilities(withFile, { files: false });
-      } catch (caught) {
-        return caught;
-      }
-      return null;
-    })();
-    expect(error).toBeInstanceOf(AppError);
-    expect(error).toMatchObject({
-      code: 'capability_unavailable',
-      status: 422,
-      errors: [{ path: 'fields.1.type', code: 'capability_unavailable' }],
-    });
-    expect(() => assertFieldCapabilities(withFile, { files: true })).not.toThrow();
-    expect(() => assertFieldCapabilities(defaultFormsConfig(), { files: false })).not.toThrow();
+  test('file fields are tagged capability_unavailable while uploads is absent (§C.7)', () => {
+    const result = formsModuleConfigSchema({ files: false }).safeParse(input);
+    expect(result.success).toBe(false);
+    expect(result.error?.issues).toEqual([
+      expect.objectContaining({
+        code: 'custom',
+        path: ['fields', 1, 'type'],
+        params: { code: 'capability_unavailable' },
+      }),
+    ]);
+    expect(formsModuleConfigSchema({ files: true }).safeParse(input).success).toBe(true);
+    expect(formsModuleConfigSchema({ files: false }).safeParse(defaultFormsConfig()).success).toBe(
+      true,
+    );
   });
 });
 

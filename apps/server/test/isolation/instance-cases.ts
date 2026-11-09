@@ -5,11 +5,17 @@ import { instanceResponseSchema } from '@backbricks/core';
 import type { IsolationFixture } from './setup.ts';
 import type { Cases } from './suite.ts';
 
-/** The operational test-only sample joins the same manifest-based isolation detector as production routes. */
-export async function instanceIsolationCases(f: IsolationFixture): Promise<Cases> {
-  const root = `/v1/projects/${f.a1.id}/samples`;
-  const foreignRoot = `/v1/projects/${f.b1.id}/samples`;
-  const siblingRoot = `/v1/projects/${f.a2.id}/samples`;
+/**
+ * Generic instance routes (ADR-0040) for any operational module: the test-only sample and
+ * production modules (forms) join the same manifest-based isolation detector.
+ */
+export async function instanceIsolationCases(
+  f: IsolationFixture,
+  module: { type: string; plural: string } = { type: 'sample', plural: 'samples' },
+): Promise<Cases> {
+  const root = `/v1/projects/${f.a1.id}/${module.plural}`;
+  const foreignRoot = `/v1/projects/${f.b1.id}/${module.plural}`;
+  const siblingRoot = `/v1/projects/${f.a2.id}/${module.plural}`;
   const seed = async (path: string, key: string, cookie: string) => {
     const response = await f.request(path, { key, name: 'Fixture' }, cookie);
     expect(response.status).toBe(201);
@@ -20,19 +26,19 @@ export async function instanceIsolationCases(f: IsolationFixture): Promise<Cases
   const sibling = await seed(siblingRoot, 'sibling-only', f.owner.cookie);
   await seed(root, 'history', f.owner.cookie);
   return {
-    'sample.instance.revisions': {
+    [`${module.type}.instance.revisions`]: {
       kind: 'collection',
       read: { path: `${root}/history/revisions`, cookie: f.member.cookie },
       present: [],
       absent: [foreign.id, sibling.id],
       foreign: { path: `${foreignRoot}/foreign-only/revisions`, cookie: f.owner.cookie },
     },
-    'sample.instance.revision': {
+    [`${module.type}.instance.revision`]: {
       kind: 'resource',
       own: { path: `${root}/history/revisions/1`, cookie: f.member.cookie },
       foreign: { path: `${root}/foreign-only/revisions/1`, cookie: f.owner.cookie },
     },
-    'sample.instance.rollback': {
+    [`${module.type}.instance.rollback`]: {
       kind: 'mutation',
       denied: [
         {
@@ -58,7 +64,7 @@ export async function instanceIsolationCases(f: IsolationFixture): Promise<Cases
         cookie: f.admin.cookie,
       },
     },
-    'sample.instance.migrate': {
+    [`${module.type}.instance.migrate`]: {
       kind: 'mutation',
       denied: [
         {
@@ -84,14 +90,14 @@ export async function instanceIsolationCases(f: IsolationFixture): Promise<Cases
         cookie: f.admin.cookie,
       },
     },
-    'sample.instance.list': {
+    [`${module.type}.instance.list`]: {
       kind: 'collection',
       read: { path: root, cookie: f.member.cookie },
       present: [own.id],
       absent: [foreign.id, sibling.id],
       foreign: { path: foreignRoot, cookie: f.owner.cookie },
     },
-    'sample.instance.create': {
+    [`${module.type}.instance.create`]: {
       kind: 'creation',
       successStatus: 201,
       denied: [
@@ -121,12 +127,12 @@ export async function instanceIsolationCases(f: IsolationFixture): Promise<Cases
         expect(instanceResponseSchema.parse(await response.json()).projectId).toBe(f.a1.id);
       },
     },
-    'sample.instance.read': {
+    [`${module.type}.instance.read`]: {
       kind: 'resource',
       own: { path: `${root}/contact`, cookie: f.member.cookie },
       foreign: { path: `${root}/foreign-only`, cookie: f.owner.cookie },
     },
-    'sample.instance.update': {
+    [`${module.type}.instance.update`]: {
       kind: 'mutation',
       denied: [
         {
@@ -167,7 +173,7 @@ export async function instanceIsolationCases(f: IsolationFixture): Promise<Cases
         expect(instanceResponseSchema.parse(await response.json()).configVersion).toBe(2);
       },
     },
-    'sample.instance.archive': {
+    [`${module.type}.instance.archive`]: {
       kind: 'mutation',
       successStatus: 204,
       denied: [

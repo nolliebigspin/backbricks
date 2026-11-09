@@ -1,5 +1,4 @@
 import {
-  AppError,
   instanceKeySchema,
   publicWritePolicySchema,
   type PublicWritePolicyInput,
@@ -199,23 +198,22 @@ export function formsPublicWritePolicy(config: FormsConfig): PublicWritePolicyIn
   };
 }
 
-/** `file` fields need the optional `files` capability (uploads); without it the config is rejected (§C.7). */
-export function assertFieldCapabilities(config: FormsConfig, available: { files: boolean }): void {
-  if (available.files) return;
-  const errors = config.fields.flatMap((entry, index) =>
-    entry.type === 'file'
-      ? [
-          {
-            path: `fields.${index}.type`,
-            code: 'capability_unavailable',
-            message: 'File fields need the uploads module.',
-          },
-        ]
-      : [],
-  );
-  if (errors.length)
-    throw new AppError('capability_unavailable', {
-      detail: 'File fields need the uploads module, which is not enabled.',
-      errors,
+/**
+ * The module's config schema for a given capability set: `file` fields need the optional `files`
+ * capability (uploads). Without it they are tagged issues that the core turns into a
+ * `capability_unavailable` problem (§C.7), keeping their field paths.
+ */
+export function formsModuleConfigSchema(available: { files: boolean }) {
+  return formsConfigSchema.superRefine((config, ctx) => {
+    if (available.files) return;
+    config.fields.forEach((entry, index) => {
+      if (entry.type === 'file')
+        ctx.addIssue({
+          code: 'custom',
+          path: ['fields', index, 'type'],
+          message: 'File fields need the uploads module, which is not enabled.',
+          params: { code: 'capability_unavailable' },
+        });
     });
+  });
 }

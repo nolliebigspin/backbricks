@@ -193,3 +193,7 @@ Details: `docs/progress/phase-0.md` → "Deviations".
 - **D48 – Public schema reads are rate limited:** forms add the first production public read route, so the P1 review's L2 is decided now: a light per-IP limit and `Cache-Control` on `GET /v1/public/forms/{key}`.
 - **D49 – Notification throttling:** at most 10 mails per rule per hour, then one content-free hourly digest with the count; configurable per rule within a bounded range.
 - **D50 – Release mechanics:** Changesets for the changelog; a tag-triggered workflow pushes the image to `ghcr.io/nolliebigspin/backbricks` (Q3). The maintainer creates and pushes the signed tag.
+
+### Decided during P2 execution, please confirm
+
+- **D51 – Config validation errors keep their paths:** `validatedConfig` (core) returns `validation_failed` with `errors[]` (paths relative to the module config; module refinement messages only, built-in Zod messages replaced so no input is echoed) instead of a path-less problem. A module refinement tagged `{ code: 'capability_unavailable' }` becomes that problem, which is how forms rejects `file` fields without uploads (§C.7) without a `ModuleDefinition` change.

@@ -84,6 +84,7 @@ test.skipIf(!available)(
           ...configurationIsolationCases(f),
           ...(await keyIsolationCases(f)),
           ...(await platformReadIsolationCases(f)),
+          ...(await instanceIsolationCases(f, { type: 'forms', plural: 'forms' })),
         };
         assertIsolationCoverage(operations, cases);
         const missing = Object.fromEntries(

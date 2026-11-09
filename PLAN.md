@@ -678,14 +678,14 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 - **Tests:** real-Postgres repository and schema-integrity tests.
 - **Risks/notes:** `search_vector` covers only text field values, never `source`/consent metadata. Migration SQL reviewed by hand (§B.5).
 
-### [ ] P2.3c – Make forms an operational module (est. 4 h)
+### [x] P2.3c – Make forms an operational module (est. 4 h)
 - **Description:** Replace the descriptor with the full `defineModule` definition: config/templates/classifier/codegen, scopes (`forms:submit` already in the catalog), event `forms.submission.created`, usage metric `forms.submissions`, optional `files` capability, `retention` (`purgeExpired`, `recomputeExpiry`) and `privacy` (`exportSubject`, `deleteSubject`) on the repository. Generic instance CRUD, revisions, config-as-code and JSON Schema export then work for `forms` without new code.
 - **Files/packages:** `packages/modules/forms/src/{index,module,retention,privacy}.ts`; `apps/server/src/modules.ts` catalog entry.
 - **Depends on:** P2.1b, P2.3b.
 - **Reuses:** generic instance service, planner, scheduled fan-out (ADR-0050), platform subject-erasure job.
 - **Acceptance criteria:**
-  - [ ] `/v1/meta` reports forms as operational; `BACKBRICKS_MODULES=forms` boots app + Postgres only; with forms disabled, its routes return `module_not_enabled`.
-  - [ ] Create/patch/archive/rollback/plan/apply a form through the generic API with audit and revisions; `file` fields rejected without uploads.
+  - [x] `/v1/meta` reports forms as operational; `BACKBRICKS_MODULES=forms` boots app + Postgres only; with forms disabled, its routes return `module_not_enabled`.
+  - [x] Create/patch/archive/rollback/plan/apply a form through the generic API with audit and revisions; `file` fields rejected without uploads.
 - **Tests:** server integration (instances, configuration), registry subset matrix with the real module, OpenAPI regenerated (`api:generate`, additive only).
 - **Risks/notes:** DEV-9's synthetic fixtures stay for the framework; this adds the first real-module subset proof.
 
@@ -915,6 +915,8 @@ P2.2: the validator is one normalizer per field type rather than a generated Zod
 P2.3a: [ADR-0055](docs/adr/0055-module-tables-in-db.md). `moduleRepositoryFactories` in db is still empty; P2.3b adds `forms`, and from then on the typed assignment in `apps/server/src/module-repositories.ts` fails to compile if the forms interface and db's implementation disagree. New arch rule `modules-no-database` (fixture `module-defines-table`); `tenant-tables-only-repositories` no longer allows module-local schema files.
 
 P2.3b: [`schema/forms.ts`](packages/db/src/schema/forms.ts), [`repositories/forms.ts`](packages/db/src/repositories/forms.ts), migration `20261109045220_form_submissions` (generated, reviewed). Spam always has an expiry (CHECK), subject emails must be lowercase (CHECK), and `recomputeExpiry` keeps spam's earlier cap. The module computes `expiresAt` itself when it marks or unmarks spam (`least(current, now + 30 days)` / retention expiry), and passes `searchText` to insert. The composition typecheck caught a real mismatch on its first run (spam verdict typed as `string`). The spam verdict enum is an explicit tuple tied to core by a `satisfies` and a runtime equality test.
+
+P2.3c: [`module.ts`](packages/modules/forms/src/module.ts) replaces the descriptor in the catalog. `createFormsModule({ files })` builds the capability-aware config schema and templates; the catalog uses `files: false` because uploads has no `files` provider before M3, which must then pass the real availability (and declare the `FilesCapability` contract, after which forms calls `files.deleteByOwner` on deletes). Core `validatedConfig` now forwards config issue paths (custom messages only) and maps an issue tagged `{ code: 'capability_unavailable' }` to that problem (D51). The instance isolation cases are parameterized by module, so forms' nine generic routes join the suite with cookie and key probes.
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · stub
 

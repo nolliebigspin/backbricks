@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 
-import { assertFieldCapabilities, formsConfigSchema } from './config.ts';
+import { formsConfigSchema, formsModuleConfigSchema } from './config.ts';
 import { defaultFormsConfig, formsTemplates } from './templates.ts';
 
 describe('form templates', () => {
@@ -41,9 +41,9 @@ describe('form templates', () => {
     const withFiles = formsTemplates({ files: true })['job-application-en']!.config;
     expect(without.fields.some((field) => field.type === 'file')).toBe(false);
     expect(without.fields.find((field) => field.key === 'cv_link')?.type).toBe('url');
-    expect(() => assertFieldCapabilities(without, { files: false })).not.toThrow();
+    expect(formsModuleConfigSchema({ files: false }).safeParse(without).success).toBe(true);
     expect(withFiles.fields.find((field) => field.key === 'cv')?.type).toBe('file');
-    expect(() => assertFieldCapabilities(withFiles, { files: false })).toThrow();
+    expect(formsModuleConfigSchema({ files: false }).safeParse(withFiles).success).toBe(false);
   });
 
   test('the default config is the English contact template', () => {

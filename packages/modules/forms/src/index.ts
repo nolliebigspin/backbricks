@@ -1,10 +1,8 @@
-import { defineModuleDescriptor, type InfraRequirement } from '@backbricks/core';
-
 export {
-  assertFieldCapabilities,
   fieldKeySchema,
   formFieldSchema,
   formsConfigSchema,
+  formsModuleConfigSchema,
   formsPublicWritePolicy,
   redirectUrlSchema,
   type FormField,
@@ -39,13 +37,10 @@ export {
 } from './validator.ts';
 export { defaultFormsConfig, formsTemplates, type FormTemplateName } from './templates.ts';
 
-/** Forms needs nothing besides Postgres (ARCHITECTURE §C.7). The full definition arrives in its domain milestone. */
-export const formsInfrastructure = [] as const satisfies readonly InfraRequirement[];
-
-/** M1 descriptor only; the domain milestone supplies the operational definition. */
-export const formsDescriptor = defineModuleDescriptor({
-  type: 'forms',
-  displayName: { en: 'Forms', de: 'Formulare' },
-  resourceName: { singular: 'form', plural: 'forms' },
-  infrastructure: formsInfrastructure,
-});
+export {
+  createFormsModule,
+  formsInfrastructure,
+  formsModule,
+  FORMS_EVENTS,
+  FORMS_METRICS,
+} from './module.ts';
