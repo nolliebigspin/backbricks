@@ -206,5 +206,94 @@
   "languages": {
     "en": "English",
     "de": "Deutsch"
+  },
+  "forms": {
+    "inbox": "Posteingang",
+    "back": "Alle Formulare",
+    "unavailable": "Formulare sind in dieser Installation nicht eingeschaltet.",
+    "counts": "{{total}} Einträge · {{unread}} ungelesen",
+    "status": {
+      "active": "Aktiv",
+      "paused": "Pausiert",
+      "archived": "Archiviert"
+    },
+    "empty": {
+      "title": "Noch keine Formulare",
+      "description": "Erstelle unten ein Formular aus einer Vorlage und binde es auf deiner Website ein. Einträge erscheinen dann hier.",
+      "embed": "So bindest du ein Formular ein"
+    },
+    "create": {
+      "title": "Neues Formular",
+      "name": "Name",
+      "key": "Kurzname",
+      "template": "Vorlage",
+      "submit": "Formular erstellen"
+    },
+    "tabs": {
+      "label": "Formularbereiche",
+      "entries": "Einträge",
+      "settings": "Einstellungen"
+    },
+    "entries": {
+      "summary": "{{total}} Einträge, {{unread}} ungelesen, {{spam}} im Spam-Ordner."
+    },
+    "settings": {
+      "readOnly": "Nur Inhaber und Administratoren können diese Einstellungen ändern. Du kannst sie ansehen.",
+      "spam": "Spam-Schutz",
+      "proofOfWork": "Prüfen, dass ein echter Browser das Formular sendet",
+      "proofOfWorkHint": "Empfohlen. Ohne diese Prüfung halten nur das versteckte Fallenfeld und Anfragelimits Bots ab.",
+      "lessProtected": "Weniger geschützt",
+      "honeypot": "Name des versteckten Fallenfelds",
+      "honeypotHint": "Bots füllen dieses unsichtbare Feld aus; solche Einträge werden verworfen. Behalte den Standard, außer er kollidiert mit einem deiner Felder.",
+      "retention": "Aufbewahrung",
+      "retentionLabel": "Einträge löschen nach",
+      "days_one": "{{count}} Tag",
+      "days_other": "{{count}} Tagen",
+      "unlimited": "Ohne Zeitlimit",
+      "retentionHint_one": "Einträge werden {{count}} Tag nach dem Eingang automatisch gelöscht. Spam wird nach 30 Tagen gelöscht.",
+      "retentionHint_other": "Einträge werden {{count}} Tage nach dem Eingang automatisch gelöscht. Spam wird nach 30 Tagen gelöscht.",
+      "unlimitedHint": "Einträge bleiben, bis du sie löschst. Wähle das nur, wenn du einen Grund hast, personenbezogene Daten so lange zu behalten. Spam wird weiterhin nach 30 Tagen gelöscht.",
+      "redirects": "Nach dem Absenden",
+      "redirectsHint": "Für Formulare auf einfachen Webseiten: wohin Besucher nach dem Absenden kommen. Leer lassen, um eine einfache Bestätigung zu zeigen.",
+      "successRedirect": "Seite nach erfolgreichem Eintrag",
+      "errorRedirect": "Seite, wenn etwas nicht stimmt (optional)",
+      "redirectOutside": "Diese Adresse liegt auf keiner der erlaubten Domains deines Projekts und wird deshalb abgelehnt. Füge die Domain in den Projekteinstellungen hinzu oder nutze eine andere Seite."
+    },
+    "notifications": {
+      "title": "E-Mail-Benachrichtigungen",
+      "noEmail": "E-Mail ist in dieser Installation nicht eingerichtet, daher werden keine Benachrichtigungen verschickt. Bitte die Betreiber von Backbricks, E-Mail einzurichten.",
+      "noRecipients": "Keine Empfänger mehr",
+      "on": "An",
+      "off": "Pausiert",
+      "withContent": "Mit Inhalt des Eintrags",
+      "pause": "Pausieren",
+      "resume": "Fortsetzen",
+      "remove": "Entfernen",
+      "removeTitle": "Diese Benachrichtigung entfernen?",
+      "removeDescription": "Die gewählten Mitglieder bekommen keine E-Mails mehr zu neuen Einträgen in diesem Formular.",
+      "add": "Diese Mitglieder über neue Einträge informieren",
+      "noMembers": "Noch kein Mitglied hat seine E-Mail-Adresse bestätigt.",
+      "includeContent": "Inhalt des Eintrags in die E-Mail aufnehmen",
+      "contentWarning": "E-Mail ist weniger geschützt als Backbricks: Der Inhalt verlässt das System und bleibt in Postfächern. Ohne diese Option sagen E-Mails nur, dass ein Eintrag eingegangen ist, und verlinken ihn.",
+      "save": "Benachrichtigung hinzufügen"
+    },
+    "danger": {
+      "title": "Löschen und archivieren",
+      "deleteAllDescription": "Alle {{total}} Einträge dieses Formulars endgültig löschen. Das lässt sich nicht rückgängig machen.",
+      "typeKey": "Zum Bestätigen „{{key}}“ eingeben",
+      "deleteAll": "Alle Einträge löschen",
+      "deleting": "Die Einträge werden gelöscht. Das kann einen Moment dauern.",
+      "archiveDescription": "Archivieren stoppt die Annahme neuer Einträge.",
+      "archiveWithEntries": "Archivieren stoppt die Annahme neuer Einträge. Die Einträge bleiben bis zu ihrem Löschdatum erhalten. Lösche sie vorher, wenn du sie nicht mehr brauchst.",
+      "archive": "Formular archivieren",
+      "archiveTitle": "Dieses Formular archivieren?",
+      "archiveConfirm": "Das Formular nimmt keine Einträge mehr an und verschwindet aus dem Posteingang."
+    },
+    "errors": {
+      "stale": "Jemand anderes hat dieses Formular inzwischen geändert. Lade neu, um die aktuellen Einstellungen zu sehen, und ändere sie dann erneut.",
+      "reload": "Einstellungen neu laden",
+      "forbidden": "Dazu fehlt dir die Berechtigung. Frag einen Inhaber oder Administrator.",
+      "keyTaken": "Dieser Kurzname wird schon von einem anderen Formular verwendet. Wähle einen anderen."
+    }
   }
 }

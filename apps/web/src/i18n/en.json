@@ -206,5 +206,94 @@
   "languages": {
     "en": "English",
     "de": "Deutsch"
+  },
+  "forms": {
+    "inbox": "Inbox",
+    "back": "All forms",
+    "unavailable": "Forms aren't switched on for this installation.",
+    "counts": "{{total}} entries · {{unread}} unread",
+    "status": {
+      "active": "Active",
+      "paused": "Paused",
+      "archived": "Archived"
+    },
+    "empty": {
+      "title": "No forms yet",
+      "description": "Create a form from a template below, then add it to your website. Entries show up here.",
+      "embed": "How to add a form to your website"
+    },
+    "create": {
+      "title": "New form",
+      "name": "Name",
+      "key": "Short name",
+      "template": "Start from",
+      "submit": "Create form"
+    },
+    "tabs": {
+      "label": "Form sections",
+      "entries": "Entries",
+      "settings": "Settings"
+    },
+    "entries": {
+      "summary": "{{total}} entries, {{unread}} unread, {{spam}} in the spam folder."
+    },
+    "settings": {
+      "readOnly": "Only owners and administrators can change these settings. You can view them.",
+      "spam": "Spam protection",
+      "proofOfWork": "Check that a real browser sends the form",
+      "proofOfWorkHint": "Recommended. Without this check, only the hidden trap field and request limits keep bots out.",
+      "lessProtected": "Less protected",
+      "honeypot": "Name of the hidden trap field",
+      "honeypotHint": "Bots fill this invisible field; such entries are dropped. Keep the default unless it clashes with one of your fields.",
+      "retention": "Keeping entries",
+      "retentionLabel": "Delete entries after",
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days",
+      "unlimited": "No time limit",
+      "retentionHint_one": "Entries are deleted automatically {{count}} day after they arrive. Spam is deleted after 30 days.",
+      "retentionHint_other": "Entries are deleted automatically {{count}} days after they arrive. Spam is deleted after 30 days.",
+      "unlimitedHint": "Entries are kept until you delete them. Only choose this if you have a reason to keep personal data that long. Spam is still deleted after 30 days.",
+      "redirects": "After sending",
+      "redirectsHint": "For forms on plain web pages: where visitors go after sending. Leave empty to show a simple confirmation instead.",
+      "successRedirect": "Page after a successful entry",
+      "errorRedirect": "Page when something is wrong (optional)",
+      "redirectOutside": "This address isn't on one of your project's allowed domains, so it will be refused. Add the domain in the project settings or use another page."
+    },
+    "notifications": {
+      "title": "Email notifications",
+      "noEmail": "Email isn't set up on this installation, so no notifications are sent. Ask whoever runs Backbricks to configure email.",
+      "noRecipients": "No recipients left",
+      "on": "On",
+      "off": "Paused",
+      "withContent": "Includes entry content",
+      "pause": "Pause",
+      "resume": "Resume",
+      "remove": "Remove",
+      "removeTitle": "Remove this notification?",
+      "removeDescription": "The chosen members stop getting emails about new entries in this form.",
+      "add": "Notify these members about new entries",
+      "noMembers": "No member has confirmed their email address yet.",
+      "includeContent": "Include the entry's content in the email",
+      "contentWarning": "Email is less protected than Backbricks: the content leaves the system and stays in inboxes. Without this option, emails only say that an entry arrived and link to it.",
+      "save": "Add notification"
+    },
+    "danger": {
+      "title": "Delete and archive",
+      "deleteAllDescription": "Permanently delete all {{total}} entries of this form. This can't be undone.",
+      "typeKey": "Type \"{{key}}\" to confirm",
+      "deleteAll": "Delete all entries",
+      "deleting": "The entries are being deleted. This can take a moment.",
+      "archiveDescription": "Archiving stops the form from accepting entries.",
+      "archiveWithEntries": "Archiving stops the form from accepting entries. Its entries are kept until their deletion date, so delete them first if you no longer need them.",
+      "archive": "Archive form",
+      "archiveTitle": "Archive this form?",
+      "archiveConfirm": "The form stops accepting entries and disappears from the inbox."
+    },
+    "errors": {
+      "stale": "Someone else changed this form in the meantime. Reload to see the latest settings, then make your change again.",
+      "reload": "Reload settings",
+      "forbidden": "You don't have permission to change this. Ask an owner or administrator.",
+      "keyTaken": "This short name is already used by another form. Choose another."
+    }
   }
 }

@@ -802,14 +802,14 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 - **Tests:** real Postgres + worker; synthetic module with objects proves the storage path for M3.
 - **Risks/notes:** Organization deletion stays disabled until P6 (Q15). The dashboard offers "delete all entries" before archiving a form (P2.8a).
 
-### [ ] P2.8a – Add the Inbox shell and form settings (est. 6 h)
+### [x] P2.8a – Add the Inbox shell and form settings (est. 6 h)
 - **Description:** Dashboard module registry (`apps/web/src/modules/registry.ts`, §C.2) and the Inbox: form list with entry/unread counts and empty state, create from template, tabs, Settings (spam/PoW, honeypot, retention picker, redirects, notification rules picking verified members as recipients, Q14; "delete all entries" before archiving a form, Q15). All copy en/de, owner/admin gating (§E.4).
 - **Files/packages:** `apps/web/src/modules/{registry,forms/*}`, `packages/ui` components added via the shadcn CLI (`RetentionPicker`, `EmptyState`, `StatusBadge`).
 - **Depends on:** P2.3c, P2.6a.
 - **Reuses:** generated admin client, project shell, `SnippetTabs`, `ConfirmDialog`.
 - **Acceptance criteria:**
-  - [ ] Forms disabled → no Inbox nav; member sees read-only settings.
-  - [ ] Config writes send the current config version and show stale/destructive conflicts in plain language.
+  - [x] Forms disabled → no Inbox nav; member sees read-only settings.
+  - [x] Config writes send the current config version and show stale/destructive conflicts in plain language.
 - **Tests:** component tests (happy-dom), i18n key parity test.
 - **Risks/notes:** Counts come from an aggregate route or list metadata; add it to P2.5a if missing rather than counting in the browser.
 
@@ -947,6 +947,9 @@ P2.7b implementation and verification complete: core `privacy/subjects.ts` (owne
 
 
 P2.7c implementation and verification complete (release gate): required `privacy.eraseScope` hook (forms erases entries in batches and releases linked uploads via the optional files capability; all test fixtures declare it), owner-only `POST /v1/project-erasures` (organization-scoped because archived projects are unreachable through project routes; archived and slug-confirmed only), and a `core.projects.erase` worker in a new worker-only `archivedProject` tenant context. Rounds of 100 per module continue while a batch is full; the last round deletes outbox/idempotency/usage/rules/keys/revisions/instances, every queued or finished job payload of the project (notification mails are now tagged with their project) and leaves a tombstone (`erased_at`, migration `20261109104341_project_erasure`). The Postgres test proves zero rows in every `project_id` table but the audit log, no job payload, no personal labels in audit, rollback and resume, 409/422/403 rejections, an untouched neighbour and 404 afterwards. ADR-0061/D59. Deviation: no synthetic module with stored objects, because no storage-backed module exists before M3; the uploads module must prove the object path through `eraseScope` (noted in the ADR). Next: P2.8a dashboard.
+
+
+P2.8a implementation and verification complete. API prerequisites (`7a56300`): `/v1/meta` lists each operational module's template keys/names (I5 allowlist extended), instance creation accepts a `template`, and a new generic `PUT …/{plural}/{key}` replaces the full config. Merge patch (RFC 7396) deletes null-valued keys, so unlimited retention was unreachable through PATCH; a failing test came first. The PUT route joined the isolation suite; config-as-code documents exclude `template`. Dashboard: static registry `apps/web/src/modules/registry.ts` (project nav entry only for operational modules); pages live under `/projects/{id}/forms[/{key}]`, matching the notification links (ADR-0060). Inbox: forms with total/unread counts, empty state, creation from the current language's templates (`<template>-<lang>` keys). Form page: Entries tab (counts until P2.8b) and Settings: PoW with "less protected" badge, honeypot, `RetentionPicker` incl. no limit, redirects with origin warning, notification rules for verified members (content opt-in warning, no-email hint), delete-all with type-to-confirm, archive. Members get a disabled form and no notification requests; writes send the current version and explain 409s with a reload. `useAction` takes an error mapper. Deviation: `EmptyState`, `StatusBadge` and `RetentionPicker` are compositions of existing shadcn primitives in `packages/ui`, so the shadcn CLI wasn't used. Component tests (happy-dom) cover read-only members, the full-replace body (null retention, PoW off, redirect), the stale message, the registry and the picker; i18n parity holds. Not checked in a real browser yet (P2.9b journeys). Next: P2.8b.
 
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · stub
