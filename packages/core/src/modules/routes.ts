@@ -31,6 +31,7 @@ export interface ModuleAdminRouter<Runtime> {
 export interface ModulePublicRouter<Runtime> {
   register<I extends ModuleInputSchema>(
     spec: ModuleRouteSpec<I, Extract<RoutePolicy, { kind: 'public' }>> & {
+      /** `form: true` on writes opts into flat urlencoded fields and HTML/303 results. */
       access: PublicAccessInput;
     },
     handler: (runtime: Runtime, input: z.output<I>) => Promise<Response>,

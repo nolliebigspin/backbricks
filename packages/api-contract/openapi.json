@@ -5639,6 +5639,24 @@
                 "required": ["data"],
                 "type": "object"
               }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  ]
+                },
+                "type": "object"
+              }
             }
           },
           "required": true
@@ -5675,6 +5693,9 @@
               }
             },
             "description": "Accepted."
+          },
+          "303": {
+            "description": "HTML submission received, or safe error redirect."
           },
           "default": {
             "content": {
@@ -5750,6 +5771,11 @@
                   },
                   "required": ["type", "title", "status", "code", "requestId"],
                   "type": "object"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
                 }
               }
             },

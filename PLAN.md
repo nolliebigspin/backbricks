@@ -701,15 +701,15 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 - **Tests:** real HTTP/Postgres; PoW solve fixture; rate-limit identities per test.
 - **Risks/notes:** The response body never echoes submitted data.
 
-### [ ] P2.4b – Accept plain HTML form posts (est. 5 h)
+### [x] P2.4b – Accept plain HTML form posts (est. 5 h)
 - **Description:** `application/x-www-form-urlencoded` transport for the submissions route: the server executor accepts it for routes that opt in, maps flat fields to the module payload, takes honeypot and PoW from reserved field names, and answers `303` to the configured success redirect. Errors follow **Q13**: `303` to `redirects.error` with `?error=<code>&fields=<paths>` (never values), otherwise a minimal escaped HTML page listing the problems with a back link. Redirect targets must match the project's allowed origins. ADR-0046 gains the transport rule; the core route contract gets an explicit opt-in so no other public route accepts forms by accident.
 - **Files/packages:** `apps/server/src/public-executor.ts`, `packages/core/src/abuse/policy.ts`, `packages/core/src/modules/routes.ts`, forms public route; ADR-0046 update.
 - **Depends on:** P2.4a.
 - **Reuses:** P2.2 coercion, `safeRedirect`-style validation, redirect response kind.
 - **Acceptance criteria:**
-  - [ ] A real `<form method="post">` without JavaScript creates an entry and lands on the success page (Playwright, P2.9b).
-  - [ ] Open redirects are impossible (foreign host, `javascript:`, credentials in URL, protocol-relative) — property tests.
-  - [ ] Error pages/redirects never contain submitted values; HTML is escaped with `default-src 'none'` CSP.
+  - [x] A real `<form method="post">` without JavaScript creates an entry and lands on the success page (Playwright, P2.9b).
+  - [x] Open redirects are impossible (foreign host, `javascript:`, credentials in URL, protocol-relative) — property tests.
+  - [x] Error pages/redirects never contain submitted values; HTML is escaped with `default-src 'none'` CSP.
 - **Tests:** server integration for both transports; fast-check for redirect validation.
 - **Risks/notes:** Browsers send no `Idempotency-Key` from plain forms; double submits are handled by PoW single-use and rate limits, documented.
 
@@ -919,6 +919,11 @@ P2.3b: [`schema/forms.ts`](packages/db/src/schema/forms.ts), [`repositories/form
 P2.3c: [`module.ts`](packages/modules/forms/src/module.ts) replaces the descriptor in the catalog. `createFormsModule({ files })` builds the capability-aware config schema and templates; the catalog uses `files: false` because uploads has no `files` provider before M3, which must then pass the real availability (and declare the `FilesCapability` contract, after which forms calls `files.deleteByOwner` on deletes). Core `validatedConfig` now forwards config issue paths (custom messages only) and maps an issue tagged `{ code: 'capability_unavailable' }` to that problem (D51). The instance isolation cases are parameterized by module, so forms' nine generic routes join the suite with cookie and key probes.
 
 P2.4a implementation and verification are complete: both forms routes and both preflights have manifest-driven I5 cases; the generated API contract is additive. Real HTTP/Postgres tests cover public projection, PoW, honeypot, validation, idempotent and concurrent retries, secret-key exposure, source minimization, read limiting and forced event/usage rollback. ADR-0046's addendum and D52 document the shared context/read-policy changes. `CI=true bun run check` passed, with no skips; the final source-minimization/read-limit cases also passed directly, and formatting/lint/typecheck were rerun after adding them. Maintainer reviewed the staged diff and explicitly approved the DCO sign-off on 2026-11-09 (AGENTS §8 / CONTRIBUTING). Next: P2.4b, plain HTML transport.
+
+P2.4a cache follow-up: a new regression failed because cached schema responses varied only by Origin despite depending on bearer credentials. The executor now varies by both Origin and Authorization; query credentials already distinguish URLs. ADR-0046 records the reason. Committed separately as `0a23c6c` after maintainer review and explicit approval of DCO sign-off.
+
+P2.4b implementation and verification are complete: `access.form` explicitly opts a route into urlencoded fields, the shared guard extracts base64 ALTCHA proof and repeated names, and the trusted transport context selects the existing validator's coercion. Success/error redirects use the shared URL schema and current nonempty project origins, rechecked under the project lock. Missing/disallowed success redirects prevent storage; errors use an authorized error redirect or escaped HTML/CSP with codes/paths only. Early size/auth failures also use safe HTML. ADR-0046/D53 document the contract; API contract regenerated additively. `CI=true bun run check` passed (393 package + 93 script tests, no skips), and `CI=true bun run test:e2e e2e/forms-html.spec.ts` passed (one real native form journey with JavaScript disabled). Maintainer reviewed the staged changes and explicitly approved both signed-off commits on 2026-11-09. No push. Next task after that checkpoint: P2.5a.
+
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · stub
 

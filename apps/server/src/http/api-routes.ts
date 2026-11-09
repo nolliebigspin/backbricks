@@ -2,9 +2,10 @@ import {
   AppError,
   problemDetailsSchema,
   routePolicySchema,
+  isPublicFormContentType,
   type RoutePolicy,
 } from '@backbricks/core';
-import { OpenAPIHono, type RouteConfig, type RouteHandler } from '@hono/zod-openapi';
+import { OpenAPIHono, z, type RouteConfig, type RouteHandler } from '@hono/zod-openapi';
 import type { Context } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 
@@ -61,7 +62,7 @@ export class ApiRoutes {
     route: R,
     policy: RoutePolicy,
     handler: RouteHandler<R, AppEnv>,
-    options: { deferPublicBodyValidation?: boolean } = {},
+    options: { deferPublicBodyValidation?: boolean; publicFormTransport?: boolean } = {},
   ): void {
     const parsed = routePolicySchema.parse(policy);
     if (!route.path.startsWith('/v1/') || route.hide) {
@@ -89,6 +90,12 @@ export class ApiRoutes {
     });
     this.#app.use(path, async (c, next) => {
       if (c.req.method !== method && !(c.req.method === 'HEAD' && method === 'GET')) return next();
+      if (
+        parsed.kind === 'public' &&
+        options.publicFormTransport &&
+        isPublicFormContentType(c.req.header('content-type'))
+      )
+        c.set('publicForm', {});
       if (parsed.kind === 'management') {
         c.header('Cache-Control', 'no-store');
         await this.#authorize(parsed, c, tenant);
@@ -103,7 +110,10 @@ export class ApiRoutes {
       responses: {
         default: {
           description: 'A structured API error.',
-          content: { 'application/problem+json': { schema: problemDetailsSchema } },
+          content: {
+            'application/problem+json': { schema: problemDetailsSchema },
+            ...(options.publicFormTransport ? { 'text/html': { schema: z.string() } } : {}),
+          },
         },
         ...route.responses,
       },

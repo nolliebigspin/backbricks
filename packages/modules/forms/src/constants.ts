@@ -20,7 +20,7 @@ export const FORMS_LIMITS = {
   consentTextLength: 2000,
   consentVersionLength: 64,
   maxFilesPerField: 10,
-  redirectUrlLength: 2048,
+  redirectUrlLength: MAX_PUBLIC_REDIRECT_URL_LENGTH,
   perMinute: 1000,
   perHour: 10_000,
   /** Serialized configuration size; matches the public submission body limit. */
@@ -56,3 +56,4 @@ export const FORM_FIELD_TYPES = [
   'consent',
   'file',
 ] as const;
+import { MAX_PUBLIC_REDIRECT_URL_LENGTH } from '@backbricks/core';

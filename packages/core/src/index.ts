@@ -159,6 +159,16 @@ export {
 } from './logging/redact.ts';
 export { fieldErrorSchema, problemDetailsSchema } from './errors/schema.ts';
 export {
+  publicRedirectUrlSchema,
+  publicFormRedirect,
+  publicFormFailure,
+  PUBLIC_FORM_MEDIA_TYPE,
+  MAX_PUBLIC_REDIRECT_URL_LENGTH,
+  PUBLIC_FORM_PROOF_FIELD,
+  isPublicFormContentType,
+  type PublicFormRedirects,
+} from './http/public-forms.ts';
+export {
   refererPath,
   USER_AGENT_FAMILIES,
   userAgentFamily,

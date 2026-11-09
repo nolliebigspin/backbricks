@@ -112,6 +112,10 @@ export function createFormsModule(options: { files: boolean } = { files: false }
             body: submissionBodySchema,
           }),
           responses: {
+            303: {
+              kind: 'redirect',
+              description: 'HTML submission received, or safe error redirect.',
+            },
             200: {
               kind: 'json',
               description: 'The entry was received. The body never echoes submitted data.',
@@ -121,6 +125,7 @@ export function createFormsModule(options: { files: boolean } = { files: false }
           policy: { kind: 'public', bodyLimitBytes: FORMS_BODY_LIMIT_BYTES },
           access: {
             kind: 'write',
+            form: true,
             secretScope: 'forms:submit',
             idempotency: { status: 200 },
             quota: { metric: FORMS_METRICS.submissions },
@@ -132,7 +137,7 @@ export function createFormsModule(options: { files: boolean } = { files: false }
           const config = runtime.config(context.config);
           const now = runtime.services.clock.now();
           const { data, subjectEmail } = validateSubmission(config, input.body, {
-            transport: 'json',
+            transport: context.transport,
             now,
             formKey: input.params.key,
           });

@@ -473,6 +473,8 @@ Assumption: an attacker knows the publishable key and every form key and can sen
 
 **AbuseGuard pipeline** for every public write (cheap before expensive):
 
+Implemented transport, instance context, schema-read limits, project-bound redirects and HTML error behavior: [ADR-0046 and its P2 addenda](adr/0046-public-write-guard-and-cors.md). Plain HTML support is an explicit module-route opt-in; configuration and response code are the source of truth.
+
 1. Key valid, project active, instance active (else `404`)
 2. Body limit (forms 64 KB, reviews 16 KB, upload intent 4 KB)
 3. Rate limits: `ip_hash × instance` (default 10/min, 100/h), `project` (default 600/min), global

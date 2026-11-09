@@ -4,13 +4,14 @@ import {
   type FieldError,
   type FieldErrorCode,
   type JsonValue,
+  type PublicWriteContext,
 } from '@backbricks/core';
 import { z } from 'zod';
 
 import type { FormField, FormsConfig } from './config.ts';
 
 /** `json`: typed JSON values. `form`: urlencoded strings, repeated names as arrays (P2.4b). */
-export type SubmissionTransport = 'json' | 'form';
+export type SubmissionTransport = PublicWriteContext['transport'];
 export type NormalizedSubmission = Readonly<{
   /** Normalized answers keyed by field key; absent answers are omitted. */
   data: Readonly<Record<string, JsonValue>>;

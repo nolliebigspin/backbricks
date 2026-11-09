@@ -39,8 +39,17 @@ export async function createFormFixture(
 }
 
 /** Fetch and solve a real proof-of-work challenge for the project of `publishable`. */
-export async function solvedProof(f: IsolationFixture, publishable: string) {
-  const response = await f.request(`/v1/public/challenge?key=${publishable}`);
+export async function solvedProof(
+  f: IsolationFixture,
+  publishable: string,
+  headers?: Record<string, string>,
+) {
+  const response = await f.request(
+    `/v1/public/challenge?key=${publishable}`,
+    undefined,
+    undefined,
+    headers,
+  );
   if (response.status !== 200) throw new Error(`Challenge failed: ${response.status}`);
   const challenge = altchaChallengeSchema.parse(await response.json());
   const solution = await solveChallenge({ challenge, deriveKey, timeout: 10_000 });

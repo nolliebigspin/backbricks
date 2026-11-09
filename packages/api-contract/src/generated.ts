@@ -2446,6 +2446,9 @@ export interface operations {
           honeypot?: string;
           proof?: unknown;
         };
+        'application/x-www-form-urlencoded': {
+          [key: string]: string | string[];
+        };
       };
     };
     responses: {
@@ -2464,6 +2467,13 @@ export interface operations {
                 accepted: true;
               };
         };
+      };
+      /** @description HTML submission received, or safe error redirect. */
+      303: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description A structured API error. */
       default: {
@@ -2488,6 +2498,7 @@ export interface operations {
             title: string;
             type: string;
           };
+          'text/html': string;
         };
       };
     };

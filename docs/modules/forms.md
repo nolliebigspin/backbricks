@@ -95,6 +95,8 @@ Columns follow §B.3 with ADR-0023 integrity: composite live-parent FKs to proje
 
 ## 4. Public API (P2.4a/b)
 
+Implemented sources: [public projection](../../packages/modules/forms/src/public.ts), [module routes](../../packages/modules/forms/src/module.ts), [guard](../../packages/core/src/abuse/guard.ts), [HTML decoding](../../packages/core/src/abuse/form-envelope.ts), and [redirect/error helpers](../../packages/core/src/http/public-forms.ts). Transport decisions and origin rechecks are recorded in the [ADR-0046 addenda](../adr/0046-public-write-guard-and-cors.md).
+
 Paths are under `/v1/public/forms`. The publishable key comes as `Authorization: Bearer` or as the `key` query parameter (needed by HTML forms and preflight); secret keys only in the header. Missing, archived or disabled forms return `404` (I2); a disabled module returns `module_not_enabled`.
 
 | Route | Access | Credentials | Body limit | Rate limits | Response allowlist (I5) |
@@ -106,6 +108,8 @@ Paths are under `/v1/public/forms`. The publishable key comes as `Authorization:
 **Pipeline** (shared guard, ADR-0046): credential → origin → body limit → rate buckets narrowest first → honeypot → proof → strict validation → spam verdict → then one transaction with project lock, rechecks, idempotency (ADR-0047), quota, insert, `files.claim` (when present), event, usage.
 
 **Transports:** JSON uses `{ data, proof?, honeypot? }`. urlencoded maps flat fields to `data`; reserved names are the honeypot field and `altcha` (proof, for sites using the ALTCHA widget); repeated names become `multiselect` arrays; strings are coerced per field type (P2.2). Both transports produce the same normalized data. Plain forms send no `Idempotency-Key`; double submits are bounded by PoW single use and rate limits (documented). A urlencoded post to a form without `redirects.success` gets the HTML error page explaining that the form isn't set up for plain HTML posts (Q13: success redirect required).
+
+`altcha` cannot be a domain field key or the configured honeypot. Its value is base64 JSON containing the challenge and solution. A form with JavaScript disabled must explicitly opt out of proof-of-work; it receives the lower default rate limit. Early body-size/auth failures use the escaped HTML fallback because no redirect has been authorized yet.
 
 **Errors:** RFC 9457. `validation_failed` (422) carries `errors[]` with `path`, `code`, `message`, `meta` and a hint to `GET /v1/public/forms/{key}`. Field codes: [`FIELD_ERROR_CODES`](../../packages/core/src/errors/codes.ts); the validator is [`validator.ts`](../../packages/modules/forms/src/validator.ts). Others from the existing catalog: `proof_invalid`, `payload_too_large`, `unsupported_media_type`, `rate_limited`, `quota_exceeded`, `conflict` (changed body for a used `Idempotency-Key`), `forbidden` (origin).
 

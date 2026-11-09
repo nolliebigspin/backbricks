@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { publicRedirectUrlSchema } from '../http/public-forms.ts';
 import { DEFAULT_BODY_LIMIT_BYTES } from '../http/route-policy.ts';
 import { scopeNameSchema } from '../keys/protocol.ts';
 import { moduleInstanceSchema } from '../platform/models.ts';
@@ -19,6 +20,8 @@ export const publicAccessSchema = z.discriminatedUnion('kind', [
       kind: z.literal('write'),
       instanceParam: field.default('key'),
       secretScope: scopeNameSchema,
+      /** Explicit opt-in; JSON remains the default for every other public write. */
+      form: z.literal(true).optional(),
       idempotency: idempotencyPolicySchema.optional(),
       quota: z
         .object({ metric: metricNameSchema, amountField: field.optional() })
@@ -41,6 +44,10 @@ export const publicWritePolicySchema = z
       .default(DEFAULT_BODY_LIMIT_BYTES),
     perMinute: rateLimitInputSchema.shape.limit.default(10),
     perHour: rateLimitInputSchema.shape.limit.default(100),
+    redirects: z
+      .object({ success: publicRedirectUrlSchema, error: publicRedirectUrlSchema.optional() })
+      .strict()
+      .optional(),
   })
   .strict();
 export type PublicWritePolicy = z.output<typeof publicWritePolicySchema>;
@@ -71,7 +78,11 @@ export const publicRequestSourceSchema = z
   .strict();
 export type PublicRequestSource = z.infer<typeof publicRequestSourceSchema>;
 export const publicWriteContextSchema = publicReadContextSchema
-  .extend({ spam: spamVerdictSchema, source: publicRequestSourceSchema })
+  .extend({
+    spam: spamVerdictSchema,
+    source: publicRequestSourceSchema,
+    transport: z.enum(['json', 'form']).default('json'),
+  })
   .strict();
 export type PublicWriteContext = z.infer<typeof publicWriteContextSchema>;
 export const honeypotResponseSchema = z.object({ accepted: z.literal(true) }).strict();

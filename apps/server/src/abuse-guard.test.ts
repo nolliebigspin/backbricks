@@ -48,6 +48,13 @@ test.skipIf(!available)(
         ).toBe(201);
         const path = `/v1/public/entries/contact?key=${pk.token}`;
         const headers = { origin: 'https://site.test' };
+        const html = await fetch(`${base.origin}${path}`, {
+          method: 'POST',
+          headers: { ...headers, 'content-type': 'application/x-www-form-urlencoded' },
+          body: 'text=hello',
+        });
+        expect(html.status).toBe(415);
+        expect(html.headers.get('content-type')).toContain('application/problem+json');
         const before = await f.snapshot();
         const honey = await f.request(
           path,

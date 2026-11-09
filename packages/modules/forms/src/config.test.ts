@@ -47,6 +47,14 @@ describe('forms configuration schema', () => {
     }
   });
 
+  test('the proof field cannot be a domain field or the honeypot', () => {
+    expect(formsConfigSchema.safeParse(form([text('altcha')])).success).toBe(false);
+    expect(
+      formsConfigSchema.safeParse(form([text('name')], { spam: { honeypotField: 'altcha' } }))
+        .success,
+    ).toBe(false);
+  });
+
   test('every field type accepts its minimal shape', () => {
     const minimal: Record<(typeof FORM_FIELD_TYPES)[number], Record<string, unknown>> = {
       text: {},

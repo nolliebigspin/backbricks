@@ -1,6 +1,8 @@
 import {
   instanceKeySchema,
   publicWritePolicySchema,
+  publicRedirectUrlSchema,
+  PUBLIC_FORM_PROOF_FIELD,
   type PublicWritePolicyInput,
 } from '@backbricks/core';
 import { z } from 'zod';
@@ -17,7 +19,10 @@ export const fieldKeySchema = z
   .string()
   .min(1)
   .max(FORMS_LIMITS.fieldKeyLength)
-  .regex(/^[a-z][a-z0-9_]*$/);
+  .regex(/^[a-z][a-z0-9_]*$/)
+  .refine((key) => key !== PUBLIC_FORM_PROOF_FIELD, {
+    message: 'This key is reserved for proof-of-work.',
+  });
 const labelSchema = z.string().min(1).max(FORMS_LIMITS.labelLength);
 const length = (max: number) => z.number().int().min(0).max(max);
 const optionSchema = z
@@ -80,26 +85,8 @@ export const formFieldSchema = z.discriminatedUnion('type', [
 ]);
 export type FormField = z.output<typeof formFieldSchema>;
 
-const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 /** Shape only; the submit path checks the origin against the project's current allowed origins (Q13). */
-export const redirectUrlSchema = z
-  .string()
-  .max(FORMS_LIMITS.redirectUrlLength)
-  .refine(
-    (value) => {
-      if (!URL.canParse(value)) return false;
-      const url = new URL(value);
-      return (
-        (url.protocol === 'https:' ||
-          (url.protocol === 'http:' && LOCAL_HOSTS.has(url.hostname))) &&
-        !url.username &&
-        !url.password &&
-        !url.hash &&
-        !url.hostname.includes('*')
-      );
-    },
-    { message: 'Expected an absolute https URL without credentials or fragment.' },
-  );
+export const redirectUrlSchema = publicRedirectUrlSchema;
 
 const honeypotField = publicWritePolicySchema.shape.honeypotField;
 export const formsConfigSchema = z
@@ -137,6 +124,8 @@ export const formsConfigSchema = z
   .superRefine((config, ctx) => {
     const issue = (path: (string | number)[], message: string) =>
       ctx.addIssue({ code: 'custom', path, message });
+    if (config.spam.honeypotField === PUBLIC_FORM_PROOF_FIELD)
+      issue(['spam', 'honeypotField'], 'The honeypot cannot use the proof-of-work field name.');
     const keys = new Map<string, number>();
     let subjects = 0;
     config.fields.forEach((entry, index) => {
@@ -192,6 +181,7 @@ export function formsPublicWritePolicy(config: FormsConfig): PublicWritePolicyIn
   return {
     proofOfWork: config.spam.proofOfWork,
     honeypotField: config.spam.honeypotField,
+    ...(config.redirects ? { redirects: config.redirects } : {}),
     bodyLimitBytes: FORMS_BODY_LIMIT_BYTES,
     ...(perMinute === undefined ? {} : { perMinute }),
     ...(config.limits.perHour === undefined ? {} : { perHour: config.limits.perHour }),

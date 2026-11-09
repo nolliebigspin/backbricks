@@ -9,6 +9,7 @@ import {
   idempotencyKeySchema,
   publishableKeyTokenSchema,
   type PublicCredentialResolver,
+  PUBLIC_FORM_MEDIA_TYPE,
 } from '@backbricks/core';
 import { createRoute, z, type RouteConfig } from '@hono/zod-openapi';
 import type { Context } from 'hono';
@@ -120,6 +121,16 @@ export function moduleRoutes(
                         ? route.input.shape.body
                         : publicWriteEnvelopeSchema(route.input.shape.body),
                     },
+                    ...(!management && route.access?.kind === 'write' && route.access.form
+                      ? {
+                          [PUBLIC_FORM_MEDIA_TYPE]: {
+                            schema: z.record(
+                              z.string(),
+                              z.union([z.string(), z.array(z.string())]),
+                            ),
+                          },
+                        }
+                      : {}),
                   },
                 },
               }
@@ -163,7 +174,10 @@ export function moduleRoutes(
           };
           return services.withTenant(requireTenantContext(c), (tx) => run(tx, input));
         },
-        { deferPublicBodyValidation: !management && hasBody },
+        {
+          deferPublicBodyValidation: !management && hasBody,
+          publicFormTransport: route.access?.kind === 'write' && route.access.form,
+        },
       );
     }
   }

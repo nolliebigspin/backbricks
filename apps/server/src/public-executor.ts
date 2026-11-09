@@ -49,6 +49,8 @@ export function createPublicExecutor(
       route,
       params: c.req.param(),
       query,
+      transport: c.get('publicForm') ? 'form' : 'json',
+      formReady: (redirects) => c.set('publicForm', redirects),
       run,
       source: {
         path: refererPath(c.req.header('referer')),
@@ -60,17 +62,24 @@ export function createPublicExecutor(
       },
       async body() {
         if (
-          !c.req
-            .header('content-type')
-            ?.split(';')[0]
-            ?.trim()
-            .toLowerCase()
-            .endsWith('application/json')
+          !c.get('publicForm') &&
+          c.req.header('content-type')?.split(';')[0]?.trim().toLowerCase() !== 'application/json'
         )
-          throw new AppError('invalid_request');
+          throw new AppError('unsupported_media_type');
         return new Uint8Array(await c.req.arrayBuffer());
       },
     });
+    const form = c.get('publicForm');
+    if (form?.success) {
+      return c.newResponse(null, {
+        status: 303,
+        headers: {
+          Location: form.success,
+          'Cache-Control': 'no-store',
+          'Referrer-Policy': 'no-referrer',
+        },
+      });
+    }
     // A route may allow caching (e.g. a public form schema); everything else stays uncached.
     c.header('Cache-Control', response.headers.get('cache-control') ?? 'no-store');
     return c.newResponse(response.body, response);

@@ -4,6 +4,7 @@ import type {
   createIpIdentity,
   Ids,
   SelectedModules,
+  PublicFormRedirects,
 } from '@backbricks/core';
 
 import type { Logger } from './logger.ts';
@@ -15,6 +16,7 @@ export type AppEnv = {
     ipHash?: string;
     tenant?: AuthenticatedTenantContext;
     log: Logger;
+    publicForm?: PublicFormRedirects;
   };
 };
 
