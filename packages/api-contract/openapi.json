@@ -4158,7 +4158,567 @@
         }
       }
     },
+    "/v1/projects/{projectId}/forms/{key}/submissions/bulk": {
+      "post": {
+        "operationId": "forms.submissions.bulk",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "action": {
+                    "enum": ["read", "unread", "done", "open", "spam", "not_spam"],
+                    "type": "string"
+                  },
+                  "ids": {
+                    "items": {
+                      "maxLength": 128,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "maxItems": 100,
+                    "minItems": 1,
+                    "type": "array"
+                  }
+                },
+                "required": ["ids", "action"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "count": {
+                      "minimum": 0,
+                      "type": "integer"
+                    }
+                  },
+                  "required": ["count"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "All selected entries were updated."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      }
+    },
+    "/v1/projects/{projectId}/forms/{key}/submissions/bulk-delete": {
+      "post": {
+        "operationId": "forms.submissions.bulk_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "ids": {
+                    "items": {
+                      "maxLength": 128,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "maxItems": 100,
+                    "minItems": 1,
+                    "type": "array"
+                  }
+                },
+                "required": ["ids"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "count": {
+                      "minimum": 0,
+                      "type": "integer"
+                    }
+                  },
+                  "required": ["count"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "All selected entries were erased."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      }
+    },
+    "/v1/projects/{projectId}/forms/{key}/submissions/delete-all": {
+      "post": {
+        "operationId": "forms.submissions.delete_all",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "confirm": {
+                    "maxLength": 63,
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": ["confirm"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "accepted": {
+                      "enum": [true],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": ["accepted"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bounded erasure was queued."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      }
+    },
     "/v1/projects/{projectId}/forms/{key}/submissions/{id}": {
+      "delete": {
+        "operationId": "forms.submissions.delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The entry was erased."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      },
       "get": {
         "operationId": "forms.submissions.read",
         "parameters": [
@@ -4373,6 +4933,161 @@
               }
             },
             "description": "An entry with its historical field definitions."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      },
+      "patch": {
+        "operationId": "forms.submissions.update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "read": {
+                    "type": "boolean"
+                  },
+                  "spamVerdict": {
+                    "enum": ["clean", "suspect", "spam"],
+                    "type": "string"
+                  },
+                  "status": {
+                    "enum": ["open", "done"],
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["id"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "The entry was updated."
           },
           "default": {
             "content": {

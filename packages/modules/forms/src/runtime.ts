@@ -3,7 +3,7 @@ import { AppError, type ModuleRuntime } from '@backbricks/core';
 import type { FormsConfig } from './config.ts';
 import type { FormsRepository } from './repository.ts';
 
-export type FormsRuntime = ModuleRuntime<FormsConfig, never, 'files', never, never, 'forms'>;
+export type FormsRuntime = ModuleRuntime<FormsConfig, never, 'files', never, 'queue', 'forms'>;
 
 /** One checked repository seam for all forms operations. */
 export function formsRepository(runtime: {

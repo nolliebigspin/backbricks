@@ -132,7 +132,9 @@ Paths are under `/v1/projects/{projectId}/forms`. Every route declares session r
 | `POST /{key}/submissions/delete-all` | owner/admin | – | 1 KB | `{ confirm: "<form key>" }` → `202`; a job deletes in bounded batches (Q15: clear entries before archiving). Open point E |
 | `GET /{key}/export.csv` | owner/admin | – (D46) | – | streamed CSV, same filters as the list, union of fields across all versions; rate limited (1/min per user and form) |
 
-**Audit** (same transaction, structural only, never content, I12; names in the module's event list): `forms.submission.updated` (IDs, changed field names), `forms.submission.deleted`, `forms.submissions.bulk_updated` / `bulk_deleted` (count), `forms.submissions.delete_all_requested` and one summarized `forms.submissions.deleted_all` (count) from the job, `forms.submissions.exported` (row count, filter names). Deletes call `files.deleteByOwner` when the capability is present.
+**Audit** (same transaction, structural only, never content, I12; names in the module's action catalog): `forms.submission.updated` (IDs, changed field names), `forms.submission.deleted`, `forms.submissions.bulk_updated` / `bulk_deleted` (count), `forms.submissions.delete_all_requested` and one summarized `forms.submissions.deleted_all` (count) from the job, `forms.submissions.exported` (row count, filter names). Deletes call `files.deleteByOwner` when the capability is present.
+
+Mutation implementation: [entry actions](../../packages/modules/forms/src/mutations.ts), [bulk routes/jobs](../../packages/modules/forms/src/bulk.ts), and [ADR-0057](../adr/0057-forms-data-mutations-and-batched-erasure.md).
 
 **CSV** (P2.5c): a generic pure encoder in `packages/core/src/export/csv.ts` (RFC 4180, prefix `'` before `= + - @ \t \r`, §F.1), reused by uploads/reviews. Column logic stays in forms. Columns: `id`, `created_at`, `status`, `read`, `spam`, then field keys.
 

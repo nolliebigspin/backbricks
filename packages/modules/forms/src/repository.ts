@@ -64,7 +64,7 @@ export interface FormsRepository {
     filters: SubmissionFilters,
     page: RepositoryPage,
   ): Promise<SubmissionRecord[]>;
-  get(instanceId: string, id: string): Promise<SubmissionRecord>;
+  get(instanceId: string, id: string, options?: { lock?: boolean }): Promise<SubmissionRecord>;
   patch(instanceId: string, id: string, changes: SubmissionChanges): Promise<SubmissionRecord>;
   delete(instanceId: string, id: string): Promise<void>;
   bulkPatch(

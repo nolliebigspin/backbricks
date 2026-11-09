@@ -39,7 +39,7 @@ export type IsolationCase = (
       allowed: Probe;
       verify: (response: Response) => Promise<void>;
     }
-) & { successStatus?: 200 | 201 | 204 };
+) & { successStatus?: 200 | 201 | 202 | 204 };
 export type Cases = Readonly<Record<string, IsolationCase>>;
 
 /** Missing cases are a test failure, including operations added after the fixture was written. */

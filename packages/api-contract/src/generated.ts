@@ -240,6 +240,54 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/projects/{projectId}/forms/{key}/submissions/bulk': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['forms.submissions.bulk'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/forms/{key}/submissions/bulk-delete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['forms.submissions.bulk_delete'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/forms/{key}/submissions/delete-all': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['forms.submissions.delete_all'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/projects/{projectId}/forms/{key}/submissions/{id}': {
     parameters: {
       query?: never;
@@ -250,10 +298,10 @@ export interface paths {
     get: operations['forms.submissions.read'];
     put?: never;
     post?: never;
-    delete?: never;
+    delete: operations['forms.submissions.delete'];
     options?: never;
     head?: never;
-    patch?: never;
+    patch: operations['forms.submissions.update'];
     trace?: never;
   };
   '/v1/projects/{projectId}/forms/{key}/summary': {
@@ -1925,6 +1973,177 @@ export interface operations {
       };
     };
   };
+  'forms.submissions.bulk': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          action: 'read' | 'unread' | 'done' | 'open' | 'spam' | 'not_spam';
+          ids: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description All selected entries were updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            count: number;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.submissions.bulk_delete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          ids: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description All selected entries were erased. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            count: number;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.submissions.delete_all': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          confirm: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Bounded erasure was queued. */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {boolean} */
+            accepted: true;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
   'forms.submissions.read': {
     parameters: {
       query?: never;
@@ -1992,6 +2211,114 @@ export interface operations {
             status: 'open' | 'done';
             /** Format: date-time */
             updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.submissions.delete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+        id: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The entry was erased. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.submissions.update': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+        id: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          read?: boolean;
+          /** @enum {string} */
+          spamVerdict?: 'clean' | 'suspect' | 'spam';
+          /** @enum {string} */
+          status?: 'open' | 'done';
+        };
+      };
+    };
+    responses: {
+      /** @description The entry was updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            id: string;
           };
         };
       };

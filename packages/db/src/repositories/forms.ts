@@ -1,4 +1,9 @@
-import { AppError, type JsonValue, type RepositoryPage } from '@backbricks/core';
+import {
+  AppError,
+  MAX_BULK_ITEMS as MAX_BULK,
+  type JsonValue,
+  type RepositoryPage,
+} from '@backbricks/core';
 import {
   and,
   desc,
@@ -53,7 +58,6 @@ type Filters = Readonly<{
   to?: Date;
   query?: string;
 }>;
-const MAX_BULK = 100;
 const MAX_BATCH = 1000;
 
 // Stored values were validated by the module before insert; rows map back without re-validation.
@@ -98,6 +102,7 @@ export function createFormsRepository(tx: DbTransaction, scope: RepositoryScope)
       .select({ id: t.id })
       .from(t)
       .where(inForm(instanceId, inArray(t.id, [...ids])))
+      .orderBy(t.id)
       .for('update');
     if (rows.length !== ids.length) throw new AppError('not_found');
   }
@@ -163,11 +168,12 @@ export function createFormsRepository(tx: DbTransaction, scope: RepositoryScope)
         .limit(scope.limit(page));
       return rows.map(record);
     },
-    async get(instanceId: string, id: string) {
-      const [row] = await tx
+    async get(instanceId: string, id: string, options: { lock?: boolean } = {}) {
+      const query = tx
         .select()
         .from(t)
         .where(inForm(instanceId, eq(t.id, id)));
+      const [row] = await (options.lock ? query.for('update') : query);
       if (!row) throw new AppError('not_found');
       return record(row);
     },

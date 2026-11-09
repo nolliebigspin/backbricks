@@ -66,3 +66,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0054](0054-publishable-key-authentication-bootstrap.md) | Publishable key authentication bootstrap | accepted; Q11 approved |
 | [0055](0055-module-tables-in-db.md) | Module tables in db, repository interfaces in the module | accepted (Q12) |
 | [0056](0056-module-owned-instance-reads.md) | Module-owned configuration reads | accepted during execution; D54 |
+| [0057](0057-forms-data-mutations-and-batched-erasure.md) | Forms data mutations and batched erasure | accepted during execution; D55 |

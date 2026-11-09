@@ -4,6 +4,20 @@
  */
 export const FORMS_MODULE_VERSION = 1;
 
+export const FORMS_EVENTS = {
+  submissionCreated: 'forms.submission.created',
+} as const;
+export const FORMS_AUDIT_ACTIONS = {
+  submissionUpdated: 'forms.submission.updated',
+  submissionDeleted: 'forms.submission.deleted',
+  bulkUpdated: 'forms.submissions.bulk_updated',
+  bulkDeleted: 'forms.submissions.bulk_deleted',
+  deleteAllRequested: 'forms.submissions.delete_all_requested',
+  deletedAll: 'forms.submissions.deleted_all',
+} as const;
+export const FORMS_METRICS = { submissions: 'forms.submissions' } as const;
+export const FORMS_JOBS = { deleteAll: 'forms.submissions.delete-all' } as const;
+
 /** Hard upper bounds for one form's configuration (docs/modules/forms.md §2). */
 export const FORMS_LIMITS = {
   fields: 50,

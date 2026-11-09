@@ -5,8 +5,16 @@ import { formsAdminRoutes } from './admin.ts';
 import { classifyFormsChange } from './changes.ts';
 import { formsCodegen } from './codegen.ts';
 import { formsModuleConfigSchema, formsPublicWritePolicy } from './config.ts';
-import { FORMS_BODY_LIMIT_BYTES, FORMS_MODULE_VERSION } from './constants.ts';
+import {
+  FORMS_BODY_LIMIT_BYTES,
+  FORMS_MODULE_VERSION,
+  FORMS_EVENTS,
+  FORMS_METRICS,
+} from './constants.ts';
+export { FORMS_EVENTS, FORMS_METRICS } from './constants.ts';
+import { formsBulkRoutes, formsJobs } from './bulk.ts';
 import { entryExpiry, searchText } from './entries.ts';
+import { formsMutationRoutes } from './mutations.ts';
 import {
   formKeyParams,
   publicForm,
@@ -20,8 +28,6 @@ import { validateSubmission } from './validator.ts';
 
 /** Forms needs nothing besides Postgres (ARCHITECTURE §C.7). */
 export const formsInfrastructure = [] as const satisfies readonly InfraRequirement[];
-export const FORMS_EVENTS = { submissionCreated: 'forms.submission.created' } as const;
-export const FORMS_METRICS = { submissions: 'forms.submissions' } as const;
 /** Subject erasure deletes in bounded batches inside the one erasure transaction. */
 const SUBJECT_BATCH = 1000;
 const SUBJECT_EXPORT_PAGE = 100;
@@ -70,7 +76,13 @@ export function createFormsModule(options: { files: boolean } = { files: false }
       },
     ],
     optional: ['files'],
-    adminRoutes: formsAdminRoutes,
+    services: { optional: ['queue'] },
+    adminRoutes(router) {
+      formsAdminRoutes(router);
+      formsMutationRoutes(router);
+      formsBulkRoutes(router);
+    },
+    jobs: formsJobs,
     publicRoutes(router) {
       router.register(
         {

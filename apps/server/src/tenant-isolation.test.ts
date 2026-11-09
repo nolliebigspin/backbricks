@@ -156,7 +156,7 @@ test.skipIf(!available)(
         expect(await f.snapshot()).toEqual(before);
       },
       {},
-      { configure: managementFixtureRoutes },
+      { configure: managementFixtureRoutes, durableDelivery: true, consumeJobs: false },
     );
   },
   30_000,

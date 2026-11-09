@@ -34,6 +34,7 @@ export type {
   WithTenant,
 } from './tenancy/tenant-context.ts';
 export * from './tenancy/repositories.ts';
+export { MAX_BULK_ITEMS, bulkIdsSchema } from './http/bulk.ts';
 export * from './platform/models.ts';
 export {
   MAX_PAGE_SIZE,
@@ -344,6 +345,7 @@ export {
   bindCapability,
   capabilityView,
   type CapabilityMap,
+  type FilesCapability,
   type CapabilityName,
   type Capability,
   type CapabilityLookup,

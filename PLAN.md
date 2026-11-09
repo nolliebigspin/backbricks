@@ -725,14 +725,14 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 - **Tests:** real HTTP/Postgres incl. pagination traversal and search ranking basics.
 - **Risks/notes:** Reading does not mark as read; the dashboard does that explicitly.
 
-### [ ] P2.5b – Update, delete and bulk-edit submissions (est. 5 h)
+### [x] P2.5b – Update, delete and bulk-edit submissions (est. 5 h)
 - **Description:** `PATCH …/submissions/{id}` (JSON Merge Patch on status, read, spam verdict only), `DELETE …/submissions/{id}`, `POST …/submissions/bulk` (mark read/unread/done/open/spam/not spam, delete; ≤ 100 IDs, all-or-nothing). Plus a delete-all action for one form (owner/admin session only, bounded batches, one summarized audit entry) so owners can clear entries before archiving it (Q15). Single delete: members; bulk delete: owner/admin session or `data:delete` key (§E.4). Each mutation audits structural metadata only (IDs, counts, never content, I12); deletes call `files.deleteByOwner` when the capability is present.
 - **Files/packages:** `packages/modules/forms/src/admin.ts`.
 - **Depends on:** P2.5a.
 - **Reuses:** merge-patch helper, audit service, capability view.
 - **Acceptance criteria:**
-  - [ ] Forced audit failure rolls back every mutation; bulk with one foreign ID changes nothing and returns 404.
-  - [ ] Members can't bulk delete; keys without `data:delete` can't delete.
+  - [x] Forced audit failure rolls back every mutation; bulk with one foreign ID changes nothing and returns 404.
+  - [x] Members can't bulk delete; keys without `data:delete` can't delete.
 - **Tests:** real HTTP/Postgres, rollback loop, role/scope matrix.
 - **Risks/notes:** Hard delete only (I11); no trash.
 
@@ -926,6 +926,9 @@ P2.4b implementation and verification are complete: `access.form` explicitly opt
 
 
 P2.5a implementation: list/read/summary routes in `forms/src/admin.ts` use the existing pagination and scoped forms repository, with strict response projections. List values follow `listFields` (fallback: first two visible fields); details use the stored config revision and separate removed/unknown data. ADR-0056/D54 add a read-only module-owned instance/revision seam and remove the host-only project selector before strict module input validation. The HTTP JSON wrapper reuses the same JSON validator without recursive OpenAPI generation. HTTP tests first failed on 404, then found the host-selector 500; historical labels, paging, combined filters, size/date bounds and unread behavior now pass. The three new operations join the automatic cookie/key isolation suite (foreign org, sibling project, nested ID), which passes. `CI=true bun run check` passed; the maintainer reviewed the staged diff and explicitly approved DCO sign-off on 2026-11-09. Continue with P2.5b after that checkpoint.
+
+
+P2.5b implementation and verification complete: metadata-only PATCH, individual erasure, bounded bulk edits/deletes, and admin-session-only confirmed delete-all. Core owns the shared 100-ID bulk schema/ceiling and types the architecture's existing file-owner deletion seam (claim/list remain M3). Entry locks and deterministic bulk locks preserve per-row spam/read timestamps. All audit/enqueue effects share the caller transaction. The delete-all job removes 100 per transaction, carries an ID/count-only continuation and writes one final summarized audit, including after archive. HTTP/worker tests prove audit rollback for every mutation, 102-row batch behavior, roles/scopes and optional file cleanup rollback. All new routes join cookie/key isolation; denied-write snapshots include form rows. ADR-0057/D55 record the contracts. `CI=true bun run check` passed; the maintainer reviewed the staged diff and explicitly approved DCO sign-off on 2026-11-09. Next: P2.5c streamed CSV.
 
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · stub

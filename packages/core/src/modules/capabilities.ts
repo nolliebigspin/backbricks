@@ -1,8 +1,14 @@
 import { AppError } from '../errors/app-error.ts';
 import type { TenantHandle } from '../tenancy/tenant-context.ts';
 
+/** The deletion seam is available before uploads; M3 adds claiming and listing. */
+export interface FilesCapability {
+  deleteByOwner(tx: TenantHandle, owner: { type: string; id: string }): Promise<void>;
+}
+
 /** Modules augment this public interface with transaction-first capability contracts. */
 export interface CapabilityMap {
+  readonly files: FilesCapability;
   readonly [name: string]: object;
 }
 export type CapabilityName = Extract<keyof CapabilityMap, string>;

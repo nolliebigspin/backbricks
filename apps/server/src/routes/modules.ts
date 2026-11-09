@@ -96,7 +96,9 @@ export function moduleRoutes(
         ? `/v1/projects/{projectId}/${module.resourceName.plural}`
         : `/v1/public/${module.resourceName.plural}`;
       const path = `${prefix}${route.path === '/' ? '' : route.path}`;
-      const hasBody = route.method !== 'GET';
+      const hasBody =
+        route.method !== 'GET' &&
+        !(route.method === 'DELETE' && route.input.shape.body instanceof z.ZodNull);
       const definition = createRoute({
         method: methods[route.method],
         path,
