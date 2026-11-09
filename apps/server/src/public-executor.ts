@@ -10,6 +10,8 @@ import {
 import type { ModulePublicExecutor } from './routes/modules.ts';
 import type { ServerServices } from './services.ts';
 
+const PUBLIC_RESPONSE_VARY = 'Origin, Authorization';
+
 /** The host binds credentials, transport and the module's transaction without granting management access. */
 export function createPublicExecutor(
   services: ServerServices,
@@ -23,7 +25,7 @@ export function createPublicExecutor(
   });
   return async (c, type, route, run) => {
     c.header('Cache-Control', 'no-store');
-    c.header('Vary', 'Origin');
+    c.header('Vary', PUBLIC_RESPONSE_VARY);
     const request = {
       origin: c.req.header('origin') ?? null,
       ipHash: c.get('ipHash'),
@@ -54,7 +56,7 @@ export function createPublicExecutor(
       },
       allowOrigin(origin) {
         c.header('Access-Control-Allow-Origin', origin);
-        c.header('Vary', 'Origin');
+        c.header('Vary', PUBLIC_RESPONSE_VARY);
       },
       async body() {
         if (

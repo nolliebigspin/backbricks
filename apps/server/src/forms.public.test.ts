@@ -28,6 +28,7 @@ test.skipIf(!available)(
       const schema = await f.request(path, undefined, undefined, bearer);
       expect(schema.status).toBe(200);
       expect(schema.headers.get('cache-control')).toBe('public, max-age=60');
+      expect(schema.headers.get('vary')?.toLowerCase().split(/,\s*/)).toContain('authorization');
       const body = await schema.json();
       expect(body).toEqual({
         key,
