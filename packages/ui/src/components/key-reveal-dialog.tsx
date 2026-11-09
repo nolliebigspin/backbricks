@@ -39,7 +39,12 @@ export function KeyRevealDialog({
         if (!open) onClose();
       }}
     >
-      <DialogContent showCloseButton={false}>
+      {/* The value can't be shown again, so only the explicit close button may dismiss it. */}
+      <DialogContent
+        showCloseButton={false}
+        onEscapeKeyDown={(event) => event.preventDefault()}
+        onInteractOutside={(event) => event.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>

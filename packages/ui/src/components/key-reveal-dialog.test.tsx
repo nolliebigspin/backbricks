@@ -46,3 +46,11 @@ test('copy and dismiss remove the revealed value from the document', async () =>
   expect(screen.queryByDisplayValue('one-time-test-value')).toBeNull();
   expect(screen.queryByRole('dialog')).toBeNull();
 });
+
+test('Escape and outside clicks cannot discard the one-time value', () => {
+  render(<Fixture />);
+  fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+  fireEvent.pointerDown(document.body);
+  expect(screen.getByDisplayValue('one-time-test-value')).toBeTruthy();
+  expect(screen.getByRole('dialog')).toBeTruthy();
+});
