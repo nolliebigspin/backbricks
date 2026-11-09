@@ -62,7 +62,8 @@
                         "service_unavailable",
                         "rate_limited",
                         "proof_invalid",
-                        "quota_exceeded"
+                        "quota_exceeded",
+                        "capability_unavailable"
                       ]
                     },
                     "detail": {
@@ -225,7 +226,8 @@
                         "service_unavailable",
                         "rate_limited",
                         "proof_invalid",
-                        "quota_exceeded"
+                        "quota_exceeded",
+                        "capability_unavailable"
                       ]
                     },
                     "detail": {
@@ -321,7 +323,8 @@
                         "service_unavailable",
                         "rate_limited",
                         "proof_invalid",
-                        "quota_exceeded"
+                        "quota_exceeded",
+                        "capability_unavailable"
                       ]
                     },
                     "detail": {
@@ -609,7 +612,8 @@
                         "service_unavailable",
                         "rate_limited",
                         "proof_invalid",
-                        "quota_exceeded"
+                        "quota_exceeded",
+                        "capability_unavailable"
                       ]
                     },
                     "detail": {
@@ -784,7 +788,8 @@
                         "service_unavailable",
                         "rate_limited",
                         "proof_invalid",
-                        "quota_exceeded"
+                        "quota_exceeded",
+                        "capability_unavailable"
                       ]
                     },
                     "detail": {
@@ -962,7 +967,8 @@
                         "service_unavailable",
                         "rate_limited",
                         "proof_invalid",
-                        "quota_exceeded"
+                        "quota_exceeded",
+                        "capability_unavailable"
                       ]
                     },
                     "detail": {
@@ -1060,7 +1066,8 @@
                         "service_unavailable",
                         "rate_limited",
                         "proof_invalid",
-                        "quota_exceeded"
+                        "quota_exceeded",
+                        "capability_unavailable"
                       ]
                     },
                     "detail": {
@@ -1207,7 +1214,8 @@
                         "service_unavailable",
                         "rate_limited",
                         "proof_invalid",
-                        "quota_exceeded"
+                        "quota_exceeded",
+                        "capability_unavailable"
                       ]
                     },
                     "detail": {
@@ -1392,7 +1400,8 @@
                         "service_unavailable",
                         "rate_limited",
                         "proof_invalid",
-                        "quota_exceeded"
+                        "quota_exceeded",
+                        "capability_unavailable"
                       ]
                     },
                     "detail": {
@@ -1680,7 +1689,8 @@
                         "service_unavailable",
                         "rate_limited",
                         "proof_invalid",
-                        "quota_exceeded"
+                        "quota_exceeded",
+                        "capability_unavailable"
                       ]
                     },
                     "detail": {
@@ -1831,7 +1841,8 @@
                         "service_unavailable",
                         "rate_limited",
                         "proof_invalid",
-                        "quota_exceeded"
+                        "quota_exceeded",
+                        "capability_unavailable"
                       ]
                     },
                     "detail": {
@@ -2147,7 +2158,8 @@
                         "service_unavailable",
                         "rate_limited",
                         "proof_invalid",
-                        "quota_exceeded"
+                        "quota_exceeded",
+                        "capability_unavailable"
                       ]
                     },
                     "detail": {
@@ -2350,7 +2362,8 @@
                         "service_unavailable",
                         "rate_limited",
                         "proof_invalid",
-                        "quota_exceeded"
+                        "quota_exceeded",
+                        "capability_unavailable"
                       ]
                     },
                     "detail": {
@@ -2545,7 +2558,8 @@
                         "service_unavailable",
                         "rate_limited",
                         "proof_invalid",
-                        "quota_exceeded"
+                        "quota_exceeded",
+                        "capability_unavailable"
                       ]
                     },
                     "detail": {
@@ -2805,7 +2819,8 @@
                         "service_unavailable",
                         "rate_limited",
                         "proof_invalid",
-                        "quota_exceeded"
+                        "quota_exceeded",
+                        "capability_unavailable"
                       ]
                     },
                     "detail": {
@@ -2911,7 +2926,8 @@
                         "service_unavailable",
                         "rate_limited",
                         "proof_invalid",
-                        "quota_exceeded"
+                        "quota_exceeded",
+                        "capability_unavailable"
                       ]
                     },
                     "detail": {
@@ -3026,7 +3042,8 @@
                         "service_unavailable",
                         "rate_limited",
                         "proof_invalid",
-                        "quota_exceeded"
+                        "quota_exceeded",
+                        "capability_unavailable"
                       ]
                     },
                     "detail": {
@@ -3165,7 +3182,8 @@
                         "service_unavailable",
                         "rate_limited",
                         "proof_invalid",
-                        "quota_exceeded"
+                        "quota_exceeded",
+                        "capability_unavailable"
                       ]
                     },
                     "detail": {
@@ -3327,7 +3345,8 @@
                         "service_unavailable",
                         "rate_limited",
                         "proof_invalid",
-                        "quota_exceeded"
+                        "quota_exceeded",
+                        "capability_unavailable"
                       ]
                     },
                     "detail": {
@@ -3423,7 +3442,8 @@
                         "service_unavailable",
                         "rate_limited",
                         "proof_invalid",
-                        "quota_exceeded"
+                        "quota_exceeded",
+                        "capability_unavailable"
                       ]
                     },
                     "detail": {
@@ -3519,7 +3539,8 @@
                         "service_unavailable",
                         "rate_limited",
                         "proof_invalid",
-                        "quota_exceeded"
+                        "quota_exceeded",
+                        "capability_unavailable"
                       ]
                     },
                     "detail": {

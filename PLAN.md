@@ -622,14 +622,14 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 - **Tests:** the suites above, real Postgres, `CI=true`.
 - **Risks/notes:** Test-only change; no production behavior changes.
 
-### [ ] P2.1a – Define the forms configuration schema (est. 5 h)
+### [x] P2.1a – Define the forms configuration schema (est. 5 h)
 - **Description:** Zod config in `packages/modules/forms`: ordered `fields` with the 13 MVP types (§D.8), per-type rules (`required`, `minLength`/`maxLength`, `min`/`max`, `options`; no regex, I10), stable field keys, labels (en/de optional), `identifiesSubject` on at most one `email` field, `consent` text version, honeypot field name, `proofOfWork` (explicit opt-out marks the form less protected and lowers the per-IP default to 5/min, Q13), `redirects.success`/`redirects.error` (allowed only with a non-empty project origin list, Q13), `retentionDays` (default 180; 7–3650 or `null` = unlimited), rate limits. `file` fields declare the optional `files` capability and are rejected with `capability_unavailable` while it is absent (§C.7). Map config to `publicWritePolicy` (ADR-0046). Hard upper bounds: fields per form, options per select, label/text lengths, total schema size.
 - **Files/packages:** `packages/modules/forms/src/config.ts`, `constants.ts`; new error codes in `packages/core/src/errors/codes.ts` if needed.
 - **Depends on:** P2.0a.
 - **Reuses:** `publicWritePolicySchema`, `moduleNameSchema`, `jsonValueSchema`, the core field-name pattern.
 - **Acceptance criteria:**
-  - [ ] Config JSON Schema is representable (`schemaDocument`) and strict; defaults are sensible (§E.5: PoW on, 6 months, honeypot set).
-  - [ ] Invalid combinations (duplicate keys, options on a text field, two subject fields, `min > max`) fail with field paths.
+  - [x] Config JSON Schema is representable (`schemaDocument`) and strict; defaults are sensible (§E.5: PoW on, 6 months, honeypot set).
+  - [x] Invalid combinations (duplicate keys, options on a text field, two subject fields, `min > max`) fail with field paths.
 - **Tests:** unit + fast-check (generated configs round-trip, bounds hold).
 - **Risks/notes:** Field keys are API surface for websites and CSV columns; keep them `[a-z][a-z0-9_]*`, max 64.
 
@@ -905,6 +905,8 @@ Run after `mise install && mise run infra` with isolated test tenants and Mailpi
 P2.0a: [`docs/modules/forms.md`](docs/modules/forms.md) approved by the maintainer on 2026-11-09 with open points A–F (§12) as recommended.
 
 P2.0b: key probes are derived from the existing cookie cases (`exerciseKeyIsolation`): each project-scoped key route is probed with a session-issued key for its own project (reads must succeed) and the same request moved to the sibling and foreign projects (404, no writes); mutations get denial probes only, so stateful allowed steps still run once. The I5 gate (`public-responses.test.ts`) found the challenge preflight uncovered on its first run; every current public operation now has a field-allowlist, static-document or empty-body case. L4: the two applied migrations already start with explanatory comments and AGENTS §10 forbids editing applied migrations, so the guard is a schema-integrity assertion plus pointer comments next to the Drizzle tables. `CI=true bun run check`: 265 package + 92 script tests, no skips.
+
+P2.1a: [`config.ts`](packages/modules/forms/src/config.ts) is a strict per-type field union plus one form-level `superRefine` (no transforms, so the JSON Schema export works); it reuses the core honeypot schema and leaves the PoW-on per-minute default to the shared guard. New catalog code `capability_unavailable` (422; OpenAPI regenerated, additive). The module contract has no capability-aware validation hook, so `assertFieldCapabilities(config, { files })` is a pure check that P2.3c must call wherever forms configs are written (instance create/update, config apply). `listFields` stays optional; the list route (P2.5a) applies the "first two visible fields" fallback. New dependencies for the forms package: `zod` 4.6.7 (runtime, same pinned version as the rest of the workspace) and `fast-check` 4.10.2 (dev).
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · stub
 

@@ -19,6 +19,7 @@ export const ERROR_CODES = {
   rate_limited: { status: 429, title: 'Too many requests' },
   proof_invalid: { status: 400, title: 'Verification failed' },
   quota_exceeded: { status: 402, title: 'Usage limit reached' },
+  capability_unavailable: { status: 422, title: 'Capability is not available' },
 } as const satisfies Record<string, { status: number; title: string }>;
 
 export type ErrorCode = keyof typeof ERROR_CODES;
