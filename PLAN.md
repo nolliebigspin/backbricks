@@ -1,7 +1,7 @@
 # PLAN – Backbricks
 
 > The only task list. Milestones, scope and exit criteria: [`docs/MILESTONES.md`](docs/MILESTONES.md). Decisions for the maintainer: [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md). Key decisions: [`docs/adr/`](docs/adr/). How phases are planned and executed: `AGENTS.md` §9.
-> **State:** P0 done (report: [`docs/progress/phase-0.md`](docs/progress/phase-0.md)). P1 planned on 2026-11-06; resolve its decision gates in `OPEN_QUESTIONS.md` before the affected tasks. P2–P6 and C1–C3 remain stubs.
+> **State:** P0 done (report: [`docs/progress/phase-0.md`](docs/progress/phase-0.md)). P1 implemented and merged ([report](docs/progress/phase-1.md), [review](docs/progress/review-phase-1.md)). P2 planned on 2026-11-09; Q12–Q16 answered the same day (all recommendations accepted). P3–P6 and C1–C3 remain stubs.
 
 ## Task format
 
@@ -23,7 +23,7 @@ Each phase ends with a **Phase acceptance** checklist: the milestone's exit crit
 
 ## Overview
 
-- **Total estimate:** P0 **47 h ≈ 5.9 PD**; P1 **182 h ≈ 22.8 PD**, plus a **36 h (~20%) reserve**, giving **218 h ≈ 27.3 PD** as the planning envelope. P2–P6 retain their milestone ranges (**41–53 PD**). **OSS track ≈ 70–82 PD before the P1 reserve, 74–86 PD including it.** Cloud track (C1–C3): **15–21 PD**. P1's detailed estimate is a proposed revision to its original 12–15 PD allowance, not an approved budget increase or scope change.
+- **Total estimate:** P0 **47 h ≈ 5.9 PD**; P1 **182 h ≈ 22.8 PD**, plus a **36 h (~20%) reserve**, giving **218 h ≈ 27.3 PD** as the planning envelope. P2 **124 h ≈ 15.5 PD**, plus a **25 h reserve**, giving **149 h ≈ 18.6 PD** (allowance 9–11 PD; accepted as the P2 envelope, Q16). P3–P6 retain their milestone ranges (**32–42 PD**). **OSS track ≈ 76–86 PD before reserves, 84–94 PD including them.** Cloud track (C1–C3): **15–21 PD**. P1's detailed estimate is a proposed revision to its original 12–15 PD allowance, not an approved budget increase or scope change.
 - P0 is about 1 PD over the planned 4–5 PD. The extra comes from the library spike, the Garage init (the Garage image has no shell) and the Docker setup for Bun's isolated linker. DEV-4 and DEV-7 keep P1 work out of P0.
 - **Milestones:** see [`docs/MILESTONES.md`](docs/MILESTONES.md) (M0–M6, C1–C3). Phase P*n* → milestone M*n*.
 - **P0 execution order** (IDs unchanged): P0.1 → P0.2 → P0.3a → P0.3b → **P0.9a → P0.9b** → P0.4 → P0.6 → P0.5a → P0.5b → P0.7 → P0.8a → P0.8b. The spike runs early because it needs the compose services (Postgres, Garage), and its findings feed P0.2, P0.5 and P0.6.
@@ -77,6 +77,9 @@ P0 versions checked 2026-11-04. New P1 dependencies rechecked 2026-11-06 with `n
 | | @modelcontextprotocol/sdk | 1.32.2 | yes, Bun and Node 24 (ADR-0020) | must also run on Node ≥ 20 (I18) |
 | | nodemailer / @types/nodemailer | 10.3.1 / 8.0.2 | yes (P1.8b) | Bun Mailpit delivery and safe failure tests pass; Node delivery probe passes; used API typechecks despite types' older major |
 | | file-type | 22.3.0 | to verify (P3.4) | |
+| P2 (checked 2026-11-09) | @tanstack/react-table | 9.3.1 | verify in P2.8b | New major (v9); peer `react >=18`; pulls `@tanstack/table-core` 9.3.1 and `@tanstack/react-store`. Read the installed types, not v8 docs |
+| | @changesets/cli / @changesets/changelog-github | 3.0.3 / 1.0.1 | dev tool, runs on mise Node 24 | P2.10a; requires Node ≥ 22.11 |
+| | SDK PoW solver | – (WebCrypto) | yes | P2.9a: no dependency; tested against the server's `altcha-lib` 2.8.0 |
 | | @hono/zod-openapi | 1.6.3 | yes | peer zod ^4, hono ≥4.10 |
 | | openapi-typescript | 7.13.0 | yes, with fallback (ADR-0020) | fails on TS 7; works with `typescript@5.9.3` local to `api-contract` |
 | | openapi-fetch | 0.17.0 | to verify in P1.11b | Separate admin export keeps this dependency out of the browser SDK entry point |
@@ -101,6 +104,7 @@ P0 versions checked 2026-11-04. New P1 dependencies rechecked 2026-11-06 with `n
 - [ ] **DEV-9: Test the M1 module framework with test-only modules.** There are no domain modules in M1, yet P1.6 asks for single-module boots. Exercise full definitions and all capability/infrastructure combinations with synthetic fixtures; retain the existing domain infrastructure declarations once, and replace them with full definitions in P2–P4. Do not invent production forms/upload/review schemas to fill the contract. Clearly distinguish shipped descriptors from operational modules in metadata. Real single-module acceptance is added as each domain module lands. *Impact:* §C.7, P1.6, P2–P4; **Q5**.
 - [x] **DEV-10: Make the auth/schema/transaction boundary explicit.** P1.1a proved the request-scoped outer transaction in [ADR-0021](docs/adr/0021-auth-transactions-and-schema-ownership.md), including negative control showing the stock adapter option alone is insufficient. Generated tables belong to db; auth receives schema/connection/services via injection. No I12 waiver; durable production integration remains P1.1c.
 - [ ] **DEV-11: Resolve privacy and deletion gaps before schema/API implementation.** §B.3's audit labels, recipients and cached idempotency responses do not all have explicit expiry; the idempotency table lacks `organization_id` despite I1. §F.4's hard deletion differs from P1.5's soft project deletion. Propose tenant/expiry constraints, minimized audit labels, and separate archive vs. erasure semantics; do not copy the SQL spec literally. *Impact:* §B.3, §F.4, I1/I11; **Q7/Q8**. Architecture text changes only with the accepted decision/ADR during execution.
+- [x] **DEV-12: Module tables live in `packages/db`, repository contracts in the module.** §B.5 and the §C.5 example place Drizzle tables in module packages, but a module may import only core (I13), so it can't reference `module_instances` for the composite live-parent FKs (ADR-0023) or reuse db's tenant columns and scope helper. Proposal: the module declares its repository interface (augmenting `ModuleRepositories`); db owns the table, migration and implementation; the server's composition typecheck proves they match. *Impact:* §B.5, §C.3, §C.5 wording; P2.3a, later P3.2/P4.2; **Q12**. *Accepted 2026-11-09;* P2.3a writes the ADR and updates the wording.
 
 ## Phase P0 – Foundation (M0) · done
 
@@ -586,22 +590,319 @@ P1.13c acceptance resolved the key expiry display regression with a failing-then
 
 P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted publishable-key exact-hash/IDs-only bootstrap into production before scoped revalidation. The challenge regression failed with 503 before wiring and passes with the real lookup; DB and en/de process-level journeys prove kind/expiry/revocation/archive/origin boundaries. All 39 M1 implementation tasks are checked.
 
-## Phase P2 – Forms (M2 · v0.1.0) · stub
+## Phase P2 – Forms (M2 · v0.1.0) · planned 2026-11-09
 
-**Goal:** The first module end to end. **Estimate:** 9–11 PD.
+**Goal:** The first module end to end: a headless form backend, a dashboard inbox and the `v0.1.0` developer preview. **25 tasks, 124 h ≈ 15.5 PD; reserve 25 h (~20%); envelope 149 h ≈ 18.6 PD.** Original allowance: 9–11 PD. The maintainer accepted it as the planning envelope (**Q16**, 2026-11-09). The allowance did not include the release-gate erasure workflow, generic notification rules and privacy routes (platform pieces every module reuses), the module table seam, urlencoded transport or the P1 review test gaps.
 
-**Release gate from Q7 / ADR-0030:** Define and implement personal-data hard erasure separately from project configuration archive before the M2 release, including DB records, objects, queued jobs and retained audit lifecycle.
+**Execution:** Work top to bottom; IDs keep the stub numbers with suffixes, so the order below is the dependency order, not the numeric one. **Q12–Q16** are answered (all recommendations accepted, 2026-11-09); D44–D50 still await confirmation but don't block. Read ARCHITECTURE §B.3, §B.5, §C, §D.2–D.5, §D.7–D.8, §E, §F.4, §F.6 and ADRs 0022, 0024, 0030, 0037–0050. Paths describe intended owners, not files that already exist. The P1 sequential-handoff rules (one checkout, one active agent, handoff notes in the execution notes below) apply unchanged.
 
-- [ ] P2.1 – `packages/modules/forms`: config schema (field types and rules per §D.8, honeypot, PoW, HTML redirects, `retentionDays`, `identifiesSubject`), templates (contact, quote request, job application, event sign-up), `validateConfigChange` (field removed / type changed = destructive)
-- [ ] P2.2 – Runtime validator: config → Zod; normalization (trim, lowercase email); unknown fields rejected; field errors as problem details
-- [ ] P2.3 – Table `form_submissions` + migration; `search_vector` on insert; `expires_at`; `subject_email`; replace its SQL in §B.3 with a link
-- [ ] P2.4 – Public: `GET /v1/public/forms/{key}` and `POST …/submissions` (JSON + urlencoded with 303 redirect), `Idempotency-Key`, AbuseGuard, spam verdict, event `forms.submission.created`, usage counter; secret-key variant with `forms:submit` without PoW
-- [ ] P2.5 – Admin: submissions list (cursor, filters status/read/spam/date, full-text search), detail (rendered with field definitions of the stored `config_version`), patch (status, read, spam), delete, bulk (mark, delete), streamed CSV export (union of fields, CSV-injection safe, owner/admin, audited)
-- [ ] P2.6 – Notification rules (CRUD) and sending on new submissions: content-free by default, `include_content` opt-in, throttling (max N/h per rule, then digest)
-- [ ] P2.7 – Retention: daily purge job (entries + spam after 30 days), `expires_at` recomputation on retention change; `privacy` handler (export/erase by email)
-- [ ] P2.8 – Dashboard "Inbox": form list (counts, unread), tabs Entries (DataTable + RecordDrawer + spam folder), Fields (FieldListEditor with templates, up/down, no logic rules), Settings (spam, notifications, retention), Embed (HTML/fetch/SDK snippets)
-- [ ] P2.9 – Minimal `@backbricks/sdk` with `forms.submit` + PoW solving; `examples/html` (plain HTML form without JS **and** fetch variant)
-- [ ] P2.10 – Release `v0.1.0` developer preview: changelog, Docker image tag, README quickstart for the dev setup
+**Release gate from Q7 / ADR-0030:** P2.7c implements personal-data hard erasure separately from configuration archive (DB records, objects, queued jobs and retained audit lifecycle). `v0.1.0` is not tagged without it.
+
+**Already done:** review finding H1 (narrowest-first bucket order, origin before body) was fixed on the P1 branch before merge; P2 relies on it and adds no second guard.
+
+### [ ] P2.0a – Write and approve the forms module plan (est. 3 h)
+- **Description:** `docs/MODULES.md` rule 4 requires an approved module plan before code. Write `docs/modules/forms.md`: config schema, field types and rules, table, public/admin routes with policies, events, metrics, jobs, retention/privacy handlers, dashboard pages, SDK method, tests. It is the durable spec; the tasks below implement it, and its sections are replaced by code links as they land (ARCHITECTURE "once built, code wins").
+- **Files/packages:** `docs/modules/forms.md`; link from `docs/MODULES.md` and ARCHITECTURE §B.3.
+- **Depends on:** –
+- **Reuses:** the §C.5 waitlist shape; ADR-0037/0040/0046/0047 contracts.
+- **Acceptance criteria:**
+  - [ ] Every route has its access policy, scope/role, body limit and response allowlist; every personal field has its lifecycle (ADR-0022 categories).
+  - [ ] The Q12–Q15 answers are reflected; maintainer approval of the doc is recorded in its header.
+- **Tests:** – (docs only; `bun run format:check`).
+- **Risks/notes:** No code before approval. Keep it short and link ADRs instead of restating them.
+
+### [ ] P2.0b – Close the P1 review test gaps for new routes (est. 4 h)
+- **Description:** P2 adds the first production public and data routes, so the P1 review's coverage gaps must be closed first: **M3** run every management isolation case whose route accepts secret keys with a project-A key too (404 on project-B and sibling resources); **M4** a manifest-driven I5 gate: every `kind: 'public'` operation needs a field-allowlist or snapshot case, or the test fails; **M5** add `invitation.cancel` to the rollback loop and force audit failure for config apply and `instance.migrated`. Also **L4**: header comments plus a schema-integrity assertion for the hand-written SQL objects, so `db:generate` can't drop them.
+- **Files/packages:** `apps/server/test/isolation/*`, `apps/server/src/tenant-isolation.test.ts`, a new public-response coverage test next to it, `organizations.transactions.test.ts`, `configuration.apply.test.ts`, `instance-versions.test.ts`, `packages/db/src/schema-integrity.test.ts`.
+- **Depends on:** –
+- **Reuses:** `assertIsolationCoverage`, the existing case registry and snapshot fixtures.
+- **Acceptance criteria:**
+  - [ ] A synthetic public route without an I5 case and a secret-key route without key probes each fail the suite (negative fixtures).
+  - [ ] The three rollback gaps fail when audit insertion fails and roll back data and outbox together.
+- **Tests:** the suites above, real Postgres, `CI=true`.
+- **Risks/notes:** Test-only change; no production behavior changes.
+
+### [ ] P2.1a – Define the forms configuration schema (est. 5 h)
+- **Description:** Zod config in `packages/modules/forms`: ordered `fields` with the 13 MVP types (§D.8), per-type rules (`required`, `minLength`/`maxLength`, `min`/`max`, `options`; no regex, I10), stable field keys, labels (en/de optional), `identifiesSubject` on at most one `email` field, `consent` text version, honeypot field name, `proofOfWork` (explicit opt-out marks the form less protected and lowers the per-IP default to 5/min, Q13), `redirects.success`/`redirects.error` (allowed only with a non-empty project origin list, Q13), `retentionDays` (default 180; 7–3650 or `null` = unlimited), rate limits. `file` fields declare the optional `files` capability and are rejected with `capability_unavailable` while it is absent (§C.7). Map config to `publicWritePolicy` (ADR-0046). Hard upper bounds: fields per form, options per select, label/text lengths, total schema size.
+- **Files/packages:** `packages/modules/forms/src/config.ts`, `constants.ts`; new error codes in `packages/core/src/errors/codes.ts` if needed.
+- **Depends on:** P2.0a.
+- **Reuses:** `publicWritePolicySchema`, `moduleNameSchema`, `jsonValueSchema`, the core field-name pattern.
+- **Acceptance criteria:**
+  - [ ] Config JSON Schema is representable (`schemaDocument`) and strict; defaults are sensible (§E.5: PoW on, 6 months, honeypot set).
+  - [ ] Invalid combinations (duplicate keys, options on a text field, two subject fields, `min > max`) fail with field paths.
+- **Tests:** unit + fast-check (generated configs round-trip, bounds hold).
+- **Risks/notes:** Field keys are API surface for websites and CSV columns; keep them `[a-z][a-z0-9_]*`, max 64.
+
+### [ ] P2.1b – Add templates, change classification, migrations and codegen (est. 4 h)
+- **Description:** Four templates (contact, quote request, job application with a `file` field only when uploads exists, event sign-up). `validateConfigChange`: removing a field or changing its type is destructive; renaming labels, adding optional fields, reordering and limit changes are not; tightening a rule is a warning. `migrateConfig` for module version 1 (identity). `codegen` emits a `BackbricksSchema` augmentation for the submit payload (§D.7).
+- **Files/packages:** `packages/modules/forms/src/{templates,changes,codegen}.ts`.
+- **Depends on:** P2.1a.
+- **Reuses:** `configuration()` normalization, `configChangeReportSchema`.
+- **Acceptance criteria:**
+  - [ ] Every template validates and is offered in en/de; the job-application template degrades without `files`.
+  - [ ] Classifier table tests cover every field-level change kind; unclassified changes stay destructive.
+  - [ ] Codegen output typechecks in a fixture compiled with TS 7.
+- **Tests:** unit; codegen fixture typecheck.
+- **Risks/notes:** The classifier decides when `config:destructive` is needed (D30); err on destructive.
+
+### [ ] P2.2 – Build the runtime submission validator (est. 5 h)
+- **Description:** Config → strict Zod schema per `config_version`: type coercion for urlencoded strings (number, checkbox, multiselect arrays), normalization (trim, lowercase email, collapse empty to absent), unknown fields rejected, `consent` stores text version and accepted timestamp from the clock, `hidden` bounded, `file` delegates to the capability. Errors become RFC 9457 `validation_failed` with `errors[]` (`path`, `code`, `message`, `meta`) and a hint to the public schema (§D.3).
+- **Files/packages:** `packages/modules/forms/src/validator.ts`; codes in `packages/core/src/errors/codes.ts`.
+- **Depends on:** P2.1a.
+- **Reuses:** `AppError` field errors, core email schema, `spamVerdict`.
+- **Acceptance criteria:**
+  - [ ] Every field type has accept/reject cases; error codes are from the catalog, stable and documented.
+  - [ ] Both transports (JSON values and urlencoded strings) produce the same normalized data.
+- **Tests:** unit + fast-check (no input crashes the validator; normalized output re-validates).
+- **Risks/notes:** No user-provided regex; email/URL/phone checks use fixed core validators.
+
+### [ ] P2.3a – Establish the module table and repository seam (est. 5 h)
+- **Description:** First production module table; the seam follows the accepted DEV-12 (**Q12**) and gets its ADR here: the module declares its repository contract (augmenting `ModuleRepositories`); `packages/db` owns the Drizzle table, migration and repository implementation using the existing tenant columns, composite FKs and `scope` helper; the server composes selected modules' repository factories into `createWithTenant`, and the typecheck at that composition point proves db's implementation matches the module contract. Repositories exist for every module table whether or not the module is enabled (one migration history, §C.7). Update ARCHITECTURE §B.5/§C.3 wording with the ADR.
+- **Files/packages:** ADR-0055; `apps/server/src/services.ts`; `packages/db/src/repositories/index.ts`; `.dependency-cruiser.json`: drop the allowance for `packages/modules/*/src/schema` files, with a negative fixture.
+- **Depends on:** P2.0a.
+- **Reuses:** `createWithTenant`'s `createModuleRepositories`, `repositories/scope.ts`, `schema/columns.ts`, the ledger fixture pattern.
+- **Acceptance criteria:**
+  - [ ] A module callback reaches only its own repository; disabled modules get none; foreign/escaped handles fail as before (ADR-0024).
+  - [ ] Architecture rules still pass; no module imports db or drizzle.
+- **Tests:** real-DB capability-boundary and module-registry tests extended to a production repository factory.
+- **Risks/notes:** Changes no invariant. Keep repositories thin: they store and query already-validated values; forms logic (validation, normalization, search text) stays in the module.
+
+### [ ] P2.3b – Add the `form_submissions` table and repository (est. 5 h)
+- **Description:** Table per §B.3 with ADR-0023 integrity: composite live-parent FKs, `config_version`, normalized `data`, status/read/spam columns using the core verdict enum (`clean|suspect|spam`), `spam_reasons`, `is_test`, `subject_email`, minimized `source` (origin, path, UA family, rotating IP hash; no raw IP or UA), `search_vector` computed on insert from text-like values (`simple` config), clock-supplied timestamps, required `expires_at` unless retention is unlimited. Repository: insert, keyset list with filters and search, get, patch, delete, bulk ops (bounded), purge-expired batch, subject lookup/delete. Replace the forms SQL in §B.3 with a link.
+- **Files/packages:** `packages/db/src/schema/forms.ts`, `packages/db/src/repositories/forms.ts`, migration via `bun run db:generate`.
+- **Depends on:** P2.3a, P2.2.
+- **Reuses:** `pagination.ts` keyset helper, `MAX_PAGE_SIZE`, maintenance-delete batch pattern (ADR-0050), IP identity (ADR-0025).
+- **Acceptance criteria:**
+  - [ ] Constraints reject cross-tenant parents, invalid enums and expiry before creation; indexes match the list/search/subject/expiry queries (checked with `EXPLAIN` in a test).
+  - [ ] Every query is scoped; a project-A handle never reads project-B rows.
+- **Tests:** real-Postgres repository and schema-integrity tests.
+- **Risks/notes:** `search_vector` covers only text field values, never `source`/consent metadata. Migration SQL reviewed by hand (§B.5).
+
+### [ ] P2.3c – Make forms an operational module (est. 4 h)
+- **Description:** Replace the descriptor with the full `defineModule` definition: config/templates/classifier/codegen, scopes (`forms:submit` already in the catalog), event `forms.submission.created`, usage metric `forms.submissions`, optional `files` capability, `retention` (`purgeExpired`, `recomputeExpiry`) and `privacy` (`exportSubject`, `deleteSubject`) on the repository. Generic instance CRUD, revisions, config-as-code and JSON Schema export then work for `forms` without new code.
+- **Files/packages:** `packages/modules/forms/src/{index,module,retention,privacy}.ts`; `apps/server/src/modules.ts` catalog entry.
+- **Depends on:** P2.1b, P2.3b.
+- **Reuses:** generic instance service, planner, scheduled fan-out (ADR-0050), platform subject-erasure job.
+- **Acceptance criteria:**
+  - [ ] `/v1/meta` reports forms as operational; `BACKBRICKS_MODULES=forms` boots app + Postgres only; with forms disabled, its routes return `module_not_enabled`.
+  - [ ] Create/patch/archive/rollback/plan/apply a form through the generic API with audit and revisions; `file` fields rejected without uploads.
+- **Tests:** server integration (instances, configuration), registry subset matrix with the real module, OpenAPI regenerated (`api:generate`, additive only).
+- **Risks/notes:** DEV-9's synthetic fixtures stay for the framework; this adds the first real-module subset proof.
+
+### [ ] P2.4a – Serve the public form schema and JSON submissions (est. 6 h)
+- **Description:** `GET /v1/public/forms/{key}` returns only the public schema (fields, labels, required, limits, PoW needed, honeypot name), with a light per-IP read limit (review L2 is now real for forms) and `Cache-Control`. `POST …/submissions` through the shared guard: idempotency (ADR-0047), honeypot → fake `200`, PoW, validation, spam verdict, entitlement check, then submission + event + usage in one transaction; response `{ id }` only. Secret-key variant with `forms:submit` skips PoW (§A.4); a secret key with a foreign `Origin` still gets `403 secret_key_exposed`.
+- **Files/packages:** `packages/modules/forms/src/public.ts`; I5 cases from P2.0b.
+- **Depends on:** P2.3c, P2.0b.
+- **Reuses:** `publicWriteEnvelopeSchema`, guard, CORS, idempotency, ALTCHA provider, usage/entitlements.
+- **Acceptance criteria:**
+  - [ ] Snapshot tests prove both responses contain no private fields (I5); archived/disabled forms return 404.
+  - [ ] Replay of the same `Idempotency-Key` returns the same id without a second row; changed body → 409.
+  - [ ] Concurrent submissions are atomic: forced event/usage failure leaves no row.
+- **Tests:** real HTTP/Postgres; PoW solve fixture; rate-limit identities per test.
+- **Risks/notes:** The response body never echoes submitted data.
+
+### [ ] P2.4b – Accept plain HTML form posts (est. 5 h)
+- **Description:** `application/x-www-form-urlencoded` transport for the submissions route: the server executor accepts it for routes that opt in, maps flat fields to the module payload, takes honeypot and PoW from reserved field names, and answers `303` to the configured success redirect. Errors follow **Q13**: `303` to `redirects.error` with `?error=<code>&fields=<paths>` (never values), otherwise a minimal escaped HTML page listing the problems with a back link. Redirect targets must match the project's allowed origins. ADR-0046 gains the transport rule; the core route contract gets an explicit opt-in so no other public route accepts forms by accident.
+- **Files/packages:** `apps/server/src/public-executor.ts`, `packages/core/src/abuse/policy.ts`, `packages/core/src/modules/routes.ts`, forms public route; ADR-0046 update.
+- **Depends on:** P2.4a.
+- **Reuses:** P2.2 coercion, `safeRedirect`-style validation, redirect response kind.
+- **Acceptance criteria:**
+  - [ ] A real `<form method="post">` without JavaScript creates an entry and lands on the success page (Playwright, P2.9b).
+  - [ ] Open redirects are impossible (foreign host, `javascript:`, credentials in URL, protocol-relative) — property tests.
+  - [ ] Error pages/redirects never contain submitted values; HTML is escaped with `default-src 'none'` CSP.
+- **Tests:** server integration for both transports; fast-check for redirect validation.
+- **Risks/notes:** Browsers send no `Idempotency-Key` from plain forms; double submits are handled by PoW single-use and rate limits, documented.
+
+### [ ] P2.5a – List and read submissions (est. 6 h)
+- **Description:** `GET …/forms/{key}/submissions` with cursor pagination and filters (status, read, spam folder, test, date range) plus full-text search (`websearch_to_tsquery`); `GET …/submissions/{id}` renders with the field definitions of the stored `config_version` (revision read) and lists removed/unknown keys as "additional data" (§B.5). Session members may read (§E.4); keys need `data:read`. List items carry only configurable key fields; details carry all.
+- **Files/packages:** `packages/modules/forms/src/admin.ts`, response schemas; isolation cases.
+- **Depends on:** P2.3c.
+- **Reuses:** pagination helper, revision reads, management route registrar, isolation registry.
+- **Acceptance criteria:**
+  - [ ] Isolation suite covers both routes with cookies and keys (P2.0b); foreign IDs → 404.
+  - [ ] A submission validated against v1 renders correctly after the form moves to v3.
+  - [ ] Search and filters combine; page size ≤ 100.
+- **Tests:** real HTTP/Postgres incl. pagination traversal and search ranking basics.
+- **Risks/notes:** Reading does not mark as read; the dashboard does that explicitly.
+
+### [ ] P2.5b – Update, delete and bulk-edit submissions (est. 5 h)
+- **Description:** `PATCH …/submissions/{id}` (JSON Merge Patch on status, read, spam verdict only), `DELETE …/submissions/{id}`, `POST …/submissions/bulk` (mark read/unread/done/open/spam/not spam, delete; ≤ 100 IDs, all-or-nothing). Plus a delete-all action for one form (owner/admin session only, bounded batches, one summarized audit entry) so owners can clear entries before archiving it (Q15). Single delete: members; bulk delete: owner/admin session or `data:delete` key (§E.4). Each mutation audits structural metadata only (IDs, counts, never content, I12); deletes call `files.deleteByOwner` when the capability is present.
+- **Files/packages:** `packages/modules/forms/src/admin.ts`.
+- **Depends on:** P2.5a.
+- **Reuses:** merge-patch helper, audit service, capability view.
+- **Acceptance criteria:**
+  - [ ] Forced audit failure rolls back every mutation; bulk with one foreign ID changes nothing and returns 404.
+  - [ ] Members can't bulk delete; keys without `data:delete` can't delete.
+- **Tests:** real HTTP/Postgres, rollback loop, role/scope matrix.
+- **Risks/notes:** Hard delete only (I11); no trash.
+
+### [ ] P2.5c – Export submissions as CSV (est. 5 h)
+- **Description:** Core pure CSV encoder (RFC 4180 quoting, CSV-injection defusing per §F.1: prefix `'` before `= + - @ \t \r`) and a streamed `GET …/forms/{key}/export.csv` over keyset batches with the union of fields across all config versions, same filters as the list. Owner/admin session only in M2 (no key scope; exfiltration rule §F.1), rate limited, audited with row count.
+- **Files/packages:** `packages/core/src/export/csv.ts` (+ index export), `packages/modules/forms/src/export.ts`.
+- **Depends on:** P2.5a.
+- **Reuses:** csv response kind in the registrar, rate limiter, audit.
+- **Acceptance criteria:**
+  - [ ] A field `=SUM(1)` exports defused; quotes/newlines/Unicode round-trip through a CSV parser.
+  - [ ] Memory stays bounded for 50k rows (streamed, no full buffering).
+- **Tests:** fast-check on the encoder; integration export with mixed versions.
+- **Risks/notes:** The encoder is generic (uploads/reviews reuse it); module-specific column logic stays in forms.
+
+### [ ] P2.6a – Manage notification rules (est. 6 h)
+- **Description:** Generic platform feature (§C.2): core service and routes `GET/POST /v1/projects/{id}/notification-rules`, `PATCH/DELETE …/{ruleId}` on the existing table, bound to a module event type and optional instance. Owner/admin session only; recipients are verified organization members picked from a list and are removed with the member (**Q14**); enabling `include_content` is owner/admin only, audited and warned about. An outbox consumer resolves enabled rules for each event and enqueues one delivery job per rule.
+- **Files/packages:** `packages/core/src/notifications/*`, `apps/server/src/routes/notification-rules.ts`, `packages/db/src/repositories/notification-rules.ts`; isolation cases.
+- **Depends on:** P2.3c.
+- **Reuses:** outbox dispatcher and consumers (ADR-0049), event catalog from the registry, audit.
+- **Acceptance criteria:**
+  - [ ] Unknown/disabled event types are rejected; rules for archived instances stop firing.
+  - [ ] Recipient addresses never appear in audit, events or logs (I4/I11 lifecycle per ADR-0022).
+- **Tests:** real HTTP/Postgres, isolation, outbox consumer test.
+- **Risks/notes:** Recipients are configuration, not personal records: hard-deleted with the rule or on member removal (Q8 lifecycle).
+
+### [ ] P2.6b – Send submission notifications (est. 5 h)
+- **Description:** Delivery job: content-free email by default (form name, time, link to the entry), `include_content` opt-in renders field values HTML-escaped (I8) with a size cap. Throttle: at most N mails per rule per hour, then one hourly content-free digest with the count. Templates en/de via the existing template module; SMTP absent → no-op with a dashboard hint.
+- **Files/packages:** `packages/core/src/mail/templates.ts`, `packages/core/src/notifications/delivery.ts`, job registration.
+- **Depends on:** P2.6a.
+- **Reuses:** mailer, rate limiter for throttling, restricted delivery lifecycle (ADR-0049/0050).
+- **Acceptance criteria:**
+  - [ ] Mailpit receives a mail without submission content by default; with opt-in, `<script>` arrives escaped.
+  - [ ] The 11th mail in an hour becomes part of a digest, not a mail; retries never duplicate.
+- **Tests:** real Postgres + Mailpit.
+- **Risks/notes:** Job payloads carry IDs only; content is read at send time and never stored in the queue.
+
+### [ ] P2.7a – Purge expired and spam entries (est. 4 h)
+- **Description:** Wire forms retention into the existing daily fan-out: bounded `purgeExpired` batches, spam auto-expiry after 30 days (§F.4), `recomputeExpiry` when `retentionDays` changes (inside the config transaction, D30), a summarized audit entry per run (counts only). Archived instances keep purging.
+- **Files/packages:** `packages/modules/forms/src/retention.ts`; job tests.
+- **Depends on:** P2.3c.
+- **Reuses:** ADR-0050 scheduled fan-out and batch pattern, injected clock.
+- **Acceptance criteria:**
+  - [ ] Clock-driven test: an entry past expiry is gone after one run; a spam entry after 30 days; nothing else is touched.
+  - [ ] Shortening retention immediately recomputes `expires_at`; unlimited retention shows a warning in the plan.
+- **Tests:** real Postgres with injected clock, concurrency (two workers).
+- **Risks/notes:** Exit criterion "expired entries are purged" is proven here and in P2.10b.
+
+### [ ] P2.7b – Add subject export and erasure routes (est. 5 h)
+- **Description:** Generic `POST /v1/projects/{id}/privacy/subject-export` (returns JSON from every enabled module's `exportSubject`) and `POST …/privacy/subject-delete` (enqueues the existing platform erasure job, returns 202). Owner/admin session only; audited without the email (hash or count only); rate limited.
+- **Files/packages:** `apps/server/src/routes/privacy.ts`, `packages/core/src/privacy/*`; isolation cases.
+- **Depends on:** P2.3c.
+- **Reuses:** platform `subjectErasure` job, module privacy hooks.
+- **Acceptance criteria:**
+  - [ ] Export finds entries by normalized subject email only within the project; erasure removes them and leaves no email in audit/events.
+  - [ ] Isolation and rollback cases pass.
+- **Tests:** real HTTP/Postgres + worker job.
+- **Risks/notes:** Job payload contains the email; its job retention stays bounded (ADR-0048/0050).
+
+### [ ] P2.7c – Implement project hard erasure (release gate) (est. 6 h)
+- **Description:** The Q7/ADR-0030 gate, scoped by **Q15**: owner-only, type-to-confirm erasure of an archived project; a worker job erases every module's records via a new `privacy.eraseScope` hook (bounded batches, objects through storage when present), then project-scoped transient rows (idempotency, outbox, usage, keys, rules, instances, revisions); audit entries keep only structural IDs and expire on their one-year schedule; the archived project row stays as a tombstone without personal data so audit references remain valid. ADR plus ARCHITECTURE §F.4 update.
+- **Files/packages:** `packages/core/src/modules/contract.ts` (hook, ADR required: changes `ModuleDefinition`), `packages/core/src/projects/erasure.ts`, route + job, forms hook.
+- **Depends on:** P2.3c.
+- **Reuses:** ADR-0050 batch deletion, scheduled jobs, `projects` service lock.
+- **Acceptance criteria:**
+  - [ ] After the job, no personal record, job payload or object for that project remains (queries across all tables in the test); audit rows contain no personal labels.
+  - [ ] Interrupted erasure resumes idempotently; an active (not archived) project can't be erased.
+- **Tests:** real Postgres + worker; synthetic module with objects proves the storage path for M3.
+- **Risks/notes:** Organization deletion stays disabled until P6 (Q15). The dashboard offers "delete all entries" before archiving a form (P2.8a).
+
+### [ ] P2.8a – Add the Inbox shell and form settings (est. 6 h)
+- **Description:** Dashboard module registry (`apps/web/src/modules/registry.ts`, §C.2) and the Inbox: form list with entry/unread counts and empty state, create from template, tabs, Settings (spam/PoW, honeypot, retention picker, redirects, notification rules picking verified members as recipients, Q14; "delete all entries" before archiving a form, Q15). All copy en/de, owner/admin gating (§E.4).
+- **Files/packages:** `apps/web/src/modules/{registry,forms/*}`, `packages/ui` components added via the shadcn CLI (`RetentionPicker`, `EmptyState`, `StatusBadge`).
+- **Depends on:** P2.3c, P2.6a.
+- **Reuses:** generated admin client, project shell, `SnippetTabs`, `ConfirmDialog`.
+- **Acceptance criteria:**
+  - [ ] Forms disabled → no Inbox nav; member sees read-only settings.
+  - [ ] Config writes send the current config version and show stale/destructive conflicts in plain language.
+- **Tests:** component tests (happy-dom), i18n key parity test.
+- **Risks/notes:** Counts come from an aggregate route or list metadata; add it to P2.5a if missing rather than counting in the browser.
+
+### [ ] P2.8b – Build the entries view (est. 6 h)
+- **Description:** Entries tab: `DataTable` (server pagination, filter bar, search, multi-select, bulk actions with type-to-confirm delete), `RecordDrawer` with `FieldValue` rendering every field type as plain text (I8), "Additional data", mark read on open, spam folder tab, test badge, CSV download for owner/admin; mobile layout (§E.5).
+- **Files/packages:** `packages/ui/src/components/{data-table,record-drawer,field-value}.tsx`, `apps/web/src/modules/forms/entries.tsx`.
+- **Depends on:** P2.5b, P2.5c, P2.8a.
+- **Reuses:** `@tanstack/react-table` (new dependency, verify v9 API), `ConfirmDialog`, query keys per org/project.
+- **Acceptance criteria:**
+  - [ ] No `dangerouslySetInnerHTML`; a `<img onerror>` value renders as text.
+  - [ ] Organization switch cancels entry queries (existing shell rule).
+- **Tests:** component tests; Playwright in P2.9b.
+- **Risks/notes:** `DataTable`/`RecordDrawer`/`FieldValue` go to `packages/ui` because uploads and reviews reuse them.
+
+### [ ] P2.8c – Build the fields editor and embed tab (est. 6 h)
+- **Description:** Fields tab with `FieldListEditor` (field-type picker, rules per type, up/down, templates, no logic rules, no drag-and-drop), preview of destructive changes before saving. Embed tab with HTML (no-JS), fetch and SDK snippets filled with the project's publishable key and form key, plus the PoW/allowed-origins hints.
+- **Files/packages:** `packages/ui/src/components/field-list-editor.tsx`, `apps/web/src/modules/forms/{fields,embed}.tsx`.
+- **Depends on:** P2.8a.
+- **Reuses:** config schema JSON export for client-side hints, `SnippetTabs`, integration metadata.
+- **Acceptance criteria:**
+  - [ ] Removing a field warns that existing entries keep it under "Additional data"; the save requires destructive confirmation.
+  - [ ] Snippets match the examples in P2.9b exactly (one source).
+- **Tests:** component tests.
+- **Risks/notes:** Keep the snippet text in one shared module used by the dashboard and the examples test.
+
+### [ ] P2.9a – Ship a minimal SDK with `forms.submit` (est. 5 h)
+- **Description:** `createClient({ publishableKey | secretKey, baseUrl })`, `forms.submit(key, data, { idempotencyKey? })` with automatic challenge fetch and PoW solving (WebCrypto SHA-256, compatible with the server's ALTCHA v2 format), minimal `BackbricksError` (`code`, `fieldErrors`, `requestId`). Dependency-free root entry, ESM, works on browsers, Node ≥ 20 and Bun. Full SDK, web-worker solver and size budget stay in P5.1.
+- **Files/packages:** `packages/sdk/src/{client,forms,pow,errors}.ts`.
+- **Depends on:** P2.4a.
+- **Reuses:** `api-contract` types only (I18).
+- **Acceptance criteria:**
+  - [ ] A real server accepts SDK-solved proofs on Bun and Node 20/24; validation errors surface as `fieldErrors`.
+  - [ ] Architecture rules prove no AGPL import; the root entry adds no runtime dependency.
+- **Tests:** SDK tests against a real server; Node 20 probe as in P1.
+- **Risks/notes:** Not published to npm before M5 (Q2).
+
+### [ ] P2.9b – Add the HTML example and the M2 browser journeys (est. 5 h)
+- **Description:** `examples/html` (MIT): a plain HTML form without JavaScript and a fetch variant using the SDK. Playwright: both create entries visible in the dashboard Inbox; honeypot drop; notification in Mailpit without content; CSV download defused; validation error rendering; en/de.
+- **Files/packages:** `examples/html/*`, `e2e/forms*.spec.ts` or `apps/web/e2e/`.
+- **Depends on:** P2.4b, P2.6b, P2.8b, P2.9a.
+- **Reuses:** P1 E2E server/Mailpit helpers.
+- **Acceptance criteria:**
+  - [ ] All M2 exit criteria that involve a browser pass in one Playwright run with no retries.
+- **Tests:** Playwright (Node via mise).
+- **Risks/notes:** The no-JS variant sets `proofOfWork: false` explicitly (Q13); the fetch variant keeps PoW.
+
+### [ ] P2.10a – Prepare the `v0.1.0` release (est. 4 h)
+- **Description:** Changesets for the changelog, a tag-triggered GitHub workflow that builds and pushes the image to `ghcr.io/nolliebigspin/backbricks` (Q3), README quickstart for the dev setup and the HTML example, migration notes. The maintainer pushes the signed tag; the agent never does.
+- **Files/packages:** `.changeset/`, `.github/workflows/release.yml`, `README.md`, root `package.json`.
+- **Depends on:** P2.9b.
+- **Reuses:** CI image job and smoke script.
+- **Acceptance criteria:**
+  - [ ] A manual `workflow_dispatch` run with pushing disabled builds the same image as CI; no credentials in the repo.
+  - [ ] README quickstart works from a fresh clone (`mise run setup && mise run dev`, create form, submit).
+- **Tests:** CI workflow lint; image smoke.
+- **Risks/notes:** `@changesets/cli` 3.0.3 needs Node ≥ 22.11 (mise Node 24); it's a dev dependency only.
+
+### [ ] P2.10b – Demonstrate M2 and record the handoff (est. 4 h)
+- **Description:** Run the phase acceptance below with fresh real services, write `docs/progress/phase-2.md` (done, deviations, known gaps, new risks, evidence), update ARCHITECTURE links where code now wins, tick the plan.
+- **Files/packages:** `docs/progress/phase-2.md`, `PLAN.md`, `docs/MILESTONES.md`.
+- **Depends on:** all P2 tasks.
+- **Reuses:** P1 report format.
+- **Acceptance criteria:**
+  - [ ] Every phase-acceptance item has a command and a recorded result; no skipped integration result counts as proof.
+- **Tests:** full acceptance below.
+- **Risks/notes:** A fresh session reviews M2 (AGENTS §9). The maintainer opens the PR and tags.
+
+### Phase acceptance
+
+Run after `mise install && mise run infra` with isolated test tenants and Mailpit.
+
+- [ ] **HTML and fetch examples create visible entries:** `bun run build && CI=true bun run test:e2e` (P2.9b journeys).
+- [ ] **Structured validation errors:** server tests and E2E assert `validation_failed` problem details with `errors[]` for both transports.
+- [ ] **Spam/honeypot; content-free notification:** E2E and server tests show honeypot drop, spam folder, and a Mailpit message without submission content.
+- [ ] **CSV injection-safe; expired entries purged:** encoder property tests, export integration (`=SUM(1)` defused) and clock-driven purge test, all in `CI=true bunx turbo run test --force`.
+- [ ] **Isolation covers new routes:** the automatic suite (cookies and keys) and the I5 public gate fail for any uncovered route; `bun run test:scripts` architecture fixtures pass.
+- [ ] **Release gate:** P2.7c erasure test proves no personal data remains for an erased project.
+- [ ] **Contract and quality:** `bun run api:generate && bun run api:check && bun run api:breaking` (additive only vs. the M1 base), `bun run check && bun run build`, image smoke with `BACKBRICKS_MODULES=forms` (app + Postgres only).
+- [ ] **Release:** `v0.1.0` changelog, tag-built GHCR image, README quickstart verified; `docs/progress/phase-2.md` written; green CI on the maintainer's PR.
+
+### Planning risks and sources
+
+- **Estimate:** 124 h vs. a 72–88 h allowance, accepted as the envelope (Q16). Largest drivers: erasure gate (P2.7c), generic notifications/privacy (P2.6a/b, P2.7b), dashboard (18 h). If the reserve runs out, trim in this order: digest throttling (fixed cap only), the Fields editor's destructive preview, dashboard editing of notification rules.
+- **Critical path:** P2.3a → P2.3b → P2.3c; nearly everything waits on the operational module.
+- **No-JS forms vs. PoW (Q13):** forms that opt out of PoW rely on honeypot and lower per-IP limits only; P2.4b tests that posture, and the dashboard marks them less protected.
+- **Notification relay abuse (Q14):** prevented in M2 by member-only recipients; external addresses need double opt-in when added later.
+- **TanStack Table 9:** a recent major; verify the API against the installed types before building `DataTable`.
+- **P1 review M2 (per-account auth limits)** is not forms work; it stays a P6 hardening item but should not slip past it.
+- Primary references to check at implementation time: [ALTCHA docs](https://altcha.org/docs/), [TanStack Table v9](https://tanstack.com/table/latest), [Changesets](https://github.com/changesets/changesets), [Postgres text search](https://www.postgresql.org/docs/18/textsearch.html).
+
+### Execution notes
+
+_None yet._
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · stub
 
@@ -687,6 +988,9 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 | R7 | ClamAV: arm64 only in `-debian` images; 1.5–2 GB RAM | P0.3a, P3 | `-debian` tag, profile `scan` | open |
 | R8 | File watching across the macOS bind mount | P0.3b | Polling options, documented | open |
 | R9 | Garage may not enforce signed `Content-Length` on presigned PUTs | P0.9b, P3 | Enforced (403 on mismatch); needs the checksum setting (ADR-0020); P3.10 keeps it under test | resolved |
+| R10 | P2 estimate ~1.5× the milestone allowance | P2 | Accepted envelope (Q16) with reserve; trim list in the P2 risks | open |
+| R11 | No-JS HTML forms can't solve PoW; disabling PoW per form weakens abuse protection | P2.1a, P2.4b | Q13 (accepted): explicit per-form opt-out with honeypot and lower limits, dashboard warning | open |
+| R12 | Notification rules could relay mail to arbitrary third parties | P2.6a | Q14 (accepted): recipients limited to verified members in M2 | resolved by design |
 
 P1.9b implements the shared guard and public CORS (ADR-0046), verified through real HTTP/PG fixtures including quota/provider failure and atomic rollback. The former Q11/P1.9a gate was resolved with explicit approval and the narrow lookup in ADR-0054. JSON transport is in M1; HTML form adaptation stays M2.
 

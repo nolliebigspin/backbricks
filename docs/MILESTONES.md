@@ -47,7 +47,7 @@ flowchart LR
   - OpenAPI drift check enforced in CI
 
 ### M2 · Forms → `v0.1.0` (developer preview)
-- **Phase:** P2 · **Effort:** 9–11 PD
+- **Phase:** P2 · **Effort:** 9–11 PD original allowance; [detailed plan and accepted revised estimate](../PLAN.md#phase-p2--forms-m2--v010--planned-2026-11-09)
 - **Goal:** The first module, complete: a headless form backend plus a dashboard inbox.
 - **Scope:** form config + templates, runtime validation, public submit (JSON + plain HTML), idempotency, spam handling, admin API (list, search, status, bulk, CSV), notifications, retention + GDPR handlers, dashboard inbox, minimal SDK `forms.submit`, HTML example.
 - **Exit criteria:**

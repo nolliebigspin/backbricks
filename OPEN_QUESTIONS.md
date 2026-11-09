@@ -1,6 +1,6 @@
 # Open questions
 
-Decisions for the maintainer, started in P0 planning (2026-11-04), extended for P1 on 2026-11-06. Answer inline under each question. Each lists a recommendation and the latest task by which the answer is needed. Recommendations are not approvals. Execution runs add invariant-preserving implementation decisions under "Decided, please confirm".
+Decisions for the maintainer, started in P0 planning (2026-11-04), extended for P1 on 2026-11-06 and for P2 on 2026-11-09. Answer inline under each question. Each lists a recommendation and the latest task by which the answer is needed. Recommendations are not approvals. Execution runs add invariant-preserving implementation decisions under "Decided, please confirm".
 
 ## Open
 
@@ -71,6 +71,38 @@ Decisions for the maintainer, started in P0 planning (2026-11-04), extended for 
 - **Recommendation:** Extend the same exact SHA-256, active-key/active-project, IDs-only authentication projection to publishable keys. Keep kind selection trusted and separate from HTTP input; all metadata/origin/instance/scope/business access still goes through `withTenant`. No general query API or unscoped HTTP endpoint. Alternative: change the public protocol to require an explicit project-ID header on every request.
 - **Needed by:** Public-key challenge/auth composition in P1.9a/b. Provider/replay work does not depend on this answer.
 - **Answer (2026-11-06):** The maintainer explicitly approved: “Approve Q11 and finish it (recommended).” Extend the same exact-hash, active-key/project, IDs-only bootstrap to publishable credentials through a trusted kind-specific factory; all later access stays scoped. Implemented in ADR-0054.
+
+## P2 planning: open decisions
+
+### Q12 – Where do module tables and their repositories live?
+- **Context:** The first production module table arrives in P2.3. §B.5/§C.5 put Drizzle tables in module packages, but a module imports only core (I13). It then can't reference `module_instances` for the composite live-parent FKs (ADR-0023), nor reuse db's tenant columns and `scope` helper without copying them. DEV-12 in `PLAN.md`.
+- **Recommendation:** Accept DEV-12. The module declares its repository interface by augmenting `ModuleRepositories`; `packages/db` owns table, migration and implementation; server composition wires selected modules' factories into `createWithTenant`, and its typecheck proves the implementation matches the module contract. Alternative: module-owned tables, with the FK and scope pieces moved into a new shared package or hand-written SQL (more work, re-estimate P2.3a).
+- **Needed by:** P2.3a (critical path).
+- **Answer (2026-11-09):** The maintainer accepted the recommendation (“Do all the recommended ones”). DEV-12 is accepted: module tables, migrations and repository implementations live in `packages/db`; the module owns the repository interface. P2.3a writes the ADR and removes the architecture-rule allowance for module `schema` files.
+
+### Q13 – How do plain HTML forms without JavaScript handle proof-of-work and errors?
+- **Context:** The M2 exit criterion needs a plain HTML form; PoW is on by default (§E.5) and needs JavaScript. A urlencoded post also needs a success target and some response for validation errors, where a JSON problem document is useless to a visitor.
+- **Recommendation:** Keep PoW on by default. A form may set `proofOfWork: false` explicitly; the plan shows a warning, the dashboard marks the form "less protected", and honeypot plus the per-IP limits stay on (default lowered to 5/min for such forms). The no-JS example uses that setting; the fetch/SDK variant keeps PoW. Redirects: `redirects.success` (required for urlencoded posts) and optional `redirects.error`, both checked against the project's allowed origins (a non-empty origin list is required to set them). On error: `303` to the error URL with `?error=<code>&fields=<paths>` (never values); without an error URL, a minimal escaped HTML page (no scripts, `default-src 'none'`) listing the problems with a back link. Alternative: no-JS posts always require PoW via the optional ALTCHA widget script (then the example isn't JavaScript-free).
+- **Needed by:** P2.1a (config shape), P2.4b.
+- **Answer (2026-11-09):** The maintainer accepted the recommendation (“Do all the recommended ones”). PoW stays on by default with an explicit, warned per-form opt-out (5/min default for such forms); success/error redirects are checked against non-empty allowed origins; errors without an error URL get the minimal escaped HTML page.
+
+### Q14 – Who can receive notification emails?
+- **Context:** Notification rules store recipient addresses (table exists since P1). Free-form addresses let any account send mail to third parties through the instance, which matters for open sign-up and the later cloud. `include_content` sends personal data by email.
+- **Recommendation:** In M2, recipients are members of the organization with a verified email, picked from a list; removing a member removes them from rules (Q8 lifecycle). External addresses with double opt-in come later on demand. Only owner/admin may create rules or enable `include_content`; enabling it is audited and the dashboard warns about personal data in email.
+- **Needed by:** P2.6a.
+- **Answer (2026-11-09):** The maintainer accepted the recommendation (“Do all the recommended ones”). Recipients are verified organization members in M2; only owner/admin create rules or enable `include_content`, which is audited.
+
+### Q15 – What exactly must the M2 hard-erasure gate cover?
+- **Context:** Q7/ADR-0030 require a personal-data hard-erasure workflow, separate from configuration archive, before the M2 release: DB records, objects, queued jobs and the retained audit lifecycle. Organization deletion is disabled (§F.4).
+- **Recommendation:** Project erasure only: owner-only, type-to-confirm, allowed only for an archived project. A worker job calls a new `privacy.eraseScope` module hook (ModuleDefinition change, ADR), deletes in bounded batches including storage objects when present, then removes project-scoped transient rows, keys, rules, instances and revisions. Audit rows keep only structural IDs and expire on their one-year schedule; the project's archived row is kept as a tombstone without personal data so audit references stay valid. Form archive keeps its entries under their retention; the dashboard offers "delete all entries" before archiving. Organization deletion stays disabled until P6.
+- **Needed by:** P2.7c (before tagging `v0.1.0`).
+- **Answer (2026-11-09):** The maintainer accepted the recommendation (“Do all the recommended ones”). The gate covers archived-project erasure through a new `privacy.eraseScope` hook (ADR); organization deletion stays disabled until P6.
+
+### Q16 – Accept the revised P2 estimate?
+- **Context:** The detailed plan is 124 h (≈ 15.5 PD) plus a 25 h reserve, against a 9–11 PD allowance. The extra comes from the erasure gate, generic notification rules and privacy routes, the module table seam, urlencoded transport and the P1 review test gaps.
+- **Recommendation:** Accept the detailed estimate as the planning envelope. If the allowance must hold, trim in this order: notification digests (fixed hourly cap only), the destructive-change preview in the Fields editor, notification-rule editing in the dashboard (API only in M2).
+- **Needed by:** start of P2 execution.
+- **Answer (2026-11-09):** The maintainer accepted the recommendation (“Do all the recommended ones”). The detailed estimate (124 h + 25 h reserve, 149 h envelope) is the P2 planning envelope; no scope trims.
 
 ## Decided in planning, please confirm
 
@@ -151,3 +183,13 @@ Details: `docs/progress/phase-0.md` → "Deviations".
 - **D42 – Contract gates and method handling:** ADR-0052 runs `api:check` as a non-destructive byte comparison and `api:breaking` with oasdiff (pinned in `mise.toml`) against the resolved base commit; bootstrap is allowed only when that commit has no contract. Unknown methods on declared paths inherit the path's access policy before returning 405.
 
 - **D43 – Dashboard account boundary:** ADR-0053 uses the pinned Better Auth React/organization clients without importing the server auth instance, adds the CSRF header through a same-origin client and reads only signup policy, email availability and minimum password length from a public capability endpoint. Reset tokens stay in component memory and leave the address bar immediately; no form library, analytics or persistent token storage is added.
+
+### Decided in P2 planning, please confirm
+
+- **D44 – Spam verdict values:** use the implemented core verdict `clean|suspect|spam` (`packages/core/src/abuse/policy.ts`) instead of §B.3's `ok|suspect|spam`; one source of truth.
+- **D45 – Full-text search:** Postgres `simple` configuration (language-neutral, en/de content) over text-like field values only, computed on insert; queries via `websearch_to_tsquery`. No `source` or consent metadata in the index.
+- **D46 – Data access rights:** sessions follow §E.4. Secret keys: `data:read` lists/reads, `data:write` patches, `data:delete` deletes (single and bulk). CSV export is owner/admin session only in M2 (no key scope), audited and rate limited.
+- **D47 – Test entries:** `is_test` exists from P2.3b with a dashboard badge and filter; the creation path (`test:write`, `backbricks test submit`) arrives with the CLI in P5.4.
+- **D48 – Public schema reads are rate limited:** forms add the first production public read route, so the P1 review's L2 is decided now: a light per-IP limit and `Cache-Control` on `GET /v1/public/forms/{key}`.
+- **D49 – Notification throttling:** at most 10 mails per rule per hour, then one content-free hourly digest with the count; configurable per rule within a bounded range.
+- **D50 – Release mechanics:** Changesets for the changelog; a tag-triggered workflow pushes the image to `ghcr.io/nolliebigspin/backbricks` (Q3). The maintainer creates and pushes the signed tag.
