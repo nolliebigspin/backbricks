@@ -51,12 +51,27 @@ export const spamVerdictSchema = z
     reasons: z.array(z.enum(['links', 'repetition'])),
   })
   .strict();
-export const publicWriteContextSchema = z
+/** The active instance a public route runs against, with the config the guard already validated. */
+export const publicReadContextSchema = z
   .object({
     instanceId: moduleInstanceSchema.shape.id,
     configVersion: moduleInstanceSchema.shape.configVersion,
-    spam: spamVerdictSchema,
+    config: z.json(),
   })
+  .strict();
+export type PublicReadContext = z.infer<typeof publicReadContextSchema>;
+/** Minimized request metadata a module may store (I11): no raw IP or user agent, no query string. */
+export const publicRequestSourceSchema = z
+  .object({
+    origin: z.string().max(2048).nullable(),
+    path: z.string().max(2048).nullable(),
+    uaFamily: z.string().max(32),
+    ipHash: z.string().max(128).nullable(),
+  })
+  .strict();
+export type PublicRequestSource = z.infer<typeof publicRequestSourceSchema>;
+export const publicWriteContextSchema = publicReadContextSchema
+  .extend({ spam: spamVerdictSchema, source: publicRequestSourceSchema })
   .strict();
 export type PublicWriteContext = z.infer<typeof publicWriteContextSchema>;
 export const honeypotResponseSchema = z.object({ accepted: z.literal(true) }).strict();

@@ -1,6 +1,7 @@
 import { expect, test } from 'bun:test';
 
 import { available, scenario } from '../test/auth-fixture.ts';
+import { createFormFixture, validAnswers } from '../test/forms-fixture.ts';
 import { prepareIsolationFixture } from '../test/isolation/setup.ts';
 import { issueKey } from '../test/platform-read-fixture.ts';
 import {
@@ -27,6 +28,13 @@ test.skipIf(!available)(
   async () => {
     await scenario(async (base) => {
       const f = await prepareIsolationFixture(base);
+      const form = await createFormFixture(f);
+      const secret = await issueKey(f, f.a1.id, {
+        kind: 'secret',
+        name: 'Public response submitter',
+        scopes: ['forms:submit'],
+        expiresAt: null,
+      });
       const pk = await issueKey(f, f.a1.id, {
         kind: 'publishable',
         name: 'Public response fixture',
@@ -38,6 +46,60 @@ test.skipIf(!available)(
           row.policy.kind === 'public' ? [{ method: row.method, path: row.path }] : [],
         );
       const cases: PublicResponseCases = {
+        'GET /v1/public/forms/{key}': {
+          kind: 'fields',
+          request: {
+            path: `/v1/public/forms/${form.key}`,
+            headers: { authorization: `Bearer ${form.publishable}` },
+          },
+          fields: [
+            'key',
+            'proofOfWork',
+            'honeypotField',
+            'fields[].key',
+            'fields[].type',
+            'fields[].label',
+            'fields[].help',
+            'fields[].required',
+            'fields[].minLength',
+            'fields[].maxLength',
+            'fields[].min',
+            'fields[].max',
+            'fields[].options[].value',
+            'fields[].options[].label',
+            'fields[].maxFiles',
+            'fields[].consent.text',
+            'fields[].consent.version',
+          ],
+        },
+        'POST /v1/public/forms/{key}/submissions': {
+          kind: 'fields',
+          request: {
+            path: `/v1/public/forms/${form.key}/submissions`,
+            method: 'POST',
+            headers: { authorization: `Bearer ${secret.token}` },
+            body: { data: validAnswers },
+          },
+          fields: ['id'],
+        },
+        'OPTIONS /v1/public/forms/{key}': {
+          kind: 'empty',
+          status: 204,
+          request: {
+            path: `/v1/public/forms/${form.key}?key=${form.publishable}`,
+            method: 'OPTIONS',
+            headers: { origin: 'https://site.test', 'access-control-request-method': 'GET' },
+          },
+        },
+        'OPTIONS /v1/public/forms/{key}/submissions': {
+          kind: 'empty',
+          status: 204,
+          request: {
+            path: `/v1/public/forms/${form.key}/submissions?key=${form.publishable}`,
+            method: 'OPTIONS',
+            headers: { origin: 'https://site.test', 'access-control-request-method': 'POST' },
+          },
+        },
         'GET /v1/openapi.json': { kind: 'static', request: { path: '/v1/openapi.json' } },
         'GET /v1/schema/config': { kind: 'static', request: { path: '/v1/schema/config' } },
         'GET /v1/auth/capabilities': {

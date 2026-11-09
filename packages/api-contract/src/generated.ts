@@ -320,6 +320,38 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/public/forms/{key}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['forms.public.schema'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options: operations['forms.preflight.0'];
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/public/forms/{key}/submissions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['forms.public.submit'];
+    delete?: never;
+    options: operations['forms.preflight.1'];
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/schema/config': {
     parameters: {
       query?: never;
@@ -549,6 +581,8 @@ export interface operations {
                 /** @enum {string} */
                 role?: 'owner' | 'admin' | 'member';
                 scopes?: string[];
+                /** @enum {string} */
+                spam?: 'clean' | 'suspect' | 'spam';
                 status?: string;
               } | null;
               /** Format: date-time */
@@ -941,6 +975,8 @@ export interface operations {
                 /** @enum {string} */
                 role?: 'owner' | 'admin' | 'member';
                 scopes?: string[];
+                /** @enum {string} */
+                spam?: 'clean' | 'suspect' | 'spam';
                 status?: string;
               } | null;
               /** Format: date-time */
@@ -2226,6 +2262,237 @@ export interface operations {
     };
   };
   'public.challenge.preflight': {
+    parameters: {
+      query: {
+        key: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Permitted public request preflight. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.public.schema': {
+    parameters: {
+      query?: {
+        key?: string;
+      };
+      header?: never;
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The public form schema. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            fields: {
+              consent?: {
+                text: string;
+                version: string;
+              };
+              help?: string;
+              key: string;
+              label: string;
+              max?: number | string;
+              maxFiles?: number;
+              maxLength?: number;
+              min?: number | string;
+              minLength?: number;
+              options?: {
+                label: string;
+                value: string;
+              }[];
+              required: boolean;
+              type: string;
+            }[];
+            honeypotField: string;
+            key: string;
+            proofOfWork: boolean;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.preflight.0': {
+    parameters: {
+      query: {
+        key: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Permitted public request preflight. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.public.submit': {
+    parameters: {
+      query?: {
+        key?: string;
+      };
+      header?: {
+        'idempotency-key'?: string;
+      };
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          data: {
+            [key: string]: unknown;
+          };
+          honeypot?: string;
+          proof?: unknown;
+        };
+      };
+    };
+    responses: {
+      /** @description Accepted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json':
+            | {
+                id: string;
+              }
+            | {
+                /** @enum {boolean} */
+                accepted: true;
+              };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.preflight.1': {
     parameters: {
       query: {
         key: string;

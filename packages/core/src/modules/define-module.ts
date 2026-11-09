@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
-import { publicWriteContextSchema, publicWritePolicySchema } from '../abuse/policy.ts';
+import {
+  publicReadContextSchema,
+  publicWriteContextSchema,
+  publicWritePolicySchema,
+} from '../abuse/policy.ts';
 import { AppError } from '../errors/app-error.ts';
 import { emailAddressSchema } from '../platform/values.ts';
 import type { OptionalServiceName } from '../services/container.ts';
@@ -72,6 +76,9 @@ export function defineModule<
       config: (input: unknown) => configSchema.parse(input),
       capabilities: capabilityView(execution.handle, execution.capability, { required, optional }),
       services: moduleServices(execution, { ...metadata, jobs: jobs.jobs }),
+      publicRead: execution.publicRead
+        ? Object.freeze(publicReadContextSchema.parse(execution.publicRead))
+        : undefined,
       publicWrite: execution.publicWrite
         ? Object.freeze(publicWriteContextSchema.parse(execution.publicWrite))
         : undefined,

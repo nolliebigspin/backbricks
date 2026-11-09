@@ -16,12 +16,16 @@ import {
   honeypotResponseSchema,
   publicWriteEnvelopeSchema,
   spamVerdict,
+  type PublicReadContext,
+  type PublicRequestSource,
   type PublicWriteContext,
 } from './policy.ts';
 import { publicCredentialSchema } from './public-credentials.ts';
 import type { RateLimiter, RateLimitInput } from './rate-limiter.ts';
 
 const PROJECT_REQUESTS_PER_MINUTE = 600;
+/** Light per-client limit for public reads such as form schemas (D48). */
+const READS_PER_MINUTE = 60;
 const GLOBAL_REQUESTS_PER_MINUTE = 100_000;
 const digest = (value: string) => createHash('sha256').update(value).digest('hex');
 
@@ -56,8 +60,14 @@ export function createAbuseGuard(deps: {
     params: Record<string, string>;
     query: Record<string, unknown>;
     body: () => Promise<Uint8Array>;
+    /** Page path (no query/fragment) and browser family, derived by the host from request headers. */
+    source?: Pick<PublicRequestSource, 'path' | 'uaFamily'>;
     allowOrigin?: (origin: string) => void;
-    run: (tx: TenantTransaction, input: unknown, context?: PublicWriteContext) => Promise<Response>;
+    run: (
+      tx: TenantTransaction,
+      input: unknown,
+      context: PublicReadContext | PublicWriteContext,
+    ) => Promise<Response>;
   }) => {
     const identity = publicCredentialSchema.parse(input.identity);
     const { route, module, request } = input;
@@ -76,22 +86,35 @@ export function createAbuseGuard(deps: {
       const project = await tx.repositories.projects.get(identity.projectId);
       const instance = await tx.repositories.instances.getByKey(module.type, key);
       if (instance.status !== 'active') throw new AppError('not_found');
+      const config = validatedConfig(module, instance.config, instance.moduleVersion);
       return {
         allowedOrigins: project.allowedOrigins,
         instance,
-        policy: module.publicWritePolicy(
-          validatedConfig(module, instance.config, instance.moduleVersion),
-        ),
+        config,
+        policy: module.publicWritePolicy(config),
       };
     });
+    const instanceContext: PublicReadContext = {
+      instanceId: prepared.instance.id,
+      configVersion: prepared.instance.configVersion,
+      config: prepared.config,
+    };
     const origin = () => {
       assertPublicOrigin(identity.kind, prepared.allowedOrigins, request.origin);
       if (request.origin !== null) input.allowOrigin?.(request.origin);
     };
     if (access.kind === 'read') {
       origin();
+      if (!request.ipHash) throw new AppError('service_unavailable');
+      const reads = await deps.limiter.consume({
+        namespace: 'public.read_minute',
+        identity: digest(`${request.ipHash}:${prepared.instance.id}`),
+        limit: READS_PER_MINUTE,
+        windowMs: 60_000,
+      });
+      if (!reads.allowed) throw new AppError('rate_limited');
       return deps.withTenant(tenant, (tx) =>
-        input.run(tx, { params: input.params, query: input.query, body: null }),
+        input.run(tx, { params: input.params, query: input.query, body: null }, instanceContext),
       );
     }
     if (identity.kind === 'secret' && !identity.scopes.includes(access.secretScope))
@@ -223,9 +246,14 @@ export function createAbuseGuard(deps: {
         })),
       });
     const context: PublicWriteContext = {
-      instanceId: prepared.instance.id,
-      configVersion: prepared.instance.configVersion,
+      ...instanceContext,
       spam: spamVerdict(parsed.data.body),
+      source: {
+        origin: request.origin,
+        path: input.source?.path ?? null,
+        uaFamily: input.source?.uaFamily ?? 'other',
+        ipHash: request.ipHash,
+      },
     };
     return deps.withTenant(tenant, async (tx) => {
       await recheck(tx);

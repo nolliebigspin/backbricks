@@ -6,6 +6,7 @@ type PublicRequest = Readonly<{
   path: string;
   method?: string;
   headers?: NonNullable<RequestInit['headers']>;
+  body?: unknown;
 }>;
 
 /**
@@ -58,8 +59,8 @@ export async function exercisePublicResponse(
   testCase: PublicResponseCase,
   context: { cookie: string; tenantValues: readonly string[] },
 ): Promise<void> {
-  const { path, method, headers } = testCase.request;
-  const send = (cookie?: string) => fixture.request(path, undefined, cookie, headers, method);
+  const { path, method, headers, body: requestBody } = testCase.request;
+  const send = (cookie?: string) => fixture.request(path, requestBody, cookie, headers, method);
   const response = await send();
   if (testCase.kind === 'empty') {
     expect(response.status).toBe(testCase.status);

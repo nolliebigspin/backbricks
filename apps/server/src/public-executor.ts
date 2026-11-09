@@ -2,6 +2,8 @@ import {
   AppError,
   createAbuseGuard,
   publicRequestCredential,
+  refererPath,
+  userAgentFamily,
   type PublicCredentialResolver,
 } from '@backbricks/core';
 
@@ -46,6 +48,10 @@ export function createPublicExecutor(
       params: c.req.param(),
       query,
       run,
+      source: {
+        path: refererPath(c.req.header('referer')),
+        uaFamily: userAgentFamily(c.req.header('user-agent')),
+      },
       allowOrigin(origin) {
         c.header('Access-Control-Allow-Origin', origin);
         c.header('Vary', 'Origin');
@@ -63,6 +69,8 @@ export function createPublicExecutor(
         return new Uint8Array(await c.req.arrayBuffer());
       },
     });
+    // A route may allow caching (e.g. a public form schema); everything else stays uncached.
+    c.header('Cache-Control', response.headers.get('cache-control') ?? 'no-store');
     return c.newResponse(response.body, response);
   };
 }

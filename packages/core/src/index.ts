@@ -75,6 +75,8 @@ export {
   publicAccessSchema,
   publicWritePolicySchema,
   publicWriteEnvelopeSchema,
+  publicReadContextSchema,
+  publicRequestSourceSchema,
   publicWriteContextSchema,
   honeypotResponseSchema,
   spamVerdict,
@@ -83,6 +85,8 @@ export {
   type PublicAccessInput,
   type PublicWritePolicy,
   type PublicWritePolicyInput,
+  type PublicReadContext,
+  type PublicRequestSource,
   type PublicWriteContext,
 } from './abuse/policy.ts';
 export {
@@ -154,6 +158,12 @@ export {
   redactSecretText,
 } from './logging/redact.ts';
 export { fieldErrorSchema, problemDetailsSchema } from './errors/schema.ts';
+export {
+  refererPath,
+  USER_AGENT_FAMILIES,
+  userAgentFamily,
+  type UserAgentFamily,
+} from './http/user-agent.ts';
 export {
   actorTypeSchema,
   apiKeyKindSchema,

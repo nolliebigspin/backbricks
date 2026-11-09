@@ -1,6 +1,7 @@
 import {
   AppError,
   type RegisteredRoute,
+  type PublicReadContext,
   type PublicWriteContext,
   type TenantTransaction,
   publicWriteEnvelopeSchema,
@@ -24,7 +25,11 @@ export type ModulePublicExecutor = (
   context: Context<AppEnv>,
   moduleType: string,
   route: RegisteredRoute,
-  run: (tx: TenantTransaction, input: unknown, context?: PublicWriteContext) => Promise<Response>,
+  run: (
+    tx: TenantTransaction,
+    input: unknown,
+    context?: PublicReadContext | PublicWriteContext,
+  ) => Promise<Response>,
 ) => Promise<Response>;
 
 function responses(route: RegisteredRoute): RouteConfig['responses'] {
@@ -126,11 +131,19 @@ export function moduleRoutes(
         definition,
         route.policy,
         async (c) => {
-          const run = (tx: TenantTransaction, input: unknown, context?: PublicWriteContext) =>
+          const run = (
+            tx: TenantTransaction,
+            input: unknown,
+            context?: PublicReadContext | PublicWriteContext,
+          ) =>
             route.run(
               {
                 ...services.moduleRuntime.forTenant(tx).execution(module.type),
-                ...(context ? { publicWrite: context } : {}),
+                ...(context
+                  ? 'spam' in context
+                    ? { publicWrite: context }
+                    : { publicRead: context }
+                  : {}),
               },
               input,
             );

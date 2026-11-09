@@ -689,15 +689,15 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 - **Tests:** server integration (instances, configuration), registry subset matrix with the real module, OpenAPI regenerated (`api:generate`, additive only).
 - **Risks/notes:** DEV-9's synthetic fixtures stay for the framework; this adds the first real-module subset proof.
 
-### [ ] P2.4a – Serve the public form schema and JSON submissions (est. 6 h)
+### [x] P2.4a – Serve the public form schema and JSON submissions (est. 6 h)
 - **Description:** `GET /v1/public/forms/{key}` returns only the public schema (fields, labels, required, limits, PoW needed, honeypot name), with a light per-IP read limit (review L2 is now real for forms) and `Cache-Control`. `POST …/submissions` through the shared guard: idempotency (ADR-0047), honeypot → fake `200`, PoW, validation, spam verdict, entitlement check, then submission + event + usage in one transaction; response `{ id }` only. Secret-key variant with `forms:submit` skips PoW (§A.4); a secret key with a foreign `Origin` still gets `403 secret_key_exposed`.
 - **Files/packages:** `packages/modules/forms/src/public.ts`; I5 cases from P2.0b.
 - **Depends on:** P2.3c, P2.0b.
 - **Reuses:** `publicWriteEnvelopeSchema`, guard, CORS, idempotency, ALTCHA provider, usage/entitlements.
 - **Acceptance criteria:**
-  - [ ] Snapshot tests prove both responses contain no private fields (I5); archived/disabled forms return 404.
-  - [ ] Replay of the same `Idempotency-Key` returns the same id without a second row; changed body → 409.
-  - [ ] Concurrent submissions are atomic: forced event/usage failure leaves no row.
+  - [x] Snapshot tests prove both responses contain no private fields (I5); archived/disabled forms return 404.
+  - [x] Replay of the same `Idempotency-Key` returns the same id without a second row; changed body → 409.
+  - [x] Concurrent submissions are atomic: forced event/usage failure leaves no row.
 - **Tests:** real HTTP/Postgres; PoW solve fixture; rate-limit identities per test.
 - **Risks/notes:** The response body never echoes submitted data.
 
@@ -917,6 +917,8 @@ P2.3a: [ADR-0055](docs/adr/0055-module-tables-in-db.md). `moduleRepositoryFactor
 P2.3b: [`schema/forms.ts`](packages/db/src/schema/forms.ts), [`repositories/forms.ts`](packages/db/src/repositories/forms.ts), migration `20261109045220_form_submissions` (generated, reviewed). Spam always has an expiry (CHECK), subject emails must be lowercase (CHECK), and `recomputeExpiry` keeps spam's earlier cap. The module computes `expiresAt` itself when it marks or unmarks spam (`least(current, now + 30 days)` / retention expiry), and passes `searchText` to insert. The composition typecheck caught a real mismatch on its first run (spam verdict typed as `string`). The spam verdict enum is an explicit tuple tied to core by a `satisfies` and a runtime equality test.
 
 P2.3c: [`module.ts`](packages/modules/forms/src/module.ts) replaces the descriptor in the catalog. `createFormsModule({ files })` builds the capability-aware config schema and templates; the catalog uses `files: false` because uploads has no `files` provider before M3, which must then pass the real availability (and declare the `FilesCapability` contract, after which forms calls `files.deleteByOwner` on deletes). Core `validatedConfig` now forwards config issue paths (custom messages only) and maps an issue tagged `{ code: 'capability_unavailable' }` to that problem (D51). The instance isolation cases are parameterized by module, so forms' nine generic routes join the suite with cookie and key probes.
+
+P2.4a implementation and verification are complete: both forms routes and both preflights have manifest-driven I5 cases; the generated API contract is additive. Real HTTP/Postgres tests cover public projection, PoW, honeypot, validation, idempotent and concurrent retries, secret-key exposure, source minimization, read limiting and forced event/usage rollback. ADR-0046's addendum and D52 document the shared context/read-policy changes. `CI=true bun run check` passed, with no skips; the final source-minimization/read-limit cases also passed directly, and formatting/lint/typecheck were rerun after adding them. Maintainer reviewed the staged diff and explicitly approved the DCO sign-off on 2026-11-09 (AGENTS §8 / CONTRIBUTING). Next: P2.4b, plain HTML transport.
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · stub
 

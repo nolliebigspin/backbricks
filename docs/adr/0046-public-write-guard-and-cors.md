@@ -25,3 +25,13 @@ The [central registrar](../../apps/server/src/http/api-routes.ts) can defer only
 The [test-only module](../../apps/server/test/public-module-fixture.ts) proves real HTTP/PG proof, replay, scope, size, chunking, honeypot, schema, verdict, quota, provider failure, CORS and usage/outbox rollback behavior. It is absent from the production catalog. Forms/HTML adapters remain M2; M1 supplies JSON transport only.
 
 Q11 remains pending: this ADR does not widen I1. Production publishable authentication continues to fail closed until the exact-hash bootstrap decision is approved; tests inject an already-authorized ID directory followed by real scoped database checks.
+
+## P2.4a addendum (2026-11-09, D52)
+
+Q11 is now resolved by [ADR-0054](0054-publishable-key-authentication-bootstrap.md). The first production module uses the same guard and scoped rechecks.
+
+Public handlers receive the active instance ID, config version and validated config through the [public context schemas](../../packages/core/src/abuse/policy.ts). Writes additionally receive the spam verdict and minimized source: origin, Referer pathname without query/fragment, coarse browser family and rotating IP hash. The [host](../../apps/server/src/public-executor.ts) reduces headers before invoking the guard; raw IPs and User-Agent headers never enter the module context. These are internal execution contracts, never public response fields.
+
+Public reads consume a separate 60-per-minute IP/instance bucket (D48), outside tenant transactions. The executor defaults to `no-store` and preserves an explicit handler cache policy; forms schema reads use `public, max-age=60` with `Vary: Origin`. Writes still recheck configuration versions under the project lock and commit the submission, event and usage together.
+
+The [forms HTTP tests](../../apps/server/src/forms.public.test.ts) prove projection, real proof verification, honeypot handling, idempotent/concurrent retries, secret scope/exposure, minimized stored source and event/usage rollback. The [manifest-driven I5 gate](../../apps/server/src/public-responses.test.ts) covers both JSON responses and both preflights. No invariant or authentication bootstrap exception changes.
