@@ -713,15 +713,15 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 - **Tests:** server integration for both transports; fast-check for redirect validation.
 - **Risks/notes:** Browsers send no `Idempotency-Key` from plain forms; double submits are handled by PoW single-use and rate limits, documented.
 
-### [ ] P2.5a – List and read submissions (est. 6 h)
+### [x] P2.5a – List and read submissions (est. 6 h)
 - **Description:** `GET …/forms/{key}/submissions` with cursor pagination and filters (status, read, spam folder, test, date range) plus full-text search (`websearch_to_tsquery`); `GET …/submissions/{id}` renders with the field definitions of the stored `config_version` (revision read) and lists removed/unknown keys as "additional data" (§B.5). Session members may read (§E.4); keys need `data:read`. List items carry only configurable key fields; details carry all.
 - **Files/packages:** `packages/modules/forms/src/admin.ts`, response schemas; isolation cases.
 - **Depends on:** P2.3c.
 - **Reuses:** pagination helper, revision reads, management route registrar, isolation registry.
 - **Acceptance criteria:**
-  - [ ] Isolation suite covers both routes with cookies and keys (P2.0b); foreign IDs → 404.
-  - [ ] A submission validated against v1 renders correctly after the form moves to v3.
-  - [ ] Search and filters combine; page size ≤ 100.
+  - [x] Isolation suite covers both routes with cookies and keys (P2.0b); foreign IDs → 404.
+  - [x] A submission validated against v1 renders correctly after the form moves to v3.
+  - [x] Search and filters combine; page size ≤ 100.
 - **Tests:** real HTTP/Postgres incl. pagination traversal and search ranking basics.
 - **Risks/notes:** Reading does not mark as read; the dashboard does that explicitly.
 
@@ -923,6 +923,9 @@ P2.4a implementation and verification are complete: both forms routes and both p
 P2.4a cache follow-up: a new regression failed because cached schema responses varied only by Origin despite depending on bearer credentials. The executor now varies by both Origin and Authorization; query credentials already distinguish URLs. ADR-0046 records the reason. Committed separately as `0a23c6c` after maintainer review and explicit approval of DCO sign-off.
 
 P2.4b implementation and verification are complete: `access.form` explicitly opts a route into urlencoded fields, the shared guard extracts base64 ALTCHA proof and repeated names, and the trusted transport context selects the existing validator's coercion. Success/error redirects use the shared URL schema and current nonempty project origins, rechecked under the project lock. Missing/disallowed success redirects prevent storage; errors use an authorized error redirect or escaped HTML/CSP with codes/paths only. Early size/auth failures also use safe HTML. ADR-0046/D53 document the contract; API contract regenerated additively. `CI=true bun run check` passed (393 package + 93 script tests, no skips), and `CI=true bun run test:e2e e2e/forms-html.spec.ts` passed (one real native form journey with JavaScript disabled). Maintainer reviewed the staged changes and explicitly approved both signed-off commits on 2026-11-09. No push. Next task after that checkpoint: P2.5a.
+
+
+P2.5a implementation: list/read/summary routes in `forms/src/admin.ts` use the existing pagination and scoped forms repository, with strict response projections. List values follow `listFields` (fallback: first two visible fields); details use the stored config revision and separate removed/unknown data. ADR-0056/D54 add a read-only module-owned instance/revision seam and remove the host-only project selector before strict module input validation. The HTTP JSON wrapper reuses the same JSON validator without recursive OpenAPI generation. HTTP tests first failed on 404, then found the host-selector 500; historical labels, paging, combined filters, size/date bounds and unread behavior now pass. The three new operations join the automatic cookie/key isolation suite (foreign org, sibling project, nested ID), which passes. `CI=true bun run check` passed; the maintainer reviewed the staged diff and explicitly approved DCO sign-off on 2026-11-09. Continue with P2.5b after that checkpoint.
 
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · stub

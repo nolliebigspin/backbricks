@@ -351,6 +351,7 @@ export {
 } from './modules/capabilities.ts';
 export {
   jsonValueSchema,
+  jsonValueWireSchema,
   canonicalJson,
   moduleNameSchema,
   localizedNameSchema,

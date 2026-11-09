@@ -18,6 +18,7 @@ import type {
   OptionalInfrastructure,
 } from './contract.ts';
 import { infraRequirementSchema, type InfraRequirement } from './infrastructure.ts';
+import { moduleInstanceReads } from './instances.ts';
 import type { RegisteredModule } from './registered.ts';
 import { jobRegistrar, routeRegistrar } from './registrars.ts';
 import { moduleServices } from './services.ts';
@@ -74,6 +75,13 @@ export function defineModule<
       tx: execution.handle,
       repository: execution.tx.modules[type],
       config: (input: unknown) => configSchema.parse(input),
+      instances: moduleInstanceReads(execution, (row) =>
+        config.instance({
+          ...row,
+          config: config.migrateConfig(row.moduleVersion, row.config),
+          moduleVersion: definition.moduleVersion,
+        }),
+      ),
       capabilities: capabilityView(execution.handle, execution.capability, { required, optional }),
       services: moduleServices(execution, { ...metadata, jobs: jobs.jobs }),
       publicRead: execution.publicRead

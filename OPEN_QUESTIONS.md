@@ -196,6 +196,8 @@ Details: `docs/progress/phase-0.md` → "Deviations".
 
 ### Decided during P2 execution, please confirm
 
+- **D54 – Module-owned configuration reads:** [ADR-0056](docs/adr/0056-module-owned-instance-reads.md) adds read-only current/historical config access fixed to the module and caller transaction. Modules never receive platform repositories or tenant selectors. The bridge strips its host-only project selector before strict module validation. Opaque HTTP JSON schemas reuse the existing JSON validator and enforce JSON-safe responses centrally to avoid recursive OpenAPI generation failure. No invariant changes.
+
 - **D51 – Config validation errors keep their paths:** `validatedConfig` (core) returns `validation_failed` with `errors[]` (paths relative to the module config; module refinement messages only, built-in Zod messages replaced so no input is echoed) instead of a path-less problem. A module refinement tagged `{ code: 'capability_unavailable' }` becomes that problem, which is how forms rejects `file` fields without uploads (§C.7) without a `ModuleDefinition` change.
 
 - **D52 – Public handler context and read limits:** [ADR-0046's P2.4a addendum](docs/adr/0046-public-write-guard-and-cors.md#p24a-addendum-2026-11-09-d52) passes the guard's validated instance config to public handlers and gives writes only minimized source metadata (origin, Referer pathname, browser family, rotating IP hash). Reads use a separate 60/min IP/instance bucket; the executor preserves an explicit route cache policy and otherwise uses `no-store`. No public response fields, invariant or bootstrap exception are added.

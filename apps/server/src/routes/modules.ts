@@ -163,7 +163,9 @@ export function moduleRoutes(
             return executePublic(c, module.type, route, run);
           }
           const input = {
-            params: c.req.param(),
+            params: Object.fromEntries(
+              Object.entries(c.req.param()).filter(([name]) => name !== 'projectId'),
+            ),
             query: Object.fromEntries(
               Object.entries(c.req.queries()).map(([name, values]) => [
                 name,

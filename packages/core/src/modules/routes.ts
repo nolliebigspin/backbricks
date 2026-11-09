@@ -2,7 +2,6 @@ import type { z } from 'zod';
 
 import type { PublicAccessInput } from '../abuse/policy.ts';
 import type { ManagementRoutePolicy, RoutePolicy } from '../http/route-policy.ts';
-import type { JsonValue } from './values.ts';
 
 export type ModuleInputSchema = z.ZodObject<{
   params: z.ZodObject;
@@ -10,7 +9,7 @@ export type ModuleInputSchema = z.ZodObject<{
   body: z.ZodType;
 }>;
 export type ModuleResponseDefinition =
-  | { kind: 'json'; description: string; schema: z.ZodType<JsonValue> }
+  | { kind: 'json'; description: string; schema: z.ZodType }
   | { kind: 'empty' | 'redirect'; description: string }
   | { kind: 'csv'; description: string };
 export type ModuleRouteSpec<I extends ModuleInputSchema, P extends RoutePolicy> = {

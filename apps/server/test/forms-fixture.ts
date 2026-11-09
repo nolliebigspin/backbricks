@@ -1,4 +1,5 @@
 import { altchaChallengeSchema } from '@backbricks/adapters';
+import { submissionAcceptedSchema } from '@backbricks/module-forms';
 import { solveChallenge } from 'altcha-lib';
 import { deriveKey } from 'altcha-lib/algorithms/sha';
 
@@ -63,3 +64,22 @@ export const validAnswers = {
   message: 'Hello there',
   privacy: true,
 };
+
+/** Receive a real entry through the scoped server-to-server public API. */
+export async function createSubmissionFixture(
+  f: IsolationFixture,
+  key: string,
+  data: Record<string, unknown> = validAnswers,
+) {
+  const secret = await issueKey(f, f.a1.id, {
+    kind: 'secret',
+    name: 'Submission fixture',
+    scopes: ['forms:submit'],
+    expiresAt: null,
+  });
+  const response = await f.request(`/v1/public/forms/${key}/submissions`, { data }, undefined, {
+    authorization: `Bearer ${secret.token}`,
+  });
+  if (response.status !== 200) throw new Error(`Submission setup failed: ${response.status}`);
+  return submissionAcceptedSchema.parse(await response.json()).id;
+}

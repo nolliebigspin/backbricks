@@ -23,6 +23,11 @@ import type {
 } from './values.ts';
 
 export type ConfiguredInstance<T> = Omit<ModuleInstance, 'config'> & { config: T };
+/** Read-only configuration access fixed to the module and caller transaction. */
+export type ModuleInstanceReads<T> = Readonly<{
+  get(key: string): Promise<ConfiguredInstance<T>>;
+  revision(key: string, version: number): Promise<ConfiguredInstance<T>>;
+}>;
 export type RequiredInfrastructure<I extends readonly InfraRequirement[]> =
   I[number] extends infer D
     ? D extends { optional: true }
@@ -55,6 +60,7 @@ export type ModuleRuntime<
   tx: TenantHandle;
   repository: Partial<ModuleRepositories>[MT];
   config(input: unknown): T;
+  instances: ModuleInstanceReads<T>;
   capabilities: ReturnType<typeof capabilityView<R, O>>;
   services: ModuleServices<SR, SO>;
   /** Public read routes: the active instance and its validated config. */

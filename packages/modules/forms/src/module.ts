@@ -1,6 +1,7 @@
 import { AppError, defineModule, type InfraRequirement, type JsonValue } from '@backbricks/core';
 import { z } from 'zod';
 
+import { formsAdminRoutes } from './admin.ts';
 import { classifyFormsChange } from './changes.ts';
 import { formsCodegen } from './codegen.ts';
 import { formsModuleConfigSchema, formsPublicWritePolicy } from './config.ts';
@@ -13,7 +14,7 @@ import {
   submissionAcceptedSchema,
   submissionBodySchema,
 } from './public.ts';
-import type { FormsRepository } from './repository.ts';
+import { formsRepository as repositoryOf } from './runtime.ts';
 import { defaultFormsConfig, formsTemplates } from './templates.ts';
 import { validateSubmission } from './validator.ts';
 
@@ -27,12 +28,6 @@ const SUBJECT_EXPORT_PAGE = 100;
 const SUBJECT_EXPORT_MAX = 10_000;
 /** Browsers and CDNs may cache a form's public schema briefly (D48). */
 const PUBLIC_SCHEMA_MAX_AGE_SECONDS = 60;
-
-function repositoryOf(runtime: { repository: FormsRepository | undefined }): FormsRepository {
-  if (!runtime.repository)
-    throw new AppError('internal_error', { detail: 'The forms repository is not bound.' });
-  return runtime.repository;
-}
 
 /**
  * The operational forms module (docs/modules/forms.md). `files` tells whether the optional
@@ -75,6 +70,7 @@ export function createFormsModule(options: { files: boolean } = { files: false }
       },
     ],
     optional: ['files'],
+    adminRoutes: formsAdminRoutes,
     publicRoutes(router) {
       router.register(
         {

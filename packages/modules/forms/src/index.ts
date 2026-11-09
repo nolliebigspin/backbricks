@@ -18,6 +18,12 @@ export {
   FORMS_RETENTION_DAYS,
 } from './constants.ts';
 export { classifyFormsChange } from './changes.ts';
+export {
+  submissionDetailSchema,
+  submissionItemSchema,
+  submissionListSchema,
+  submissionSummarySchema,
+} from './admin-schemas.ts';
 export { entryExpiry, markedSpamExpiry, searchText, SPAM_RETENTION_DAYS } from './entries.ts';
 export {
   publicForm,

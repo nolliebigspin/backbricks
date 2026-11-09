@@ -115,6 +115,8 @@ Paths are under `/v1/public/forms`. The publishable key comes as `Authorization:
 
 ## 5. Management API (P2.5a–c)
 
+The [data read routes](../../packages/modules/forms/src/admin.ts) and [response schemas](../../packages/modules/forms/src/admin-schemas.ts) implement P2.5a. Historical configuration access is constrained by [ADR-0056](../adr/0056-module-owned-instance-reads.md).
+
 Paths are under `/v1/projects/{projectId}/forms`. Every route declares session role and/or key scope, body limit and an isolation case (I3); the isolation suite probes each with cookies and, where a key scope exists, with a project-A key (P2.0b). Responses are `no-store`. Foreign IDs → `404`.
 
 | Route | Session | Secret key | Body | Response |

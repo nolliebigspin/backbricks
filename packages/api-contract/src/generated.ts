@@ -224,6 +224,54 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/projects/{projectId}/forms/{key}/submissions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['forms.submissions.list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/forms/{key}/submissions/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['forms.submissions.read'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/forms/{key}/summary': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['forms.summary'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/projects/{projectId}/integration': {
     parameters: {
       query?: never;
@@ -1770,6 +1818,232 @@ export interface operations {
             storedModuleVersion?: number;
             /** Format: date-time */
             updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.submissions.list': {
+    parameters: {
+      query?: {
+        limit?: number;
+        cursor?: string;
+        status?: 'open' | 'done';
+        read?: 'true' | 'false';
+        folder?: 'inbox' | 'spam';
+        test?: 'true' | 'false';
+        from?: string;
+        to?: string;
+        q?: string;
+      };
+      header?: never;
+      path: {
+        key: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A bounded page with selected key fields only. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data: {
+              configVersion: number;
+              /** Format: date-time */
+              createdAt: string;
+              data: {
+                [key: string]: unknown;
+              };
+              id: string;
+              isTest: boolean;
+              read: boolean;
+              /** @enum {string} */
+              spamVerdict: 'clean' | 'suspect' | 'spam';
+              /** @enum {string} */
+              status: 'open' | 'done';
+              /** Format: date-time */
+              updatedAt: string;
+            }[];
+            nextCursor: string | null;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.submissions.read': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+        id: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description An entry with its historical field definitions. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            additionalData: {
+              [key: string]: unknown;
+            };
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            data: {
+              [key: string]: unknown;
+            };
+            /** Format: date-time */
+            expiresAt: string | null;
+            fields: {
+              consent?: {
+                text: string;
+                version: string;
+              };
+              help?: string;
+              key: string;
+              label: string;
+              max?: number | string;
+              maxFiles?: number;
+              maxLength?: number;
+              min?: number | string;
+              minLength?: number;
+              options?: {
+                label: string;
+                value: string;
+              }[];
+              required: boolean;
+              type: string;
+            }[];
+            id: string;
+            isTest: boolean;
+            read: boolean;
+            source: {
+              ipHash?: string;
+              origin?: string;
+              path?: string;
+              uaFamily: string;
+            };
+            spamReasons: string[];
+            /** @enum {string} */
+            spamVerdict: 'clean' | 'suspect' | 'spam';
+            /** @enum {string} */
+            status: 'open' | 'done';
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.summary': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Counts only, without personal data. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            spam: number;
+            total: number;
+            unread: number;
           };
         };
       };

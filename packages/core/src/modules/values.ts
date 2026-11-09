@@ -34,6 +34,12 @@ export const configChangeReportSchema = z
   })
   .strict();
 export const jsonValueSchema = z.json();
+/** HTTP JSON is validated without exposing recursive Zod types to the OpenAPI adapter. */
+export const jsonValueWireSchema = z
+  .unknown()
+  .refine((value) => jsonValueSchema.safeParse(value).success, {
+    message: 'Expected a JSON value.',
+  });
 export type JsonValue = z.infer<typeof jsonValueSchema>;
 export type ScopeDefinition = z.infer<typeof scopeDefinitionSchema>;
 export type EventDefinition = z.infer<typeof eventDefinitionSchema>;
