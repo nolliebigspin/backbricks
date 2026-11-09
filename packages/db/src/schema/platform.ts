@@ -46,6 +46,8 @@ export const events = pgTable(
   ],
 );
 
+// The append-only trigger is hand-written SQL (migration 20261106024528_audit_immutability);
+// schema-integrity.test.ts asserts it still exists.
 export const auditLogs = pgTable(
   'audit_logs',
   {

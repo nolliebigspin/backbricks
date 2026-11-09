@@ -611,14 +611,14 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 - **Tests:** – (docs only; `bun run format:check`).
 - **Risks/notes:** No code before approval. Keep it short and link ADRs instead of restating them.
 
-### [ ] P2.0b – Close the P1 review test gaps for new routes (est. 4 h)
+### [x] P2.0b – Close the P1 review test gaps for new routes (est. 4 h)
 - **Description:** P2 adds the first production public and data routes, so the P1 review's coverage gaps must be closed first: **M3** run every management isolation case whose route accepts secret keys with a project-A key too (404 on project-B and sibling resources); **M4** a manifest-driven I5 gate: every `kind: 'public'` operation needs a field-allowlist or snapshot case, or the test fails; **M5** add `invitation.cancel` to the rollback loop and force audit failure for config apply and `instance.migrated`. Also **L4**: header comments plus a schema-integrity assertion for the hand-written SQL objects, so `db:generate` can't drop them.
 - **Files/packages:** `apps/server/test/isolation/*`, `apps/server/src/tenant-isolation.test.ts`, a new public-response coverage test next to it, `organizations.transactions.test.ts`, `configuration.apply.test.ts`, `instance-versions.test.ts`, `packages/db/src/schema-integrity.test.ts`.
 - **Depends on:** –
 - **Reuses:** `assertIsolationCoverage`, the existing case registry and snapshot fixtures.
 - **Acceptance criteria:**
-  - [ ] A synthetic public route without an I5 case and a secret-key route without key probes each fail the suite (negative fixtures).
-  - [ ] The three rollback gaps fail when audit insertion fails and roll back data and outbox together.
+  - [x] A synthetic public route without an I5 case and a secret-key route without key probes each fail the suite (negative fixtures).
+  - [x] The three rollback gaps fail when audit insertion fails and roll back data and outbox together.
 - **Tests:** the suites above, real Postgres, `CI=true`.
 - **Risks/notes:** Test-only change; no production behavior changes.
 
@@ -903,6 +903,8 @@ Run after `mise install && mise run infra` with isolated test tenants and Mailpi
 ### Execution notes
 
 P2.0a: [`docs/modules/forms.md`](docs/modules/forms.md) approved by the maintainer on 2026-11-09 with open points A–F (§12) as recommended.
+
+P2.0b: key probes are derived from the existing cookie cases (`exerciseKeyIsolation`): each project-scoped key route is probed with a session-issued key for its own project (reads must succeed) and the same request moved to the sibling and foreign projects (404, no writes); mutations get denial probes only, so stateful allowed steps still run once. The I5 gate (`public-responses.test.ts`) found the challenge preflight uncovered on its first run; every current public operation now has a field-allowlist, static-document or empty-body case. L4: the two applied migrations already start with explanatory comments and AGENTS §10 forbids editing applied migrations, so the guard is a schema-integrity assertion plus pointer comments next to the Drizzle tables. `CI=true bun run check`: 265 package + 92 script tests, no skips.
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · stub
 

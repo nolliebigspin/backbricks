@@ -64,14 +64,24 @@ test.skipIf(!available)(
           (await f.request(path.replace('/old', '/broken'), undefined, f.owner.cookie)).status,
         ).toBe(422);
         expect(await f.snapshot()).toEqual(before);
-        await f.db.execute(
-          "alter table events add constraint fixture_migration_failure check (type <> 'instance.migrated') not valid",
-        );
-        expect(
-          (await f.request(`${path}/migrate`, { configVersion: 1 }, f.owner.cookie)).status,
-        ).toBe(500);
-        expect(await f.snapshot()).toEqual(before);
-        await f.db.execute('alter table events drop constraint fixture_migration_failure');
+        // Audit and outbox each fail on their own; either failure rolls back the migration and both tables.
+        for (const [table, column] of [
+          ['events', 'type'],
+          ['audit_logs', 'action'],
+        ] as const) {
+          // oxlint-disable-next-line no-await-in-loop -- One disposable constraint at a time.
+          await f.db.execute(
+            `alter table ${table} add constraint fixture_migration_failure check (${column} <> 'instance.migrated') not valid`,
+          );
+          expect(
+            // oxlint-disable-next-line no-await-in-loop -- See above.
+            (await f.request(`${path}/migrate`, { configVersion: 1 }, f.owner.cookie)).status,
+          ).toBe(500);
+          // oxlint-disable-next-line no-await-in-loop -- See above.
+          expect(await f.snapshot()).toEqual(before);
+          // oxlint-disable-next-line no-await-in-loop -- See above.
+          await f.db.execute(`alter table ${table} drop constraint fixture_migration_failure`);
+        }
         expect(
           (await f.request(`${path}/migrate`, { configVersion: 1 }, f.owner.cookie)).status,
         ).toBe(200);

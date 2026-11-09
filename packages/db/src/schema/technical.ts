@@ -35,6 +35,7 @@ export const idempotencyKeys = pgTable(
 );
 
 // Global technical tables contain no tenant records. Bucket identifiers contain hashed identities.
+// UNLOGGED storage is hand-written SQL (migration 20261106024528_audit_immutability), asserted in schema-integrity.test.ts.
 export const rateLimitBuckets = pgTable(
   'rate_limit_buckets',
   {
