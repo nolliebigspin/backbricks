@@ -118,6 +118,8 @@ test.skipIf(!available)(
             'modules[].resourceName.plural',
             'modules[].enabled',
             'modules[].operational',
+            'modules[].templates[].key',
+            'modules[].templates[].name',
           ],
         },
         'GET /v1/public/challenge': {

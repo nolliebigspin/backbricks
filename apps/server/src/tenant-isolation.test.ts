@@ -50,7 +50,7 @@ test.skipIf(!available)(
         );
         const cases = await instanceIsolationCases(f);
         const keys = createKeyProbes(f);
-        expect(operations).toHaveLength(9);
+        expect(operations).toHaveLength(10);
         expect(operations.every((operation) => operation.secretKeyScope)).toBe(true);
         assertIsolationCoverage(operations, cases);
         for (const operation of operations) {

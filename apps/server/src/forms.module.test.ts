@@ -201,3 +201,34 @@ test.skipIf(!available)(
   },
   20_000,
 );
+
+test.skipIf(!available)(
+  'forms are created from a listed template, and unknown templates are rejected',
+  async () => {
+    await scenario(async (base) => {
+      const f = await prepareIsolationFixture(base);
+      const meta = platformMetaSchema.parse(await (await f.request('/v1/meta')).json());
+      const templates = meta.modules.find((module) => module.type === 'forms')?.templates ?? [];
+      expect(templates).toContainEqual({ key: 'contact-de', name: 'Kontaktformular' });
+      const root = `/v1/projects/${f.a1.id}/forms`;
+      const created = await f.request(
+        root,
+        { key: 'kontakt', name: 'Kontakt', template: 'contact-de' },
+        f.admin.cookie,
+      );
+      expect(created.status).toBe(201);
+      const config = formsConfigSchema.parse(
+        instanceResponseSchema.parse(await created.json()).config,
+      );
+      expect(config.fields.find((field) => field.key === 'message')?.label).toBe('Nachricht');
+      const unknown = await f.request(
+        root,
+        { key: 'other', name: 'Other', template: 'missing' },
+        f.admin.cookie,
+      );
+      expect(unknown.status).toBe(422);
+      expect((await problem(unknown)).errors?.[0]?.path).toBe('template');
+    });
+  },
+  30_000,
+);

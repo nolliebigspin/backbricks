@@ -132,6 +132,56 @@ export async function instanceIsolationCases(
       own: { path: `${root}/contact`, cookie: f.member.cookie },
       foreign: { path: `${root}/foreign-only`, cookie: f.owner.cookie },
     },
+    [`${module.type}.instance.replace`]: {
+      kind: 'mutation',
+      denied: [
+        {
+          request: {
+            path: `${foreignRoot}/foreign-only`,
+            body: { configVersion: 1, config: own.config },
+            cookie: f.owner.cookie,
+            method: 'PUT',
+          },
+          status: 404,
+        },
+        {
+          request: {
+            path: `${root}/sibling-only`,
+            body: { configVersion: 1, config: own.config },
+            cookie: f.owner.cookie,
+            method: 'PUT',
+          },
+          status: 404,
+        },
+        {
+          request: {
+            path: `${root}/contact`,
+            body: { configVersion: 1, config: own.config },
+            cookie: f.member.cookie,
+            method: 'PUT',
+          },
+          status: 403,
+        },
+      ],
+      // Its own instance, so the version precondition doesn't depend on the update case's order.
+      allowed: async () => {
+        // Probes may run more than once (cookie and key cases); reuse the instance's current version.
+        const existing = await f.request(`${root}/replaced`, undefined, f.owner.cookie);
+        const target =
+          existing.status === 200
+            ? instanceResponseSchema.parse(await existing.json())
+            : await seed(root, 'replaced', f.owner.cookie);
+        return {
+          path: `${root}/replaced`,
+          body: { configVersion: target.configVersion, config: target.config, name: 'Replaced' },
+          cookie: f.admin.cookie,
+          method: 'PUT',
+        };
+      },
+      verify: async (response) => {
+        expect(instanceResponseSchema.parse(await response.json()).name).toBe('Replaced');
+      },
+    },
     [`${module.type}.instance.update`]: {
       kind: 'mutation',
       denied: [

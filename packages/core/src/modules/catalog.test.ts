@@ -140,6 +140,7 @@ test('planned descriptors are visible but never operational, and catalog snapsho
             "plural": "alphas",
             "singular": "alpha",
           },
+          "templates": [],
           "type": "alpha",
         },
         {
@@ -153,6 +154,7 @@ test('planned descriptors are visible but never operational, and catalog snapsho
             "plural": "futures",
             "singular": "future",
           },
+          "templates": [],
           "type": "planned",
         },
       ],

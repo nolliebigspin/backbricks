@@ -23,6 +23,8 @@ export const instanceCreateSchema = z
     name,
     status: writableStatus.default('active'),
     config: configValue.optional(),
+    /** A module template key from `/v1/meta`; used when `config` is absent. */
+    template: z.string().min(1).max(64).optional(),
   })
   .strict();
 /** configVersion is the required optimistic precondition, never the assigned next version. */
@@ -43,7 +45,7 @@ export const instancePatchSchema = z
 export type InstanceCreate = z.input<typeof instanceCreateSchema>;
 export type InstancePatch = z.infer<typeof instancePatchSchema>;
 export const instanceReplaceSchema = instanceCreateSchema
-  .omit({ key: true })
+  .omit({ key: true, template: true })
   .partial({ name: true, status: true })
   .required({ config: true })
   .extend({ configVersion: instanceVersionSchema });

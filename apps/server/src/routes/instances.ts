@@ -3,6 +3,7 @@ import {
   DEFAULT_BODY_LIMIT_BYTES,
   instanceCreateSchema,
   instancePatchSchema,
+  instanceReplaceSchema,
   instanceResponseSchema,
   instanceKeySchema,
   instanceVersionSchema,
@@ -136,6 +137,39 @@ export function instanceRoutes(
       async (c) => {
         const instance = await deps.withTenant(requireTenantContext(c), (tx) =>
           deps.instances.update(
+            tx,
+            type,
+            c.req.valid('param').key,
+            c.req.valid('json'),
+            c.get('requestId'),
+          ),
+        );
+        return c.json(serialize(instance), 200);
+      },
+    );
+    api.register(
+      createRoute({
+        method: 'put',
+        path,
+        operationId: `${type}.instance.replace`,
+        request: {
+          params: instanceParams,
+          body: {
+            required: true,
+            content: { 'application/json': { schema: instanceReplaceSchema } },
+          },
+        },
+        responses: {
+          200: json(
+            instanceResponseSchema,
+            'Full configuration replace (null values are kept, unlike a merge patch); destructive changes additionally require config:destructive.',
+          ),
+        },
+      }),
+      policy('replace', 'write'),
+      async (c) => {
+        const instance = await deps.withTenant(requireTenantContext(c), (tx) =>
+          deps.instances.replace(
             tx,
             type,
             c.req.valid('param').key,

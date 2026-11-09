@@ -256,6 +256,7 @@ export {
 export {
   instanceCreateSchema,
   instancePatchSchema,
+  instanceReplaceSchema,
   instanceResponseSchema,
   instanceKeySchema,
   instanceVersionSchema,

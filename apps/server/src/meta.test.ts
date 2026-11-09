@@ -48,6 +48,7 @@ test('public metadata names selected descriptors without claiming operational do
             "plural": "review-collections",
             "singular": "review-collection",
           },
+          "templates": [],
           "type": "reviews",
         },
       ],

@@ -168,7 +168,7 @@ export interface paths {
       cookie?: never;
     };
     get: operations['forms.instance.read'];
-    put?: never;
+    put: operations['forms.instance.replace'];
     post?: never;
     delete: operations['forms.instance.archive'];
     options?: never;
@@ -666,6 +666,10 @@ export interface operations {
                 plural: string;
                 singular: string;
               };
+              templates: {
+                key: string;
+                name: string;
+              }[];
               type: string;
             }[];
           };
@@ -1548,6 +1552,7 @@ export interface operations {
            * @enum {string}
            */
           status?: 'active' | 'paused';
+          template?: string;
         };
       };
     };
@@ -1618,6 +1623,84 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description Instance configuration. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            config: unknown;
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            key: string;
+            moduleType: string;
+            moduleVersion: number;
+            name: string;
+            organizationId: string;
+            projectId: string;
+            /** @enum {string} */
+            status: 'active' | 'paused' | 'archived';
+            storedModuleVersion?: number;
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.instance.replace': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          config: unknown;
+          configVersion: number;
+          name?: string;
+          /**
+           * @default active
+           * @enum {string}
+           */
+          status?: 'active' | 'paused';
+        };
+      };
+    };
+    responses: {
+      /** @description Full configuration replace (null values are kept, unlike a merge patch); destructive changes additionally require config:destructive. */
       200: {
         headers: {
           [name: string]: unknown;
@@ -2658,6 +2741,10 @@ export interface operations {
                 plural: string;
                 singular: string;
               };
+              templates: {
+                key: string;
+                name: string;
+              }[];
               type: string;
             }[];
             project: {

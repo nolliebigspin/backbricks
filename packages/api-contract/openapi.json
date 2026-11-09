@@ -176,6 +176,25 @@
                             "required": ["singular", "plural"],
                             "type": "object"
                           },
+                          "templates": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "key": {
+                                  "maxLength": 64,
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "maxLength": 200,
+                                  "type": "string"
+                                }
+                              },
+                              "required": ["key", "name"],
+                              "type": "object"
+                            },
+                            "maxItems": 100,
+                            "type": "array"
+                          },
                           "type": {
                             "maxLength": 64,
                             "minLength": 1,
@@ -188,7 +207,8 @@
                           "displayName",
                           "resourceName",
                           "enabled",
-                          "operational"
+                          "operational",
+                          "templates"
                         ],
                         "type": "object"
                       },
@@ -2587,6 +2607,11 @@
                     "default": "active",
                     "enum": ["active", "paused"],
                     "type": "string"
+                  },
+                  "template": {
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "type": "string"
                   }
                 },
                 "required": ["key", "name"],
@@ -3172,6 +3197,214 @@
               }
             },
             "description": "Configuration merge patch; destructive changes additionally require config:destructive."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      },
+      "put": {
+        "operationId": "forms.instance.replace",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "config": {},
+                  "configVersion": {
+                    "exclusiveMinimum": 0,
+                    "maximum": 2147483647,
+                    "type": "integer"
+                  },
+                  "name": {
+                    "maxLength": 120,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "status": {
+                    "default": "active",
+                    "enum": ["active", "paused"],
+                    "type": "string"
+                  }
+                },
+                "required": ["config", "configVersion"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {},
+                    "configVersion": {
+                      "exclusiveMinimum": 0,
+                      "type": "integer"
+                    },
+                    "createdAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "key": {
+                      "type": "string"
+                    },
+                    "moduleType": {
+                      "type": "string"
+                    },
+                    "moduleVersion": {
+                      "exclusiveMinimum": 0,
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "organizationId": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "projectId": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "status": {
+                      "enum": ["active", "paused", "archived"],
+                      "type": "string"
+                    },
+                    "storedModuleVersion": {
+                      "exclusiveMinimum": 0,
+                      "maximum": 2147483647,
+                      "type": "integer"
+                    },
+                    "updatedAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organizationId",
+                    "projectId",
+                    "moduleType",
+                    "key",
+                    "name",
+                    "status",
+                    "config",
+                    "configVersion",
+                    "moduleVersion",
+                    "createdAt",
+                    "updatedAt"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Full configuration replace (null values are kept, unlike a merge patch); destructive changes additionally require config:destructive."
           },
           "default": {
             "content": {
@@ -5681,6 +5914,25 @@
                             "required": ["singular", "plural"],
                             "type": "object"
                           },
+                          "templates": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "key": {
+                                  "maxLength": 64,
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "maxLength": 200,
+                                  "type": "string"
+                                }
+                              },
+                              "required": ["key", "name"],
+                              "type": "object"
+                            },
+                            "maxItems": 100,
+                            "type": "array"
+                          },
                           "type": {
                             "maxLength": 64,
                             "minLength": 1,
@@ -5693,7 +5945,8 @@
                           "displayName",
                           "resourceName",
                           "enabled",
-                          "operational"
+                          "operational",
+                          "templates"
                         ],
                         "type": "object"
                       },
