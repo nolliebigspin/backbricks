@@ -19,7 +19,7 @@ import {
   type PublicWriteContext,
 } from './policy.ts';
 import { publicCredentialSchema } from './public-credentials.ts';
-import type { RateLimiter } from './rate-limiter.ts';
+import type { RateLimiter, RateLimitInput } from './rate-limiter.ts';
 
 const PROJECT_REQUESTS_PER_MINUTE = 600;
 const GLOBAL_REQUESTS_PER_MINUTE = 100_000;
@@ -96,38 +96,44 @@ export function createAbuseGuard(deps: {
     }
     if (identity.kind === 'secret' && !identity.scopes.includes(access.secretScope))
       throw new AppError('forbidden');
+    origin();
     const body = await input.body();
     if (body.byteLength > Math.min(route.policy.bodyLimitBytes, prepared.policy.bodyLimitBytes))
       throw new AppError('payload_too_large');
     if (!request.ipHash) throw new AppError('service_unavailable');
-    const limits = await Promise.all([
-      deps.limiter.consume({
+    // Narrowest bucket first, stopping at the first denial: a request rejected for one client
+    // must not consume the project/global budget that every other visitor shares.
+    const client = digest(`${request.ipHash}:${prepared.instance.id}`);
+    const buckets: RateLimitInput[] = [
+      {
         namespace: 'public.instance_minute',
-        identity: digest(`${request.ipHash}:${prepared.instance.id}`),
+        identity: client,
         limit: prepared.policy.perMinute,
         windowMs: 60_000,
-      }),
-      deps.limiter.consume({
+      },
+      {
         namespace: 'public.instance_hour',
-        identity: digest(`${request.ipHash}:${prepared.instance.id}`),
+        identity: client,
         limit: prepared.policy.perHour,
         windowMs: 3_600_000,
-      }),
-      deps.limiter.consume({
+      },
+      {
         namespace: 'public.project',
         identity: digest(identity.projectId),
         limit: PROJECT_REQUESTS_PER_MINUTE,
         windowMs: 60_000,
-      }),
-      deps.limiter.consume({
+      },
+      {
         namespace: 'public.global',
         identity: digest('public'),
         limit: GLOBAL_REQUESTS_PER_MINUTE,
         windowMs: 60_000,
-      }),
-    ]);
-    if (limits.some((result) => !result.allowed)) throw new AppError('rate_limited');
-    origin();
+      },
+    ];
+    for (const bucket of buckets) {
+      // oxlint-disable-next-line no-await-in-loop -- Sequential by design; see above.
+      if (!(await deps.limiter.consume(bucket)).allowed) throw new AppError('rate_limited');
+    }
     let decoded: unknown;
     try {
       decoded = JSON.parse(new TextDecoder().decode(body));

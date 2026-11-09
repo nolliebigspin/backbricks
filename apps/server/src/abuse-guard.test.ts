@@ -237,6 +237,87 @@ test.skipIf(!available)(
 );
 
 test.skipIf(!available)(
+  'requests rejected by origin or per-client limits never consume shared project/global buckets',
+  async () => {
+    const directory = new Map<string, SecretKeyReference>();
+    await scenario(
+      async (base) => {
+        const f = await prepareIsolationFixture(base);
+        const pk = await issueKey(f, f.a1.id, {
+          kind: 'publishable',
+          name: 'Public',
+          expiresAt: null,
+        });
+        directory.set(
+          Buffer.from(await hashApiKey(pk.token)).toString('hex'),
+          secretKeyReferenceSchema.parse({
+            id: pk.id,
+            organizationId: f.organizationId,
+            projectId: f.a1.id,
+          }),
+        );
+        const project = `/v1/projects/${f.a1.id}`;
+        const site = { origin: 'https://site.test' };
+        expect(
+          (
+            await f.request(
+              `${project}/entries`,
+              { key: 'contact', name: 'Contact', config: { perMinute: 2 } },
+              f.owner.cookie,
+            )
+          ).status,
+        ).toBe(201);
+        expect(
+          (
+            await f.request(
+              project,
+              { allowedOrigins: [site.origin] },
+              f.owner.cookie,
+              undefined,
+              'PATCH',
+            )
+          ).status,
+        ).toBe(200);
+        const path = `/v1/public/entries/contact?key=${pk.token}`;
+        const honeypot = { data: {}, honeypot: 'bot' };
+        const shared = async () => {
+          const rows = await f.db.execute<{ namespace: string; count: number }>(
+            "select split_part(bucket, ':', 1) as namespace, count from rate_limit_buckets where bucket like 'public.project:%' or bucket like 'public.global:%'",
+          );
+          return Object.fromEntries(rows.rows.map((row) => [row.namespace, row.count]));
+        };
+
+        // A disallowed origin is rejected before any bucket is touched.
+        for (let i = 0; i < 3; i++) {
+          // oxlint-disable-next-line no-await-in-loop -- Requests must hit the limiter in order.
+          const foreign = await f.request(path, honeypot, undefined, {
+            origin: 'https://foreign.test',
+          });
+          expect(foreign.status).toBe(403);
+        }
+        expect(await shared()).toEqual({});
+
+        // Only the two requests admitted by the per-client limit reach the shared buckets.
+        const statuses: number[] = [];
+        for (let i = 0; i < 6; i++) {
+          // oxlint-disable-next-line no-await-in-loop -- Requests must hit the limiter in order.
+          statuses.push((await f.request(path, honeypot, undefined, site)).status);
+        }
+        expect(statuses).toEqual([200, 200, 429, 429, 429, 429]);
+        expect(await shared()).toEqual({ 'public.project': 2, 'public.global': 2 });
+      },
+      { BACKBRICKS_MODULES: 'publictest' },
+      {
+        catalog,
+        lookupPublishable: (hash) =>
+          Promise.resolve(directory.get(Buffer.from(hash).toString('hex')) ?? null),
+      },
+    );
+  },
+  30_000,
+);
+
+test.skipIf(!available)(
   'public writes reject quota, oversized chunked input and limiter outages before domain effects',
   async () => {
     await scenario(
