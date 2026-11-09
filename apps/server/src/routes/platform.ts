@@ -12,6 +12,7 @@ import { metaRoutes } from './meta.ts';
 import { moduleRoutes, type ModulePublicExecutor } from './modules.ts';
 import { notificationRuleRoutes } from './notification-rules.ts';
 import { platformReadRoutes } from './platform-reads.ts';
+import { privacyRoutes } from './privacy.ts';
 
 /** The actual platform registration list, shared by runtime, real HTTP fixtures and offline export. */
 export function platformRoutes(
@@ -29,6 +30,7 @@ export function platformRoutes(
   );
   platformReadRoutes(api, services);
   notificationRuleRoutes(api, services);
+  privacyRoutes(api, services);
   metaRoutes(api, services.modules, services.authCapabilities);
   instanceRoutes(api, services);
   configurationRoutes(api, services);

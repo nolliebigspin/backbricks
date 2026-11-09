@@ -77,6 +77,13 @@ export {
 export { canonicalIp, resolveClientIp, createIpIdentity } from './privacy/ip-identity.ts';
 export type { AuthReplayStore } from './privacy/auth-replay.ts';
 export type { ReplayStore } from './privacy/replay.ts';
+export {
+  createSubjectPrivacyService,
+  subjectErasureResponseSchema,
+  subjectExportResponseSchema,
+  subjectRequestSchema,
+  type SubjectPrivacyService,
+} from './privacy/subjects.ts';
 export { createChallengeService, POW_TTL_SECONDS } from './abuse/challenge.ts';
 export {
   publicAccessSchema,

@@ -780,14 +780,14 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 - **Tests:** real Postgres with injected clock, concurrency (two workers).
 - **Risks/notes:** Exit criterion "expired entries are purged" is proven here and in P2.10b.
 
-### [ ] P2.7b – Add subject export and erasure routes (est. 5 h)
+### [x] P2.7b – Add subject export and erasure routes (est. 5 h)
 - **Description:** Generic `POST /v1/projects/{id}/privacy/subject-export` (returns JSON from every enabled module's `exportSubject`) and `POST …/privacy/subject-delete` (enqueues the existing platform erasure job, returns 202). Owner/admin session only; audited without the email (hash or count only); rate limited.
 - **Files/packages:** `apps/server/src/routes/privacy.ts`, `packages/core/src/privacy/*`; isolation cases.
 - **Depends on:** P2.3c.
 - **Reuses:** platform `subjectErasure` job, module privacy hooks.
 - **Acceptance criteria:**
-  - [ ] Export finds entries by normalized subject email only within the project; erasure removes them and leaves no email in audit/events.
-  - [ ] Isolation and rollback cases pass.
+  - [x] Export finds entries by normalized subject email only within the project; erasure removes them and leaves no email in audit/events.
+  - [x] Isolation and rollback cases pass.
 - **Tests:** real HTTP/Postgres + worker job.
 - **Risks/notes:** Job payload contains the email; its job retention stays bounded (ADR-0048/0050).
 
@@ -941,6 +941,9 @@ P2.6b implementation and verification complete: optional `notifications.describe
 
 
 P2.7a implementation and verification complete: forms retention was already wired through the module hooks (P2.3c) and the hourly project fan-out; the purge job now carries the run ID and, when any module returns a full batch, queues the next round (singleton per run/round, at most 50 rounds per run; the rest waits for the next run). No separate `retention.ts` was needed. A clock-driven real Postgres test proves spam is gone after 31 days (also with unlimited retention), normal and unlimited entries stay, shortening retention recomputes `expires_at` in the config transaction, archived forms keep purging, two concurrent workers purge disjoint batches (`SKIP LOCKED`) and queue continuation rounds, and audit entries hold counts only. The unlimited-retention plan warning is covered by `changes.test.ts`. Next: P2.7b.
+
+
+P2.7b implementation and verification complete: core `privacy/subjects.ts` (owner/admin session only, email lowercased like stored subject emails) runs every enabled module's `exportSubject` in the caller transaction and audits `privacy.subject_exported` with a module count; erasure enqueues the existing `core.privacy.erase` job in the same transaction as its `privacy.subject_erasure_requested` audit and answers `202 { status: "queued" }`. Both routes allow 20 requests per user and project per hour and joined the isolation suite. A real HTTP/worker test proves project-only export by normalized email, audit-failure rollback (no job left), worker erasure of only that subject in that project, and no email in audit, events or logs; the job payload keeps the email only for its 24 h retention (ADR-0048/0050). Next: P2.7c.
 
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · stub

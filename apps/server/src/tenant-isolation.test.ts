@@ -13,6 +13,7 @@ import { keyIsolationCases } from '../test/isolation/key-cases.ts';
 import { createKeyProbes } from '../test/isolation/keys.ts';
 import { notificationIsolationCases } from '../test/isolation/notification-cases.ts';
 import { platformReadIsolationCases } from '../test/isolation/platform-read-cases.ts';
+import { privacyIsolationCases } from '../test/isolation/privacy-cases.ts';
 import { projectIsolationCases } from '../test/isolation/project-cases.ts';
 import { prepareIsolationFixture } from '../test/isolation/setup.ts';
 import {
@@ -89,6 +90,7 @@ test.skipIf(!available)(
           ...(await instanceIsolationCases(f, { type: 'forms', plural: 'forms' })),
           ...(await formsIsolationCases(f)),
           ...(await notificationIsolationCases(f)),
+          ...privacyIsolationCases(f),
         };
         assertIsolationCoverage(operations, cases);
         const missing = Object.fromEntries(
