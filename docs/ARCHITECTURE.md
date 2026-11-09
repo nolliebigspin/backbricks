@@ -284,7 +284,7 @@ CREATE INDEX reviews_queue_idx  ON reviews (instance_id, moderation_status, crea
 
 ### B.5 Migrations and schema versioning
 
-- **One migration history** (`packages/db/migrations/`), generated with `drizzle-kit generate`, reviewed by hand and committed. Module tables are defined in module packages but migrated centrally (no ordering problems).
+- **One migration history** (`packages/db/migrations/`), generated with `drizzle-kit generate`, reviewed by hand and committed. Module tables, their migrations and repository implementations live in `packages/db`; the module declares the repository interface ([ADR-0055](adr/0055-module-tables-in-db.md)).
 - **Forward-only** in production. Breaking changes follow *expand → migrate → contract* across two releases.
 - `migrate` holds a Postgres advisory lock. In compose it runs as a one-shot service before `serve`/`worker`.
 - **Module config formats:** `module_version` per instance. Modules ship deterministic `migrateConfig(fromVersion, config)` hooks. [Lazy reads](../packages/core/src/instances/persistence.ts) migrate only the returned view and disclose `storedModuleVersion`; explicit writes persist a new audited revision (ADR-0041). A deployment job uses the same persistence path.
@@ -329,7 +329,7 @@ Static, no runtime plugins. `apps/server/src/modules.ts` lists the modules. [`de
 ### C.3 Module boundaries and data isolation
 
 - A module imports **only** `@backbricks/core` and its own files (enforced by dependency-cruiser).
-- A module receives only its own scoped repository and an opaque `TenantHandle`. It reads/writes **only its own tables**, plus generic core tables through bound core services; it never receives platform repositories or the full transaction.
+- A module receives only its own scoped repository (interface declared by the module, implemented in `packages/db`, ADR-0055) and an opaque `TenantHandle`. It reads/writes **only its own tables**, plus generic core tables through bound core services; it never receives platform repositories or the full transaction.
 - **Cross-module collaboration happens via capabilities.** Example: `forms` needs files; `uploads` provides the `files` capability:
   ```ts
   interface FilesCapability {
@@ -366,14 +366,14 @@ Goal: visitors join a waitlist with email (and an optional referral code) with d
 ```
 packages/modules/waitlist/
   src/config.ts        # zod: { doubleOptIn, confirmRedirectUrl, fields, retentionDays }
-  src/schema.ts        # Drizzle table waitlist_entries (standard columns + email, status, confirmed_at, referral)
+  src/repository.ts    # repository interface (augments ModuleRepositories); table + implementation in packages/db (ADR-0055)
   src/public.ts        # POST /v1/public/waitlists/{key}/entries, GET …/confirm?token=
   src/admin.ts         # list, export, delete (uses core helpers for pagination/CSV)
   src/jobs.ts          # send confirmation mail
   src/privacy.ts       # exportSubject/deleteSubject by email
   src/index.ts         # export const waitlistModule: ModuleDefinition<WaitlistConfig>
 apps/web/src/modules/waitlist/   # list + settings pages, registry entry
-packages/db/migrations/…         # generated
+packages/db/src/schema/waitlist.ts, repositories/waitlist.ts, migrations/…  # table, repository, generated migration
 apps/server/src/modules.ts       # one line: add waitlistModule
 ```
 

@@ -64,3 +64,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0052](0052-contract-gates-and-method-handling.md) | Contract gates and method handling | accepted |
 | [0053](0053-dashboard-account-boundary.md) | Dashboard account boundary | accepted |
 | [0054](0054-publishable-key-authentication-bootstrap.md) | Publishable key authentication bootstrap | accepted; Q11 approved |
+| [0055](0055-module-tables-in-db.md) | Module tables in db, repository interfaces in the module | accepted (Q12) |

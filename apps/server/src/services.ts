@@ -33,6 +33,7 @@ import {
 } from '@backbricks/db';
 
 import { moduleJobs } from './module-jobs.ts';
+import { moduleRepositories } from './module-repositories.ts';
 import { moduleCatalog } from './modules.ts';
 
 /** One provider/service lifetime per server runtime. Modules receive only the core's restricted views. */
@@ -71,7 +72,10 @@ export function createServerServices(
     },
     { mailer, storage, captcha, queue: options.queue },
   );
-  const withTenant = createWithTenant(db, options.moduleRepositories);
+  const withTenant = createWithTenant(
+    db,
+    options.moduleRepositories ?? moduleRepositories(modules),
+  );
   const moduleRuntime = modules.registry.bind(container);
   const instances = createInstanceService({
     ...container.core,

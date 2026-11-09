@@ -656,14 +656,14 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 - **Tests:** unit + fast-check (no input crashes the validator; normalized output re-validates).
 - **Risks/notes:** No user-provided regex; email/URL/phone checks use fixed core validators.
 
-### [ ] P2.3a – Establish the module table and repository seam (est. 5 h)
+### [x] P2.3a – Establish the module table and repository seam (est. 5 h)
 - **Description:** First production module table; the seam follows the accepted DEV-12 (**Q12**) and gets its ADR here: the module declares its repository contract (augmenting `ModuleRepositories`); `packages/db` owns the Drizzle table, migration and repository implementation using the existing tenant columns, composite FKs and `scope` helper; the server composes selected modules' repository factories into `createWithTenant`, and the typecheck at that composition point proves db's implementation matches the module contract. Repositories exist for every module table whether or not the module is enabled (one migration history, §C.7). Update ARCHITECTURE §B.5/§C.3 wording with the ADR.
 - **Files/packages:** ADR-0055; `apps/server/src/services.ts`; `packages/db/src/repositories/index.ts`; `.dependency-cruiser.json`: drop the allowance for `packages/modules/*/src/schema` files, with a negative fixture.
 - **Depends on:** P2.0a.
 - **Reuses:** `createWithTenant`'s `createModuleRepositories`, `repositories/scope.ts`, `schema/columns.ts`, the ledger fixture pattern.
 - **Acceptance criteria:**
-  - [ ] A module callback reaches only its own repository; disabled modules get none; foreign/escaped handles fail as before (ADR-0024).
-  - [ ] Architecture rules still pass; no module imports db or drizzle.
+  - [x] A module callback reaches only its own repository; disabled modules get none; foreign/escaped handles fail as before (ADR-0024).
+  - [x] Architecture rules still pass; no module imports db or drizzle.
 - **Tests:** real-DB capability-boundary and module-registry tests extended to a production repository factory.
 - **Risks/notes:** Changes no invariant. Keep repositories thin: they store and query already-validated values; forms logic (validation, normalization, search text) stays in the module.
 
@@ -911,6 +911,8 @@ P2.1a: [`config.ts`](packages/modules/forms/src/config.ts) is a strict per-type 
 P2.1b: templates come from one source per form and are registered as `<template>-<language>` keys (the core template record has one `name` string), so en/de needs no core change; `defaultFormsConfig()` is the English contact template. `formsTemplates({ files })` and `assertFieldCapabilities` both need to know whether the `files` capability exists; P2.3c decides how the definition gets that (M2 has no uploads, so `files: false`). No `migrateConfig` for version 1: the core parses configs at the current version directly (`FORMS_MODULE_VERSION`). Codegen emits `'forms/<key>'` members of one `BackbricksSchema` interface, so several forms (and later modules) merge; P2.9a's SDK must define `BackbricksSchema` and type `forms.submit` from it. For P2.3c: `validatedConfig` in core replaces config Zod errors with a path-less `validation_failed`, so forms config errors reach clients without field paths until that is fixed.
 
 P2.2: the validator is one normalizer per field type rather than a generated Zod object, because the error codes must be the catalog's (`FIELD_ERROR_CODES` in core, incl. `invalid_file`/`too_many_files`) and both transports share the same rules; it returns `{ data, subjectEmail }` and throws `validation_failed` with `errors[]` and the schema hint, never values. Lengths count code points (like `char_length`). An unchecked HTML checkbox is absent while JSON may send `false`. Core gained `emailAddressSchema` (email ≤ 320), now also used by the module privacy hooks and the subject-erasure job payload. Spam verdicts stay in the shared guard (ADR-0046), not in the validator.
+
+P2.3a: [ADR-0055](docs/adr/0055-module-tables-in-db.md). `moduleRepositoryFactories` in db is still empty; P2.3b adds `forms`, and from then on the typed assignment in `apps/server/src/module-repositories.ts` fails to compile if the forms interface and db's implementation disagree. New arch rule `modules-no-database` (fixture `module-defines-table`); `tenant-tables-only-repositories` no longer allows module-local schema files.
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · stub
 

@@ -3,17 +3,13 @@
   "forbidden": [
     {
       "name": "tenant-tables-only-repositories",
-      "comment": "I1: tenant table definitions stay inside schema/repositories; identity tables and tests are explicit exceptions.",
+      "comment": "I1: tenant tables live in packages/db (ADR-0055) and are reached only through its repositories; identity tables and tests are explicit exceptions.",
       "severity": "error",
       "from": {
-        "pathNot": [
-          "^packages/(db|modules/[^/]+)/src/(schema(/|\\.ts$)|repositories/|repository\\.ts$)",
-          "\\.test\\.tsx?$",
-          "/test/"
-        ]
+        "pathNot": ["^packages/db/src/(schema/|repositories/)", "\\.test\\.tsx?$", "/test/"]
       },
       "to": {
-        "path": "^packages/(db|modules/[^/]+)/src/schema(/|\\.ts$)",
+        "path": "^packages/db/src/schema/",
         "pathNot": "^packages/db/src/schema/auth\\.generated\\.ts$"
       }
     },
@@ -33,6 +29,13 @@
         "path": "^(apps|packages)/",
         "pathNot": ["^packages/modules/$1/", "^packages/core/"]
       }
+    },
+    {
+      "name": "modules-no-database",
+      "comment": "ADR-0055: modules declare repository interfaces; tables, migrations and queries live in packages/db.",
+      "severity": "error",
+      "from": { "path": "^packages/modules/" },
+      "to": { "path": "(^|/node_modules/)(drizzle-orm|drizzle-kit|pg|pg-boss)(/|$)" }
     },
     {
       "name": "core-no-internal-deps",
