@@ -71,10 +71,14 @@ export function defineModule<
   function runtime(execution: ModuleExecution): Runtime {
     execution.tx.assertActive();
     if (execution.moduleType !== metadata.type) throw new AppError('internal_error');
+    const readStream = execution.readStream;
     return Object.freeze({
       tx: execution.handle,
       repository: execution.tx.modules[type],
       config: (input: unknown) => configSchema.parse(input),
+      streamText: readStream
+        ? (prefix, read) => readStream((frame, cursor) => read(runtime(frame), cursor), prefix)
+        : undefined,
       instances: moduleInstanceReads(execution, (row) =>
         config.instance({
           ...row,

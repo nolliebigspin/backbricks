@@ -196,6 +196,8 @@ Details: `docs/progress/phase-0.md` → "Deviations".
 
 ### Decided during P2 execution, please confirm
 
+- **D56 – Audited CSV streaming:** [ADR-0058](docs/adr/0058-audited-paged-csv-exports.md) adds bounded management rate policies and a CSV-only text-stream port using fresh, module-owned read transactions after the initial audit commits. Exports retain a started audit even if canceled, add the actual row count on completion, and use `data.<key>` columns to distinguish user fields from metadata. Keyset pages permit concurrent changes rather than claiming a single database snapshot. No invariant changes.
+
 - **D55 – Forms mutations and batched erasure:** [ADR-0057](docs/adr/0057-forms-data-mutations-and-batched-erasure.md) uses locked, all-or-nothing batches with the shared 100-ID ceiling; every mutation audits in the same transaction. Admin-session delete-all enqueues bounded, resumable Postgres batches and records one final count. All deletion paths borrow the specified `files.deleteByOwner` capability when present; core types only that existing deletion seam before M3 adds claiming/listing. No invariant changes.
 
 - **D54 – Module-owned configuration reads:** [ADR-0056](docs/adr/0056-module-owned-instance-reads.md) adds read-only current/historical config access fixed to the module and caller transaction. Modules never receive platform repositories or tenant selectors. The bridge strips its host-only project selector before strict module validation. Opaque HTTP JSON schemas reuse the existing JSON validator and enforce JSON-safe responses centrally to avoid recursive OpenAPI generation failure. No invariant changes.

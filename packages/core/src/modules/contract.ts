@@ -6,14 +6,16 @@ import type {
   PublicWritePolicyInput,
 } from '../abuse/policy.ts';
 import type { ModuleInstance } from '../platform/models.ts';
+import type { InstanceRevision } from '../platform/models.ts';
 import type { OptionalServiceName } from '../services/container.ts';
-import type { ModuleRepositories } from '../tenancy/repositories.ts';
+import type { ModuleRepositories, RepositoryPage } from '../tenancy/repositories.ts';
 import type { TenantHandle } from '../tenancy/tenant-context.ts';
 import type { CapabilityFactories, CapabilityName, capabilityView } from './capabilities.ts';
 import type { InfraRequirement } from './infrastructure.ts';
 import type { ModuleJobRegistrar } from './jobs.ts';
 import type { ModuleAdminRouter, ModulePublicRouter } from './routes.ts';
 import type { BoundCoreServices, ModuleOptionalServices } from './services.ts';
+import type { ModuleStreamPage } from './streams.ts';
 import type {
   ConfigChangeReport,
   EventDefinition,
@@ -27,6 +29,10 @@ export type ConfiguredInstance<T> = Omit<ModuleInstance, 'config'> & { config: T
 export type ModuleInstanceReads<T> = Readonly<{
   get(key: string): Promise<ConfiguredInstance<T>>;
   revision(key: string, version: number): Promise<ConfiguredInstance<T>>;
+  revisions(
+    key: string,
+    page: RepositoryPage,
+  ): Promise<(Omit<InstanceRevision, 'config'> & { config: T })[]>;
 }>;
 export type RequiredInfrastructure<I extends readonly InfraRequirement[]> =
   I[number] extends infer D
@@ -49,7 +55,7 @@ export type ModuleServices<
   require<K extends R>(name: K): NonNullable<ModuleOptionalServices[K]>;
   optional<K extends O>(name: K): ModuleOptionalServices[K];
 };
-export type ModuleRuntime<
+export type ModuleDataRuntime<
   T,
   R extends CapabilityName,
   O extends CapabilityName,
@@ -68,6 +74,24 @@ export type ModuleRuntime<
   /** Public write routes: instance, config, spam verdict and minimized request source. */
   publicWrite?: Readonly<PublicWriteContext>;
 }>;
+/** CSV readers receive fresh, module-owned frames after the request's audit transaction commits. */
+export type ModuleRuntime<
+  T,
+  R extends CapabilityName,
+  O extends CapabilityName,
+  SR extends OptionalServiceName,
+  SO extends OptionalServiceName,
+  MT extends string = string,
+> = ModuleDataRuntime<T, R, O, SR, SO, MT> &
+  Readonly<{
+    streamText?: (
+      prefix: string,
+      read: (
+        runtime: ModuleDataRuntime<T, R, O, SR, SO, MT>,
+        cursor: string | undefined,
+      ) => Promise<ModuleStreamPage>,
+    ) => ReadableStream<Uint8Array>;
+  }>;
 export type { ModuleExecution } from './execution.ts';
 
 export type ModuleDefinition<

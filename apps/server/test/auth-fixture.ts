@@ -146,6 +146,7 @@ export async function scenario(
           log,
           auth,
           ids: runtime.container.core.ids,
+          rateLimiter: runtime.container.core.rateLimiter,
           modules: runtime.modules,
           dashboardDir: null,
           readinessChecks: runtime.readinessChecks,

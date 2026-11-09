@@ -8,6 +8,7 @@ export const FORMS_EVENTS = {
   submissionCreated: 'forms.submission.created',
 } as const;
 export const FORMS_AUDIT_ACTIONS = {
+  exported: 'forms.submissions.exported',
   submissionUpdated: 'forms.submission.updated',
   submissionDeleted: 'forms.submission.deleted',
   bulkUpdated: 'forms.submissions.bulk_updated',

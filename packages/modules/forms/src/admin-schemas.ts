@@ -19,13 +19,12 @@ export const submissionFiltersSchema = z
     to: z.iso.datetime().optional(),
     q: z.string().trim().max(200).optional(),
   })
-  .strict();
-export const submissionsQuerySchema = pageQuerySchema
-  .extend(submissionFiltersSchema.shape)
+  .strict()
   .refine((query) => !query.from || !query.to || query.from <= query.to, {
     message: 'from cannot be after to.',
     path: ['from'],
   });
+export const submissionsQuerySchema = submissionFiltersSchema.safeExtend(pageQuerySchema.shape);
 export const submissionSummarySchema = z
   .object({
     total: z.number().int().nonnegative(),

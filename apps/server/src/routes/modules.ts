@@ -10,6 +10,8 @@ import {
   publishableKeyTokenSchema,
   type PublicCredentialResolver,
   PUBLIC_FORM_MEDIA_TYPE,
+  createPagedTextStream,
+  type ModuleExecution,
 } from '@backbricks/core';
 import { createRoute, z, type RouteConfig } from '@hono/zod-openapi';
 import type { Context } from 'hono';
@@ -148,10 +150,12 @@ export function moduleRoutes(
             tx: TenantTransaction,
             input: unknown,
             context?: PublicReadContext | PublicWriteContext,
+            readStream?: ModuleExecution['readStream'],
           ) =>
             route.run(
               {
                 ...services.moduleRuntime.forTenant(tx).execution(module.type),
+                ...(readStream ? { readStream } : {}),
                 ...(context
                   ? 'spam' in context
                     ? { publicWrite: context }
@@ -176,7 +180,31 @@ export function moduleRoutes(
             ),
             body: hasBody ? await c.req.json<unknown>() : null,
           };
-          return services.withTenant(requireTenantContext(c), (tx) => run(tx, input));
+          const tenant = requireTenantContext(c);
+          if (!Object.values(route.responses).some((response) => response.kind === 'csv'))
+            return services.withTenant(tenant, (tx) => run(tx, input));
+          let release: (() => void) | undefined;
+          let committed = false;
+          const ready = new Promise<void>((resolve) => {
+            release = resolve;
+          });
+          const readStream: NonNullable<ModuleExecution['readStream']> = (read, streamPrefix) =>
+            createPagedTextStream(async (cursor) => {
+              await ready;
+              if (!committed) throw new AppError('internal_error');
+              return services.withTenant(tenant, (tx) =>
+                read(services.moduleRuntime.forTenant(tx).execution(module.type), cursor),
+              );
+            }, streamPrefix);
+          try {
+            const response = await services.withTenant(tenant, (tx) =>
+              run(tx, input, undefined, readStream),
+            );
+            committed = true;
+            return response;
+          } finally {
+            release?.();
+          }
         },
         {
           deferPublicBodyValidation: !management && hasBody,

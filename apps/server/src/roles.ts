@@ -77,6 +77,7 @@ async function startRuntime(
         {
           log,
           ids: runtime.container.core.ids,
+          rateLimiter: runtime.container.core.rateLimiter,
           modules,
           ipIdentity: createIpIdentity({
             appSecret: config.appSecret,

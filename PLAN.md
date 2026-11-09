@@ -736,14 +736,14 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 - **Tests:** real HTTP/Postgres, rollback loop, role/scope matrix.
 - **Risks/notes:** Hard delete only (I11); no trash.
 
-### [ ] P2.5c – Export submissions as CSV (est. 5 h)
+### [x] P2.5c – Export submissions as CSV (est. 5 h)
 - **Description:** Core pure CSV encoder (RFC 4180 quoting, CSV-injection defusing per §F.1: prefix `'` before `= + - @ \t \r`) and a streamed `GET …/forms/{key}/export.csv` over keyset batches with the union of fields across all config versions, same filters as the list. Owner/admin session only in M2 (no key scope; exfiltration rule §F.1), rate limited, audited with row count.
 - **Files/packages:** `packages/core/src/export/csv.ts` (+ index export), `packages/modules/forms/src/export.ts`.
 - **Depends on:** P2.5a.
 - **Reuses:** csv response kind in the registrar, rate limiter, audit.
 - **Acceptance criteria:**
-  - [ ] A field `=SUM(1)` exports defused; quotes/newlines/Unicode round-trip through a CSV parser.
-  - [ ] Memory stays bounded for 50k rows (streamed, no full buffering).
+  - [x] A field `=SUM(1)` exports defused; quotes/newlines/Unicode round-trip through a CSV parser.
+  - [x] Memory stays bounded for 50k rows (streamed, no full buffering).
 - **Tests:** fast-check on the encoder; integration export with mixed versions.
 - **Risks/notes:** The encoder is generic (uploads/reviews reuse it); module-specific column logic stays in forms.
 
@@ -929,6 +929,9 @@ P2.5a implementation: list/read/summary routes in `forms/src/admin.ts` use the e
 
 
 P2.5b implementation and verification complete: metadata-only PATCH, individual erasure, bounded bulk edits/deletes, and admin-session-only confirmed delete-all. Core owns the shared 100-ID bulk schema/ceiling and types the architecture's existing file-owner deletion seam (claim/list remain M3). Entry locks and deterministic bulk locks preserve per-row spam/read timestamps. All audit/enqueue effects share the caller transaction. The delete-all job removes 100 per transaction, carries an ID/count-only continuation and writes one final summarized audit, including after archive. HTTP/worker tests prove audit rollback for every mutation, 102-row batch behavior, roles/scopes and optional file cleanup rollback. All new routes join cookie/key isolation; denied-write snapshots include form rows. ADR-0057/D55 record the contracts. `CI=true bun run check` passed; the maintainer reviewed the staged diff and explicitly approved DCO sign-off on 2026-11-09. Next: P2.5c streamed CSV.
+
+
+P2.5c implementation and verification complete: RFC 4180 encoder with formula defusing; owner/admin-only CSV over 100-row keyset pages and historical configuration columns. Lists/exports share filter/date handling; `data.<key>` CSV headers avoid metadata collisions. ADR-0058/D56 define CSV-only fresh-frame reads after the initial transaction commits, one started audit before any personal data and a completed audit with the actual row count. Management rate limits run outside tenant transactions (one request per user/form/minute). The 50,000-row Postgres HTTP stress test passes with chunks below 1 MiB and post-GC retained growth below 40 MiB; property/parser tests, cancellation/backpressure, roles/scopes and automatic tenant isolation pass. `CI=true bun run check` passed; the maintainer reviewed the staged diff and explicitly approved DCO sign-off on 2026-11-09. Next: P2.6a notifications.
 
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · stub

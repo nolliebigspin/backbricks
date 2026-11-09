@@ -136,7 +136,7 @@ Paths are under `/v1/projects/{projectId}/forms`. Every route declares session r
 
 Mutation implementation: [entry actions](../../packages/modules/forms/src/mutations.ts), [bulk routes/jobs](../../packages/modules/forms/src/bulk.ts), and [ADR-0057](../adr/0057-forms-data-mutations-and-batched-erasure.md).
 
-**CSV** (P2.5c): a generic pure encoder in `packages/core/src/export/csv.ts` (RFC 4180, prefix `'` before `= + - @ \t \r`, §F.1), reused by uploads/reviews. Column logic stays in forms. Columns: `id`, `created_at`, `status`, `read`, `spam`, then field keys.
+**CSV** (P2.5c): a generic pure encoder in `packages/core/src/export/csv.ts` (RFC 4180, prefix `'` before `= + - @ \t \r`, §F.1), reused by uploads/reviews. Column logic stays in forms. Columns: `id`, `created_at`, `status`, `read`, `spam`, then `data.<field key>` columns (preventing metadata collisions). Streaming, attempt/completion audits and concurrency semantics: [ADR-0058](../adr/0058-audited-paged-csv-exports.md); implementation: [export.ts](../../packages/modules/forms/src/export.ts).
 
 ## 6. Events, metrics, scopes
 

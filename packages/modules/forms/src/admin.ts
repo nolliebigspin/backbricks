@@ -15,6 +15,7 @@ import {
 } from './admin-schemas.ts';
 import type { FormsConfig } from './config.ts';
 import { formKeyParams, publicForm } from './public.ts';
+import { submissionFilters } from './queries.ts';
 import type { SubmissionRecord } from './repository.ts';
 import { formsRepository, type FormsRuntime } from './runtime.ts';
 
@@ -93,15 +94,7 @@ export function formsAdminRoutes(router: ModuleAdminRouter<FormsRuntime>) {
       const instance = await runtime.instances.get(params.key);
       const rows = await formsRepository(runtime).list(
         instance.id,
-        {
-          status: query.status,
-          read: query.read,
-          folder: query.folder,
-          isTest: query.test,
-          from: query.from ? new Date(query.from) : undefined,
-          to: query.to ? new Date(query.to) : undefined,
-          query: query.q,
-        },
+        submissionFilters(query),
         repositoryPage(query),
       );
       const page = pageResult(rows, query.limit);

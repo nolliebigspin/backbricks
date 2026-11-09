@@ -35,6 +35,8 @@ export type {
 } from './tenancy/tenant-context.ts';
 export * from './tenancy/repositories.ts';
 export { MAX_BULK_ITEMS, bulkIdsSchema } from './http/bulk.ts';
+export { csvRow } from './export/csv.ts';
+export { createPagedTextStream, type ModuleStreamPage } from './modules/streams.ts';
 export * from './platform/models.ts';
 export {
   MAX_PAGE_SIZE,
@@ -370,6 +372,8 @@ export {
 export type {
   ModuleDefinition,
   ModuleRuntime,
+  ModuleDataRuntime,
+  ModuleInstanceReads,
   ModuleServices,
   ModuleExecution,
   ConfiguredInstance,

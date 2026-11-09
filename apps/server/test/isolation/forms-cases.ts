@@ -23,6 +23,13 @@ export async function formsIsolationCases(f: IsolationFixture): Promise<Cases> {
     await createSubmissionFixture(f, 'inbox'),
   ];
   return {
+    'forms.submissions.export': {
+      kind: 'collection',
+      read: { path: `${own.root}/export.csv`, cookie: f.admin.cookie },
+      present: [own.id],
+      absent: [sibling.id, foreign.id],
+      foreign: { path: `${foreign.root}/export.csv`, cookie: f.owner.cookie },
+    },
     'forms.submissions.update': {
       kind: 'mutation',
       denied: [

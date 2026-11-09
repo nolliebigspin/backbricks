@@ -160,6 +160,22 @@ export interface paths {
     patch: operations['forms.instance.update'];
     trace?: never;
   };
+  '/v1/projects/{projectId}/forms/{key}/export.csv': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['forms.submissions.export'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/projects/{projectId}/forms/{key}/migrate': {
     parameters: {
       query?: never;
@@ -1626,6 +1642,62 @@ export interface operations {
       };
     };
   };
+  'forms.submissions.export': {
+    parameters: {
+      query?: {
+        status?: 'open' | 'done';
+        read?: 'true' | 'false';
+        folder?: 'inbox' | 'spam';
+        test?: 'true' | 'false';
+        from?: string;
+        to?: string;
+        q?: string;
+      };
+      header?: never;
+      path: {
+        key: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description CSV with defused spreadsheet formulas and all historical field columns. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'text/csv': string;
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
   'forms.instance.migrate': {
     parameters: {
       query?: never;
@@ -1899,8 +1971,6 @@ export interface operations {
   'forms.submissions.list': {
     parameters: {
       query?: {
-        limit?: number;
-        cursor?: string;
         status?: 'open' | 'done';
         read?: 'true' | 'false';
         folder?: 'inbox' | 'spam';
@@ -1908,6 +1978,8 @@ export interface operations {
         from?: string;
         to?: string;
         q?: string;
+        limit?: number;
+        cursor?: string;
       };
       header?: never;
       path: {

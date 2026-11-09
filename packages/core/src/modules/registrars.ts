@@ -60,7 +60,7 @@ export function routeRegistrar<Runtime>(
     if (
       policy.kind !== kind ||
       (spec.path !== '/' &&
-        !/^\/(?:[a-z0-9-]+|\{[A-Za-z][A-Za-z0-9]*\})(?:\/(?:[a-z0-9-]+|\{[A-Za-z][A-Za-z0-9]*\}))*\/?$/.test(
+        !/^\/(?:[a-z0-9-]+(?:\.[a-z0-9-]+)*|\{[A-Za-z][A-Za-z0-9]*\})(?:\/(?:[a-z0-9-]+(?:\.[a-z0-9-]+)*|\{[A-Za-z][A-Za-z0-9]*\}))*\/?$/.test(
           spec.path,
         ))
     )

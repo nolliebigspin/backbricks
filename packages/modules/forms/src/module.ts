@@ -14,6 +14,7 @@ import {
 export { FORMS_EVENTS, FORMS_METRICS } from './constants.ts';
 import { formsBulkRoutes, formsJobs } from './bulk.ts';
 import { entryExpiry, searchText } from './entries.ts';
+import { formsExportRoutes } from './export.ts';
 import { formsMutationRoutes } from './mutations.ts';
 import {
   formKeyParams,
@@ -81,6 +82,7 @@ export function createFormsModule(options: { files: boolean } = { files: false }
       formsAdminRoutes(router);
       formsMutationRoutes(router);
       formsBulkRoutes(router);
+      formsExportRoutes(router);
     },
     jobs: formsJobs,
     publicRoutes(router) {

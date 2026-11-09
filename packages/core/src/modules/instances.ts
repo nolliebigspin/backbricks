@@ -30,5 +30,19 @@ export function moduleInstanceReads<T>(
         configVersion: revision.configVersion,
       });
     },
+    async revisions(key, page) {
+      const instance = await get(key);
+      const rows = await execution.tx.repositories.revisions.list(instance.id, page);
+      return rows.map((revision) =>
+        Object.assign({}, revision, {
+          config: view({
+            ...instance,
+            config: revision.config,
+            moduleVersion: revision.moduleVersion,
+            configVersion: revision.configVersion,
+          }).config,
+        }),
+      );
+    },
   });
 }

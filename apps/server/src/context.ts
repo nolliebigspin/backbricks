@@ -5,6 +5,7 @@ import type {
   Ids,
   SelectedModules,
   PublicFormRedirects,
+  RateLimiter,
 } from '@backbricks/core';
 
 import type { Logger } from './logger.ts';
@@ -33,6 +34,7 @@ export type AppDependencies = {
   modules?: SelectedModules;
   /** Omitted only by apps/tests that do not mount auth or public-write handlers. */
   ipIdentity?: ReturnType<typeof createIpIdentity>;
+  rateLimiter?: RateLimiter;
   auth?: Pick<ReturnType<typeof createDashboardAuth>, 'handle' | 'basePath'>;
   readinessChecks: readonly ReadinessCheck[];
   /** Built dashboard to serve, or `null` (development: Vite serves it; API-only setups). */
