@@ -813,14 +813,14 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 - **Tests:** component tests (happy-dom), i18n key parity test.
 - **Risks/notes:** Counts come from an aggregate route or list metadata; add it to P2.5a if missing rather than counting in the browser.
 
-### [ ] P2.8b – Build the entries view (est. 6 h)
+### [x] P2.8b – Build the entries view (est. 6 h)
 - **Description:** Entries tab: `DataTable` (server pagination, filter bar, search, multi-select, bulk actions with type-to-confirm delete), `RecordDrawer` with `FieldValue` rendering every field type as plain text (I8), "Additional data", mark read on open, spam folder tab, test badge, CSV download for owner/admin; mobile layout (§E.5).
 - **Files/packages:** `packages/ui/src/components/{data-table,record-drawer,field-value}.tsx`, `apps/web/src/modules/forms/entries.tsx`.
 - **Depends on:** P2.5b, P2.5c, P2.8a.
 - **Reuses:** `@tanstack/react-table` (new dependency, verify v9 API), `ConfirmDialog`, query keys per org/project.
 - **Acceptance criteria:**
-  - [ ] No `dangerouslySetInnerHTML`; a `<img onerror>` value renders as text.
-  - [ ] Organization switch cancels entry queries (existing shell rule).
+  - [x] No `dangerouslySetInnerHTML`; a `<img onerror>` value renders as text.
+  - [x] Organization switch cancels entry queries (existing shell rule).
 - **Tests:** component tests; Playwright in P2.9b.
 - **Risks/notes:** `DataTable`/`RecordDrawer`/`FieldValue` go to `packages/ui` because uploads and reviews reuse them.
 
@@ -950,6 +950,9 @@ P2.7c implementation and verification complete (release gate): required `privacy
 
 
 P2.8a implementation and verification complete. API prerequisites (`7a56300`): `/v1/meta` lists each operational module's template keys/names (I5 allowlist extended), instance creation accepts a `template`, and a new generic `PUT …/{plural}/{key}` replaces the full config. Merge patch (RFC 7396) deletes null-valued keys, so unlimited retention was unreachable through PATCH; a failing test came first. The PUT route joined the isolation suite; config-as-code documents exclude `template`. Dashboard: static registry `apps/web/src/modules/registry.ts` (project nav entry only for operational modules); pages live under `/projects/{id}/forms[/{key}]`, matching the notification links (ADR-0060). Inbox: forms with total/unread counts, empty state, creation from the current language's templates (`<template>-<lang>` keys). Form page: Entries tab (counts until P2.8b) and Settings: PoW with "less protected" badge, honeypot, `RetentionPicker` incl. no limit, redirects with origin warning, notification rules for verified members (content opt-in warning, no-email hint), delete-all with type-to-confirm, archive. Members get a disabled form and no notification requests; writes send the current version and explain 409s with a reload. `useAction` takes an error mapper. Deviation: `EmptyState`, `StatusBadge` and `RetentionPicker` are compositions of existing shadcn primitives in `packages/ui`, so the shadcn CLI wasn't used. Component tests (happy-dom) cover read-only members, the full-replace body (null retention, PoW off, redirect), the stale message, the registry and the picker; i18n parity holds. Not checked in a real browser yet (P2.9b journeys). Next: P2.8b.
+
+
+P2.8b implementation and verification complete. `@tanstack/react-table` 9.3.1 (verified current; v9 API read from the installed types: `useTable` + `tableFeatures({ rowSelectionFeature })`, core row models built in) added to `packages/ui` for row selection; justification: shared server-paginated selection for forms, uploads and reviews. `packages/ui` gains `DataTable` (controlled selection, columns render plain cells, first cell opens the row, columns can hide on phones), `RecordDrawer` (full-width side panel on phones) and `FieldValue` (every value as a React text node, option labels, consent version, yes/no). The Entries tab has inbox/spam folders, status/read/date filters, full-text search, "Load more" keyset pagination, relative times, new/status/test badges, a bulk toolbar (read/unread/done/reopen/spam; delete only for owners/admins and only after typing the form's short name, §E.5), the CSV link with the same filters (owners/admins) and a drawer with the entry's historical labels, "Additional data", expiry and status/spam/delete actions. Opening an unread entry sends `PATCH { read: true }`; the form page opens `?entry=` from notification links. Tests: hostile values stay text in list and drawer, read-on-open, member/admin actions, type-to-confirm bulk delete, org-switch cancellation aborts the in-flight list request; UI selection and value rendering. happy-dom warns about the `<search>` element (supported by current browsers). Not yet checked in a real browser (P2.9b). Next: P2.8c.
 
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · stub

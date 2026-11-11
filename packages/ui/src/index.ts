@@ -28,3 +28,6 @@ export { ConfirmDialog } from '#components/confirm-dialog';
 export { EmptyState } from '#components/empty-state';
 export { RETENTION_PRESETS, RetentionPicker } from '#components/retention-picker';
 export { StatusBadge, type StatusTone } from '#components/status-badge';
+export { DataTable, type DataTableColumn } from '#components/data-table';
+export { FieldValue, type FieldValueLabels } from '#components/field-value';
+export { RecordDrawer } from '#components/record-drawer';

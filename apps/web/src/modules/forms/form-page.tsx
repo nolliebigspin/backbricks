@@ -3,14 +3,19 @@ import { useTranslation } from 'react-i18next';
 
 import { Feedback } from '../../dashboard/feedback.tsx';
 import { formsError, useForm, useFormSummary, useFormsScope } from './api.ts';
+import { EntriesTab } from './entries.tsx';
 import { FormSettingsTab } from './settings.tsx';
 
-/** One form: entries first, settings next (Fields and Embed tabs follow in P2.8c). */
+/**
+ * One form: entries first, settings next (Fields and Embed tabs follow in P2.8c). `?entry=` opens
+ * that entry, the link notification mails use (ADR-0060).
+ */
 export function FormPage({ formKey }: { formKey: string }) {
   const { t } = useTranslation();
   const scope = useFormsScope();
   const form = useForm(formKey);
   const summary = useFormSummary(formKey);
+  const initialEntry = new URLSearchParams(window.location.search).get('entry');
   if (form.isPending) return <output>{t('common.loading')}</output>;
   if (form.isError) return <Feedback error={formsError(form.error)} />;
   return (
@@ -33,17 +38,16 @@ export function FormPage({ formKey }: { formKey: string }) {
           <TabsTrigger value="settings">{t('forms.tabs.settings')}</TabsTrigger>
         </TabsList>
         <TabsContent value="entries">
-          {summary.data ? (
-            <p>
+          {summary.data && (
+            <p className="mb-4 text-sm text-muted-foreground">
               {t('forms.entries.summary', {
                 total: summary.data.total,
                 unread: summary.data.unread,
                 spam: summary.data.spam,
               })}
             </p>
-          ) : (
-            <output>{t('common.loading')}</output>
           )}
+          <EntriesTab form={form.data} initialEntry={initialEntry} />
         </TabsContent>
         <TabsContent value="settings">
           <FormSettingsTab form={form.data} />
