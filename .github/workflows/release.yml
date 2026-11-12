@@ -33,7 +33,7 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v5
-      - uses: jdx/mise-action@v3
+      - uses: jdx/mise-action@v5
       - run: bun install --frozen-lockfile
       - name: Tag matches the server version
         if: github.event_name == 'push'

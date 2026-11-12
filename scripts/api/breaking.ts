@@ -3,8 +3,28 @@ import { join } from 'node:path';
 
 import { CONTRACT_PATH, REPOSITORY_ROOT } from './paths.ts';
 
+/**
+ * The environment without the variables that pin git to one repository. Git exports `GIT_DIR`
+ * to hooks, as an absolute path in linked worktrees, so without this a pre-push run would send
+ * git commands meant for `cwd` (fixture repositories included) to the real repository.
+ */
+export function gitEnvironment(): Record<string, string> {
+  const pinned = new Set(
+    Bun.spawnSync(['git', 'rev-parse', '--local-env-vars']).stdout.toString().split('\n'),
+  );
+  return Object.fromEntries(
+    Object.entries(process.env).filter(
+      (entry): entry is [string, string] => entry[1] !== undefined && !pinned.has(entry[0]),
+    ),
+  );
+}
 async function git(cwd: string, args: string[]) {
-  const child = Bun.spawn(['git', ...args], { cwd, stdout: 'pipe', stderr: 'pipe' });
+  const child = Bun.spawn(['git', ...args], {
+    cwd,
+    env: gitEnvironment(),
+    stdout: 'pipe',
+    stderr: 'pipe',
+  });
   const [stdout, stderr, code] = await Promise.all([
     new Response(child.stdout).text(),
     new Response(child.stderr).text(),
