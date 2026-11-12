@@ -1,5 +1,9 @@
 import type { z } from 'zod';
 
+import type { NotificationRuleRepository } from '../notifications/repository.ts';
+import type { RepositoryPage } from './page.ts';
+export type { RepositoryPage } from './page.ts';
+
 import type { AuditFilters } from '../platform/activity-fields.ts';
 import type {
   ApiKeyRecord,
@@ -12,13 +16,6 @@ import type {
 } from '../platform/models.ts';
 import type { instanceUpdateSchema, projectUpdateSchema } from '../platform/models.ts';
 
-/** A bounded page query; API-specific cursors are decoded before entering repositories. */
-export type RepositoryPage = {
-  limit: number;
-  /** Internal look-ahead for determining nextCursor; never a client-provided limit override. */
-  lookAhead?: boolean;
-  before?: { createdAt: Date; id: string };
-};
 type ProjectChild<T> = Omit<T, 'organizationId' | 'projectId'>;
 
 export interface ProjectRepository {
@@ -26,6 +23,15 @@ export interface ProjectRepository {
   get(id: string, options?: { includeArchived?: boolean; lock?: boolean }): Promise<Project>;
   insert(input: Omit<Project, 'organizationId'>): Promise<Project>;
   update(id: string, input: z.infer<typeof projectUpdateSchema>): Promise<Project>;
+  /** When hard erasure finished, or `null`; also reads archived projects (ADR-0061). */
+  erasedAt(id: string): Promise<Date | null>;
+  /**
+   * Erasure worker only (`archivedProject` context): hard-deletes the bound project's platform rows
+   * (outbox events, idempotency, usage, notification rules, keys, revisions, instances).
+   */
+  eraseRecords(): Promise<number>;
+  /** Erasure worker only: keeps the row for audit references, without names or origins. */
+  tombstone(input: { slug: string; now: Date }): Promise<void>;
 }
 
 export interface KeyRepository {
@@ -93,6 +99,7 @@ export interface ModuleRepositories {
 
 /** Only repositories, not an unrestricted driver, cross the tenant transaction boundary. */
 export type TenantRepositories = Readonly<{
+  notificationRules: NotificationRuleRepository;
   projects: ProjectRepository;
   keys: KeyRepository;
   instances: InstanceRepository;

@@ -10,6 +10,9 @@ import {
   createKeyScopeCatalog,
   createProjectService,
   createInstanceService,
+  createNotificationRuleService,
+  createSubjectPrivacyService,
+  createProjectErasureService,
   createConfigurationService,
   createPlatformQueries,
   createRateLimiter,
@@ -19,6 +22,8 @@ import {
   systemClock,
   type Clock,
   type Queue,
+  type NotificationMailEnqueue,
+  type ProjectErasurePorts,
   type ProjectJobEnqueue,
   type TenantContext,
   type Config,
@@ -33,6 +38,7 @@ import {
 } from '@backbricks/db';
 
 import { moduleJobs } from './module-jobs.ts';
+import { moduleRepositories } from './module-repositories.ts';
 import { moduleCatalog } from './modules.ts';
 
 /** One provider/service lifetime per server runtime. Modules receive only the core's restricted views. */
@@ -43,6 +49,8 @@ export function createServerServices(
     clock?: Clock;
     queue?: Queue;
     enqueueProject?: ProjectJobEnqueue;
+    enqueueNotificationMail?: NotificationMailEnqueue;
+    projectErasure?: ProjectErasurePorts;
     entitlements?: Entitlements;
     modules?: SelectedModules;
     moduleRepositories?: Parameters<typeof createWithTenant>[1];
@@ -71,7 +79,10 @@ export function createServerServices(
     },
     { mailer, storage, captcha, queue: options.queue },
   );
-  const withTenant = createWithTenant(db, options.moduleRepositories);
+  const withTenant = createWithTenant(
+    db,
+    options.moduleRepositories ?? moduleRepositories(modules),
+  );
   const moduleRuntime = modules.registry.bind(container);
   const instances = createInstanceService({
     ...container.core,
@@ -93,6 +104,11 @@ export function createServerServices(
         options.queue && options.enqueueProject
           ? { queue: options.queue, enqueueProject: options.enqueueProject }
           : undefined,
+        // Without SMTP, notification delivery is a no-op; the options route reports it (P2.6b).
+        mailer && options.enqueueNotificationMail
+          ? { publicUrl: config.publicUrl, enqueueMail: options.enqueueNotificationMail }
+          : undefined,
+        options.projectErasure,
       ).map((handler) => {
         const definition = PLATFORM_JOB_DEFINITIONS.find((job) => job.name === handler.name);
         if (!definition) throw new Error('Missing platform job definition');
@@ -100,7 +116,7 @@ export function createServerServices(
           ...definition,
           moduleType: 'core',
           cron: undefined,
-          consumes: undefined,
+          consumes: handler.consumes,
           runInTransaction: handler.runInTransaction,
           run: (context: TenantContext, input: unknown) =>
             withTenant(context, (tx) => handler.runInTransaction(tx, input)),
@@ -108,7 +124,22 @@ export function createServerServices(
       }),
     ],
     withTenant,
+    notificationRules: createNotificationRuleService({
+      ...container.core,
+      registry: modules.registry,
+      emailAvailable: mailer !== null,
+    }),
+    privacy: createSubjectPrivacyService({
+      ...container.core,
+      registry: modules.registry,
+      runtime: moduleRuntime,
+      queue: options.queue,
+    }),
     projects: createProjectService(container.core),
+    projectErasure: createProjectErasureService({
+      audit: container.core.audit,
+      ports: options.projectErasure,
+    }),
     instances,
     configuration: createConfigurationService({
       ...container.core,

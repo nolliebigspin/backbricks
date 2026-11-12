@@ -47,8 +47,14 @@ export function createWithTenant(
         const scope = createRepositoryScope(context, assertActive);
         const repositories = createTenantRepositories(tx, scope);
         if (context.projectId) {
-          const project = await repositories.projects.get(context.projectId);
-          if (project.organizationId !== context.organizationId || project.id !== context.projectId)
+          const project = await repositories.projects.get(context.projectId, {
+            includeArchived: context.archivedProject === true,
+          });
+          if (
+            project.organizationId !== context.organizationId ||
+            project.id !== context.projectId ||
+            (context.archivedProject && !project.deletedAt)
+          )
             throw new AppError('not_found');
         }
         const handle: TenantTransaction = Object.freeze({

@@ -125,6 +125,8 @@ export async function scenario(
         modules,
         queue: queue?.queue,
         enqueueProject: queue?.enqueueProject,
+        enqueueNotificationMail: queue?.enqueueNotificationMail,
+        projectErasure: queue?.projectErasure,
         moduleRepositories: apiOptions.moduleRepositories,
       });
       services = runtime;
@@ -146,6 +148,7 @@ export async function scenario(
           log,
           auth,
           ids: runtime.container.core.ids,
+          rateLimiter: runtime.container.core.rateLimiter,
           modules: runtime.modules,
           dashboardDir: null,
           readinessChecks: runtime.readinessChecks,

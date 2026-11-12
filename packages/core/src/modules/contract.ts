@@ -1,15 +1,22 @@
 import type { z } from 'zod';
 
-import type { PublicWriteContext, PublicWritePolicyInput } from '../abuse/policy.ts';
+import type {
+  PublicReadContext,
+  PublicWriteContext,
+  PublicWritePolicyInput,
+} from '../abuse/policy.ts';
+import type { NotificationSubject, NotificationSubjectInput } from '../notifications/schemas.ts';
 import type { ModuleInstance } from '../platform/models.ts';
+import type { InstanceRevision } from '../platform/models.ts';
 import type { OptionalServiceName } from '../services/container.ts';
-import type { ModuleRepositories } from '../tenancy/repositories.ts';
+import type { ModuleRepositories, RepositoryPage } from '../tenancy/repositories.ts';
 import type { TenantHandle } from '../tenancy/tenant-context.ts';
 import type { CapabilityFactories, CapabilityName, capabilityView } from './capabilities.ts';
 import type { InfraRequirement } from './infrastructure.ts';
 import type { ModuleJobRegistrar } from './jobs.ts';
 import type { ModuleAdminRouter, ModulePublicRouter } from './routes.ts';
 import type { BoundCoreServices, ModuleOptionalServices } from './services.ts';
+import type { ModuleStreamPage } from './streams.ts';
 import type {
   ConfigChangeReport,
   EventDefinition,
@@ -19,6 +26,15 @@ import type {
 } from './values.ts';
 
 export type ConfiguredInstance<T> = Omit<ModuleInstance, 'config'> & { config: T };
+/** Read-only configuration access fixed to the module and caller transaction. */
+export type ModuleInstanceReads<T> = Readonly<{
+  get(key: string): Promise<ConfiguredInstance<T>>;
+  revision(key: string, version: number): Promise<ConfiguredInstance<T>>;
+  revisions(
+    key: string,
+    page: RepositoryPage,
+  ): Promise<(Omit<InstanceRevision, 'config'> & { config: T })[]>;
+}>;
 export type RequiredInfrastructure<I extends readonly InfraRequirement[]> =
   I[number] extends infer D
     ? D extends { optional: true }
@@ -40,7 +56,7 @@ export type ModuleServices<
   require<K extends R>(name: K): NonNullable<ModuleOptionalServices[K]>;
   optional<K extends O>(name: K): ModuleOptionalServices[K];
 };
-export type ModuleRuntime<
+export type ModuleDataRuntime<
   T,
   R extends CapabilityName,
   O extends CapabilityName,
@@ -51,10 +67,32 @@ export type ModuleRuntime<
   tx: TenantHandle;
   repository: Partial<ModuleRepositories>[MT];
   config(input: unknown): T;
+  instances: ModuleInstanceReads<T>;
   capabilities: ReturnType<typeof capabilityView<R, O>>;
   services: ModuleServices<SR, SO>;
+  /** Public read routes: the active instance and its validated config. */
+  publicRead?: Readonly<PublicReadContext>;
+  /** Public write routes: instance, config, spam verdict and minimized request source. */
   publicWrite?: Readonly<PublicWriteContext>;
 }>;
+/** CSV readers receive fresh, module-owned frames after the request's audit transaction commits. */
+export type ModuleRuntime<
+  T,
+  R extends CapabilityName,
+  O extends CapabilityName,
+  SR extends OptionalServiceName,
+  SO extends OptionalServiceName,
+  MT extends string = string,
+> = ModuleDataRuntime<T, R, O, SR, SO, MT> &
+  Readonly<{
+    streamText?: (
+      prefix: string,
+      read: (
+        runtime: ModuleDataRuntime<T, R, O, SR, SO, MT>,
+        cursor: string | undefined,
+      ) => Promise<ModuleStreamPage>,
+    ) => ReadableStream<Uint8Array>;
+  }>;
 export type { ModuleExecution } from './execution.ts';
 
 export type ModuleDefinition<
@@ -155,6 +193,21 @@ export type ModuleDefinition<
       now: Date,
     ): Promise<number>;
   };
+  /** Optional: lets notification rules on this module's events mail about a subject (ADR-0060). */
+  notifications?: {
+    /** `null` skips the notification (e.g. spam, test entries or a deleted subject). */
+    describe(
+      runtime: ModuleRuntime<
+        T,
+        R,
+        O,
+        SR | RequiredInfrastructure<I>,
+        SO | OptionalInfrastructure<I>,
+        MT
+      >,
+      input: NotificationSubjectInput<ConfiguredInstance<T>>,
+    ): Promise<NotificationSubject | null>;
+  };
   privacy: {
     exportSubject(
       runtime: ModuleRuntime<
@@ -177,6 +230,21 @@ export type ModuleDefinition<
         MT
       >,
       email: string,
+    ): Promise<number>;
+    /**
+     * Project hard erasure (ADR-0061): delete up to `limit` of the project's records, including
+     * stored objects, and return how many went. The platform calls it until it returns < limit.
+     */
+    eraseScope(
+      runtime: ModuleRuntime<
+        T,
+        R,
+        O,
+        SR | RequiredInfrastructure<I>,
+        SO | OptionalInfrastructure<I>,
+        MT
+      >,
+      input: { limit: number },
     ): Promise<number>;
   };
 };

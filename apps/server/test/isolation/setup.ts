@@ -103,6 +103,14 @@ export async function prepareIsolationFixture(fixture: AuthFixture) {
       db.select().from(authSchema.user),
     ]);
     return {
+      notificationRules: (
+        await db.execute<Record<string, unknown>>('select * from notification_rules order by id')
+      ).rows,
+      submissions: (
+        await db.execute<Record<string, unknown>>(
+          'select id, organization_id, project_id, instance_id, data, status, read_at, spam_verdict, expires_at, updated_at from form_submissions order by id',
+        )
+      ).rows,
       scoped,
       projectState,
       organizations: sorted(organizations).map(({ id, name }) => ({ id, name })),

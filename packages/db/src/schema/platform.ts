@@ -1,3 +1,8 @@
+import {
+  DEFAULT_NOTIFICATION_HOURLY_LIMIT,
+  MAX_NOTIFICATION_HOURLY_LIMIT,
+  MAX_NOTIFICATION_RECIPIENTS,
+} from '@backbricks/core';
 import { sql } from 'drizzle-orm';
 import {
   bigint,
@@ -6,6 +11,7 @@ import {
   check,
   date,
   index,
+  integer,
   jsonb,
   pgTable,
   primaryKey,
@@ -46,6 +52,8 @@ export const events = pgTable(
   ],
 );
 
+// The append-only trigger is hand-written SQL (migration 20261106024528_audit_immutability);
+// schema-integrity.test.ts asserts it still exists.
 export const auditLogs = pgTable(
   'audit_logs',
   {
@@ -79,12 +87,41 @@ export const notificationRules = pgTable(
     instanceId: text('instance_id'),
     eventType: text('event_type').notNull(),
     channel: notificationChannel('channel').notNull().default('email'),
-    recipients: text('recipients').array().notNull(),
+    recipientUserIds: text('recipient_user_ids').array().notNull(),
+    maxPerHour: integer('max_per_hour').notNull().default(DEFAULT_NOTIFICATION_HOURLY_LIMIT),
+    // Delivery throttle state (ADR-0060): mails sent in the current hour and entries waiting for a digest.
+    throttleWindowStart: timestampColumn('throttle_window_start'),
+    throttleSent: integer('throttle_sent').notNull().default(0),
+    throttleSuppressed: integer('throttle_suppressed').notNull().default(0),
     includeContent: boolean('include_content').notNull().default(false),
     enabled: boolean('enabled').notNull().default(true),
     ...recordTimestamps(),
   },
-  (table) => [projectForeignKey(table), instanceForeignKey(table)],
+  (table) => [
+    projectForeignKey(table),
+    instanceForeignKey(table),
+    check(
+      'notification_rules_recipient_bound',
+      sql`cardinality(${table.recipientUserIds}) <= ${sql.raw(String(MAX_NOTIFICATION_RECIPIENTS))}`,
+    ),
+    check(
+      'notification_rules_enabled_recipients',
+      sql`not ${table.enabled} or cardinality(${table.recipientUserIds}) > 0`,
+    ),
+    check(
+      'notification_rules_hourly_bound',
+      sql`${table.maxPerHour} between 1 and ${sql.raw(String(MAX_NOTIFICATION_HOURLY_LIMIT))}`,
+    ),
+    check(
+      'notification_rules_throttle_counts',
+      sql`${table.throttleSent} >= 0 and ${table.throttleSuppressed} >= 0`,
+    ),
+    index('notification_rules_event_idx').on(
+      table.organizationId,
+      table.projectId,
+      table.eventType,
+    ),
+  ],
 );
 
 export const usageCounters = pgTable(

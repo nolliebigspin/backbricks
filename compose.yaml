@@ -33,6 +33,7 @@ x-bun: &bun
     - nm-packages-modules-forms:/app/packages/modules/forms/node_modules
     - nm-packages-modules-reviews:/app/packages/modules/reviews/node_modules
     - nm-packages-modules-uploads:/app/packages/modules/uploads/node_modules
+    - nm-examples-html:/app/examples/html/node_modules
 
 # Dev configuration for the app services (documented in .env.example). Host env vars override
 # BACKBRICKS_MODULES, e.g. `BACKBRICKS_MODULES=forms docker compose up` without storage.
@@ -216,3 +217,4 @@ volumes:
   nm-packages-modules-forms:
   nm-packages-modules-reviews:
   nm-packages-modules-uploads:
+  nm-examples-html:

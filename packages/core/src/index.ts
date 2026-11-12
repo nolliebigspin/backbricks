@@ -34,6 +34,13 @@ export type {
   WithTenant,
 } from './tenancy/tenant-context.ts';
 export * from './tenancy/repositories.ts';
+export { MAX_BULK_ITEMS, bulkIdsSchema } from './http/bulk.ts';
+export { requireSessionRole } from './identity/permissions.ts';
+export { createNotificationRuleService } from './notifications/service.ts';
+export * from './notifications/schemas.ts';
+export type { NotificationRuleRepository } from './notifications/repository.ts';
+export { csvRow } from './export/csv.ts';
+export { createPagedTextStream, type ModuleStreamPage } from './modules/streams.ts';
 export * from './platform/models.ts';
 export {
   MAX_PAGE_SIZE,
@@ -70,11 +77,20 @@ export {
 export { canonicalIp, resolveClientIp, createIpIdentity } from './privacy/ip-identity.ts';
 export type { AuthReplayStore } from './privacy/auth-replay.ts';
 export type { ReplayStore } from './privacy/replay.ts';
+export {
+  createSubjectPrivacyService,
+  subjectErasureResponseSchema,
+  subjectExportResponseSchema,
+  subjectRequestSchema,
+  type SubjectPrivacyService,
+} from './privacy/subjects.ts';
 export { createChallengeService, POW_TTL_SECONDS } from './abuse/challenge.ts';
 export {
   publicAccessSchema,
   publicWritePolicySchema,
   publicWriteEnvelopeSchema,
+  publicReadContextSchema,
+  publicRequestSourceSchema,
   publicWriteContextSchema,
   honeypotResponseSchema,
   spamVerdict,
@@ -83,6 +99,8 @@ export {
   type PublicAccessInput,
   type PublicWritePolicy,
   type PublicWritePolicyInput,
+  type PublicReadContext,
+  type PublicRequestSource,
   type PublicWriteContext,
 } from './abuse/policy.ts';
 export {
@@ -141,8 +159,10 @@ export {
 export {
   ERROR_CODES,
   ERROR_TYPE_BASE_URL,
+  FIELD_ERROR_CODES,
   type ErrorCode,
   type ErrorStatus,
+  type FieldErrorCode,
 } from './errors/codes.ts';
 export {
   isSecretField,
@@ -153,8 +173,25 @@ export {
 } from './logging/redact.ts';
 export { fieldErrorSchema, problemDetailsSchema } from './errors/schema.ts';
 export {
+  publicRedirectUrlSchema,
+  publicFormRedirect,
+  publicFormFailure,
+  PUBLIC_FORM_MEDIA_TYPE,
+  MAX_PUBLIC_REDIRECT_URL_LENGTH,
+  PUBLIC_FORM_PROOF_FIELD,
+  isPublicFormContentType,
+  type PublicFormRedirects,
+} from './http/public-forms.ts';
+export {
+  refererPath,
+  USER_AGENT_FAMILIES,
+  userAgentFamily,
+  type UserAgentFamily,
+} from './http/user-agent.ts';
+export {
   actorTypeSchema,
   apiKeyKindSchema,
+  emailAddressSchema,
   moduleInstanceStatusSchema,
   notificationChannelSchema,
 } from './platform/values.ts';
@@ -219,6 +256,7 @@ export {
 export {
   instanceCreateSchema,
   instancePatchSchema,
+  instanceReplaceSchema,
   instanceResponseSchema,
   instanceKeySchema,
   instanceVersionSchema,
@@ -321,6 +359,7 @@ export {
   bindCapability,
   capabilityView,
   type CapabilityMap,
+  type FilesCapability,
   type CapabilityName,
   type Capability,
   type CapabilityLookup,
@@ -328,6 +367,7 @@ export {
 } from './modules/capabilities.ts';
 export {
   jsonValueSchema,
+  jsonValueWireSchema,
   canonicalJson,
   moduleNameSchema,
   localizedNameSchema,
@@ -344,6 +384,8 @@ export {
 export type {
   ModuleDefinition,
   ModuleRuntime,
+  ModuleDataRuntime,
+  ModuleInstanceReads,
   ModuleServices,
   ModuleExecution,
   ConfiguredInstance,
@@ -414,6 +456,34 @@ export {
 export { PLATFORM_JOB_DEFINITIONS, createPlatformJobHandlers } from './jobs/platform.ts';
 
 export { PLATFORM_JOBS } from './jobs/platform-names.ts';
+export {
+  createProjectErasureService,
+  erasedProjectSlug,
+  projectErasureRequestSchema,
+  projectErasureResponseSchema,
+  type ProjectErasurePorts,
+  type ProjectErasureService,
+} from './projects/erasure.ts';
+export {
+  notificationDispatchPayloadSchema,
+  notificationDeliveryPayloadSchema,
+  notificationDigestPayloadSchema,
+} from './notifications/jobs.ts';
+export type {
+  NotificationDeliveryOptions,
+  NotificationMailEnqueue,
+} from './notifications/delivery.ts';
+export {
+  NOTIFICATION_THROTTLE_WINDOW_MS,
+  throttleDecision,
+  type NotificationThrottle,
+} from './notifications/throttle.ts';
+export {
+  NOTIFICATION_CONTENT_LIMIT,
+  NOTIFICATION_VALUE_LIMIT,
+  renderNotificationMail,
+  type NotificationMailInput,
+} from './mail/notifications.ts';
 
 export {
   AUTH_MIN_PASSWORD_LENGTH,

@@ -64,6 +64,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/project-erasures': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['eraseProject'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/projects': {
     parameters: {
       query?: never;
@@ -128,6 +144,214 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/projects/{projectId}/forms': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['forms.instance.list'];
+    put?: never;
+    post: operations['forms.instance.create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/forms/{key}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['forms.instance.read'];
+    put: operations['forms.instance.replace'];
+    post?: never;
+    delete: operations['forms.instance.archive'];
+    options?: never;
+    head?: never;
+    patch: operations['forms.instance.update'];
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/forms/{key}/export.csv': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['forms.submissions.export'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/forms/{key}/migrate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['forms.instance.migrate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/forms/{key}/revisions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['forms.instance.revisions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/forms/{key}/revisions/{version}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['forms.instance.revision'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/forms/{key}/revisions/{version}/rollback': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['forms.instance.rollback'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/forms/{key}/submissions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['forms.submissions.list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/forms/{key}/submissions/bulk': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['forms.submissions.bulk'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/forms/{key}/submissions/bulk-delete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['forms.submissions.bulk_delete'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/forms/{key}/submissions/delete-all': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['forms.submissions.delete_all'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/forms/{key}/submissions/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['forms.submissions.read'];
+    put?: never;
+    post?: never;
+    delete: operations['forms.submissions.delete'];
+    options?: never;
+    head?: never;
+    patch: operations['forms.submissions.update'];
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/forms/{key}/summary': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['forms.summary'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/projects/{projectId}/integration': {
     parameters: {
       query?: never;
@@ -171,6 +395,86 @@ export interface paths {
     put?: never;
     post?: never;
     delete: operations['revokeKey'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/notification-rules': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['notifications.list'];
+    put?: never;
+    post: operations['notifications.create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/notification-rules/options': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['notifications.options'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/notification-rules/{ruleId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['notifications.delete'];
+    options?: never;
+    head?: never;
+    patch: operations['notifications.update'];
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/privacy/subject-delete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['privacy.subjectDelete'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/privacy/subject-export': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['privacy.subjectExport'];
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -220,6 +524,38 @@ export interface paths {
     post?: never;
     delete?: never;
     options: operations['public.challenge.preflight'];
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/public/forms/{key}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['forms.public.schema'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options: operations['forms.preflight.0'];
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/public/forms/{key}/submissions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['forms.public.submit'];
+    delete?: never;
+    options: operations['forms.preflight.1'];
     head?: never;
     patch?: never;
     trace?: never;
@@ -330,6 +666,10 @@ export interface operations {
                 plural: string;
                 singular: string;
               };
+              templates: {
+                key: string;
+                name: string;
+              }[];
               type: string;
             }[];
           };
@@ -453,6 +793,8 @@ export interface operations {
                 /** @enum {string} */
                 role?: 'owner' | 'admin' | 'member';
                 scopes?: string[];
+                /** @enum {string} */
+                spam?: 'clean' | 'suspect' | 'spam';
                 status?: string;
               } | null;
               /** Format: date-time */
@@ -464,6 +806,61 @@ export interface operations {
               targetType: string | null;
             }[];
             nextCursor: string | null;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  eraseProject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          confirm: string;
+          projectId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Hard erasure of an archived project's personal data was queued. The slug confirms it. */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            status: 'queued';
           };
         };
       };
@@ -845,6 +1242,8 @@ export interface operations {
                 /** @enum {string} */
                 role?: 'owner' | 'admin' | 'member';
                 scopes?: string[];
+                /** @enum {string} */
+                spam?: 'clean' | 'suspect' | 'spam';
                 status?: string;
               } | null;
               /** Format: date-time */
@@ -1063,6 +1462,1251 @@ export interface operations {
       };
     };
   };
+  'forms.instance.list': {
+    parameters: {
+      query?: {
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Active and paused instance configurations. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data: {
+              config: unknown;
+              configVersion: number;
+              /** Format: date-time */
+              createdAt: string;
+              id: string;
+              key: string;
+              moduleType: string;
+              moduleVersion: number;
+              name: string;
+              organizationId: string;
+              projectId: string;
+              /** @enum {string} */
+              status: 'active' | 'paused' | 'archived';
+              storedModuleVersion?: number;
+              /** Format: date-time */
+              updatedAt: string;
+            }[];
+            nextCursor: string | null;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.instance.create': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          config?: unknown;
+          key: string;
+          name: string;
+          /**
+           * @default active
+           * @enum {string}
+           */
+          status?: 'active' | 'paused';
+          template?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Instance created with its initial revision. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            config: unknown;
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            key: string;
+            moduleType: string;
+            moduleVersion: number;
+            name: string;
+            organizationId: string;
+            projectId: string;
+            /** @enum {string} */
+            status: 'active' | 'paused' | 'archived';
+            storedModuleVersion?: number;
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.instance.read': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Instance configuration. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            config: unknown;
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            key: string;
+            moduleType: string;
+            moduleVersion: number;
+            name: string;
+            organizationId: string;
+            projectId: string;
+            /** @enum {string} */
+            status: 'active' | 'paused' | 'archived';
+            storedModuleVersion?: number;
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.instance.replace': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          config: unknown;
+          configVersion: number;
+          name?: string;
+          /**
+           * @default active
+           * @enum {string}
+           */
+          status?: 'active' | 'paused';
+        };
+      };
+    };
+    responses: {
+      /** @description Full configuration replace (null values are kept, unlike a merge patch); destructive changes additionally require config:destructive. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            config: unknown;
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            key: string;
+            moduleType: string;
+            moduleVersion: number;
+            name: string;
+            organizationId: string;
+            projectId: string;
+            /** @enum {string} */
+            status: 'active' | 'paused' | 'archived';
+            storedModuleVersion?: number;
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.instance.archive': {
+    parameters: {
+      query: {
+        configVersion: number;
+      };
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Configuration archived, key reserved, revisions retained. Requires config:write and config:destructive; personal records are not erased. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.instance.update': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          config?: unknown;
+          configVersion: number;
+          name?: string;
+          /** @enum {string} */
+          status?: 'active' | 'paused';
+        };
+      };
+    };
+    responses: {
+      /** @description Configuration merge patch; destructive changes additionally require config:destructive. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            config: unknown;
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            key: string;
+            moduleType: string;
+            moduleVersion: number;
+            name: string;
+            organizationId: string;
+            projectId: string;
+            /** @enum {string} */
+            status: 'active' | 'paused' | 'archived';
+            storedModuleVersion?: number;
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.submissions.export': {
+    parameters: {
+      query?: {
+        status?: 'open' | 'done';
+        read?: 'true' | 'false';
+        folder?: 'inbox' | 'spam';
+        test?: 'true' | 'false';
+        from?: string;
+        to?: string;
+        q?: string;
+      };
+      header?: never;
+      path: {
+        key: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description CSV with defused spreadsheet formulas and all historical field columns. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'text/csv': string;
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.instance.migrate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          configVersion: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Persist the current format with transactional revision and audit. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            config: unknown;
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            key: string;
+            moduleType: string;
+            moduleVersion: number;
+            name: string;
+            organizationId: string;
+            projectId: string;
+            /** @enum {string} */
+            status: 'active' | 'paused' | 'archived';
+            storedModuleVersion?: number;
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.instance.revisions': {
+    parameters: {
+      query?: {
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Immutable revision history. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data: {
+              /** @enum {string} */
+              actorType: 'user' | 'api_key' | 'mcp' | 'system';
+              config?: unknown;
+              configVersion: number;
+              /** Format: date-time */
+              createdAt: string;
+              id: string;
+              instanceId: string;
+              moduleVersion: number;
+              organizationId: string;
+              projectId: string;
+            }[];
+            nextCursor: string | null;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.instance.revision': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+        version: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Stored format and configuration of one revision. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            actorType: 'user' | 'api_key' | 'mcp' | 'system';
+            config?: unknown;
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            instanceId: string;
+            moduleVersion: number;
+            organizationId: string;
+            projectId: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.instance.rollback': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+        version: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          configVersion: number;
+        };
+      };
+    };
+    responses: {
+      /** @description New revision restoring the selected historical configuration. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            config: unknown;
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            key: string;
+            moduleType: string;
+            moduleVersion: number;
+            name: string;
+            organizationId: string;
+            projectId: string;
+            /** @enum {string} */
+            status: 'active' | 'paused' | 'archived';
+            storedModuleVersion?: number;
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.submissions.list': {
+    parameters: {
+      query?: {
+        status?: 'open' | 'done';
+        read?: 'true' | 'false';
+        folder?: 'inbox' | 'spam';
+        test?: 'true' | 'false';
+        from?: string;
+        to?: string;
+        q?: string;
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        key: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A bounded page with selected key fields only. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data: {
+              configVersion: number;
+              /** Format: date-time */
+              createdAt: string;
+              data: {
+                [key: string]: unknown;
+              };
+              id: string;
+              isTest: boolean;
+              read: boolean;
+              /** @enum {string} */
+              spamVerdict: 'clean' | 'suspect' | 'spam';
+              /** @enum {string} */
+              status: 'open' | 'done';
+              /** Format: date-time */
+              updatedAt: string;
+            }[];
+            nextCursor: string | null;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.submissions.bulk': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          action: 'read' | 'unread' | 'done' | 'open' | 'spam' | 'not_spam';
+          ids: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description All selected entries were updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            count: number;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.submissions.bulk_delete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          ids: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description All selected entries were erased. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            count: number;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.submissions.delete_all': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          confirm: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Bounded erasure was queued. */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {boolean} */
+            accepted: true;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.submissions.read': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+        id: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description An entry with its historical field definitions. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            additionalData: {
+              [key: string]: unknown;
+            };
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            data: {
+              [key: string]: unknown;
+            };
+            /** Format: date-time */
+            expiresAt: string | null;
+            fields: {
+              consent?: {
+                text: string;
+                version: string;
+              };
+              help?: string;
+              key: string;
+              label: string;
+              max?: number | string;
+              maxFiles?: number;
+              maxLength?: number;
+              min?: number | string;
+              minLength?: number;
+              options?: {
+                label: string;
+                value: string;
+              }[];
+              required: boolean;
+              type: string;
+            }[];
+            id: string;
+            isTest: boolean;
+            read: boolean;
+            source: {
+              ipHash?: string;
+              origin?: string;
+              path?: string;
+              uaFamily: string;
+            };
+            spamReasons: string[];
+            /** @enum {string} */
+            spamVerdict: 'clean' | 'suspect' | 'spam';
+            /** @enum {string} */
+            status: 'open' | 'done';
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.submissions.delete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+        id: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The entry was erased. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.submissions.update': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+        id: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          read?: boolean;
+          /** @enum {string} */
+          spamVerdict?: 'clean' | 'suspect' | 'spam';
+          /** @enum {string} */
+          status?: 'open' | 'done';
+        };
+      };
+    };
+    responses: {
+      /** @description The entry was updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            id: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.summary': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Counts only, without personal data. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            spam: number;
+            total: number;
+            unread: number;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
   getProjectIntegration: {
     parameters: {
       query?: never;
@@ -1097,6 +2741,10 @@ export interface operations {
                 plural: string;
                 singular: string;
               };
+              templates: {
+                key: string;
+                name: string;
+              }[];
               type: string;
             }[];
             project: {
@@ -1357,6 +3005,445 @@ export interface operations {
       };
     };
   };
+  'notifications.list': {
+    parameters: {
+      query?: {
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Notification configuration. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data: {
+              /** @enum {string} */
+              channel: 'email';
+              /** Format: date-time */
+              createdAt: string;
+              enabled: boolean;
+              eventType: string;
+              id: string;
+              includeContent: boolean;
+              instanceId: string | null;
+              maxPerHour: number;
+              recipientUserIds: string[];
+              /** Format: date-time */
+              updatedAt: string;
+            }[];
+            nextCursor: string | null;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'notifications.create': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @default true */
+          enabled?: boolean;
+          eventType: string;
+          /** @default false */
+          includeContent?: boolean;
+          /** @default null */
+          instanceId?: string | null;
+          /** @default 10 */
+          maxPerHour?: number;
+          recipientUserIds: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Notification rule created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            channel: 'email';
+            /** Format: date-time */
+            createdAt: string;
+            enabled: boolean;
+            eventType: string;
+            id: string;
+            includeContent: boolean;
+            instanceId: string | null;
+            maxPerHour: number;
+            recipientUserIds: string[];
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'notifications.options': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Enabled events and verified organization members. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            emailAvailable: boolean;
+            events: {
+              description: {
+                de: string;
+                en: string;
+              };
+              name: string;
+            }[];
+            recipients: {
+              /** Format: email */
+              email: string;
+              id: string;
+              name: string;
+            }[];
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'notifications.delete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        ruleId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Notification rule removed. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'notifications.update': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        ruleId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          enabled?: boolean;
+          eventType?: string;
+          includeContent?: boolean;
+          instanceId?: string | null;
+          maxPerHour?: number;
+          recipientUserIds?: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Notification rule updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            channel: 'email';
+            /** Format: date-time */
+            createdAt: string;
+            enabled: boolean;
+            eventType: string;
+            id: string;
+            includeContent: boolean;
+            instanceId: string | null;
+            maxPerHour: number;
+            recipientUserIds: string[];
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'privacy.subjectDelete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: email */
+          email: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Erasure of the subject's records in every enabled module was queued. */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            status: 'queued';
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'privacy.subjectExport': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: email */
+          email: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Every enabled module's records for the subject email, as JSON. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            modules: {
+              [key: string]: unknown;
+            };
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
   getProjectTypes: {
     parameters: {
       query?: {
@@ -1525,6 +3612,248 @@ export interface operations {
     };
   };
   'public.challenge.preflight': {
+    parameters: {
+      query: {
+        key: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Permitted public request preflight. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.public.schema': {
+    parameters: {
+      query?: {
+        key?: string;
+      };
+      header?: never;
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The public form schema. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            fields: {
+              consent?: {
+                text: string;
+                version: string;
+              };
+              help?: string;
+              key: string;
+              label: string;
+              max?: number | string;
+              maxFiles?: number;
+              maxLength?: number;
+              min?: number | string;
+              minLength?: number;
+              options?: {
+                label: string;
+                value: string;
+              }[];
+              required: boolean;
+              type: string;
+            }[];
+            honeypotField: string;
+            key: string;
+            proofOfWork: boolean;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.preflight.0': {
+    parameters: {
+      query: {
+        key: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Permitted public request preflight. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'forms.public.submit': {
+    parameters: {
+      query?: {
+        key?: string;
+      };
+      header?: {
+        'idempotency-key'?: string;
+      };
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          data: {
+            [key: string]: unknown;
+          };
+          honeypot?: string;
+          proof?: unknown;
+        };
+        'application/x-www-form-urlencoded': {
+          [key: string]: string | string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Accepted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json':
+            | {
+                id: string;
+              }
+            | {
+                /** @enum {boolean} */
+                accepted: true;
+              };
+        };
+      };
+      /** @description HTML submission received, or safe error redirect. */
+      303: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+          'text/html': string;
+        };
+      };
+    };
+  };
+  'forms.preflight.1': {
     parameters: {
       query: {
         key: string;

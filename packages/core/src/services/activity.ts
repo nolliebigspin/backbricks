@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { spamVerdictSchema } from '../abuse/policy.ts';
 import { AppError } from '../errors/app-error.ts';
 import { organizationRoleSchema } from '../http/route-policy.ts';
 import type { Principal } from '../identity/principal.ts';
@@ -36,6 +37,8 @@ export const activityMetadataSchema = z
     previousRole: organizationRoleSchema.optional(),
     role: organizationRoleSchema.optional(),
     isTest: z.boolean().optional(),
+    /** Spam verdict of a received record (forms, later reviews); never its content. */
+    spam: spamVerdictSchema.shape.status.optional(),
     count: z.number().int().nonnegative().optional(),
   })
   .strict();

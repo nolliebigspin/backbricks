@@ -44,6 +44,7 @@ export async function exportOpenApi(): Promise<string> {
       {
         log,
         ids: services.container.core.ids,
+        rateLimiter: services.container.core.rateLimiter,
         modules: services.modules,
         readinessChecks: [],
         dashboardDir: null,

@@ -2,7 +2,6 @@ import type { z } from 'zod';
 
 import type { PublicAccessInput } from '../abuse/policy.ts';
 import type { ManagementRoutePolicy, RoutePolicy } from '../http/route-policy.ts';
-import type { JsonValue } from './values.ts';
 
 export type ModuleInputSchema = z.ZodObject<{
   params: z.ZodObject;
@@ -10,7 +9,7 @@ export type ModuleInputSchema = z.ZodObject<{
   body: z.ZodType;
 }>;
 export type ModuleResponseDefinition =
-  | { kind: 'json'; description: string; schema: z.ZodType<JsonValue> }
+  | { kind: 'json'; description: string; schema: z.ZodType }
   | { kind: 'empty' | 'redirect'; description: string }
   | { kind: 'csv'; description: string };
 export type ModuleRouteSpec<I extends ModuleInputSchema, P extends RoutePolicy> = {
@@ -31,6 +30,7 @@ export interface ModuleAdminRouter<Runtime> {
 export interface ModulePublicRouter<Runtime> {
   register<I extends ModuleInputSchema>(
     spec: ModuleRouteSpec<I, Extract<RoutePolicy, { kind: 'public' }>> & {
+      /** `form: true` on writes opts into flat urlencoded fields and HTML/303 results. */
       access: PublicAccessInput;
     },
     handler: (runtime: Runtime, input: z.output<I>) => Promise<Response>,

@@ -74,12 +74,22 @@ test.skipIf(!available)(
           ).status,
         ).toBe(404);
         expect(await f.snapshot()).toEqual(before);
-        await f.db.execute(
-          "alter table events add constraint fixture_apply_failure check (type <> 'instance.created') not valid",
-        );
-        expect((await apply(desired, proposal.planHash)).status).toBe(500);
-        expect(await f.snapshot()).toEqual(before);
-        await f.db.execute('alter table events drop constraint fixture_apply_failure');
+        // Audit and outbox each fail on their own; either failure rolls back instances and both tables.
+        for (const [table, column] of [
+          ['events', 'type'],
+          ['audit_logs', 'action'],
+        ] as const) {
+          // oxlint-disable-next-line no-await-in-loop -- One disposable constraint at a time.
+          await f.db.execute(
+            `alter table ${table} add constraint fixture_apply_failure check (${column} <> 'instance.created') not valid`,
+          );
+          // oxlint-disable-next-line no-await-in-loop -- See above.
+          expect((await apply(desired, proposal.planHash)).status).toBe(500);
+          // oxlint-disable-next-line no-await-in-loop -- See above.
+          expect(await f.snapshot()).toEqual(before);
+          // oxlint-disable-next-line no-await-in-loop -- See above.
+          await f.db.execute(`alter table ${table} drop constraint fixture_apply_failure`);
+        }
         const concurrent = await Promise.all([
           apply(desired, proposal.planHash),
           apply(desired, proposal.planHash),

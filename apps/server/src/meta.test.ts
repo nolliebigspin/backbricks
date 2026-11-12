@@ -7,7 +7,7 @@ import {
   systemClock,
   authCapabilities,
 } from '@backbricks/core';
-import { formsDescriptor } from '@backbricks/module-forms';
+import { reviewsDescriptor } from '@backbricks/module-reviews';
 
 import { createApp } from './app.ts';
 import { createLogger } from './logger.ts';
@@ -29,7 +29,7 @@ function application(modules = moduleCatalog.select(['forms'])) {
 }
 
 test('public metadata names selected descriptors without claiming operational domain APIs', async () => {
-  const modules = defineModuleCatalog([formsDescriptor]).select(['forms']);
+  const modules = defineModuleCatalog([reviewsDescriptor]).select(['reviews']);
   const app = application(modules);
   const response = await app.request('/v1/meta');
   expect(response.status).toBe(200);
@@ -39,16 +39,17 @@ test('public metadata names selected descriptors without claiming operational do
       "modules": [
         {
           "displayName": {
-            "de": "Formulare",
-            "en": "Forms",
+            "de": "Bewertungen",
+            "en": "Reviews",
           },
           "enabled": true,
           "operational": false,
           "resourceName": {
-            "plural": "forms",
-            "singular": "form",
+            "plural": "review-collections",
+            "singular": "review-collection",
           },
-          "type": "forms",
+          "templates": [],
+          "type": "reviews",
         },
       ],
     }
@@ -71,12 +72,10 @@ test('known disabled and unimplemented namespaces return only installation-wide 
     metadata.modules.map((module) => [module.type, module.enabled, module.operational]),
   ).toEqual([
     ['uploads', false, false],
-    ['forms', true, false],
+    ['forms', true, true],
     ['reviews', false, false],
   ]);
   const paths = [
-    '/v1/public/forms/contact/submissions',
-    '/v1/projects/foreign/forms/contact',
     '/v1/public/upload-zones/cv/files',
     '/v1/projects/foreign/upload-zones/cv',
     '/v1/public/review-collections/testimonials/reviews',

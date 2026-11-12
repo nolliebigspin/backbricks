@@ -11,7 +11,7 @@ export function unwrap<T>(result: { data?: T | null; error?: unknown }): T {
 }
 
 /** Mutations are deliberately outside Query's response cache (keys may be revealed once). */
-export function useAction() {
+export function useAction(describe: (error: unknown) => string = accountError) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
@@ -27,7 +27,7 @@ export function useAction() {
         await work();
         setDone(true);
       } catch (cause) {
-        setError(accountError(cause));
+        setError(describe(cause));
       } finally {
         running.current = false;
         setBusy(false);

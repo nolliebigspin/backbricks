@@ -1,7 +1,13 @@
 import { z } from 'zod';
 
-import { publicWriteContextSchema, publicWritePolicySchema } from '../abuse/policy.ts';
+import {
+  publicReadContextSchema,
+  publicWriteContextSchema,
+  publicWritePolicySchema,
+} from '../abuse/policy.ts';
 import { AppError } from '../errors/app-error.ts';
+import { notificationSubjectSchema } from '../notifications/schemas.ts';
+import { emailAddressSchema } from '../platform/values.ts';
 import type { OptionalServiceName } from '../services/container.ts';
 import { capabilityView, type CapabilityName } from './capabilities.ts';
 import { configuration } from './configuration.ts';
@@ -13,6 +19,7 @@ import type {
   OptionalInfrastructure,
 } from './contract.ts';
 import { infraRequirementSchema, type InfraRequirement } from './infrastructure.ts';
+import { moduleInstanceReads } from './instances.ts';
 import type { RegisteredModule } from './registered.ts';
 import { jobRegistrar, routeRegistrar } from './registrars.ts';
 import { moduleServices } from './services.ts';
@@ -54,6 +61,7 @@ export function defineModule<
   const config = configuration(definition);
   const retention = { ...definition.retention };
   const privacy = { ...definition.privacy };
+  const notifications = definition.notifications ? { ...definition.notifications } : null;
   type Runtime = ModuleRuntime<
     T,
     R,
@@ -65,12 +73,26 @@ export function defineModule<
   function runtime(execution: ModuleExecution): Runtime {
     execution.tx.assertActive();
     if (execution.moduleType !== metadata.type) throw new AppError('internal_error');
+    const readStream = execution.readStream;
     return Object.freeze({
       tx: execution.handle,
       repository: execution.tx.modules[type],
       config: (input: unknown) => configSchema.parse(input),
+      streamText: readStream
+        ? (prefix, read) => readStream((frame, cursor) => read(runtime(frame), cursor), prefix)
+        : undefined,
+      instances: moduleInstanceReads(execution, (row) =>
+        config.instance({
+          ...row,
+          config: config.migrateConfig(row.moduleVersion, row.config),
+          moduleVersion: definition.moduleVersion,
+        }),
+      ),
       capabilities: capabilityView(execution.handle, execution.capability, { required, optional }),
       services: moduleServices(execution, { ...metadata, jobs: jobs.jobs }),
+      publicRead: execution.publicRead
+        ? Object.freeze(publicReadContextSchema.parse(execution.publicRead))
+        : undefined,
       publicWrite: execution.publicWrite
         ? Object.freeze(publicWriteContextSchema.parse(execution.publicWrite))
         : undefined,
@@ -82,7 +104,6 @@ export function defineModule<
   definition.adminRoutes?.(admin);
   definition.publicRoutes?.(publicRouter);
   definition.jobs?.(jobs);
-  const emailSchema = z.email().max(320);
   return Object.freeze({
     ...metadata,
     infrastructure: Object.freeze(infrastructure),
@@ -116,16 +137,36 @@ export function defineModule<
         );
       },
     },
+    notifications: notifications
+      ? {
+          async describe(execution, input) {
+            const subject = await notifications.describe(runtime(execution), {
+              eventType: z.string().parse(input.eventType),
+              subjectId: z.string().parse(input.subjectId),
+              instance: config.instance(input.instance),
+              includeContent: z.boolean().parse(input.includeContent),
+            });
+            return subject === null ? null : notificationSubjectSchema.parse(subject);
+          },
+        }
+      : null,
     privacy: {
       async exportSubject(execution, email) {
         return jsonValueSchema.parse(
-          await privacy.exportSubject(runtime(execution), emailSchema.parse(email)),
+          await privacy.exportSubject(runtime(execution), emailAddressSchema.parse(email)),
         );
       },
       async deleteSubject(execution, email) {
         return checkedCount(
-          await privacy.deleteSubject(runtime(execution), emailSchema.parse(email)),
+          await privacy.deleteSubject(runtime(execution), emailAddressSchema.parse(email)),
         );
+      },
+      async eraseScope(execution, input) {
+        const validated = z
+          .object({ limit: z.number().int().min(1).max(1000) })
+          .strict()
+          .parse(input);
+        return checkedCount(await privacy.eraseScope(runtime(execution), validated));
       },
     },
   });

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { jsonValueSchema } from '../modules/values.ts';
+import { jsonValueWireSchema } from '../modules/values.ts';
 import { moduleInstanceSchema, instanceRevisionSchema } from '../platform/models.ts';
 import { moduleInstanceStatusSchema } from '../platform/values.ts';
 
@@ -14,9 +14,7 @@ export const instanceKeySchema = z
 const name = z.string().trim().min(1).max(120);
 const writableStatus = moduleInstanceStatusSchema.exclude(['archived']);
 // Keep recursive JSON out of HTTP type expansion and OpenAPI's unsupported lazy-schema traversal.
-const configValue = z.unknown().refine((value) => jsonValueSchema.safeParse(value).success, {
-  message: 'Configuration must contain only JSON values.',
-});
+const configValue = jsonValueWireSchema;
 
 /** Identity, parent, versions and archive lifecycle are service-owned. */
 export const instanceCreateSchema = z
@@ -25,6 +23,8 @@ export const instanceCreateSchema = z
     name,
     status: writableStatus.default('active'),
     config: configValue.optional(),
+    /** A module template key from `/v1/meta`; used when `config` is absent. */
+    template: z.string().min(1).max(64).optional(),
   })
   .strict();
 /** configVersion is the required optimistic precondition, never the assigned next version. */
@@ -45,7 +45,7 @@ export const instancePatchSchema = z
 export type InstanceCreate = z.input<typeof instanceCreateSchema>;
 export type InstancePatch = z.infer<typeof instancePatchSchema>;
 export const instanceReplaceSchema = instanceCreateSchema
-  .omit({ key: true })
+  .omit({ key: true, template: true })
   .partial({ name: true, status: true })
   .required({ config: true })
   .extend({ configVersion: instanceVersionSchema });

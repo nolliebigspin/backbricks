@@ -2,6 +2,7 @@ import type { z } from 'zod';
 
 import type { PublicAccess, PublicWritePolicy } from '../abuse/policy.ts';
 import type { RoutePolicy } from '../http/route-policy.ts';
+import type { NotificationSubject, NotificationSubjectInput } from '../notifications/schemas.ts';
 import type { OptionalServiceName } from '../services/container.ts';
 import type { Capability, CapabilityName } from './capabilities.ts';
 import type { ModuleExecution } from './contract.ts';
@@ -61,8 +62,15 @@ export type RegisteredModule = Readonly<{
     purgeExpired(execution: ModuleExecution, input: { now: Date; limit: number }): Promise<number>;
     recomputeExpiry(execution: ModuleExecution, instance: unknown, now: Date): Promise<number>;
   };
+  notifications: {
+    describe(
+      execution: ModuleExecution,
+      input: NotificationSubjectInput<unknown>,
+    ): Promise<NotificationSubject | null>;
+  } | null;
   privacy: {
     exportSubject(execution: ModuleExecution, email: string): Promise<JsonValue>;
     deleteSubject(execution: ModuleExecution, email: string): Promise<number>;
+    eraseScope(execution: ModuleExecution, input: { limit: number }): Promise<number>;
   };
 }>;

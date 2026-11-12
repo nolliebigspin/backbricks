@@ -24,6 +24,8 @@ import { Route as DashboardProjectsProjectIdRouteImport } from './routes/_dashbo
 import { Route as DashboardProjectsProjectIdIndexRouteImport } from './routes/_dashboard.projects.$projectId.index'
 import { Route as DashboardProjectsProjectIdEmbedRouteImport } from './routes/_dashboard.projects.$projectId.embed'
 import { Route as DashboardProjectsProjectIdSettingsRouteImport } from './routes/_dashboard.projects.$projectId.settings'
+import { Route as DashboardProjectsProjectIdFormsIndexRouteImport } from './routes/_dashboard.projects.$projectId.forms.index'
+import { Route as DashboardProjectsProjectIdFormsFormKeyRouteImport } from './routes/_dashboard.projects.$projectId.forms.$formKey'
 
 const DashboardRoute = DashboardRouteImport.update({
   id: '/_dashboard',
@@ -104,6 +106,18 @@ const DashboardProjectsProjectIdSettingsRoute =
     path: '/settings',
     getParentRoute: () => DashboardProjectsProjectIdRoute,
   } as any)
+const DashboardProjectsProjectIdFormsIndexRoute =
+  DashboardProjectsProjectIdFormsIndexRouteImport.update({
+    id: '/forms/',
+    path: '/forms/',
+    getParentRoute: () => DashboardProjectsProjectIdRoute,
+  } as any)
+const DashboardProjectsProjectIdFormsFormKeyRoute =
+  DashboardProjectsProjectIdFormsFormKeyRouteImport.update({
+    id: '/forms/$formKey',
+    path: '/forms/$formKey',
+    getParentRoute: () => DashboardProjectsProjectIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof DashboardIndexRoute
@@ -120,6 +134,8 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId/embed': typeof DashboardProjectsProjectIdEmbedRoute
   '/projects/$projectId/settings': typeof DashboardProjectsProjectIdSettingsRoute
   '/projects/$projectId/': typeof DashboardProjectsProjectIdIndexRoute
+  '/projects/$projectId/forms/$formKey': typeof DashboardProjectsProjectIdFormsFormKeyRoute
+  '/projects/$projectId/forms/': typeof DashboardProjectsProjectIdFormsIndexRoute
 }
 export interface FileRoutesByTo {
   '/accept-invitation': typeof AcceptInvitationRoute
@@ -135,6 +151,8 @@ export interface FileRoutesByTo {
   '/projects/$projectId/embed': typeof DashboardProjectsProjectIdEmbedRoute
   '/projects/$projectId/settings': typeof DashboardProjectsProjectIdSettingsRoute
   '/projects/$projectId': typeof DashboardProjectsProjectIdIndexRoute
+  '/projects/$projectId/forms/$formKey': typeof DashboardProjectsProjectIdFormsFormKeyRoute
+  '/projects/$projectId/forms': typeof DashboardProjectsProjectIdFormsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -153,6 +171,8 @@ export interface FileRoutesById {
   '/_dashboard/projects/$projectId/embed': typeof DashboardProjectsProjectIdEmbedRoute
   '/_dashboard/projects/$projectId/settings': typeof DashboardProjectsProjectIdSettingsRoute
   '/_dashboard/projects/$projectId/': typeof DashboardProjectsProjectIdIndexRoute
+  '/_dashboard/projects/$projectId/forms/$formKey': typeof DashboardProjectsProjectIdFormsFormKeyRoute
+  '/_dashboard/projects/$projectId/forms/': typeof DashboardProjectsProjectIdFormsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -171,6 +191,8 @@ export interface FileRouteTypes {
     | '/projects/$projectId/embed'
     | '/projects/$projectId/settings'
     | '/projects/$projectId/'
+    | '/projects/$projectId/forms/$formKey'
+    | '/projects/$projectId/forms/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/accept-invitation'
@@ -186,6 +208,8 @@ export interface FileRouteTypes {
     | '/projects/$projectId/embed'
     | '/projects/$projectId/settings'
     | '/projects/$projectId'
+    | '/projects/$projectId/forms/$formKey'
+    | '/projects/$projectId/forms'
   id:
     | '__root__'
     | '/_dashboard'
@@ -203,6 +227,8 @@ export interface FileRouteTypes {
     | '/_dashboard/projects/$projectId/embed'
     | '/_dashboard/projects/$projectId/settings'
     | '/_dashboard/projects/$projectId/'
+    | '/_dashboard/projects/$projectId/forms/$formKey'
+    | '/_dashboard/projects/$projectId/forms/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -322,6 +348,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProjectsProjectIdSettingsRouteImport
       parentRoute: typeof DashboardProjectsProjectIdRoute
     }
+    '/_dashboard/projects/$projectId/forms/': {
+      id: '/_dashboard/projects/$projectId/forms/'
+      path: '/forms'
+      fullPath: '/projects/$projectId/forms/'
+      preLoaderRoute: typeof DashboardProjectsProjectIdFormsIndexRouteImport
+      parentRoute: typeof DashboardProjectsProjectIdRoute
+    }
+    '/_dashboard/projects/$projectId/forms/$formKey': {
+      id: '/_dashboard/projects/$projectId/forms/$formKey'
+      path: '/forms/$formKey'
+      fullPath: '/projects/$projectId/forms/$formKey'
+      preLoaderRoute: typeof DashboardProjectsProjectIdFormsFormKeyRouteImport
+      parentRoute: typeof DashboardProjectsProjectIdRoute
+    }
   }
 }
 
@@ -329,6 +369,8 @@ interface DashboardProjectsProjectIdRouteChildren {
   DashboardProjectsProjectIdEmbedRoute: typeof DashboardProjectsProjectIdEmbedRoute
   DashboardProjectsProjectIdSettingsRoute: typeof DashboardProjectsProjectIdSettingsRoute
   DashboardProjectsProjectIdIndexRoute: typeof DashboardProjectsProjectIdIndexRoute
+  DashboardProjectsProjectIdFormsFormKeyRoute: typeof DashboardProjectsProjectIdFormsFormKeyRoute
+  DashboardProjectsProjectIdFormsIndexRoute: typeof DashboardProjectsProjectIdFormsIndexRoute
 }
 
 const DashboardProjectsProjectIdRouteChildren: DashboardProjectsProjectIdRouteChildren =
@@ -337,6 +379,10 @@ const DashboardProjectsProjectIdRouteChildren: DashboardProjectsProjectIdRouteCh
     DashboardProjectsProjectIdSettingsRoute:
       DashboardProjectsProjectIdSettingsRoute,
     DashboardProjectsProjectIdIndexRoute: DashboardProjectsProjectIdIndexRoute,
+    DashboardProjectsProjectIdFormsFormKeyRoute:
+      DashboardProjectsProjectIdFormsFormKeyRoute,
+    DashboardProjectsProjectIdFormsIndexRoute:
+      DashboardProjectsProjectIdFormsIndexRoute,
   }
 
 const DashboardProjectsProjectIdRouteWithChildren =

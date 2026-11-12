@@ -51,7 +51,7 @@ export function createApp(
       return auth.handle(c.req.raw, ipHash);
     });
   }
-  const api = new ApiRoutes(app, authorize);
+  const api = new ApiRoutes(app, authorize, deps.rateLimiter);
   api.register(
     createRoute({
       method: 'get',

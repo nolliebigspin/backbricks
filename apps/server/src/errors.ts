@@ -2,6 +2,7 @@ import {
   AppError,
   toProblemDetails,
   unavailableModuleAtPath,
+  publicFormFailure,
   type SelectedModules,
 } from '@backbricks/core';
 import type { Context, ErrorHandler, NotFoundHandler } from 'hono';
@@ -10,6 +11,11 @@ import { HTTPException } from 'hono/http-exception';
 import type { AppEnv } from './context.ts';
 
 export function problemResponse(c: Context<AppEnv>, error: AppError): Response {
+  const form = c.get('publicForm');
+  if (form) {
+    const response = publicFormFailure(error, form);
+    return c.newResponse(response.body, response);
+  }
   return c.body(JSON.stringify(toProblemDetails(error, c.get('requestId'))), {
     status: error.status,
     headers: { 'Content-Type': 'application/problem+json' },

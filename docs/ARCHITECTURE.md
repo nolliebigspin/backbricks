@@ -161,7 +161,7 @@ Hierarchy: **Organization → Project (= website) → Module instance (form `con
 
 ### B.3 PostgreSQL schema (first version)
 
-> **Code is authoritative for implemented tables.** Domain table SQL remains a spec until P2–P4 replaces it with schema links.
+> **Code is authoritative for implemented tables.** Uploads and reviews SQL remains a spec until P3/P4 replaces it with schema links.
 
 Better Auth tables (`user`, `session`, `account`, `verification`, `organization`, `member`, `invitation`) are implemented in the [generated auth schema](../packages/db/src/schema/auth.generated.ts) and the [central migration history](../packages/db/migrations/). Regenerate with `bun run auth:generate`, then `bun run db:generate` and review the resulting SQL. The [schema-only config](../packages/auth/auth.config.ts) has no database connection or import of its own generated output (ADR-0021). All tables specified below belong to the platform.
 
@@ -171,39 +171,12 @@ Implemented core tables are defined in code (ADR-0023), with no parallel SQL spe
 - [Module instances and revisions](../packages/db/src/schema/instances.ts)
 - [Events, audit, notification rules and usage](../packages/db/src/schema/platform.ts)
 - [Idempotency, rate limiting, replay and system settings](../packages/db/src/schema/technical.ts)
+- [Forms entries](../packages/db/src/schema/forms.ts) (`form_submissions`; repository interface in the [forms module](../packages/modules/forms/src/repository.ts), ADR-0055)
 - [Custom audit/membership/UNLOGGED constraints](../packages/db/migrations/20261106024528_audit_immutability/migration.sql)
 
 Live child references include organization/project/instance identity; audit IDs are historical references retained without cascading FKs. Platform timestamps are supplied through the injected clock. Expiry/lifecycle rules follow ADR-0022. The SQL below specifies only the unimplemented domain tables.
 
 ```sql
--- =========================================================
--- Module: forms
--- =========================================================
-CREATE TABLE form_submissions (
-  id               text PRIMARY KEY,                       -- sub_…
-  organization_id  text NOT NULL,
-  project_id       text NOT NULL,
-  instance_id      text NOT NULL REFERENCES module_instances(id) ON DELETE CASCADE,
-  config_version   integer NOT NULL,
-  data             jsonb NOT NULL,                         -- validated, normalized fields
-  status           text NOT NULL DEFAULT 'open' CHECK (status IN ('open','done')),
-  read_at          timestamptz,
-  spam_verdict     text NOT NULL DEFAULT 'ok' CHECK (spam_verdict IN ('ok','suspect','spam')),
-  spam_reasons     text[] NOT NULL DEFAULT '{}',
-  is_test          boolean NOT NULL DEFAULT false,
-  subject_email    text,                                   -- normalized, for GDPR access/erasure
-  source           jsonb NOT NULL DEFAULT '{}',            -- origin, path, ua_family, ip_hash
-  search_vector    tsvector,
-  created_at       timestamptz NOT NULL DEFAULT now(),
-  updated_at       timestamptz NOT NULL DEFAULT now(),
-  expires_at       timestamptz
-);
-CREATE INDEX form_submissions_list_idx    ON form_submissions (instance_id, created_at DESC);
-CREATE INDEX form_submissions_project_idx ON form_submissions (project_id, created_at DESC);
-CREATE INDEX form_submissions_search_idx  ON form_submissions USING gin (search_vector);
-CREATE INDEX form_submissions_subject_idx ON form_submissions (project_id, subject_email) WHERE subject_email IS NOT NULL;
-CREATE INDEX form_submissions_expiry_idx  ON form_submissions (expires_at) WHERE expires_at IS NOT NULL;
-
 -- =========================================================
 -- Module: uploads
 -- =========================================================
@@ -283,7 +256,7 @@ CREATE INDEX reviews_queue_idx  ON reviews (instance_id, moderation_status, crea
 
 ### B.5 Migrations and schema versioning
 
-- **One migration history** (`packages/db/migrations/`), generated with `drizzle-kit generate`, reviewed by hand and committed. Module tables are defined in module packages but migrated centrally (no ordering problems).
+- **One migration history** (`packages/db/migrations/`), generated with `drizzle-kit generate`, reviewed by hand and committed. Module tables, their migrations and repository implementations live in `packages/db`; the module declares the repository interface ([ADR-0055](adr/0055-module-tables-in-db.md)).
 - **Forward-only** in production. Breaking changes follow *expand → migrate → contract* across two releases.
 - `migrate` holds a Postgres advisory lock. In compose it runs as a one-shot service before `serve`/`worker`.
 - **Module config formats:** `module_version` per instance. Modules ship deterministic `migrateConfig(fromVersion, config)` hooks. [Lazy reads](../packages/core/src/instances/persistence.ts) migrate only the returned view and disclose `storedModuleVersion`; explicit writes persist a new audited revision (ADR-0041). A deployment job uses the same persistence path.
@@ -307,7 +280,7 @@ CREATE INDEX reviews_queue_idx  ON reviews (instance_id, moderation_status, crea
 
 ### C.1 Module contract
 
-The implemented contract is [`ModuleDefinition`](../packages/core/src/modules/contract.ts), normalized by [`defineModule`](../packages/core/src/modules/define-module.ts); see [ADR-0037](adr/0037-static-module-contracts.md) for the refinements to the initial sketch. It owns typed configuration/defaults/templates/migrations/change classification, localized metadata, resource names, scopes/events/metrics, declared infrastructure/services/capabilities, route/job registration, retention/privacy and codegen hooks. Schemas must have representable JSON output. Changed configurations without a classifier are conservatively destructive.
+The implemented contract is [`ModuleDefinition`](../packages/core/src/modules/contract.ts), normalized by [`defineModule`](../packages/core/src/modules/define-module.ts); see [ADR-0037](adr/0037-static-module-contracts.md) for the refinements to the initial sketch. It owns typed configuration/defaults/templates/migrations/change classification, localized metadata, resource names, scopes/events/metrics, declared infrastructure/services/capabilities, route/job registration, retention/privacy, notification and codegen hooks. Schemas must have representable JSON output. Changed configurations without a classifier are conservatively destructive.
 
 Routes use the framework-neutral [router contract](../packages/core/src/modules/routes.ts), with Zod inputs, response allowlists, explicit policies/body limits and public read/write classification. [Jobs](../packages/core/src/modules/jobs.ts) declare a typed payload, retries and bounded retention. [ADR-0039](adr/0039-module-http-and-worker-wiring.md) defines the implemented [HTTP bridge](../apps/server/src/routes/modules.ts), [worker hand-off](../apps/server/src/module-jobs.ts) and merged scope catalog. Public authorization uses the shared guard (ADR-0046). Durable job delivery uses the [PostgreSQL queue adapter](../packages/db/src/queue.ts) with atomic enqueue/completion and shared process lifetimes ([ADR-0048](adr/0048-transactional-postgres-jobs.md)). The server owns HTTP/auth/OpenAPI/worker wiring; module code imports only the public core contract and its own files. M1 proves complete definitions with [test-only modules](../packages/db/test/module-fixtures.ts); forms/uploads/reviews become operational in M2–M4.
 
@@ -321,14 +294,14 @@ Static, no runtime plugins. `apps/server/src/modules.ts` lists the modules. [`de
 - Viewing and rolling back revisions
 - Config-as-code document `GET/PUT /v1/projects/{id}/config` (all instances of all modules)
 - JSON Schema export for editor autocompletion
-- Notification rules on module events
+- Notification rules on module events; delivery asks the optional `notifications.describe` hook what a mail may say ([ADR-0059](adr/0059-notification-rules-and-dispatch.md), [ADR-0060](adr/0060-notification-delivery-and-throttling.md))
 - Retention cron, GDPR access/erasure via `retention`/`privacy` handlers
 - Usage metering
 
 ### C.3 Module boundaries and data isolation
 
 - A module imports **only** `@backbricks/core` and its own files (enforced by dependency-cruiser).
-- A module receives only its own scoped repository and an opaque `TenantHandle`. It reads/writes **only its own tables**, plus generic core tables through bound core services; it never receives platform repositories or the full transaction.
+- A module receives only its own scoped repository (interface declared by the module, implemented in `packages/db`, ADR-0055) and an opaque `TenantHandle`. It reads/writes **only its own tables**, plus generic core tables through bound core services; it never receives platform repositories or the full transaction.
 - **Cross-module collaboration happens via capabilities.** Example: `forms` needs files; `uploads` provides the `files` capability:
   ```ts
   interface FilesCapability {
@@ -365,14 +338,14 @@ Goal: visitors join a waitlist with email (and an optional referral code) with d
 ```
 packages/modules/waitlist/
   src/config.ts        # zod: { doubleOptIn, confirmRedirectUrl, fields, retentionDays }
-  src/schema.ts        # Drizzle table waitlist_entries (standard columns + email, status, confirmed_at, referral)
+  src/repository.ts    # repository interface (augments ModuleRepositories); table + implementation in packages/db (ADR-0055)
   src/public.ts        # POST /v1/public/waitlists/{key}/entries, GET …/confirm?token=
   src/admin.ts         # list, export, delete (uses core helpers for pagination/CSV)
   src/jobs.ts          # send confirmation mail
   src/privacy.ts       # exportSubject/deleteSubject by email
   src/index.ts         # export const waitlistModule: ModuleDefinition<WaitlistConfig>
 apps/web/src/modules/waitlist/   # list + settings pages, registry entry
-packages/db/migrations/…         # generated
+packages/db/src/schema/waitlist.ts, repositories/waitlist.ts, migrations/…  # table, repository, generated migration
 apps/server/src/modules.ts       # one line: add waitlistModule
 ```
 
@@ -500,6 +473,8 @@ Assumption: an attacker knows the publishable key and every form key and can sen
 
 **AbuseGuard pipeline** for every public write (cheap before expensive):
 
+Implemented transport, instance context, schema-read limits, project-bound redirects and HTML error behavior: [ADR-0046 and its P2 addenda](adr/0046-public-write-guard-and-cors.md). Plain HTML support is an explicit module-route opt-in; configuration and response code are the source of truth.
+
 1. Key valid, project active, instance active (else `404`)
 2. Body limit (forms 64 KB, reviews 16 KB, upload intent 4 KB)
 3. Rate limits: `ip_hash × instance` (default 10/min, 100/h), `project` (default 600/min), global
@@ -573,6 +548,8 @@ const { data, nextCursor } = await backbricks.reviews.list('testimonials', { sor
 ```
 
 `backbricks codegen` generates form types so `forms.submit('contact', …)` is typed (module augmentation of a `BackbricksSchema` interface).
+
+Implemented so far (M2): the minimal root entry in [`packages/sdk/src`](../packages/sdk/src) (`createClient` needs `baseUrl` until a hosted default exists; publishable keys travel as `?key=`), see [ADR-0062](adr/0062-minimal-sdk-snippets-and-release-version.md).
 
 ### D.8 CLI
 
@@ -745,11 +722,11 @@ See §B.6 and invariants I1–I3.
 |---|---|
 | Retention | `retentionDays` per instance (default 180; 7–3650 or "unlimited" with a warning); `expires_at` on insert, recomputed on change, daily purge (DB + objects), summarized audit entry |
 | Spam | Auto-deleted after 30 days |
-| Access (Art. 15 GDPR) | Search by email across modules (`privacy.exportSubject`) → JSON + files as ZIP, audited |
-| Erasure (Art. 17 GDPR) | `privacy.deleteSubject` across modules incl. files, audited (without content) |
+| Access (Art. 15 GDPR) | Search by email across modules (`privacy.exportSubject`, `POST …/privacy/subject-export`) → JSON (files as ZIP from M3), audited |
+| Erasure (Art. 17 GDPR) | `privacy.deleteSubject` across modules incl. files via `POST …/privacy/subject-delete` (job), audited (without content or email) |
 | Minimization | IP only as rotating HMAC; user agent only as family; notifications without content by default; no tracking cookies |
 | Consent | `consent` field type stores text version and timestamp |
-| Removing projects | Configuration archive disables access immediately; separate hard-erasure workflow required before M2 release (ADR-0030). No restore endpoint in M1 |
+| Removing projects | Configuration archive disables access immediately (ADR-0030); the owner then erases an archived project by typing its slug. A worker erases every module through `privacy.eraseScope`, platform rows and queued job payloads, and keeps a tombstone for audit references ([ADR-0061](adr/0061-project-hard-erasure.md)). No restore endpoint |
 | Deleting organizations | Disabled until the complete audited hard-erasure lifecycle exists; hard, cascading, objects via job; confirmation by typing the name |
 | Backups | Deleted data disappears when backup rotation expires (30 days), disclosed in the privacy documentation |
 

@@ -64,3 +64,11 @@ Short documents that record significant decisions: deviations from or refinement
 | [0052](0052-contract-gates-and-method-handling.md) | Contract gates and method handling | accepted |
 | [0053](0053-dashboard-account-boundary.md) | Dashboard account boundary | accepted |
 | [0054](0054-publishable-key-authentication-bootstrap.md) | Publishable key authentication bootstrap | accepted; Q11 approved |
+| [0055](0055-module-tables-in-db.md) | Module tables in db, repository interfaces in the module | accepted (Q12) |
+| [0056](0056-module-owned-instance-reads.md) | Module-owned configuration reads | accepted during execution; D54 |
+| [0057](0057-forms-data-mutations-and-batched-erasure.md) | Forms data mutations and batched erasure | accepted during execution; D55 |
+| [0058](0058-audited-paged-csv-exports.md) | Audited paged CSV exports | accepted during execution; D56 |
+| [0059](0059-notification-rules-and-dispatch.md) | Notification rules and outbox dispatch | accepted during execution; D57 |
+| [0060](0060-notification-delivery-and-throttling.md) | Notification delivery and throttling | accepted during execution; D58 |
+| [0061](0061-project-hard-erasure.md) | Project hard erasure | accepted during execution; D59 |
+| [0062](0062-minimal-sdk-snippets-and-release-version.md) | Minimal SDK transport, integration snippets and the product version | accepted during execution; D60 |

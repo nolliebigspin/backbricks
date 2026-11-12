@@ -1,0 +1,77 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "c960acbf-b9ea-4c53-a97b-4ddf76b2d5f9",
+  "prevIds": [
+    "463cbe54-2b19-41b2-9a13-a274aeaa9b07"
+  ],
+  "footprints": [
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "projects",
+        "erased_at"
+      ],
+      "writes": [
+        "s|col|public.projects.erased_at",
+        "n|col|public.projects.erased_at",
+        "e|col|public.projects.erased_at"
+      ],
+      "reads": [
+        "n|tbl|public.projects",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_check",
+      "statementTarget": [
+        "table",
+        "public",
+        "projects"
+      ],
+      "writes": [
+        "s|ck|public.projects.projects_erased_after_archive",
+        "n|ck|public.projects.projects_erased_after_archive",
+        "e|ck|public.projects.projects_erased_after_archive",
+        "n|con|public.projects.projects_erased_after_archive"
+      ],
+      "reads": [
+        "n|tbl|public.projects",
+        "n|sch|public",
+        "n|col|public.projects.erased_at",
+        "n|col|public.projects.deleted_at"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "projects",
+        "name": "erased_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "projects",
+        "name": "projects_erased_after_archive",
+        "value": "\"erased_at\" is null or \"deleted_at\" is not null",
+        "entityType": "checks"
+      }
+    }
+  ]
+}

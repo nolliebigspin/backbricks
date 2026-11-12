@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { rateLimitInputSchema } from '../abuse/rate-limiter.ts';
 import { scopeNameSchema } from '../keys/protocol.ts';
 
 /** Global HTTP ceiling; individual routes must declare an equal or smaller body limit. */
@@ -28,6 +29,14 @@ export const managementRoutePolicySchema = z
     session: z.object({ role: organizationRoleSchema }).strict().optional(),
     secretKey: z.object({ scope: scopeNameSchema }).strict().optional(),
     isolationCase: z.string().min(1),
+    rateLimit: z
+      .object({
+        limit: rateLimitInputSchema.shape.limit,
+        windowMs: rateLimitInputSchema.shape.windowMs,
+        byParam: z.string().min(1).max(64).optional(),
+      })
+      .strict()
+      .optional(),
   })
   .strict()
   .refine((policy) => policy.session !== undefined || policy.secretKey !== undefined, {

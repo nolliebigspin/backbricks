@@ -17,6 +17,10 @@ export const moduleAvailabilitySchema = descriptorSchema
   .extend({
     enabled: z.boolean(),
     operational: z.boolean(),
+    /** Starting configurations of operational modules (key + display name, never the config). */
+    templates: z
+      .array(z.object({ key: z.string().max(64), name: z.string().max(200) }).strict())
+      .max(100),
   })
   .strict();
 export const platformMetaSchema = z.object({ modules: z.array(moduleAvailabilitySchema) }).strict();
@@ -69,6 +73,13 @@ export function defineModuleCatalog(input: readonly ModuleCatalogEntry[]) {
             resourceName: entry.resourceName,
             enabled: enabled.has(entry.type),
             operational: enabled.has(entry.type) && implemented(entry),
+            templates:
+              enabled.has(entry.type) && implemented(entry)
+                ? Object.entries(entry.templates).map(([key, template]) => ({
+                    key,
+                    name: template.name,
+                  }))
+                : [],
           })),
         }),
       );

@@ -30,12 +30,35 @@ export function validatedConfig(
   try {
     return module.migrateConfig(fromVersion, input);
   } catch (error) {
-    if (error instanceof ZodError || error instanceof AppError)
+    if (error instanceof ZodError) throw configProblem(error);
+    if (error instanceof AppError)
       throw new AppError('validation_failed', {
         detail: 'The configuration format is invalid or unsupported.',
       });
     throw error;
   }
+}
+
+/**
+ * Config issues keep their paths (relative to the module config) so editors and agents can point
+ * at the field. Messages come only from module refinements; built-in ones are replaced so no
+ * input is echoed. A refinement tagged `{ code: 'capability_unavailable' }` becomes that problem.
+ */
+function configProblem(error: ZodError) {
+  const errors = error.issues.slice(0, 100).map((issue) => {
+    const tagged = issue.code === 'custom' ? Reflect.get(issue.params ?? {}, 'code') : undefined;
+    return {
+      path: issue.path.map(String).join('.'),
+      code: typeof tagged === 'string' ? tagged : issue.code,
+      message: issue.code === 'custom' ? issue.message : 'Invalid value.',
+    };
+  });
+  return errors.some((entry) => entry.code === 'capability_unavailable')
+    ? new AppError('capability_unavailable', {
+        detail: 'The configuration uses a feature whose module is not enabled.',
+        errors,
+      })
+    : new AppError('validation_failed', { detail: 'The configuration is invalid.', errors });
 }
 
 export function checkInstanceVersion(previous: ModuleInstance, version: number) {

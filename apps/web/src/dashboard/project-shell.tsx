@@ -5,11 +5,14 @@ import { useTranslation } from 'react-i18next';
 
 import { ChoiceField } from '../auth/fields.tsx';
 import { accountError } from '../auth/navigation.ts';
+import { moduleNavigation } from '../modules/registry.ts';
 import { useTenant } from './context.tsx';
 import { Feedback } from './feedback.tsx';
 import { readProject, useProjects, type Project } from './projects.ts';
+import { useOperationalModules } from './shell.tsx';
 
-const ProjectContext = createContext<Project | null>(null);
+/** Exported for component tests; pages read the project through {@link useProject}. */
+export const ProjectContext = createContext<Project | null>(null);
 export function useProject() {
   const project = useContext(ProjectContext);
   if (!project) throw new Error('Missing dashboard project');
@@ -19,6 +22,7 @@ export function ProjectShell({ projectId }: { projectId: string }) {
   const { t } = useTranslation();
   const { organizationId } = useTenant();
   const projects = useProjects();
+  const modules = useOperationalModules();
   const project = useQuery({
     queryKey: ['tenant', organizationId, 'project', projectId],
     queryFn: ({ signal }) => readProject(organizationId, projectId, signal),
@@ -48,6 +52,11 @@ export function ProjectShell({ projectId }: { projectId: string }) {
           aria-label={t('dashboard.projectNavigation')}
         >
           <a href={`/projects/${projectId}`}>{t('dashboard.overview')}</a>
+          {moduleNavigation(projectId, modules.data ?? []).map((item) => (
+            <a key={item.type} href={item.href}>
+              {t(item.labelKey)}
+            </a>
+          ))}
           <a href={`/projects/${projectId}/settings`}>{t('dashboard.settings')}</a>
           <a href={`/projects/${projectId}/embed`}>{t('dashboard.embed')}</a>
         </nav>

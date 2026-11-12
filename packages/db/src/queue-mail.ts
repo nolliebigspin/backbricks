@@ -28,12 +28,14 @@ export function createMailQueue(
     messages: readonly MailMessage[],
     identity?: string,
     securityOrganizationId?: string,
+    projectId?: string,
   ) => {
     if (!isStarted()) throw new AppError('service_unavailable');
     for (const message of messages) {
       const payload = mailDeliverySchema.parse({
         message,
         securityOrganizationId,
+        projectId,
         expiresAt: new Date(
           clock.now().getTime() + MAIL_JOB_RETENTION_SECONDS * 1000,
         ).toISOString(),
@@ -60,6 +62,12 @@ export function createMailQueue(
       await boss.updateQueue(MAIL_JOB_NAME, policy);
     },
     enqueueMail,
+    /** Notification mail to verified members resolved by the delivery job in this transaction. */
+    enqueueNotificationMail: (
+      tx: TenantTransaction,
+      messages: readonly MailMessage[],
+      identity: string,
+    ) => enqueueMail(transactionFor(tx), messages, identity, undefined, tx.context.projectId),
     enqueueSecurityMail: (
       tx: TenantTransaction,
       messages: readonly MailMessage[],

@@ -12,7 +12,7 @@ export const CONFIG_SCHEMA_ID = 'https://backbricks.app/schema/config.v1.json';
 export const CONFIG_PLAN_TTL_MS = 10 * 60 * 1000;
 /** Explicit envelope prevents module fields from colliding with name/status/version metadata. */
 export const configEntrySchema = instanceCreateSchema
-  .omit({ key: true })
+  .omit({ key: true, template: true })
   .required({ config: true })
   .extend({
     moduleVersion: instanceVersionSchema,

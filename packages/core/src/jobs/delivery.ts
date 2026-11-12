@@ -10,6 +10,8 @@ export const mailDeliverySchema = z
     message: mailMessageSchema,
     expiresAt: z.iso.datetime(),
     securityOrganizationId: activityIdentifierSchema.optional(),
+    /** Notification mail of this project; project erasure deletes undelivered ones (ADR-0061). */
+    projectId: activityIdentifierSchema.optional(),
   })
   .strict();
 export const systemJobPayloadSchema = z

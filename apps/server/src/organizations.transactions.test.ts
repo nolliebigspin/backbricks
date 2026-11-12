@@ -84,6 +84,33 @@ test.skipIf(!available)(
         ).status,
       ).toBe(503);
       expect(await db.select().from(authSchema.member)).toHaveLength(2);
+      await db.execute('ALTER TABLE audit_logs DROP CONSTRAINT fixture_audit_failure');
+      const canceled = idResponseSchema.parse(
+        await (
+          await request(
+            '/organization/invite-member',
+            { organizationId, email: 'cancel-rollback@example.invalid', role: 'member' },
+            owner.cookie,
+          )
+        ).json(),
+      ).id;
+      const outbox = () =>
+        createWithTenant(db)({ organizationId }, async ({ repositories }) =>
+          (await repositories.events.pending(100)).map((event) => event.id),
+        );
+      const pending = await outbox();
+      await db.execute(
+        "ALTER TABLE audit_logs ADD CONSTRAINT fixture_audit_failure CHECK (action <> 'invitation.canceled')",
+      );
+      expect(
+        (await request('/organization/cancel-invitation', { invitationId: canceled }, owner.cookie))
+          .status,
+      ).toBe(503);
+      expect(
+        (await db.select().from(authSchema.invitation)).find((entry) => entry.id === canceled)
+          ?.status,
+      ).toBe('pending');
+      expect(await outbox()).toEqual(pending);
     });
   },
   20_000,

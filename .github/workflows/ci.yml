@@ -35,6 +35,7 @@ jobs:
       - run: bun run format:check
       - run: bun run lint
       - run: bun run lint:arch
+      - run: bun run lint:workflows
       - run: bun run api:check
       - name: API compatibility against the actual base commit
         env:
@@ -72,7 +73,7 @@ jobs:
       - run: bun install --frozen-lockfile
       - name: Start services
         run: mise run infra
-      - run: bunx turbo run build --filter @backbricks/web
+      - run: bunx turbo run build --filter @backbricks/web --filter @backbricks/example-html
       - run: bunx playwright install --with-deps chromium
       - run: bun run test:e2e
       - name: Playwright report

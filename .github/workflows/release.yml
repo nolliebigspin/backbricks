@@ -1,0 +1,85 @@
+name: Release
+
+# A pushed version tag (`v0.1.0`) builds, smoke-tests and publishes the image to
+# ghcr.io/nolliebigspin/backbricks (Q3, D50). The maintainer creates and pushes the signed tag.
+# A manual run builds and smoke-tests the same image and pushes only when asked to.
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      push:
+        description: Push the image to GHCR
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/nolliebigspin/backbricks
+  PUSH: ${{ github.event_name == 'push' || inputs.push }}
+
+jobs:
+  image:
+    name: Build, smoke-test and publish the image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: jdx/mise-action@v3
+      - run: bun install --frozen-lockfile
+      - name: Tag matches the server version
+        if: github.event_name == 'push'
+        run: |
+          version="$(bun -e 'console.log((await Bun.file("apps/server/package.json").json()).version)')"
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match apps/server version $version (run 'bun run release:version' first)."
+            exit 1
+          fi
+      - id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+      - uses: docker/setup-buildx-action@v4
+      # The same build as the CI image job (context, Dockerfile, cache), loaded for the smoke test.
+      - name: Build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          tags: backbricks/server:release
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Start services
+        run: mise run infra
+      - name: Smoke test (real worker consumption, non-root/read-only roles)
+        run: bun scripts/image/smoke.ts backbricks/server:release
+      - name: Log in to GHCR
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # Rebuilds from the warm cache, so the pushed layers are the ones just smoke-tested.
+      - name: Push
+        if: env.PUSH == 'true'
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha

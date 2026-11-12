@@ -19,9 +19,35 @@ export const ERROR_CODES = {
   rate_limited: { status: 429, title: 'Too many requests' },
   proof_invalid: { status: 400, title: 'Verification failed' },
   quota_exceeded: { status: 402, title: 'Usage limit reached' },
+  capability_unavailable: { status: 422, title: 'Capability is not available' },
 } as const satisfies Record<string, { status: number; title: string }>;
 
 export type ErrorCode = keyof typeof ERROR_CODES;
+
+/**
+ * Field-level codes inside `validation_failed` problems (`errors[].code`). Like problem codes,
+ * they are API contract: add freely, never rename or remove.
+ */
+export const FIELD_ERROR_CODES = [
+  'required',
+  'unknown_field',
+  'invalid_type',
+  'too_short',
+  'too_long',
+  'too_small',
+  'too_large',
+  'invalid_email',
+  'invalid_url',
+  'invalid_phone',
+  'invalid_date',
+  'invalid_option',
+  'too_few_options',
+  'too_many_options',
+  'must_accept',
+  'invalid_file',
+  'too_many_files',
+] as const;
+export type FieldErrorCode = (typeof FIELD_ERROR_CODES)[number];
 export type ErrorStatus = (typeof ERROR_CODES)[ErrorCode]['status'];
 
 /** Problem `type` URLs resolve to the error reference on the website (`/errors/<code>`, M5). */

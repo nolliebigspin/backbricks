@@ -10,6 +10,7 @@ import { MAX_JOB_RETENTION_SECONDS, type ModuleJobRegistrar } from './jobs.ts';
 import type { RegisteredJob, RegisteredRoute } from './registered.ts';
 import type { ModuleInputSchema, ModuleRouteSpec } from './routes.ts';
 import { freezeDeclaration, schemaDocument } from './validation.ts';
+import { jsonValueSchema } from './values.ts';
 
 async function validateResponse(
   response: Response,
@@ -24,6 +25,7 @@ async function validateResponse(
   if (declared.kind === 'json') {
     const output = declared.schema.safeParse(await response.json());
     if (!output.success) throw new AppError('internal_error');
+    if (!jsonValueSchema.safeParse(output.data).success) throw new AppError('internal_error');
     headers.delete('content-length');
     headers.set('content-type', 'application/json; charset=utf-8');
     return Response.json(output.data, { status: response.status, headers });
@@ -58,7 +60,7 @@ export function routeRegistrar<Runtime>(
     if (
       policy.kind !== kind ||
       (spec.path !== '/' &&
-        !/^\/(?:[a-z0-9-]+|\{[A-Za-z][A-Za-z0-9]*\})(?:\/(?:[a-z0-9-]+|\{[A-Za-z][A-Za-z0-9]*\}))*\/?$/.test(
+        !/^\/(?:[a-z0-9-]+(?:\.[a-z0-9-]+)*|\{[A-Za-z][A-Za-z0-9]*\})(?:\/(?:[a-z0-9-]+(?:\.[a-z0-9-]+)*|\{[A-Za-z][A-Za-z0-9]*\}))*\/?$/.test(
           spec.path,
         ))
     )

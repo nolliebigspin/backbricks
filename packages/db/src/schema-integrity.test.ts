@@ -138,7 +138,7 @@ describe.skipIf(!available)('platform schema integrity (real Postgres)', () => {
           projectId: projectA2,
           instanceId: instanceA,
           eventType: 'fixture.created',
-          recipients: ['test@example.invalid'],
+          recipientUserIds: ['fixture-user-id'],
           createdAt: now,
           updatedAt: now,
         }),
@@ -272,6 +272,40 @@ describe.skipIf(!available)('platform schema integrity (real Postgres)', () => {
     expect(
       await handle.db.select({ id: auditLogs.id }).from(auditLogs).where(eq(auditLogs.id, auditId)),
     ).toEqual([{ id: auditId }]);
+  });
+
+  test('hand-written SQL objects the Drizzle schema does not declare still exist', async () => {
+    // Owned by migrations 20261106024528_audit_immutability and 20261106124449_maintenance_expiry.
+    // A later generated migration that drops or changes one of them fails here.
+    const indexes = await handle.db.execute<{ indexname: string; indexdef: string }>(
+      sql`select indexname, indexdef from pg_indexes where schemaname = current_schema()
+          and indexname in ('member_organization_user_unique', 'session_expiry_idx',
+            'verification_expiry_idx', 'invitation_expiry_idx')`,
+    );
+    expect(
+      Object.fromEntries(
+        indexes.rows.map((row) => [row.indexname, row.indexdef.replace(/^.* USING /, '')]),
+      ),
+    ).toEqual({
+      member_organization_user_unique: 'btree (organization_id, user_id)',
+      session_expiry_idx: 'btree (expires_at)',
+      verification_expiry_idx: 'btree (expires_at)',
+      invitation_expiry_idx: 'btree (expires_at)',
+    });
+    expect(
+      indexes.rows.find((row) => row.indexname === 'member_organization_user_unique')?.indexdef,
+    ).toStartWith('CREATE UNIQUE INDEX');
+    const triggers = await handle.db.execute<{
+      tgname: string;
+      tgenabled: string;
+      proname: string;
+    }>(
+      sql`select t.tgname, t.tgenabled, p.proname from pg_trigger t join pg_proc p on p.oid = t.tgfoid
+          where t.tgrelid = 'audit_logs'::regclass and not t.tgisinternal`,
+    );
+    expect(triggers.rows).toEqual([
+      { tgname: 'audit_logs_no_update', tgenabled: 'O', proname: 'audit_logs_immutable' },
+    ]);
   });
 
   test('ephemeral rate buckets use UNLOGGED storage', async () => {

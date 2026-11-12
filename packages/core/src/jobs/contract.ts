@@ -18,6 +18,8 @@ export const queueEnvelopeSchema = z
   .object({
     organizationId: activityIdentifierSchema,
     projectId: activityIdentifierSchema.optional(),
+    /** Only the project erasure job runs inside an archived project (ADR-0061). */
+    archivedProject: z.literal(true).optional(),
     payload: z.unknown(),
   })
   .strict();
@@ -25,7 +27,8 @@ export type QueueJobDefinition = z.infer<typeof queueJobDefinitionSchema> & { pa
 /** Worker callbacks receive a scoped transaction; the adapter completes the job in that same transaction. */
 export type QueueJobHandler = {
   name: string;
-  runInTransaction(tx: TenantTransaction, payload: unknown): Promise<void>;
+  consumes?: readonly string[];
+  runInTransaction(this: void, tx: TenantTransaction, payload: unknown): Promise<void>;
 };
 /** Trusted worker fan-out port; modules receive only Queue.enqueue bound to their current project. */
 export type ProjectJobEnqueue = (

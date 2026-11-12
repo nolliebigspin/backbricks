@@ -9,6 +9,7 @@ node = "24" # Playwright test runner + Node compatibility tests for published pa
 lefthook = "2.2.2"
 gh = "2"
 "github:oasdiff/oasdiff" = "1.35.0"
+"aqua:rhysd/actionlint" = "1.7.12" # GitHub workflow lint (`bun run lint:workflows`)
 "npm:@colbymchenry/codegraph" = "1.6.2"
 
 [env]

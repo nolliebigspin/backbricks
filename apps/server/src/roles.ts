@@ -59,6 +59,8 @@ async function startRuntime(
       modules,
       queue: queue.queue,
       enqueueProject: queue.enqueueProject,
+      enqueueNotificationMail: queue.enqueueNotificationMail,
+      projectErasure: queue.projectErasure,
     });
     services = runtime;
     if (role !== 'worker') {
@@ -77,6 +79,7 @@ async function startRuntime(
         {
           log,
           ids: runtime.container.core.ids,
+          rateLimiter: runtime.container.core.rateLimiter,
           modules,
           ipIdentity: createIpIdentity({
             appSecret: config.appSecret,

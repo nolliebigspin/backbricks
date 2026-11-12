@@ -1,6 +1,6 @@
 import { AppError } from '../errors/app-error.ts';
 import { pageResult } from '../http/pagination.ts';
-import { meetsOrganizationRole } from '../http/route-policy.ts';
+import { requireSessionRole } from '../identity/permissions.ts';
 import type { Ids } from '../ids/type-id.ts';
 import { principalActor, type AuditService, type EventService } from '../services/activity.ts';
 import { CORE_EVENTS } from '../services/event-types.ts';
@@ -13,10 +13,7 @@ import { apiKeyMetadata } from './metadata.ts';
 import { keyPresetScopes, type KeyScopeCatalog } from './scopes.ts';
 
 function managementSession(tx: TenantTransaction) {
-  const principal = tx.context.principal;
-  if (principal?.kind !== 'session' || !meetsOrganizationRole(principal.role, 'admin'))
-    throw new AppError('forbidden');
-  return principal;
+  return requireSessionRole(tx, 'admin');
 }
 
 /** Session-only key lifecycle; plaintext leaves only a committed creation call. */

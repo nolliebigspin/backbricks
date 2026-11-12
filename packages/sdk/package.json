@@ -28,6 +28,9 @@
     "@backbricks/api-contract": "workspace:*",
     "openapi-fetch": "0.17.0"
   },
+  "devDependencies": {
+    "altcha-lib": "2.8.0"
+  },
   "engines": {
     "node": ">=20"
   }

@@ -2,9 +2,11 @@ import {
   AppError,
   problemDetailsSchema,
   routePolicySchema,
+  isPublicFormContentType,
   type RoutePolicy,
+  type RateLimiter,
 } from '@backbricks/core';
-import { OpenAPIHono, type RouteConfig, type RouteHandler } from '@hono/zod-openapi';
+import { OpenAPIHono, z, type RouteConfig, type RouteHandler } from '@hono/zod-openapi';
 import type { Context } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 
@@ -29,6 +31,7 @@ type RuntimeRoute = OpenAPIHono<AppEnv>['routes'][number];
 export class ApiRoutes {
   readonly #app: OpenAPIHono<AppEnv>;
   readonly #authorize: ApiAuthorization;
+  readonly #rateLimiter: RateLimiter | undefined;
   readonly #handlers = new Set<RuntimeRoute>();
   readonly #manifest: RegisteredRoute[] = [];
   readonly #operations = new Set<string>();
@@ -41,9 +44,11 @@ export class ApiRoutes {
     authorize: ApiAuthorization = () => {
       throw new AppError('service_unavailable');
     },
+    rateLimiter?: RateLimiter,
   ) {
     this.#app = app;
     this.#authorize = authorize;
+    this.#rateLimiter = rateLimiter;
     const start = app.routes.length;
     app.use('/v1/*', async (_c, next) => {
       this.assertCoverage();
@@ -61,7 +66,7 @@ export class ApiRoutes {
     route: R,
     policy: RoutePolicy,
     handler: RouteHandler<R, AppEnv>,
-    options: { deferPublicBodyValidation?: boolean } = {},
+    options: { deferPublicBodyValidation?: boolean; publicFormTransport?: boolean } = {},
   ): void {
     const parsed = routePolicySchema.parse(policy);
     if (!route.path.startsWith('/v1/') || route.hide) {
@@ -89,9 +94,41 @@ export class ApiRoutes {
     });
     this.#app.use(path, async (c, next) => {
       if (c.req.method !== method && !(c.req.method === 'HEAD' && method === 'GET')) return next();
+      if (
+        parsed.kind === 'public' &&
+        options.publicFormTransport &&
+        isPublicFormContentType(c.req.header('content-type'))
+      )
+        c.set('publicForm', {});
       if (parsed.kind === 'management') {
         c.header('Cache-Control', 'no-store');
         await this.#authorize(parsed, c, tenant);
+        if (parsed.rateLimit) {
+          const context = c.get('tenant');
+          if (!context || !this.#rateLimiter) throw new AppError('service_unavailable');
+          const identity = createHash('sha256')
+            .update(
+              JSON.stringify([
+                context.organizationId,
+                context.projectId,
+                context.principal.id,
+                method,
+                route.operationId ?? route.path,
+                parsed.rateLimit.byParam ? c.req.param(parsed.rateLimit.byParam) : null,
+              ]),
+            )
+            .digest('hex');
+          const result = await this.#rateLimiter.consume({
+            namespace: 'management.operation',
+            identity,
+            limit: parsed.rateLimit.limit,
+            windowMs: parsed.rateLimit.windowMs,
+          });
+          if (!result.allowed) {
+            c.header('Retry-After', String(result.retryAfterSeconds));
+            throw new AppError('rate_limited');
+          }
+        }
       }
       await limit(c, next);
       if (parsed.kind === 'management') c.header('Cache-Control', 'no-store');
@@ -103,7 +140,10 @@ export class ApiRoutes {
       responses: {
         default: {
           description: 'A structured API error.',
-          content: { 'application/problem+json': { schema: problemDetailsSchema } },
+          content: {
+            'application/problem+json': { schema: problemDetailsSchema },
+            ...(options.publicFormTransport ? { 'text/html': { schema: z.string() } } : {}),
+          },
         },
         ...route.responses,
       },
@@ -185,3 +225,4 @@ export function createOpenApiApp(): OpenAPIHono<AppEnv> {
     },
   });
 }
+import { createHash } from 'node:crypto';

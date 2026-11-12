@@ -50,12 +50,18 @@ export function createInstanceService(deps: InstanceDependencies) {
     },
     async create(tx: TenantTransaction, type: string, input: InstanceCreate, requestId?: string) {
       const module = await moduleFor(tx, type, 'write');
-      const data = instanceCreateSchema.parse(input);
+      const { template, ...data } = instanceCreateSchema.parse(input);
+      if (template !== undefined && !Object.hasOwn(module.templates, template))
+        throw new AppError('validation_failed', {
+          detail: 'Choose a template of this module.',
+          errors: [{ path: 'template', code: 'invalid_option', message: 'Unknown template.' }],
+        });
+      const initial =
+        data.config ?? (template === undefined ? undefined : module.templates[template]?.config);
       const now = deps.clock.now();
       const instance = await tx.repositories.instances.insert({
         ...data,
-        config:
-          data.config === undefined ? module.defaultConfig() : validatedConfig(module, data.config),
+        config: initial === undefined ? module.defaultConfig() : validatedConfig(module, initial),
         id: deps.ids.generate('mod'),
         moduleType: type,
         configVersion: 1,

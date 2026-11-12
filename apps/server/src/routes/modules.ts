@@ -1,6 +1,7 @@
 import {
   AppError,
   type RegisteredRoute,
+  type PublicReadContext,
   type PublicWriteContext,
   type TenantTransaction,
   publicWriteEnvelopeSchema,
@@ -8,6 +9,9 @@ import {
   idempotencyKeySchema,
   publishableKeyTokenSchema,
   type PublicCredentialResolver,
+  PUBLIC_FORM_MEDIA_TYPE,
+  createPagedTextStream,
+  type ModuleExecution,
 } from '@backbricks/core';
 import { createRoute, z, type RouteConfig } from '@hono/zod-openapi';
 import type { Context } from 'hono';
@@ -24,7 +28,11 @@ export type ModulePublicExecutor = (
   context: Context<AppEnv>,
   moduleType: string,
   route: RegisteredRoute,
-  run: (tx: TenantTransaction, input: unknown, context?: PublicWriteContext) => Promise<Response>,
+  run: (
+    tx: TenantTransaction,
+    input: unknown,
+    context?: PublicReadContext | PublicWriteContext,
+  ) => Promise<Response>,
 ) => Promise<Response>;
 
 function responses(route: RegisteredRoute): RouteConfig['responses'] {
@@ -90,7 +98,9 @@ export function moduleRoutes(
         ? `/v1/projects/{projectId}/${module.resourceName.plural}`
         : `/v1/public/${module.resourceName.plural}`;
       const path = `${prefix}${route.path === '/' ? '' : route.path}`;
-      const hasBody = route.method !== 'GET';
+      const hasBody =
+        route.method !== 'GET' &&
+        !(route.method === 'DELETE' && route.input.shape.body instanceof z.ZodNull);
       const definition = createRoute({
         method: methods[route.method],
         path,
@@ -115,6 +125,16 @@ export function moduleRoutes(
                         ? route.input.shape.body
                         : publicWriteEnvelopeSchema(route.input.shape.body),
                     },
+                    ...(!management && route.access?.kind === 'write' && route.access.form
+                      ? {
+                          [PUBLIC_FORM_MEDIA_TYPE]: {
+                            schema: z.record(
+                              z.string(),
+                              z.union([z.string(), z.array(z.string())]),
+                            ),
+                          },
+                        }
+                      : {}),
                   },
                 },
               }
@@ -126,11 +146,21 @@ export function moduleRoutes(
         definition,
         route.policy,
         async (c) => {
-          const run = (tx: TenantTransaction, input: unknown, context?: PublicWriteContext) =>
+          const run = (
+            tx: TenantTransaction,
+            input: unknown,
+            context?: PublicReadContext | PublicWriteContext,
+            readStream?: ModuleExecution['readStream'],
+          ) =>
             route.run(
               {
                 ...services.moduleRuntime.forTenant(tx).execution(module.type),
-                ...(context ? { publicWrite: context } : {}),
+                ...(readStream ? { readStream } : {}),
+                ...(context
+                  ? 'spam' in context
+                    ? { publicWrite: context }
+                    : { publicRead: context }
+                  : {}),
               },
               input,
             );
@@ -139,7 +169,9 @@ export function moduleRoutes(
             return executePublic(c, module.type, route, run);
           }
           const input = {
-            params: c.req.param(),
+            params: Object.fromEntries(
+              Object.entries(c.req.param()).filter(([name]) => name !== 'projectId'),
+            ),
             query: Object.fromEntries(
               Object.entries(c.req.queries()).map(([name, values]) => [
                 name,
@@ -148,9 +180,36 @@ export function moduleRoutes(
             ),
             body: hasBody ? await c.req.json<unknown>() : null,
           };
-          return services.withTenant(requireTenantContext(c), (tx) => run(tx, input));
+          const tenant = requireTenantContext(c);
+          if (!Object.values(route.responses).some((response) => response.kind === 'csv'))
+            return services.withTenant(tenant, (tx) => run(tx, input));
+          let release: (() => void) | undefined;
+          let committed = false;
+          const ready = new Promise<void>((resolve) => {
+            release = resolve;
+          });
+          const readStream: NonNullable<ModuleExecution['readStream']> = (read, streamPrefix) =>
+            createPagedTextStream(async (cursor) => {
+              await ready;
+              if (!committed) throw new AppError('internal_error');
+              return services.withTenant(tenant, (tx) =>
+                read(services.moduleRuntime.forTenant(tx).execution(module.type), cursor),
+              );
+            }, streamPrefix);
+          try {
+            const response = await services.withTenant(tenant, (tx) =>
+              run(tx, input, undefined, readStream),
+            );
+            committed = true;
+            return response;
+          } finally {
+            release?.();
+          }
         },
-        { deferPublicBodyValidation: !management && hasBody },
+        {
+          deferPublicBodyValidation: !management && hasBody,
+          publicFormTransport: route.access?.kind === 'write' && route.access.form,
+        },
       );
     }
   }

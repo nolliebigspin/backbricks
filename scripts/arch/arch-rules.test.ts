@@ -14,7 +14,7 @@ type CruiseResult = { summary: { violations: { rule: { name: string } }[] } };
 
 async function violatedRules(fixture: string): Promise<string[]> {
   const cwd = join(import.meta.dir, 'fixtures', fixture);
-  const roots = ['apps', 'packages'].filter(
+  const roots = ['apps', 'packages', 'examples'].filter(
     (dir) => new Bun.Glob(`${dir}/**/*.ts`).scanSync({ cwd }).next().done === false,
   );
   const proc = Bun.spawn([depcruise, ...roots, '--config', config, '--output-type', 'json'], {
@@ -36,8 +36,10 @@ describe('architecture rules (lint:arch)', () => {
   const cases: [fixture: string, rule: string][] = [
     ['direct-tenant-table', 'tenant-tables-only-repositories'],
     ['module-type-import-db', 'modules-only-core'],
+    ['module-defines-table', 'modules-no-database'],
     ['core-imports-db', 'core-no-internal-deps'],
     ['sdk-imports-core', 'clients-only-contract'],
+    ['example-imports-core', 'examples-only-mit'],
     ['www-imports-core', 'www-only-ui'],
     ['web-imports-server', 'web-only-ui-and-contract'],
     ['web-imports-server', 'no-app-imports'],

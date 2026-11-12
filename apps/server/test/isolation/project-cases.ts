@@ -1,6 +1,6 @@
 import { expect } from 'bun:test';
 
-import { projectResponseSchema } from '@backbricks/core';
+import { projectErasureResponseSchema, projectResponseSchema } from '@backbricks/core';
 import { createWithTenant } from '@backbricks/db';
 
 import type { IsolationFixture } from './setup.ts';
@@ -120,6 +120,46 @@ export function projectIsolationCases(f: IsolationFixture): Cases {
         ).toBe(404);
         const list = await f.request('/v1/projects', undefined, f.owner.cookie);
         expect(await list.text()).not.toContain(createdId!);
+      },
+    },
+    'project.erase': {
+      kind: 'creation',
+      successStatus: 202,
+      denied: [
+        {
+          request: {
+            path: '/v1/project-erasures',
+            body: { projectId: f.a1.id, confirm: 'a1' },
+            cookie: f.admin.cookie,
+          },
+          status: 403,
+        },
+        {
+          request: {
+            path: '/v1/project-erasures',
+            body: { projectId: f.b1.id, confirm: 'b1' },
+            cookie: f.owner.cookie,
+          },
+          status: 404,
+        },
+      ],
+      // Its own archived project, so the case does not depend on the archive case's order.
+      allowed: async () => {
+        const created = await f.request(
+          '/v1/projects',
+          { name: 'Erased later', slug: 'erased-later' },
+          f.owner.cookie,
+        );
+        const { id } = projectResponseSchema.parse(await created.json());
+        await f.request(`/v1/projects/${id}`, undefined, f.owner.cookie, undefined, 'DELETE');
+        return {
+          path: '/v1/project-erasures',
+          body: { projectId: id, confirm: 'erased-later' },
+          cookie: f.owner.cookie,
+        };
+      },
+      verify: async (response) => {
+        expect(projectErasureResponseSchema.parse(await response.json()).status).toBe('queued');
       },
     },
   };

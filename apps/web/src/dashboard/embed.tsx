@@ -1,5 +1,5 @@
 import { Button, ConfirmDialog, KeyRevealDialog } from '@backbricks/ui';
-import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -7,25 +7,16 @@ import { admin } from '../auth/client.ts';
 import { accountError } from '../auth/navigation.ts';
 import { canManage, tenantHeaders, useTenant } from './context.tsx';
 import { Feedback, unwrap, useAction } from './feedback.tsx';
+import { useIntegration } from './integration.ts';
 import { KeyForm } from './key-form.tsx';
 import { useProject } from './project-shell.tsx';
 import { useBrowserTime } from './use-browser-time.ts';
 
 export function EmbedPage() {
   const { t } = useTranslation();
-  const { organizationId, role } = useTenant();
+  const { role } = useTenant();
   const project = useProject();
-  const integration = useQuery({
-    queryKey: ['tenant', organizationId, project.id, 'integration'],
-    queryFn: async ({ signal }) =>
-      unwrap(
-        await admin.GET('/v1/projects/{projectId}/integration', {
-          params: { path: { projectId: project.id } },
-          headers: tenantHeaders(organizationId),
-          signal,
-        }),
-      ),
-  });
+  const integration = useIntegration();
   return (
     <div className="space-y-7">
       <h1 className="text-2xl font-semibold">{t('dashboard.embed')}</h1>
