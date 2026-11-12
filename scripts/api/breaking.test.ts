@@ -2,7 +2,7 @@ import { expect, test } from 'bun:test';
 import { mkdir, mkdtemp, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import { checkApiBreaking } from './breaking.ts';
+import { checkApiBreaking, gitEnvironment } from './breaking.ts';
 import { CONTRACT_PATH, REPOSITORY_ROOT } from './paths.ts';
 
 const operation = {
@@ -34,7 +34,7 @@ async function fixture(
   const git = async (args: string[]) => {
     const child = Bun.spawn(
       ['git', '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', ...args],
-      { cwd: directory, stdout: 'pipe', stderr: 'pipe' },
+      { cwd: directory, env: gitEnvironment(), stdout: 'pipe', stderr: 'pipe' },
     );
     const [output, error, code] = await Promise.all([
       new Response(child.stdout).text(),
@@ -81,6 +81,42 @@ test('oasdiff accepts additive v1 changes and rejects removal/type changes again
     ).toMatchObject({ message: expect.stringContaining('API compatibility check failed') });
     await write(directory, { ...baseline, paths: { '/v1/things': baseline.paths['/v1/things'] } });
     expect((await checkApiBreaking({ cwd: directory, base })).bootstrap).toBe(false);
+  });
+}, 20_000);
+
+test('a hook-exported GIT_DIR (linked worktree) never redirects git away from cwd', async () => {
+  await fixture(async (decoy, decoyGit) => {
+    await decoyGit(['commit', '--allow-empty', '-s', '-m', 'test: decoy']);
+    const decoyHead = await decoyGit(['rev-parse', 'HEAD']);
+    await fixture(async (directory, git) => {
+      await write(directory, baseline);
+      await git(['add', CONTRACT_PATH]);
+      await git(['commit', '-s', '-m', 'test: worktree fixture']);
+      const base = await git(['rev-parse', 'HEAD']);
+      await git(['update-ref', 'refs/remotes/origin/main', base]);
+      // Bun.spawn copies the environment at start-up, so the hook's variable must reach a new process.
+      const child = Bun.spawn(
+        [
+          process.execPath,
+          '--eval',
+          `const { checkApiBreaking } = await import(${JSON.stringify(join(import.meta.dir, 'breaking.ts'))});
+           console.log(JSON.stringify(await checkApiBreaking({ cwd: process.env.FIXTURE })));`,
+        ],
+        {
+          env: { ...process.env, GIT_DIR: join(decoy, '.git'), FIXTURE: directory },
+          stdout: 'pipe',
+          stderr: 'pipe',
+        },
+      );
+      const [output, error, code] = await Promise.all([
+        new Response(child.stdout).text(),
+        new Response(child.stderr).text(),
+        child.exited,
+      ]);
+      expect({ code, error: code === 0 ? '' : error }).toEqual({ code: 0, error: '' });
+      expect(JSON.parse(output)).toEqual({ base, bootstrap: false });
+    });
+    expect(await decoyGit(['rev-parse', 'HEAD'])).toBe(decoyHead);
   });
 }, 20_000);
 
