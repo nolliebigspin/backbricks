@@ -7,7 +7,8 @@ test('organization and project isolation, origin settings and mobile navigation'
   await createAccount(page);
   const firstOrg = await createOrganization(page, 'First organization');
   const firstProject = await createProject(page, 'First website');
-  await expect(page.getByRole('link', { name: 'Inbox', exact: true })).toHaveCount(0);
+  // The E2E server enables forms, so the project navigation offers its Inbox (P2.8a).
+  await expect(page.getByRole('link', { name: 'Inbox', exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'Settings', exact: true }).click();
   await page.getByLabel('Allowed websites').fill('https://example.test/path');
   await page.getByRole('button', { name: 'Save changes' }).click();

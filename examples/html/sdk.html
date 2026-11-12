@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact (SDK)</title>
+<script type="importmap">{ "imports": { "@backbricks/sdk": "./dist/backbricks-sdk.js" } }</script>
+</head>
+<body>
+<h1>Contact (SDK)</h1>
+<form id="backbricks-contact">
+  <label>Name
+    <input type="text" name="name" required>
+  </label>
+  <label>Email
+    <input type="email" name="email" required>
+  </label>
+  <label>Message
+    <textarea name="message" required></textarea>
+  </label>
+  <label><input type="checkbox" name="privacy" required> I agree that my details are stored to answer my message (privacy policy).</label>
+  <div hidden>
+    <input name="_gotcha" tabindex="-1" autocomplete="off">
+  </div>
+  <output></output>
+  <button type="submit">Send</button>
+</form>
+<script type="module" src="sdk.js"></script>
+</body>
+</html>

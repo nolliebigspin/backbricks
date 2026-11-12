@@ -14,7 +14,7 @@ WORKDIR /src
 COPY . .
 RUN mkdir /manifests \
   && cp package.json bun.lock /manifests/ \
-  && find apps packages -name package.json -not -path '*/node_modules/*' \
+  && find apps packages examples -name package.json -not -path '*/node_modules/*' \
     -exec sh -c 'mkdir -p "/manifests/$(dirname "$1")" && cp "$1" "/manifests/$1"' _ {} \;
 
 # Dashboard build (needs dev dependencies: Vite, Tailwind).

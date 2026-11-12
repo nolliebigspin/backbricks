@@ -438,7 +438,9 @@
       "htmlHint": "Funktioniert ohne JavaScript. Nach dem Senden landen Besucher auf der Seite aus den Einstellungen.",
       "htmlNeedsPowOff": "Dieses Formular prüft auf einen echten Browser, was reines HTML nicht schafft. Schalte die Prüfung in den Einstellungen aus oder nutze das SDK.",
       "htmlNeedsRedirect": "Lege in den Einstellungen eine Seite für nach dem Senden fest; reine HTML-Formulare brauchen sie.",
-      "sdkHint": "Für Websites mit JavaScript. Das SDK besteht die Browser-Prüfung automatisch.",
+      "sdkHint": "Für Websites mit JavaScript. Füge das Formular in deine Seite und das Skript in den Code deiner Website ein; das SDK besteht die Browser-Prüfung automatisch.",
+      "sdkForm": "Formular",
+      "sdkScript": "Skript",
       "serverHint": "Für deinen eigenen Server-Code. Nutze einen geheimen Schlüssel mit der Vorlage „Servereinbindung“ in der Umgebungsvariable {{env}}. Ein geheimer Schlüssel gehört nie in Website-Code."
     }
   }

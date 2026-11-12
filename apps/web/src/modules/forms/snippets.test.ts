@@ -34,15 +34,28 @@ test('the HTML form posts to the form with the publishable key and escapes confi
   expect(html).not.toContain('<b>');
 });
 
-test('SDK and server code use the form key; secrets stay in an environment variable', () => {
-  const { sdk, server } = formSnippets(input);
+test('the SDK script reads every field from its form and keeps secrets out of website code', () => {
+  const { sdkForm, sdk, server } = formSnippets(input);
+  expect(sdkForm).toContain('<form id="backbricks-contact">');
+  expect(sdkForm).toContain('  <output></output>');
   expect(sdk).toContain("publishableKey: 'bb_pk_test',");
-  expect(sdk).toContain("await backbricks.forms.submit('contact', {");
-  expect(sdk).toContain("topic: 'sales',");
-  expect(sdk).toContain('privacy: true,');
-  expect(sdk).not.toContain('source:');
+  expect(sdk).toContain("const form = document.getElementById('backbricks-contact');");
+  expect(sdk).toContain("      'contact',");
+  expect(sdk).toContain("        name: text('name'),");
+  expect(sdk).toContain("        privacy: fields.has('privacy'),");
+  expect(sdk).toContain("        source: text('source'),");
+  expect(sdk).toContain("      { honeypot: text('_gotcha') },");
+  expect(sdk).not.toContain('innerHTML');
   expect(server).toContain('process.env.BACKBRICKS_SECRET_KEY');
+  expect(server).toContain("topic: 'sales',");
+  expect(server).not.toContain('source:');
   expect(server).not.toContain('bb_pk_test');
+});
+
+test('quotes in the API address cannot break out of the generated strings', () => {
+  const { sdk, server } = formSnippets({ ...input, baseUrl: "https://x.test/it's/v1" });
+  expect(sdk).toContain("baseUrl: 'https://x.test/it\\'s/v1',");
+  expect(server).toContain("fetch('https://x.test/it\\'s/v1/public/forms/contact/submissions', {");
 });
 
 test('without a publishable key the code shows a placeholder', () => {

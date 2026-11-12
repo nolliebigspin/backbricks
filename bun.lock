@@ -88,6 +88,13 @@
         "@types/react-dom": "19.3.0",
       },
     },
+    "examples/html": {
+      "name": "@backbricks/example-html",
+      "version": "0.0.0",
+      "dependencies": {
+        "@backbricks/sdk": "workspace:*",
+      },
+    },
     "packages/adapters": {
       "name": "@backbricks/adapters",
       "version": "0.0.0",
@@ -372,6 +379,8 @@
     "@backbricks/core": ["@backbricks/core@workspace:packages/core"],
 
     "@backbricks/db": ["@backbricks/db@workspace:packages/db"],
+
+    "@backbricks/example-html": ["@backbricks/example-html@workspace:examples/html"],
 
     "@backbricks/module-forms": ["@backbricks/module-forms@workspace:packages/modules/forms"],
 

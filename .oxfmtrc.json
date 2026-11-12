@@ -12,6 +12,7 @@
     "bun.lock",
     "packages/api-contract/src/generated/**",
     "packages/db/migrations/**",
-    "apps/web/src/routeTree.gen.ts"
+    "apps/web/src/routeTree.gen.ts",
+    "examples/html/*.html"
   ]
 }

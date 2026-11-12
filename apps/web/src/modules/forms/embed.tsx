@@ -70,6 +70,9 @@ export function EmbedTab({ form }: { form: FormInstance }) {
             content: (
               <div className="space-y-3">
                 <p>{t('forms.embed.sdkHint')}</p>
+                <p className="font-medium">{t('forms.embed.sdkForm')}</p>
+                <Code value={snippets.sdkForm} />
+                <p className="font-medium">{t('forms.embed.sdkScript')}</p>
                 <Code value={snippets.sdk} />
               </div>
             ),

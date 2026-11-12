@@ -1,0 +1,21 @@
+{
+  "fields": [
+    { "key": "name", "type": "text", "label": "Name", "required": true, "maxLength": 200 },
+    {
+      "key": "email",
+      "type": "email",
+      "label": "Email",
+      "required": true,
+      "identifiesSubject": true
+    },
+    { "key": "message", "type": "textarea", "label": "Message", "required": true },
+    {
+      "key": "privacy",
+      "type": "consent",
+      "label": "Privacy",
+      "text": "I agree that my details are stored to answer my message (privacy policy).",
+      "version": "1",
+      "required": true
+    }
+  ]
+}

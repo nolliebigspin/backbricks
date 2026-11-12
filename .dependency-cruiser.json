@@ -62,6 +62,16 @@
       }
     },
     {
+      "name": "examples-only-mit",
+      "comment": "I18: the MIT examples use the SDK (and its contract types), never AGPL code.",
+      "severity": "error",
+      "from": { "path": "^examples/" },
+      "to": {
+        "path": "^(apps|packages)/",
+        "pathNot": ["^packages/sdk/", "^packages/api-contract/"]
+      }
+    },
+    {
       "name": "www-only-ui",
       "comment": "ADR-0001: the website imports only packages/ui, never server code.",
       "severity": "error",

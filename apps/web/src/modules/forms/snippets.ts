@@ -1,7 +1,7 @@
 /**
- * Integration snippets for one form: the dashboard's Embed tab shows them and the
- * `examples/html` test (P2.9b) compares the example files against them, so this module is the
- * only place their text is written. Pure functions over the form's config; no React.
+ * Integration snippets for one form: the dashboard's Embed tab shows them and
+ * `examples.test.ts` checks that `examples/html` contains exactly these texts, so this module is
+ * the only place they are written. Pure functions over the form's config; no React.
  */
 import type { ConfigField } from './entries-view.ts';
 
@@ -14,7 +14,8 @@ export type SnippetInput = {
   fields: readonly ConfigField[];
   honeypotField: string;
 };
-export type FormSnippets = { html: string; sdk: string; server: string };
+/** `sdkForm` is the markup the `sdk` script expects; together they are the SDK variant. */
+export type FormSnippets = { html: string; sdkForm: string; sdk: string; server: string };
 
 export const PUBLISHABLE_KEY_PLACEHOLDER = 'YOUR_PUBLISHABLE_KEY';
 export const SECRET_KEY_ENV = 'BACKBRICKS_SECRET_KEY';
@@ -27,7 +28,12 @@ const escapeHtml = (value: string) =>
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;');
+/** A single-quoted JavaScript string literal. */
+const quote = (value: string) => `'${value.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`;
 const required = (field: ConfigField) => (field.required ? ' required' : '');
+const publishableKey = (input: SnippetInput) => input.publishableKey ?? PUBLISHABLE_KEY_PLACEHOLDER;
+/** Element ID of the SDK variant's form; form keys are lowercase letters, digits and dashes. */
+export const sdkFormId = (formKey: string) => `backbricks-${formKey}`;
 
 const INPUT_TYPES: Record<string, string> = {
   text: 'text',
@@ -87,23 +93,95 @@ function htmlField(field: ConfigField): string[] {
   }
 }
 
-/** Plain HTML without JavaScript: needs proof-of-work off and a success page (Q13). */
-export function htmlSnippet(input: SnippetInput): string {
-  const key = input.publishableKey ?? PUBLISHABLE_KEY_PLACEHOLDER;
-  const action = `${input.baseUrl}/public/forms/${input.formKey}/submissions?key=${key}`;
-  return [
-    `<form method="post" action="${escapeHtml(action)}">`,
+const formMarkup = (input: SnippetInput, opening: string, extra: string[] = []) =>
+  [
+    opening,
     ...input.fields.flatMap(htmlField),
     '  <div hidden>',
     `    <input name="${input.honeypotField}" tabindex="-1" autocomplete="off">`,
     '  </div>',
+    ...extra,
     '  <button type="submit">Send</button>',
     '</form>',
     '',
   ].join('\n');
+
+/** Plain HTML without JavaScript: needs proof-of-work off and a success page (Q13). */
+export function htmlSnippet(input: SnippetInput): string {
+  const action = `${input.baseUrl}/public/forms/${input.formKey}/submissions?key=${publishableKey(input)}`;
+  return formMarkup(input, `<form method="post" action="${escapeHtml(action)}">`);
 }
 
-/** Example values by field type, so the snippet shows the shape each field expects. */
+/** The form for the SDK script: no action; an `<output>` shows the result. */
+export function sdkFormSnippet(input: SnippetInput): string {
+  return formMarkup(input, `<form id="${sdkFormId(input.formKey)}">`, ['  <output></output>']);
+}
+
+/** How the script reads each field from the form, matching what the server expects. */
+function readValue(field: ConfigField): string {
+  const name = quote(field.key);
+  switch (field.type) {
+    case 'checkbox':
+    case 'consent':
+      return `fields.has(${name})`;
+    case 'multiselect':
+      return `fields.getAll(${name})`;
+    case 'number':
+      return `text(${name}) && Number(text(${name}))`;
+    default:
+      return `text(${name})`;
+  }
+}
+
+/** Browser script with the SDK, which solves proof-of-work automatically (P2.9a). */
+export function sdkSnippet(input: SnippetInput): string {
+  return [
+    "import { BackbricksError, createClient } from '@backbricks/sdk';",
+    '',
+    'const backbricks = createClient({',
+    `  publishableKey: ${quote(publishableKey(input))},`,
+    `  baseUrl: ${quote(input.baseUrl)},`,
+    '});',
+    '',
+    `const form = document.getElementById(${quote(sdkFormId(input.formKey))});`,
+    "const result = form.querySelector('output');",
+    '',
+    'async function send() {',
+    '  const fields = new FormData(form);',
+    '  // Empty inputs are left out, so the server reports missing required fields.',
+    '  const text = (name) => fields.get(name) || undefined;',
+    "  form.querySelector('button').disabled = true;",
+    '  try {',
+    '    await backbricks.forms.submit(',
+    `      ${quote(input.formKey)},`,
+    '      {',
+    ...input.fields
+      .filter((field) => field.type !== 'file')
+      .map((field) => `        ${field.key}: ${readValue(field)},`),
+    '      },',
+    `      { honeypot: text(${quote(input.honeypotField)}) },`,
+    '    );',
+    '    form.reset();',
+    "    result.textContent = 'Thank you! Your message was sent.';",
+    '  } catch (error) {',
+    '    if (!(error instanceof BackbricksError)) throw error;',
+    '    result.textContent = error.fieldErrors.length',
+    "      ? error.fieldErrors.map((field) => `${field.path}: ${field.message}`).join(' ')",
+    '      : error.message;',
+    '  } finally {',
+    "    form.querySelector('button').disabled = false;",
+    '  }',
+    '}',
+    '',
+    "form.addEventListener('submit', (event) => {",
+    '  event.preventDefault();',
+    '  void send();',
+    '});',
+    '',
+  ].join('\n');
+}
+
+/** Example values by field type, so the server snippet shows the shape each field expects. */
 function sampleValue(field: ConfigField): string {
   switch (field.type) {
     case 'email':
@@ -118,9 +196,9 @@ function sampleValue(field: ConfigField): string {
     case 'consent':
       return 'true';
     case 'select':
-      return `'${field.options?.[0]?.value ?? ''}'`;
+      return quote(field.options?.[0]?.value ?? '');
     case 'multiselect':
-      return `['${field.options?.[0]?.value ?? ''}']`;
+      return `[${quote(field.options?.[0]?.value ?? '')}]`;
     case 'phone':
       return "'+49 30 1234567'";
     default:
@@ -128,32 +206,10 @@ function sampleValue(field: ConfigField): string {
   }
 }
 
-const dataLines = (fields: readonly ConfigField[], indent: string) =>
-  fields
-    .filter((field) => field.type !== 'file' && field.type !== 'hidden')
-    .map((field) => `${indent}${field.key}: ${sampleValue(field)},`);
-
-/** Browser code with the SDK, which solves proof-of-work automatically (P2.9a). */
-export function sdkSnippet(input: SnippetInput): string {
-  return [
-    "import { createClient } from '@backbricks/sdk';",
-    '',
-    'const backbricks = createClient({',
-    `  publishableKey: '${input.publishableKey ?? PUBLISHABLE_KEY_PLACEHOLDER}',`,
-    `  baseUrl: '${input.baseUrl}',`,
-    '});',
-    '',
-    `await backbricks.forms.submit('${input.formKey}', {`,
-    ...dataLines(input.fields, '  '),
-    '});',
-    '',
-  ].join('\n');
-}
-
 /** Server-to-server with a secret key (skips proof-of-work); never in browser code. */
 export function serverSnippet(input: SnippetInput): string {
   return [
-    `const response = await fetch('${input.baseUrl}/public/forms/${input.formKey}/submissions', {`,
+    `const response = await fetch(${quote(`${input.baseUrl}/public/forms/${input.formKey}/submissions`)}, {`,
     "  method: 'POST',",
     '  headers: {',
     `    Authorization: \`Bearer \${process.env.${SECRET_KEY_ENV}}\`,`,
@@ -161,7 +217,9 @@ export function serverSnippet(input: SnippetInput): string {
     '  },',
     '  body: JSON.stringify({',
     '    data: {',
-    ...dataLines(input.fields, '      '),
+    ...input.fields
+      .filter((field) => field.type !== 'file' && field.type !== 'hidden')
+      .map((field) => `      ${field.key}: ${sampleValue(field)},`),
     '    },',
     '  }),',
     '});',
@@ -171,5 +229,10 @@ export function serverSnippet(input: SnippetInput): string {
 }
 
 export function formSnippets(input: SnippetInput): FormSnippets {
-  return { html: htmlSnippet(input), sdk: sdkSnippet(input), server: serverSnippet(input) };
+  return {
+    html: htmlSnippet(input),
+    sdkForm: sdkFormSnippet(input),
+    sdk: sdkSnippet(input),
+    server: serverSnippet(input),
+  };
 }
