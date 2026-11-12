@@ -12,13 +12,13 @@
   },
   "dependencies": {
     "@astrojs/prism": "4.1.2",
-    "@astrojs/react": "7.1.2",
+    "@astrojs/react": "7.1.4",
     "@astrojs/sitemap": "3.7.4",
     "@backbricks/ui": "workspace:*",
-    "@tailwindcss/vite": "4.3.4",
+    "@tailwindcss/vite": "4.3.5",
     "@vercel/analytics": "2.0.1",
-    "astro": "7.4.5",
-    "lucide-react": "1.68.0",
+    "astro": "7.4.7",
+    "lucide-react": "1.70.0",
     "prismjs": "1.30.0",
     "react": "19.3.1",
     "react-dom": "19.3.1"

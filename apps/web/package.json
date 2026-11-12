@@ -14,23 +14,23 @@
   "dependencies": {
     "@backbricks/sdk": "workspace:*",
     "@backbricks/ui": "workspace:*",
-    "@tanstack/react-query": "5.105.3",
+    "@tanstack/react-query": "5.107.1",
     "@tanstack/react-router": "1.170.46",
     "better-auth": "1.7.18",
-    "i18next": "26.7.1",
+    "i18next": "27.0.1",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "react-i18next": "17.1.12"
+    "react-i18next": "18.0.1"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "21.0.4",
-    "@tailwindcss/vite": "4.3.4",
+    "@tailwindcss/vite": "4.3.5",
     "@tanstack/router-plugin": "1.168.48",
     "@testing-library/react": "16.3.3",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.2.1",
-    "tailwindcss": "4.3.4",
+    "tailwindcss": "4.3.5",
     "vite": "8.3.5"
   }
 }
