@@ -185,6 +185,9 @@
         "@backbricks/api-contract": "workspace:*",
         "openapi-fetch": "0.17.0",
       },
+      "devDependencies": {
+        "altcha-lib": "2.8.0",
+      },
     },
     "packages/ui": {
       "name": "@backbricks/ui",
