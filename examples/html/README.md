@@ -10,7 +10,7 @@ Two pages with the same contact form (MIT). The code is exactly what the dashboa
 ## Try it
 
 1. Start Backbricks (`mise run dev`) and open the dashboard at <http://localhost:5173>.
-2. In a project, create the two forms above with the fields from `form.json` (the **Contact** template has them), and adjust their settings as listed.
+2. In a project, create the two forms above from the **Contact form** template (it has exactly the fields in `form.json`), and adjust their settings as listed.
 3. On the project's **Embed** page, create a publishable key and add the address you serve this folder from (e.g. `http://localhost:8080`) as an allowed website.
 4. Replace `YOUR_PUBLISHABLE_KEY` in `index.html` and `sdk.js` with the key. If your API is not at `http://localhost:5173/v1`, replace that too.
 5. Bundle the SDK for the browser and serve the folder:

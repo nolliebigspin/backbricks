@@ -4,7 +4,7 @@
 
 Your AI agent builds the frontend. Backbricks handles the functionality behind it: data processing, storage, security and a dashboard where non-technical site owners manage what comes in. No database, backend or storage to configure. Bring your own UI; Backbricks ships no widgets, iframes or CSS.
 
-> **Status: pre-alpha.** Milestone M0 (foundation) is done; M1 (platform core) is in progress. See [`docs/MILESTONES.md`](docs/MILESTONES.md).
+> **Status: developer preview (v0.1.0).** The platform core and the **Forms** module work end to end (milestone M2). Uploads and reviews follow; expect breaking changes before 1.0. See [`docs/MILESTONES.md`](docs/MILESTONES.md).
 
 ## What it does (v1 scope)
 
@@ -25,20 +25,48 @@ The three v1 modules are the start. The goal is to cover the interactive parts o
 - **Self-hosted (free, AGPL-3.0):** the complete platform via Docker Compose, with your own Postgres and S3-compatible storage. No calls home, no feature lock. Modules are optional: enable only what you need and only the services those modules require are deployed (forms alone runs on just the app and Postgres).
 - **Managed EU cloud (later):** the same code, operated for you. Planned after the open-source 1.0.
 
-## Development
+## Quickstart
 
 Requirements: [mise](https://mise.jdx.dev) and Docker (Docker Desktop or OrbStack).
 
 ```bash
-mise install        # pinned tools: bun, node, lefthook, codegraph, gh
+git clone https://github.com/nolliebigspin/backbricks.git && cd backbricks
+mise install        # pinned tools: bun, node, lefthook, codegraph, gh, actionlint
 mise run setup      # dependencies, git hooks, local code graph
-mise run dev        # full dev environment in Docker Compose
+mise run dev        # dashboard at http://localhost:5173, test emails at http://localhost:8025
+```
+
+Then, in the dashboard:
+
+1. **Sign up** at <http://localhost:5173/signup>. The verification email arrives in Mailpit (<http://localhost:8025>).
+2. Create an **organization** and a **project**. Under **Allowed websites**, add the address your test page runs on (e.g. `http://localhost:8080`).
+3. Open the project's **Inbox** and create a form from the **Contact form** template.
+4. On the form's **Embed** tab, create a publishable key and copy the code for your page: plain HTML (switch off the browser check and set a page after sending under **Settings**) or the SDK. [`examples/html`](examples/html) has both, ready to serve.
+5. Send the form. The entry appears under **Entries**, and form notifications (Settings) arrive in Mailpit.
+
+## Run the image
+
+Every release publishes one image for all roles to `ghcr.io/nolliebigspin/backbricks` (`serve`, `worker`, `all`, `migrate`). With forms only, it needs nothing but Postgres:
+
+```bash
+docker run --rm --env-file .env ghcr.io/nolliebigspin/backbricks:0.1.0 migrate
+docker run -d --env-file .env -p 3000:3000 ghcr.io/nolliebigspin/backbricks:0.1.0 all
+```
+
+The variables are documented in [`.env.example`](.env.example); set `BACKBRICKS_MODULES=forms`, a real `APP_SECRET` and the HTTPS `PUBLIC_URL`. Production Compose files and first-admin setup arrive with M6; until then the first owner signs up with `SIGNUP_POLICY=open`, after which you switch it back to `invite_only`.
+
+**Migrations:** run the `migrate` role before starting a new version (it applies pending migrations under a lock and exits). v0.1.0 is the first release, so there is nothing to upgrade from. Release notes: [`apps/server/CHANGELOG.md`](apps/server/CHANGELOG.md) (written on release).
+
+## Development
+
+```bash
 bun run check       # everything CI checks
+bun run build && bun run test:e2e   # browser journeys (needs `mise run infra`)
 ```
 
 Stack: Bun · TypeScript 7 · Turborepo · Hono · PostgreSQL + Drizzle · pg-boss · Better Auth · React + Vite + TanStack + shadcn/ui · oxlint/oxfmt · Playwright. Details and rationale: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
-Development uses the dashboard's Vite URL (`http://localhost:5173`) as `PUBLIC_URL`, with API requests proxied to the server. Update `PUBLIC_URL` when changing the browser-facing address. Production authentication requires HTTPS. Signup defaults to `invite_only`; Compose and `.env.example` explicitly enable `open` for development with Mailpit. Verification is required before login. Production first-admin setup arrives in M6; the auth dashboard screens are still part of M1 work. Runtime policy and the current auth surface are documented in [ADR-0026](docs/adr/0026-dashboard-auth-runtime.md).
+Development uses the dashboard's Vite URL (`http://localhost:5173`) as `PUBLIC_URL`, with API requests proxied to the server. Update `PUBLIC_URL` when changing the browser-facing address. Production authentication requires HTTPS. Signup defaults to `invite_only`; Compose and `.env.example` explicitly enable `open` for development with Mailpit. Verification is required before login. Runtime policy and the current auth surface are documented in [ADR-0026](docs/adr/0026-dashboard-auth-runtime.md).
 
 ## Documentation
 

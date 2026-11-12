@@ -138,7 +138,7 @@ test('the plain HTML example works without JavaScript; honeypot and errors are h
     await site.getByLabel('Name', { exact: true }).fill('Grace Hopper');
     await site.getByLabel('Email', { exact: true }).fill('grace@example.com');
     await site.getByLabel('Message', { exact: true }).fill('No JavaScript needed');
-    await site.getByLabel(/privacy/i).check();
+    await site.getByRole('checkbox').check();
     await site.getByRole('button', { name: 'Send' }).click();
     await expect(site).toHaveURL(`${setup.site.url}/thanks.html`);
     await expect(site.getByRole('heading', { name: 'Thank you' })).toBeVisible();
@@ -148,7 +148,7 @@ test('the plain HTML example works without JavaScript; honeypot and errors are h
     await site.getByLabel('Name', { exact: true }).fill('Grace Hopper');
     await site.getByLabel('Email', { exact: true }).fill('grace@localhost');
     await site.getByLabel('Message', { exact: true }).fill('Checked on the server');
-    await site.getByLabel(/privacy/i).check();
+    await site.getByRole('checkbox').check();
     await site.getByRole('button', { name: 'Send' }).click();
     await expect(site.getByRole('listitem')).toHaveText('email: invalid_email');
 
@@ -219,7 +219,7 @@ test('the SDK example solves proof-of-work, shows errors, notifies without conte
     await site.getByLabel('Name', { exact: true }).fill('=SUM(1)');
     await site.getByLabel('Email', { exact: true }).fill('ada@localhost');
     await site.getByLabel('Message', { exact: true }).fill('Private message text');
-    await site.getByLabel(/privacy/i).check();
+    await site.getByRole('checkbox').check();
     await site.getByRole('button', { name: 'Send' }).click();
     await expect(site.locator('output')).toContainText('email:');
     expect(await entryCount(setup.request, setup.project, 'contact', setup.headers)).toBe(0);

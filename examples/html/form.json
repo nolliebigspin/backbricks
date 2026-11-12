@@ -13,9 +13,8 @@
       "key": "privacy",
       "type": "consent",
       "label": "Privacy",
-      "text": "I agree that my details are stored to answer my message (privacy policy).",
-      "version": "1",
-      "required": true
+      "text": "I agree that my details are stored to answer my request.",
+      "version": "1"
     }
   ]
 }

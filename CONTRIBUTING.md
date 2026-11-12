@@ -20,6 +20,14 @@ mise run dev     # dev environment in Docker Compose
 4. Run `bun run check` (the `pre-push` hook runs the affected subset automatically).
 5. Open a pull request against `main` and fill in the template. CI must be green.
 
+## Releasing (maintainers)
+
+User-visible changes come with a changeset (`bun run changeset`, see [`.changeset/README.md`](.changeset/README.md)). The product version is the version of `@backbricks/server`.
+
+1. On an up-to-date `main`, run `GITHUB_TOKEN=<token with read:user and repo:status> bun run release:version`. It bumps `@backbricks/server` and writes `apps/server/CHANGELOG.md` with links to the pull requests. Commit the result (`chore(release): vX.Y.Z`) through a pull request.
+2. After it is merged, create and push the signed tag: `git tag -s vX.Y.Z -m vX.Y.Z && git push origin vX.Y.Z`. Agents never tag or push.
+3. The **Release** workflow checks that the tag matches the server version, builds the image exactly like CI, smoke-tests it and pushes `ghcr.io/nolliebigspin/backbricks:X.Y.Z` (plus `X.Y` and `sha-…`) with the workflow's own token. A manual run (Actions → Release → Run workflow) builds and smoke-tests without pushing unless "Push the image" is ticked.
+
 ## Developer Certificate of Origin (DCO)
 
 We use the [Developer Certificate of Origin 1.1](https://developercertificate.org/) instead of a CLA. By adding a `Signed-off-by` line to a commit, you certify that you wrote the contribution or otherwise have the right to submit it under the project's licenses (see [LICENSING.md](LICENSING.md)).
