@@ -232,7 +232,9 @@
     "tabs": {
       "label": "Formularbereiche",
       "entries": "Einträge",
-      "settings": "Einstellungen"
+      "settings": "Einstellungen",
+      "fields": "Felder",
+      "embed": "Einbinden"
     },
     "entries": {
       "summary": "{{total}} Einträge, {{unread}} ungelesen, {{spam}} im Spam-Ordner.",
@@ -352,6 +354,92 @@
       "reload": "Einstellungen neu laden",
       "forbidden": "Dazu fehlt dir die Berechtigung. Frag einen Inhaber oder Administrator.",
       "keyTaken": "Dieser Kurzname wird schon von einem anderen Formular verwendet. Wähle einen anderen."
+    },
+    "fields": {
+      "title": "Felder",
+      "intro": "Diese Felder sendet deine Website. Änderungen gelten für neue Einträge; bestehende Einträge behalten, was gesendet wurde.",
+      "readOnly": "Nur Inhaber und Administratoren können die Felder ändern. Du kannst sie ansehen.",
+      "edit": "Feld {{name}} bearbeiten",
+      "moveUp": "{{name}} nach oben",
+      "moveDown": "{{name}} nach unten",
+      "remove": "{{name}} entfernen",
+      "requiredShort": "Pflichtfeld",
+      "addLabel": "Feld hinzufügen",
+      "add": "Hinzufügen",
+      "common": "Häufige Felder",
+      "allTypes": "Alle Feldtypen",
+      "presets": {
+        "name": "Name",
+        "email": "E-Mail",
+        "phone": "Telefon",
+        "message": "Nachricht",
+        "consent": "Datenschutz-Einwilligung"
+      },
+      "consentDefault": "Ich bin einverstanden, dass meine Angaben zur Bearbeitung meiner Anfrage gespeichert werden.",
+      "optionDefault": "Option 1",
+      "label": "Bezeichnung",
+      "key": "Kurzname",
+      "keyHint": "Unter diesem Namen sendet deine Website den Wert. Kleinbuchstaben, Ziffern und Unterstriche.",
+      "keyFixed": "Der Kurzname lässt sich nach dem Speichern nicht mehr ändern. Füge stattdessen ein neues Feld hinzu.",
+      "type": "Typ",
+      "help": "Hilfetext (optional)",
+      "required": "Pflichtfeld",
+      "types": {
+        "text": "Kurzer Text",
+        "textarea": "Langer Text",
+        "email": "E-Mail",
+        "phone": "Telefonnummer",
+        "number": "Zahl",
+        "url": "Webadresse",
+        "date": "Datum",
+        "select": "Eine Auswahl",
+        "multiselect": "Mehrfachauswahl",
+        "checkbox": "Ankreuzfeld",
+        "consent": "Einwilligung",
+        "hidden": "Versteckter Wert",
+        "file": "Datei-Upload"
+      },
+      "rules": {
+        "minLength": "Mindestens Zeichen",
+        "maxLength": "Höchstens Zeichen",
+        "min": "Minimum",
+        "max": "Maximum",
+        "identifiesSubject": "Mit dieser E-Mail die Einträge einer Person für Datenschutzanfragen finden",
+        "text": "Einwilligungstext",
+        "version": "Version der Einwilligung",
+        "zone": "Upload-Bereich",
+        "maxFiles": "Höchstens Dateien"
+      },
+      "options": "Auswahlmöglichkeiten",
+      "optionLabel": "Angezeigt als",
+      "optionValue": "Gesendet als",
+      "removeOption": "Auswahl {{label}} entfernen",
+      "addOption": "Auswahl hinzufügen",
+      "confirmTitle": "Änderungen speichern, die bestehende Einträge betreffen?",
+      "confirmDescription": "Websites, die noch die alten Felder senden, bekommen eventuell Fehler, bis du sie anpasst.",
+      "confirmSave": "Änderungen speichern",
+      "changes": {
+        "removed": "„{{label}}“ wird entfernt. Bestehende Einträge behalten die Antworten unter „Weitere Daten“.",
+        "typeChanged": "„{{label}}“ ändert sich von {{from}} zu {{to}}. Bestehende Antworten bleiben, wie sie gesendet wurden.",
+        "optionsRemoved": "„{{label}}“ verliert die Auswahl {{options}}. Bestehende Einträge behalten die alte Auswahl.",
+        "other": "Diese Änderung betrifft, wie bestehende Einträge geprüft oder angezeigt werden."
+      }
+    },
+    "embed": {
+      "label": "Wege, das Formular einzubinden",
+      "html": "HTML-Formular",
+      "sdk": "JavaScript (SDK)",
+      "server": "Von deinem Server",
+      "noKey": "Dieses Projekt hat noch keinen öffentlichen Schlüssel, deshalb zeigt der Code einen Platzhalter.",
+      "keysLink": "Schlüssel erstellen",
+      "origins": "Nur diese Websites können Einträge senden: {{origins}}.",
+      "anyOrigin": "Jede Website kann Einträge senden. Beschränke das in den Projekteinstellungen auf deine Domains.",
+      "honeypot": "Lass das versteckte Feld „{{name}}“ im Formular: Bots füllen es aus, und ihre Einträge werden verworfen.",
+      "htmlHint": "Funktioniert ohne JavaScript. Nach dem Senden landen Besucher auf der Seite aus den Einstellungen.",
+      "htmlNeedsPowOff": "Dieses Formular prüft auf einen echten Browser, was reines HTML nicht schafft. Schalte die Prüfung in den Einstellungen aus oder nutze das SDK.",
+      "htmlNeedsRedirect": "Lege in den Einstellungen eine Seite für nach dem Senden fest; reine HTML-Formulare brauchen sie.",
+      "sdkHint": "Für Websites mit JavaScript. Das SDK besteht die Browser-Prüfung automatisch.",
+      "serverHint": "Für deinen eigenen Server-Code. Nutze einen geheimen Schlüssel mit der Vorlage „Servereinbindung“ in der Umgebungsvariable {{env}}. Ein geheimer Schlüssel gehört nie in Website-Code."
     }
   }
 }

@@ -2,6 +2,9 @@ export type ConfigField = {
   key: string;
   label: string;
   type: string;
+  required?: boolean;
+  /** Consent fields: the text the visitor agrees to. */
+  text?: string;
   options?: { value: string; label: string }[];
 };
 
@@ -12,7 +15,7 @@ const record = (value: unknown): Record<string, unknown> =>
 
 function fieldOf(value: unknown): ConfigField | null {
   const field = record(value);
-  const { key, label, type, options } = field;
+  const { key, label, type, options, required, text } = field;
   if (typeof key !== 'string' || typeof label !== 'string' || typeof type !== 'string') return null;
   const choices = Array.isArray(options)
     ? options.flatMap((option) => {
@@ -22,7 +25,23 @@ function fieldOf(value: unknown): ConfigField | null {
           : [];
       })
     : undefined;
-  return { key, label, type, ...(choices ? { options: choices } : {}) };
+  return {
+    key,
+    label,
+    type,
+    ...(required === true ? { required } : {}),
+    ...(typeof text === 'string' ? { text } : {}),
+    ...(choices ? { options: choices } : {}),
+  };
+}
+
+/** The form's fields in order, skipping entries that don't have the basic shape. */
+export function configFields(config: unknown): ConfigField[] {
+  const root = record(config);
+  return (Array.isArray(root['fields']) ? root['fields'] : []).flatMap((value) => {
+    const field = fieldOf(value);
+    return field ? [field] : [];
+  });
 }
 
 /**
@@ -31,10 +50,7 @@ function fieldOf(value: unknown): ConfigField | null {
  */
 export function listColumns(config: unknown): ConfigField[] {
   const root = record(config);
-  const fields = (Array.isArray(root['fields']) ? root['fields'] : []).flatMap((value) => {
-    const field = fieldOf(value);
-    return field ? [field] : [];
-  });
+  const fields = configFields(config);
   const chosen = Array.isArray(root['listFields'])
     ? root['listFields'].filter((key): key is string => typeof key === 'string')
     : null;

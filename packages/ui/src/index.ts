@@ -31,3 +31,5 @@ export { StatusBadge, type StatusTone } from '#components/status-badge';
 export { DataTable, type DataTableColumn } from '#components/data-table';
 export { FieldValue, type FieldValueLabels } from '#components/field-value';
 export { RecordDrawer } from '#components/record-drawer';
+export { TypedConfirmDialog } from '#components/typed-confirm-dialog';
+export { FieldListEditor, type FieldListEditorLabels } from '#components/field-list-editor';

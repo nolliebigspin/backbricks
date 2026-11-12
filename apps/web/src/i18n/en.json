@@ -232,7 +232,9 @@
     "tabs": {
       "label": "Form sections",
       "entries": "Entries",
-      "settings": "Settings"
+      "settings": "Settings",
+      "fields": "Fields",
+      "embed": "Embed"
     },
     "entries": {
       "summary": "{{total}} entries, {{unread}} unread, {{spam}} in the spam folder.",
@@ -352,6 +354,92 @@
       "reload": "Reload settings",
       "forbidden": "You don't have permission to change this. Ask an owner or administrator.",
       "keyTaken": "This short name is already used by another form. Choose another."
+    },
+    "fields": {
+      "title": "Fields",
+      "intro": "These are the fields your website sends. Changes apply to new entries; existing entries keep what they were sent.",
+      "readOnly": "Only owners and administrators can change the fields. You can view them.",
+      "edit": "Edit field {{name}}",
+      "moveUp": "Move {{name}} up",
+      "moveDown": "Move {{name}} down",
+      "remove": "Remove {{name}}",
+      "requiredShort": "required",
+      "addLabel": "Add a field",
+      "add": "Add field",
+      "common": "Common fields",
+      "allTypes": "All field types",
+      "presets": {
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "message": "Message",
+        "consent": "Privacy consent"
+      },
+      "consentDefault": "I agree that my details are stored to answer my request.",
+      "optionDefault": "Option 1",
+      "label": "Label",
+      "key": "Short name",
+      "keyHint": "Your website uses this name to send the value. Lowercase letters, numbers and underscores.",
+      "keyFixed": "The short name can't change after saving. Add a new field instead.",
+      "type": "Type",
+      "help": "Help text (optional)",
+      "required": "Required",
+      "types": {
+        "text": "Short text",
+        "textarea": "Long text",
+        "email": "Email",
+        "phone": "Phone number",
+        "number": "Number",
+        "url": "Web address",
+        "date": "Date",
+        "select": "Choose one",
+        "multiselect": "Choose several",
+        "checkbox": "Checkbox",
+        "consent": "Consent",
+        "hidden": "Hidden value",
+        "file": "File upload"
+      },
+      "rules": {
+        "minLength": "Minimum characters",
+        "maxLength": "Maximum characters",
+        "min": "Minimum",
+        "max": "Maximum",
+        "identifiesSubject": "Use this email to find the person's entries for privacy requests",
+        "text": "Consent text",
+        "version": "Consent version",
+        "zone": "Upload area",
+        "maxFiles": "Maximum files"
+      },
+      "options": "Choices",
+      "optionLabel": "Shown as",
+      "optionValue": "Sent as",
+      "removeOption": "Remove choice {{label}}",
+      "addOption": "Add choice",
+      "confirmTitle": "Save changes that affect existing entries?",
+      "confirmDescription": "Websites that still send the old fields may get errors until you update them.",
+      "confirmSave": "Save changes",
+      "changes": {
+        "removed": "\"{{label}}\" is removed. Existing entries keep its answers under \"Additional data\".",
+        "typeChanged": "\"{{label}}\" changes from {{from}} to {{to}}. Existing answers stay as they were sent.",
+        "optionsRemoved": "\"{{label}}\" loses the choices {{options}}. Existing entries keep the old choices.",
+        "other": "This change affects how existing entries are checked or shown."
+      }
+    },
+    "embed": {
+      "label": "Ways to add the form",
+      "html": "HTML form",
+      "sdk": "JavaScript (SDK)",
+      "server": "From your server",
+      "noKey": "This project has no publishable key yet, so the code shows a placeholder.",
+      "keysLink": "Create a key",
+      "origins": "Only these websites can send entries: {{origins}}.",
+      "anyOrigin": "Any website can send entries. Restrict this to your domains in the project settings.",
+      "honeypot": "Keep the hidden field \"{{name}}\" in your form: bots fill it and their entries are dropped.",
+      "htmlHint": "Works without JavaScript. After sending, visitors go to the page set under Settings.",
+      "htmlNeedsPowOff": "This form checks for a real browser, which plain HTML can't pass. Switch the check off under Settings, or use the SDK.",
+      "htmlNeedsRedirect": "Set a page for after sending under Settings; plain HTML forms need one.",
+      "sdkHint": "For websites with JavaScript. The SDK passes the browser check automatically.",
+      "serverHint": "For your own server code. Use a secret key with the \"Server integration\" preset in the {{env}} environment variable. Never put a secret key in website code."
     }
   }
 }

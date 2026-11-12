@@ -136,7 +136,7 @@ test('members get no bulk delete; admins must type the form name to bulk delete'
   expect(await screen.findByText('Download as spreadsheet (CSV)')).toBeDefined();
   fireEvent.click(await screen.findByLabelText(/Select the entry/));
   fireEvent.click(screen.getByRole('button', { name: 'Delete selected' }));
-  const confirm = within(await screen.findByRole('dialog')).getByRole('button', {
+  const confirm = within(await screen.findByRole('alertdialog')).getByRole('button', {
     name: 'Delete selected',
   });
   expect(confirm.hasAttribute('disabled')).toBe(true);

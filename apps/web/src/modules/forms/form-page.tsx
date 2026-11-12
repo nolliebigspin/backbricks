@@ -3,11 +3,13 @@ import { useTranslation } from 'react-i18next';
 
 import { Feedback } from '../../dashboard/feedback.tsx';
 import { formsError, useForm, useFormSummary, useFormsScope } from './api.ts';
+import { EmbedTab } from './embed.tsx';
 import { EntriesTab } from './entries.tsx';
+import { FieldsTab } from './fields.tsx';
 import { FormSettingsTab } from './settings.tsx';
 
 /**
- * One form: entries first, settings next (Fields and Embed tabs follow in P2.8c). `?entry=` opens
+ * One form: entries first, then fields, settings and embed code. `?entry=` opens
  * that entry, the link notification mails use (ADR-0060).
  */
 export function FormPage({ formKey }: { formKey: string }) {
@@ -35,7 +37,9 @@ export function FormPage({ formKey }: { formKey: string }) {
       <Tabs defaultValue="entries">
         <TabsList aria-label={t('forms.tabs.label')}>
           <TabsTrigger value="entries">{t('forms.tabs.entries')}</TabsTrigger>
+          <TabsTrigger value="fields">{t('forms.tabs.fields')}</TabsTrigger>
           <TabsTrigger value="settings">{t('forms.tabs.settings')}</TabsTrigger>
+          <TabsTrigger value="embed">{t('forms.tabs.embed')}</TabsTrigger>
         </TabsList>
         <TabsContent value="entries">
           {summary.data && (
@@ -49,8 +53,14 @@ export function FormPage({ formKey }: { formKey: string }) {
           )}
           <EntriesTab form={form.data} initialEntry={initialEntry} />
         </TabsContent>
+        <TabsContent value="fields">
+          <FieldsTab form={form.data} />
+        </TabsContent>
         <TabsContent value="settings">
           <FormSettingsTab form={form.data} />
+        </TabsContent>
+        <TabsContent value="embed">
+          <EmbedTab form={form.data} />
         </TabsContent>
       </Tabs>
     </div>

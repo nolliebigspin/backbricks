@@ -10,6 +10,7 @@ import {
   NativeSelectOption,
   RecordDrawer,
   StatusBadge,
+  TypedConfirmDialog,
   type DataTableColumn,
   type FieldValueLabels,
 } from '@backbricks/ui';
@@ -330,9 +331,13 @@ export function EntriesTab({
         <EntryDrawer form={form} id={openId} onClose={() => setOpenId(null)} onChanged={refresh} />
       )}
       {confirmBulkDelete && (
-        <TypedConfirm
-          formKey={form.key}
-          count={selection.size}
+        <TypedConfirmDialog
+          title={t('forms.entries.deleteTitle', { count: selection.size })}
+          description={t('forms.entries.deleteDescription', { count: selection.size })}
+          confirmText={form.key}
+          typeLabel={t('forms.danger.typeKey', { key: form.key })}
+          confirmLabel={t('forms.entries.deleteSelected')}
+          cancelLabel={t('common.cancel')}
           onClose={() => setConfirmBulkDelete(false)}
           onConfirm={() => {
             setConfirmBulkDelete(false);
@@ -357,50 +362,6 @@ const statusOf = (value: string): Filters['status'] =>
   value === 'open' || value === 'done' ? value : '';
 const readOf = (value: string): Filters['read'] =>
   value === 'true' || value === 'false' ? value : '';
-
-/** Bulk deletes require typing the form's short name (§E.5 "safe destructiveness"). */
-function TypedConfirm({
-  formKey,
-  count,
-  onClose,
-  onConfirm,
-}: {
-  formKey: string;
-  count: number;
-  onClose: () => void;
-  onConfirm: () => void;
-}) {
-  const { t } = useTranslation();
-  const [typed, setTyped] = useState('');
-  const id = useId();
-  return (
-    <RecordDrawer
-      open
-      onOpenChange={(open) => !open && onClose()}
-      title={t('forms.entries.deleteTitle', { count })}
-      closeLabel={t('common.close')}
-    >
-      <p>{t('forms.entries.deleteDescription', { count })}</p>
-      <div className="space-y-2">
-        <Label htmlFor={id}>{t('forms.danger.typeKey', { key: formKey })}</Label>
-        <Input
-          id={id}
-          value={typed}
-          autoComplete="off"
-          onChange={(e) => setTyped(e.target.value)}
-        />
-      </div>
-      <div className="flex gap-2">
-        <Button variant="destructive" disabled={typed !== formKey} onClick={onConfirm}>
-          {t('forms.entries.deleteSelected')}
-        </Button>
-        <Button variant="outline" onClick={onClose}>
-          {t('common.cancel')}
-        </Button>
-      </div>
-    </RecordDrawer>
-  );
-}
 
 /** Details with historical labels; opening an unread entry marks it read. */
 function EntryDrawer({
