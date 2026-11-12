@@ -868,13 +868,13 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 - **Tests:** CI workflow lint; image smoke.
 - **Risks/notes:** `@changesets/cli` 3.0.3 needs Node ≥ 22.11 (mise Node 24); it's a dev dependency only.
 
-### [ ] P2.10b – Demonstrate M2 and record the handoff (est. 4 h)
+### [x] P2.10b – Demonstrate M2 and record the handoff (est. 4 h)
 - **Description:** Run the phase acceptance below with fresh real services, write `docs/progress/phase-2.md` (done, deviations, known gaps, new risks, evidence), update ARCHITECTURE links where code now wins, tick the plan.
 - **Files/packages:** `docs/progress/phase-2.md`, `PLAN.md`, `docs/MILESTONES.md`.
 - **Depends on:** all P2 tasks.
 - **Reuses:** P1 report format.
 - **Acceptance criteria:**
-  - [ ] Every phase-acceptance item has a command and a recorded result; no skipped integration result counts as proof.
+  - [x] Every phase-acceptance item has a command and a recorded result; no skipped integration result counts as proof.
 - **Tests:** full acceptance below.
 - **Risks/notes:** A fresh session reviews M2 (AGENTS §9). The maintainer opens the PR and tags.
 
@@ -882,14 +882,14 @@ P1.9a is complete. Q11 was explicitly approved, and ADR-0054 wires the trusted p
 
 Run after `mise install && mise run infra` with isolated test tenants and Mailpit.
 
-- [ ] **HTML and fetch examples create visible entries:** `bun run build && CI=true bun run test:e2e` (P2.9b journeys).
-- [ ] **Structured validation errors:** server tests and E2E assert `validation_failed` problem details with `errors[]` for both transports.
-- [ ] **Spam/honeypot; content-free notification:** E2E and server tests show honeypot drop, spam folder, and a Mailpit message without submission content.
-- [ ] **CSV injection-safe; expired entries purged:** encoder property tests, export integration (`=SUM(1)` defused) and clock-driven purge test, all in `CI=true bunx turbo run test --force`.
-- [ ] **Isolation covers new routes:** the automatic suite (cookies and keys) and the I5 public gate fail for any uncovered route; `bun run test:scripts` architecture fixtures pass.
-- [ ] **Release gate:** P2.7c erasure test proves no personal data remains for an erased project.
-- [ ] **Contract and quality:** `bun run api:generate && bun run api:check && bun run api:breaking` (additive only vs. the M1 base), `bun run check && bun run build`, image smoke with `BACKBRICKS_MODULES=forms` (app + Postgres only).
-- [ ] **Release:** `v0.1.0` changelog, tag-built GHCR image, README quickstart verified; `docs/progress/phase-2.md` written; green CI on the maintainer's PR.
+- [x] **HTML and fetch examples create visible entries:** `bun run build && CI=true bun run test:e2e` (P2.9b journeys).
+- [x] **Structured validation errors:** server tests and E2E assert `validation_failed` problem details with `errors[]` for both transports.
+- [x] **Spam/honeypot; content-free notification:** E2E and server tests show honeypot drop, spam folder, and a Mailpit message without submission content.
+- [x] **CSV injection-safe; expired entries purged:** encoder property tests, export integration (`=SUM(1)` defused) and clock-driven purge test, all in `CI=true bunx turbo run test --force`.
+- [x] **Isolation covers new routes:** the automatic suite (cookies and keys) and the I5 public gate fail for any uncovered route; `bun run test:scripts` architecture fixtures pass.
+- [x] **Release gate:** P2.7c erasure test proves no personal data remains for an erased project.
+- [x] **Contract and quality:** `bun run api:generate && bun run api:check && bun run api:breaking` (additive only vs. the M1 base), `bun run check && bun run build`, image smoke with `BACKBRICKS_MODULES=forms` (app + Postgres only).
+- [ ] **Release:** `v0.1.0` changelog, tag-built GHCR image, README quickstart verified; `docs/progress/phase-2.md` written; green CI on the maintainer's PR. *(Quickstart verified and report written; changelog version step, tag/image and PR CI are the maintainer's.)*
 
 ### Planning risks and sources
 
@@ -965,6 +965,9 @@ P2.9b implementation and verification complete. [`examples/html`](examples/html)
 
 
 P2.10a implementation and verification complete except the GitHub-hosted run. Changesets 3.0.3 with the GitHub changelog: `.changeset/config.json` versions private packages without tags, and the product version is `@backbricks/server` (the image). `.changeset/forms-developer-preview.md` bumps it to 0.1.0 (`bunx changeset status` → `@backbricks/server -> 0.1.0`). A dry run of `changeset version` in a throwaway clone wrote `apps/server/CHANGELOG.md` (0.1.0, minor changes) and the frozen install still accepted the lockfile. The version step itself is the maintainer's on `main`: with the changeset committed, changelog-github needs `GITHUB_TOKEN` to link pull requests. `.github/workflows/release.yml`: version tags (and a manual run with a `push` input, default off) check that the tag equals the server version, build with the CI image job's context and cache, run `scripts/image/smoke.ts`, and only then log in with the workflow's own `GITHUB_TOKEN` (`packages: write`) and push `ghcr.io/nolliebigspin/backbricks` (`X.Y.Z`, `X.Y`, `sha-…`; Q3/D50). actionlint 1.7.12 is pinned in `mise.toml`; `bun run lint:workflows` is part of `check`, `check:affected` and CI's quality job. Root scripts: `changeset`, `release:version`. README: developer-preview status, a quickstart (clone → `mise install/setup/dev` → sign up with Mailpit → organization/project with an allowed website → Contact form template → Embed key/code or `examples/html` → entries), running the image (`migrate` then `all`, forms-only needs just Postgres) and migration notes (run `migrate` before each new version; nothing to upgrade from for v0.1.0). CONTRIBUTING gains "Releasing (maintainers)". `examples/html/form.json` now equals the Contact form template's English fields, so the README path produces the example's code. Evidence: fresh `git clone` plus the pending diff → `mise run setup` → `mise run dev` under its own Compose project on shifted ports; a script walked the quickstart over the dashboard origin (sign-up, Mailpit verification, organization, project, form from `contact-en`, publishable key, SDK submission with a real proof → `{"total":1}` in the form summary), then the clone's Compose project and volumes were removed. Local image build + smoke: `docker build -t backbricks/server:p2 . && bun scripts/image/smoke.ts backbricks/server:p2` passed. Open: the GitHub-hosted manual run (maintainer). Next: P2.10b.
+
+
+P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fresh services (E2E on a newly created database, no retries); results and the remaining maintainer gates are in [`docs/progress/phase-2.md`](docs/progress/phase-2.md). P2.9–P2.10 decisions recorded as [ADR-0062](docs/adr/0062-minimal-sdk-snippets-and-release-version.md)/D60. Open for the maintainer: PR with green CI, fresh-session phase review, `release:version` on `main`, signed `v0.1.0` tag (publishes the image), optional manual release run.
 
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · stub

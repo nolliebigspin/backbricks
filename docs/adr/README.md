@@ -71,3 +71,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0059](0059-notification-rules-and-dispatch.md) | Notification rules and outbox dispatch | accepted during execution; D57 |
 | [0060](0060-notification-delivery-and-throttling.md) | Notification delivery and throttling | accepted during execution; D58 |
 | [0061](0061-project-hard-erasure.md) | Project hard erasure | accepted during execution; D59 |
+| [0062](0062-minimal-sdk-snippets-and-release-version.md) | Minimal SDK transport, integration snippets and the product version | accepted during execution; D60 |

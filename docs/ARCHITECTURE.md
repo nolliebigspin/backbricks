@@ -549,6 +549,8 @@ const { data, nextCursor } = await backbricks.reviews.list('testimonials', { sor
 
 `backbricks codegen` generates form types so `forms.submit('contact', …)` is typed (module augmentation of a `BackbricksSchema` interface).
 
+Implemented so far (M2): the minimal root entry in [`packages/sdk/src`](../packages/sdk/src) (`createClient` needs `baseUrl` until a hosted default exists; publishable keys travel as `?key=`), see [ADR-0062](adr/0062-minimal-sdk-snippets-and-release-version.md).
+
 ### D.8 CLI
 
 `npx backbricks <command>` (package `backbricks`, MIT, bundled with `bun build --target=node` so it runs on Node ≥ 20 and Bun). Every command supports `--json`, runs non-interactively with `--yes`, and has documented exit codes.
