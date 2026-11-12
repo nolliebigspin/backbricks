@@ -85,9 +85,13 @@ test('publishable keys solve a challenge, then submit data, proof and options', 
     );
     expect(result).toEqual({ id: 'sub_1' });
     const [challenge, submission] = api.seen;
-    expect(challenge?.path).toBe('/api/v1/public/challenge');
-    expect(challenge?.headers.get('authorization')).toBe('Bearer bb_pk_fixture');
-    expect(submission?.path).toBe('/api/v1/public/forms/contact%20form/submissions');
+    // Browsers send no Authorization header on CORS preflights; the key must be in the URL.
+    expect(challenge?.path).toBe('/api/v1/public/challenge?key=bb_pk_fixture');
+    expect(challenge?.headers.get('authorization')).toBeNull();
+    expect(submission?.path).toBe(
+      '/api/v1/public/forms/contact%20form/submissions?key=bb_pk_fixture',
+    );
+    expect(submission?.headers.get('authorization')).toBeNull();
     expect(submission?.headers.get('idempotency-key')).toBe('retry-1');
     expect(submission?.headers.get('content-type')).toBe('application/json');
     expect(submission?.body).toMatchObject({
@@ -108,6 +112,7 @@ test('secret keys skip proof-of-work and the base URL may omit /v1', async () =>
     expect(api.seen.map((entry) => entry.path)).toEqual([
       '/api/v1/public/forms/contact/submissions',
     ]);
+    expect(api.seen[0]?.headers.get('authorization')).toBe('Bearer bb_sk_fixture');
     expect(api.seen[0]?.body).toEqual({ data: { name: 'Ada' } });
   } finally {
     await api.server.stop();

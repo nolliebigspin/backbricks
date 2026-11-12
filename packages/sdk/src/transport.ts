@@ -31,21 +31,29 @@ function apiBase(baseUrl: string) {
   return url.href;
 }
 
+/**
+ * Publishable keys travel as `?key=`: browsers send no `Authorization` header on CORS preflights,
+ * and the server needs the key there to check the project's allowed websites. Secret keys stay
+ * in the header.
+ */
 export function createTransport(options: ClientOptions): Transport {
   const base = apiBase(options.baseUrl);
-  const key = options.publishableKey ?? options.secretKey;
-  if (!key) throw new TypeError('createClient needs a publishableKey or a secretKey.');
+  const { publishableKey, secretKey } = options;
+  if (!publishableKey && !secretKey)
+    throw new TypeError('createClient needs a publishableKey or a secretKey.');
   const send = options.fetch ?? ((url: string, init: RequestInit) => fetch(url, init));
+  const url = (path: string) =>
+    publishableKey ? `${base}${path}?key=${encodeURIComponent(publishableKey)}` : `${base}${path}`;
   return {
-    publishable: options.publishableKey !== undefined,
+    publishable: Boolean(publishableKey),
     async request(path, init, signal) {
       let response: Response;
       try {
-        response = await send(`${base}${path}`, {
+        response = await send(url(path), {
           method: init.method,
           headers: {
             Accept: 'application/json',
-            Authorization: `Bearer ${key}`,
+            ...(secretKey ? { Authorization: `Bearer ${secretKey}` } : {}),
             ...(init.body === undefined ? {} : { 'Content-Type': 'application/json' }),
             ...init.headers,
           },
