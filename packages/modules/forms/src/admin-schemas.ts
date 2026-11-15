@@ -1,5 +1,6 @@
 import {
   jsonValueWireSchema,
+  fileAttachmentSchema,
   pageQuerySchema,
   spamVerdictSchema,
   publicRequestSourceSchema,
@@ -53,6 +54,7 @@ export const submissionDetailSchema = submissionItemSchema
   .extend({
     fields: z.array(publicFormFieldSchema),
     additionalData: values,
+    attachments: z.array(fileAttachmentSchema).optional(),
     source: z
       .object({
         origin: publicRequestSourceSchema.shape.origin.unwrap().optional(),

@@ -2,6 +2,12 @@ import { z } from 'zod';
 
 /** Shared by the files capability, upload validation and database constraints. */
 export const FILE_SIZE_LIMITS = { maxSizeMb: 100, bytesPerMb: 1024 * 1024 } as const;
+/** File-domain bound reused by declarations, attachments and persistence. */
+export const fileSizeSchema = z
+  .number()
+  .int()
+  .positive()
+  .max(FILE_SIZE_LIMITS.maxSizeMb * FILE_SIZE_LIMITS.bytesPerMb);
 /** Stored file state; access revocation/physical cleanup use a separate durable deletion marker. */
 export const fileStatusSchema = z.enum([
   'pending',

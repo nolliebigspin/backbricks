@@ -1,5 +1,6 @@
 import {
   AppError,
+  fileReferenceSchema,
   emailAddressSchema,
   type FieldError,
   type FieldErrorCode,
@@ -30,7 +31,6 @@ const TRUE_STRINGS = new Set(['on', 'true', '1', 'yes']);
 const FALSE_STRINGS = new Set(['off', 'false', '0', 'no']);
 const NUMBER = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i;
 const PHONE = /^[0-9 +\-()/]{5,32}$/;
-const FILE_REF = /^[A-Za-z0-9_]{1,128}$/;
 const dateSchema = z.iso.date();
 // Length limits count code points, like PostgreSQL's char_length, not UTF-16 units or graphemes.
 // oxlint-disable-next-line typescript/no-misused-spread -- Code points are the intended unit.
@@ -179,8 +179,11 @@ function fieldValue(
       const items = list(raw, transport);
       if (!items || items.some((item) => typeof item !== 'string'))
         return issue('invalid_type', 'Must be a list of file references.');
-      const refs = [...new Set(items.map((item) => String(item).trim()).filter(Boolean))];
-      if (refs.some((ref) => !FILE_REF.test(ref)))
+      const refs = items.map((item) => String(item).trim()).filter(Boolean);
+      if (
+        new Set(refs).size !== refs.length ||
+        refs.some((ref) => !fileReferenceSchema.safeParse(ref).success)
+      )
         return issue('invalid_file', 'Must be file references from an upload.');
       if (refs.length === 0) return ABSENT;
       if (refs.length > field.maxFiles)

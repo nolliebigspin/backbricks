@@ -1,0 +1,25 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`form attachment claims store IDs, propagate subject/owner expiry and expose only owner-bound metadata 1`] = `
+{
+  "fields": [
+    {
+      "key": "email",
+      "label": "Email",
+      "required": true,
+      "type": "email",
+    },
+    {
+      "key": "cv",
+      "label": "CV",
+      "maxFiles": 2,
+      "required": false,
+      "type": "file",
+      "zone": "cv",
+    },
+  ],
+  "honeypotField": "_gotcha",
+  "key": "attachments",
+  "proofOfWork": true,
+}
+`;

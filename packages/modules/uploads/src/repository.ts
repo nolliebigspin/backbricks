@@ -1,4 +1,9 @@
-import { fileStatusSchema, jsonValueSchema, type RepositoryPage } from '@backbricks/core';
+import {
+  fileStatusSchema,
+  fileScanResultSchema,
+  jsonValueSchema,
+  type RepositoryPage,
+} from '@backbricks/core';
 import { z } from 'zod';
 
 const bytes = z.custom<Uint8Array>((value) => value instanceof Uint8Array);
@@ -19,7 +24,7 @@ export const uploadRecordSchema = z
     detectedMime: z.string().nullable(),
     sizeBytes: z.number().int().positive(),
     sha256: bytes.nullable(),
-    scan: jsonValueSchema.nullable(),
+    scan: fileScanResultSchema.nullable(),
     scanAttempts: z.number().int().nonnegative(),
     uploadTokenHash: bytes,
     uploadExpiresAt: z.date(),
@@ -29,6 +34,7 @@ export const uploadRecordSchema = z
     storageCleanedAt: z.date().nullable(),
     ownerType: z.string().nullable(),
     ownerId: z.string().nullable(),
+    ownerExpiresAt: z.date().nullable(),
     subjectEmail: z.string().nullable(),
     metadata: z.record(z.string(), jsonValueSchema),
     isTest: z.boolean(),
@@ -73,6 +79,7 @@ export type UploadChanges = Partial<
     | 'storageCleanedAt'
     | 'ownerType'
     | 'ownerId'
+    | 'ownerExpiresAt'
     | 'subjectEmail'
     | 'expiresAt'
     | 'deletedAt'
@@ -93,7 +100,7 @@ export type UploadReadOptions = Readonly<{ lock?: boolean; includeInactive?: boo
 /** Tenant/project-bound persistence. Inactive reads are for internal cleanup/erasure, never HTTP projections. */
 export interface UploadsRepository {
   /** Acquire the bound project's key-share lock before worker/capability file locks (FK lock order). */
-  lockProject(): Promise<void>;
+  lockProject(options?: { write?: boolean }): Promise<void>;
   insert(input: UploadInsert): Promise<UploadRecord>;
   get(id: string, now: Date, options?: UploadReadOptions): Promise<UploadRecord>;
   /** Optional shared zone lock precedes file locks and serializes policy edits with scans/claims. */

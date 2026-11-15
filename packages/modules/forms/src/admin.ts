@@ -136,6 +136,10 @@ export function formsAdminRoutes(router: ModuleAdminRouter<FormsRuntime>) {
         additionalData: Object.fromEntries(
           Object.entries(row.data).filter(([key]) => !keys.includes(key)),
         ),
+        attachments:
+          (await runtime.capabilities
+            .optional('files')
+            ?.listByOwner(runtime.tx, { type: 'form_submission', id: row.id })) ?? [],
         source: row.source,
         spamReasons: row.spamReasons,
         expiresAt: row.expiresAt?.toISOString() ?? null,

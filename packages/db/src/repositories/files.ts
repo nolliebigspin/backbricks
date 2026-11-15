@@ -23,7 +23,7 @@ import { beforeCursor, type RepositoryScope } from './scope.ts';
 export function createUploadsRepository(tx: DbTransaction, scope: RepositoryScope) {
   const t = files;
   return {
-    async lockProject() {
+    async lockProject(options: { write?: boolean } = {}) {
       const project = scope.project();
       const rows = await tx
         .select({ id: projects.id })
@@ -34,7 +34,7 @@ export function createUploadsRepository(tx: DbTransaction, scope: RepositoryScop
             eq(projects.id, project.projectId),
           ),
         )
-        .for('key share');
+        .for(options.write ? 'update' : 'key share');
       if (rows.length !== 1) throw new AppError('not_found');
     },
     async insert(input: FileInsert) {
@@ -153,7 +153,8 @@ export function createUploadsRepository(tx: DbTransaction, scope: RepositoryScop
             options.includeInactive ? undefined : visibleFiles(now),
           ),
         )
-        .orderBy(t.id);
+        .orderBy(t.id)
+        .limit(MAX_BULK_ITEMS + 1);
     },
     async usage() {
       const [row] = await tx

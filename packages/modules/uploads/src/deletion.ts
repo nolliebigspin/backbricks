@@ -1,0 +1,31 @@
+import { AppError, principalActor } from '@backbricks/core';
+
+import { UPLOAD_JOBS } from './constants.ts';
+import type { UploadRecord } from './repository.ts';
+import { uploadsRepository, type UploadsRuntime } from './runtime.ts';
+
+/** Persist revocation, audit and cleanup together; never perform object deletion before commit. */
+export async function requestFileDeletion(
+  runtime: UploadsRuntime,
+  file: UploadRecord,
+): Promise<void> {
+  if (file.deletedAt) return;
+  const queue = runtime.services.optional('queue');
+  if (!queue) throw new AppError('service_unavailable');
+  const now = runtime.services.clock.now();
+  await uploadsRepository(runtime).patch(file.id, {
+    deletedAt: now,
+    cleanupAfter: now,
+    updatedAt: now,
+  });
+  await runtime.services.audit.record(runtime.tx, {
+    ...(runtime.tx.context.principal
+      ? principalActor(runtime.tx.context.principal)
+      : { actorType: 'system' as const, actorId: null }),
+    action: 'uploads.file.deleted',
+    targetType: 'file',
+    targetId: file.id,
+    changes: { count: 1 },
+  });
+  await queue.enqueue(runtime.tx, UPLOAD_JOBS.cleanup, { fileId: file.id });
+}

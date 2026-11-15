@@ -5302,6 +5302,72 @@
                       "additionalProperties": {},
                       "type": "object"
                     },
+                    "attachments": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "expiresAt": {
+                            "format": "date-time",
+                            "type": ["string", "null"]
+                          },
+                          "id": {
+                            "maxLength": 64,
+                            "type": "string"
+                          },
+                          "name": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "pattern": "^[^\\x00-\\x1f\\x7f]*$",
+                            "type": "string"
+                          },
+                          "scanStatus": {
+                            "enum": [
+                              "clean",
+                              "not_scanned",
+                              "infected",
+                              "failed",
+                              "retrying",
+                              null
+                            ],
+                            "type": ["string", "null"]
+                          },
+                          "size": {
+                            "exclusiveMinimum": 0,
+                            "maximum": 104857600,
+                            "type": "integer"
+                          },
+                          "status": {
+                            "enum": [
+                              "pending",
+                              "uploaded",
+                              "scanning",
+                              "ready",
+                              "quarantined",
+                              "rejected"
+                            ],
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": ["string", "null"]
+                          },
+                          "zoneId": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "zoneId",
+                          "name",
+                          "size",
+                          "type",
+                          "status",
+                          "scanStatus",
+                          "expiresAt"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
                     "configVersion": {
                       "exclusiveMinimum": 0,
                       "type": "integer"
@@ -5393,6 +5459,12 @@
                             "type": "boolean"
                           },
                           "type": {
+                            "type": "string"
+                          },
+                          "zone": {
+                            "maxLength": 63,
+                            "minLength": 1,
+                            "pattern": "^[a-z0-9][a-z0-9-]*$",
                             "type": "string"
                           }
                         },
@@ -10596,6 +10668,12 @@
                             "type": "boolean"
                           },
                           "type": {
+                            "type": "string"
+                          },
+                          "zone": {
+                            "maxLength": 63,
+                            "minLength": 1,
+                            "pattern": "^[a-z0-9][a-z0-9-]*$",
                             "type": "string"
                           }
                         },

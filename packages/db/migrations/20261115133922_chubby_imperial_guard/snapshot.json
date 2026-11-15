@@ -1,0 +1,78 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "0268b43f-e57f-448f-a015-e5e758fd307b",
+  "prevIds": [
+    "2f33d678-c375-45cc-bc0b-93af76d70000"
+  ],
+  "footprints": [
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "files",
+        "owner_expires_at"
+      ],
+      "writes": [
+        "s|col|public.files.owner_expires_at",
+        "n|col|public.files.owner_expires_at",
+        "e|col|public.files.owner_expires_at"
+      ],
+      "reads": [
+        "n|tbl|public.files",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_check",
+      "statementTarget": [
+        "table",
+        "public",
+        "files"
+      ],
+      "writes": [
+        "s|ck|public.files.files_owner_expiry_bound",
+        "n|ck|public.files.files_owner_expiry_bound",
+        "e|ck|public.files.files_owner_expiry_bound",
+        "n|con|public.files.files_owner_expiry_bound"
+      ],
+      "reads": [
+        "n|tbl|public.files",
+        "n|sch|public",
+        "n|col|public.files.owner_expires_at",
+        "n|col|public.files.owner_id",
+        "n|col|public.files.expires_at"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "files",
+        "name": "owner_expires_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "files",
+        "name": "files_owner_expiry_bound",
+        "value": "\"owner_expires_at\" is null or (\"owner_id\" is not null and \"expires_at\" is not null and \"expires_at\" <= \"owner_expires_at\")",
+        "entityType": "checks"
+      }
+    }
+  ]
+}

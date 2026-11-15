@@ -77,12 +77,15 @@ Delete staging immediately after a successful copy, and again after the PUT URL 
 
 ## 6. Forms capability and erasure
 
-ADR-0064 extends the existing `FilesCapability` with transaction-first `claim` and `listByOwner`, preserving `deleteByOwner`.
+[Core attachment/claim/scan schemas](../../packages/core/src/storage/file-metadata.ts) and [the files capability](../../packages/core/src/modules/capabilities.ts) implement ADR-0064's transaction-first claim/list/delete seam. Shared references and retention arithmetic each have one owner; domain size constraints derive from the shared file-size schema.
 
-- Claim checks every reference before changing any: exact tenant/project, configured zone, token, ready/unexpired/undeleted state, max count, no duplicate or prior owner. Acquire locks in stable order. The form's owner row, claims, usage and event commit or roll back together.
-- Forms persists file IDs/attachment metadata after claim, never the raw claim secret. The normalized subject identity is propagated for privacy erasure. Attachment retention may be shorter than the form entry; the drawer explains an expired attachment.
-- List returns safe owner-bound metadata without tokens or storage keys. It does not let forms read upload repositories directly.
-- Every forms deletion path participates: single/bulk/delete-all, retention, spam purge, subject erasure and project erasure. In particular, M2's direct `purgeExpired` and `deleteBySubject` paths must return affected IDs and call the capability before M3 is enabled.
+[The uploads provider](../../packages/modules/uploads/src/capability.ts) serializes claims through the scoped project, locks parent zones before a stable file-ID order, validates every token/zone/current policy/ready state before changing any ownership, and assigns one complete set to one trusted owner. Duplicate references and attempts to append to an existing owner are rejected. Owner identity, normalized subject email and the owner expiry bound are stored together. The generated owner-expiry migration and retention recomputation clamp zone changes to that bound; unclaimed files retain their fixed orphan expiry.
+
+[Forms attachment integration](../../packages/modules/forms/src/attachments.ts) claims the entire submission's files in the same transaction and replaces bearer references with IDs before entry insertion, search, events or export. [The submission validator](../../packages/modules/forms/src/validator.ts) uses the shared reference schema and rejects duplicates. [Authorized entry detail](../../packages/modules/forms/src/admin.ts) borrows owner metadata through the capability and explicitly projects it; no upload repository crosses the module boundary. The public form schema exposes only the configured upload-zone key and max count for file fields.
+
+[Real claim tests](../../apps/server/src/uploads.claims.test.ts) prove foreign/wrong-zone/wrong-token/unready/expired/duplicate/already-owned rejection, current scan-policy tightening, a single concurrent winner, owner-expiry clamping and transaction rollback at owner insert/audit/event/usage. IDs replace secrets in stored answers, metadata never returns keys/tokens, and failed claim diagnostics contain no private filename. Production file fields remain gated until P3.5b covers every forms deletion path.
+
+Every forms deletion path must participate: single/bulk/delete-all, retention, spam purge, subject and project erasure. M2's direct `purgeExpired` and `deleteBySubject` gaps are P3.5b, before production activation. [Durable deletion requests](../../packages/modules/uploads/src/deletion.ts) already provide the shared transactional marker/audit/enqueue operation for capabilities and management.
 
 Object storage is outside a SQL transaction. Administrative deletes therefore commit a deletion marker, audit and cleanup job together; object deletion happens after that commit. Cleanup removes both keys idempotently and removes private metadata only when deletion is confirmed and a late PUT is no longer possible. Failed cleanup remains discoverable/retryable. No row can disappear while its object becomes untracked.
 

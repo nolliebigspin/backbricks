@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import { defineModule, defineModuleCatalog, monthlyUsagePeriod } from '@backbricks/core';
+import { AppError, defineModule, defineModuleCatalog, monthlyUsagePeriod } from '@backbricks/core';
 import { createWithTenant } from '@backbricks/db';
 import { createFormsModule } from '@backbricks/module-forms';
 import { z } from 'zod';
@@ -32,6 +32,10 @@ test.skipIf(!available)(
       ],
       provides: {
         files: (runtime) => ({
+          claim: async () => {
+            throw new AppError('capability_unavailable');
+          },
+          listByOwner: async () => [],
           async deleteByOwner(tx, owner) {
             expect(owner.type).toBe('form_submission');
             expect(owner.id).toStartWith('sub_');

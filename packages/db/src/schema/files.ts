@@ -1,4 +1,9 @@
-import { FILE_SIZE_LIMITS, fileStatusSchema, type JsonValue } from '@backbricks/core';
+import {
+  FILE_SIZE_LIMITS,
+  fileStatusSchema,
+  type JsonValue,
+  type FileScanResult,
+} from '@backbricks/core';
 import { sql } from 'drizzle-orm';
 import {
   bigint,
@@ -37,7 +42,7 @@ export const files = pgTable(
     detectedMime: text('detected_mime'),
     sizeBytes: bigint('size_bytes', { mode: 'number' }).notNull(),
     sha256: bytea('sha256'),
-    scan: jsonb('scan').$type<JsonValue>(),
+    scan: jsonb('scan').$type<FileScanResult>(),
     scanAttempts: integer('scan_attempts').notNull().default(0),
     uploadTokenHash: bytea('upload_token_hash').notNull(),
     uploadExpiresAt: timestampColumn('upload_expires_at').notNull(),
@@ -47,6 +52,7 @@ export const files = pgTable(
     storageCleanedAt: timestampColumn('storage_cleaned_at'),
     ownerType: text('owner_type'),
     ownerId: text('owner_id'),
+    ownerExpiresAt: timestampColumn('owner_expires_at'),
     subjectEmail: text('subject_email'),
     metadata: jsonb('metadata').$type<Record<string, JsonValue>>().notNull().default({}),
     isTest: boolean('is_test').notNull().default(false),
@@ -103,6 +109,10 @@ export const files = pgTable(
     check(
       'files_unclaimed_expires',
       sql`${table.ownerId} is not null or ${table.expiresAt} is not null`,
+    ),
+    check(
+      'files_owner_expiry_bound',
+      sql`${table.ownerExpiresAt} is null or (${table.ownerId} is not null and ${table.expiresAt} is not null and ${table.expiresAt} <= ${table.ownerExpiresAt})`,
     ),
     check('files_put_expiry', sql`${table.uploadExpiresAt} > ${table.createdAt}`),
     check(

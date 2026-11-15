@@ -2,6 +2,7 @@ import { AppError, defineModule, type InfraRequirement, type JsonValue } from '@
 import { z } from 'zod';
 
 import { formsAdminRoutes } from './admin.ts';
+import { claimEntryFiles } from './attachments.ts';
 import { classifyFormsChange } from './changes.ts';
 import { formsCodegen } from './codegen.ts';
 import { formsModuleConfigSchema, formsPublicWritePolicy } from './config.ts';
@@ -153,11 +154,17 @@ export function createFormsModule(options: { files: boolean } = { files: false }
             formKey: input.params.key,
           });
           const id = runtime.services.ids.generate('sub');
+          const expiresAt = entryExpiry(config, now, context.spam.status);
+          const safeData = await claimEntryFiles(runtime, config, data, {
+            id,
+            subjectEmail,
+            expiresAt,
+          });
           await repositoryOf(runtime).insert({
             id,
             instanceId: context.instanceId,
             configVersion: context.configVersion,
-            data,
+            data: safeData,
             status: 'open',
             readAt: null,
             spamVerdict: context.spam.status,
@@ -172,8 +179,8 @@ export function createFormsModule(options: { files: boolean } = { files: false }
             },
             createdAt: now,
             updatedAt: now,
-            expiresAt: entryExpiry(config, now, context.spam.status),
-            searchText: searchText(config, data),
+            expiresAt,
+            searchText: searchText(config, safeData),
           });
           await runtime.services.events.publish(runtime.tx, {
             type: FORMS_EVENTS.submissionCreated,

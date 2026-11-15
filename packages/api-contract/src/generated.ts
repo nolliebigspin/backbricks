@@ -2601,6 +2601,19 @@ export interface operations {
             additionalData: {
               [key: string]: unknown;
             };
+            attachments?: {
+              /** Format: date-time */
+              expiresAt: string | null;
+              id: string;
+              name: string;
+              /** @enum {string|null} */
+              scanStatus: 'clean' | 'not_scanned' | 'infected' | 'failed' | 'retrying' | null;
+              size: number;
+              /** @enum {string} */
+              status: 'pending' | 'uploaded' | 'scanning' | 'ready' | 'quarantined' | 'rejected';
+              type: string | null;
+              zoneId: string;
+            }[];
             configVersion: number;
             /** Format: date-time */
             createdAt: string;
@@ -2628,6 +2641,7 @@ export interface operations {
               }[];
               required: boolean;
               type: string;
+              zone?: string;
             }[];
             id: string;
             isTest: boolean;
@@ -4623,6 +4637,7 @@ export interface operations {
               }[];
               required: boolean;
               type: string;
+              zone?: string;
             }[];
             honeypotField: string;
             key: string;

@@ -7,6 +7,7 @@ import { formsConfigSchema, type FormsConfig } from './config.ts';
 import { validateSubmission, type SubmissionTransport } from './validator.ts';
 
 const now = new Date('2026-11-09T10:00:00.000Z');
+const fileRef = (suffix: string) => `file_${'0'.repeat(25)}${suffix}.bbu_${'a'.repeat(64)}`;
 const config = formsConfigSchema.parse({
   fields: [
     { key: 'name', type: 'text', label: 'Name', required: true, minLength: 2, maxLength: 20 },
@@ -85,7 +86,7 @@ describe('submission validator', () => {
     ['newsletter', false, false],
     ['start', '2026-06-30', '2026-06-30'],
     ['source', 'ad', 'ad'],
-    ['cv', ['file_01'], ['file_01']],
+    ['cv', [fileRef('1')], [fileRef('1')]],
   ];
   for (const [key, value, normalized] of accepted)
     test(`accepts ${key} = ${JSON.stringify(value)}`, () => {
@@ -119,7 +120,8 @@ describe('submission validator', () => {
     ['start', '30.06.2026', 'invalid_date'],
     ['source', 'x'.repeat(11), 'too_long'],
     ['cv', ['../etc/passwd'], 'invalid_file'],
-    ['cv', ['f1', 'f2', 'f3'], 'too_many_files'],
+    ['cv', [fileRef('1'), fileRef('2'), fileRef('3')], 'too_many_files'],
+    ['cv', [fileRef('1'), fileRef('1')], 'invalid_file'],
     ['privacy', false, 'must_accept'],
     ['privacy', 'yes', 'invalid_type'],
   ];

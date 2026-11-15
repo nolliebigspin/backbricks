@@ -1,4 +1,4 @@
-import { AppError, type ConfiguredInstance, type JsonValue } from '@backbricks/core';
+import { AppError, type ConfiguredInstance, type FileScanResult } from '@backbricks/core';
 
 import type { UploadsConfig } from './config.ts';
 import { type UPLOAD_EVENTS, UPLOAD_JOBS, UPLOAD_RETRIES } from './constants.ts';
@@ -8,7 +8,11 @@ import type { UploadChanges, UploadRecord } from './repository.ts';
 import { uploadsRepository, type UploadsRuntime } from './runtime.ts';
 import { validateUploadDeclaration } from './validation.ts';
 
-type ScanOutcome = { status: keyof typeof UPLOAD_EVENTS; scan: JsonValue; changes: UploadChanges };
+type ScanOutcome = {
+  status: keyof typeof UPLOAD_EVENTS;
+  scan: FileScanResult;
+  changes: UploadChanges;
+};
 function failedOutcome(reason: string, now: Date): ScanOutcome {
   return {
     status: 'rejected',

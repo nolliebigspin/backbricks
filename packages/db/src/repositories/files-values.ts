@@ -22,6 +22,7 @@ export type FileChanges = Partial<
     | 'storageCleanedAt'
     | 'ownerType'
     | 'ownerId'
+    | 'ownerExpiresAt'
     | 'subjectEmail'
     | 'expiresAt'
     | 'deletedAt'

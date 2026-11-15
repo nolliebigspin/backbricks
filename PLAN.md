@@ -1102,15 +1102,15 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Real ClamAV/Garage/Mailpit acceptance and forced transition/event/audit/provider failures.
 - **Risks/notes:** Quarantine keeps only bounded private metadata; late staging writes still need expiry cleanup.
 
-### [ ] P3.5a – Provide atomic file claiming and owner reads (est. 6 h)
+### [x] P3.5a – Provide atomic file claiming and owner reads (est. 6 h)
 - **Description:** Implement approved ADR-0064 shared reference/capability types and uploads provider; claim sets are all-or-nothing and owner reads are scoped.
 - **Files/packages:** core FilesCapability/reference schema; uploads capability; forms submit integration
 - **Depends on:** P3.4c, approval of ADR-0064
 - **Reuses:** bindCapability, caller transaction, existing forms validator and optional files declaration
 - **Acceptance criteria:**
-  - [ ] Foreign/wrong-zone/wrong-token/unready/expired/duplicate/already-owned references fail; competing claims have one winner.
-  - [ ] Form insert, claims, subject identity, event and usage roll back together; persisted answers contain IDs, never claim secrets.
-  - [ ] Forms rejects file fields without uploads, while uploads runs independently of forms.
+  - [x] Foreign/wrong-zone/wrong-token/unready/expired/duplicate/already-owned references fail; competing claims have one winner.
+  - [x] Form insert, claims, subject identity, event and usage roll back together; persisted answers contain IDs, never claim secrets.
+  - [x] Forms rejects file fields without uploads, while uploads runs independently of forms.
 - **Tests:** Real HTTP/Postgres claims, cross-tenant/scope matrix, concurrent submissions and forced audit/event rollback.
 - **Risks/notes:** Search for and replace the dormant forms file-reference regex with the shared schema; do not duplicate protocol validation.
 
@@ -1272,7 +1272,7 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - [x] **EICAR:** real ClamAV/Garage worker tests and Mailpit assertion prove quarantined state, object deletion and content-free notification.
 - [ ] **Enforced bytes/types:** storage contract rejects oversized/wrong-header PUT; worker test rejects EXE bytes declared as PDF.
 - [ ] **Copy-then-scan:** real second-PUT/browser test proves final hash/content cannot change after complete; late staging object is eventually removed.
-- [ ] **Claim integrity:** real forms+uploads tests prove foreign/wrong-zone/expired/already-owned errors, one concurrent winner and full rollback on form/event/audit failure.
+- [x] **Claim integrity:** real forms+uploads tests prove foreign/wrong-zone/expired/already-owned errors, one concurrent winner and full rollback on form/event/audit failure.
 - [ ] **Private downloads/orphans:** HTTP/storage tests prove 60-second attachment disposition and safe-preview restrictions; clock-driven cleanup proves the 24-hour orphan rule.
 - [ ] **Privacy:** real object-backed subject/project erasure including outstanding PUTs; ZIP validation/content/cancellation/bounded-memory tests; no silent export truncation.
 - [ ] **Optional modules:** actual forms-only, uploads-only scanner-none and forms+uploads ClamAV boots; no undeclared infrastructure dependency.
@@ -1281,6 +1281,8 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
 
 ### Planning risks and execution notes
+
+- P3.5a complete: core owns reference/claim/owner/attachment/scan schemas and shared expiry arithmetic. Uploads provides atomic whole-set claims, bounded owner reads and durable owner deletion; parent/zone/file locks, token/current-policy/ready checks and one owner set prevent partial or duplicate ownership. Forms stores IDs and reads owner metadata only through the capability; public file-field schemas expose zone/count and are snapshotted. Generated owner-expiry migration plus SQL clamp prevent zone retention from extending the recorded owner bound. Four real claim tests prove invalid/foreign/expired/duplicate/already-owned rejection, current scan-policy tightening, one concurrent winner and form/audit/event/usage rollback without private diagnostics. `CI=true bun run check` passed (518 package + 102 script tests); the added file-field public-schema snapshot also passed a targeted run. Production file fields remain gated until P3.5b. P3.5b must preserve historical file-config reads when uploads is disabled and propagate shortened owner lifetimes in bounded capability batches; P3.7c must prevent disabled-module instances/FK cascades from discarding the last object reference. Next: P3.5b.
 
 - P3.4c complete: three durable scan attempts with delayed continuations/obsolete-delivery guards; terminal state, ID-only event/audit and cleanup enqueue are atomic. Physical cleanup confirms both keys, tracks final deletion via a generated nullable-column migration, retains late-PUT identity and schedules retries. Workers lock the scoped project parent before zone/file locks (including FK lock ordering), and policy edits serialize with terminal scans. Real EICAR/Garage/queue/Mailpit, provider-failure, event/audit rollback, duplicate and policy-race tests pass. `CI=true bun run check` passed (513 package + 102 script tests); seven targeted protocol/outcome tests also pass after strengthening both public snapshots (no invented host header, quarantined completion shape). Scheduled late-PUT/orphan/stalled-job recovery remains P3.7a. Existing notification links use the generic zone URL with `?entry=fileId`; P3.8 must support that selection. Next: P3.5a.
 

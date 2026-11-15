@@ -53,7 +53,7 @@ export function fileMaintenance(tx: DbTransaction, scope: RepositoryScope) {
       const rows = await tx
         .update(t)
         .set({
-          expiresAt: sql`case when ${t.ownerId} is null then ${t.expiresAt} else ${expiry} end`,
+          expiresAt: sql`case when ${t.ownerId} is null then ${t.expiresAt} else least(${expiry}, ${t.ownerExpiresAt}) end`,
         })
         .where(filesWhere(scope, eq(t.instanceId, instanceId), isNull(t.deletedAt)))
         .returning({ id: t.id });

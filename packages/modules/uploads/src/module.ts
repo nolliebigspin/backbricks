@@ -1,6 +1,7 @@
 import { defineModule, fileIdSchema } from '@backbricks/core';
 import { z } from 'zod';
 
+import { filesCapability } from './capability.ts';
 import { classifyUploadsChange } from './changes.ts';
 import { cleanupUpload } from './cleanup.ts';
 import { uploadsCodegen } from './codegen.ts';
@@ -15,6 +16,7 @@ import {
 import { uploadsInfrastructure } from './infrastructure.ts';
 import { describeUpload } from './notifications.ts';
 import { uploadsPublicRoutes } from './public.ts';
+import { uploadsRepository } from './runtime.ts';
 import { scanUpload } from './scan.ts';
 import { defaultUploadsConfig, uploadsTemplates } from './templates.ts';
 
@@ -55,6 +57,7 @@ export const uploadsModule = defineModule({
       label: { en: 'Accepted uploads', de: 'Angenommene Uploads' },
     },
   ],
+  provides: { files: filesCapability },
   publicRoutes: uploadsPublicRoutes,
   jobs(registrar) {
     registrar.register(
@@ -71,7 +74,11 @@ export const uploadsModule = defineModule({
     );
   },
   notifications: { describe: describeUpload },
-  retention: { purgeExpired: async () => 0, recomputeExpiry: async () => 0 },
+  retention: {
+    purgeExpired: async () => 0,
+    recomputeExpiry: (runtime, instance) =>
+      uploadsRepository(runtime).recomputeExpiry(instance.id, instance.config.retentionDays),
+  },
   privacy: {
     exportSubject: async () => ({ files: [] }),
     deleteSubject: async () => 0,

@@ -1,6 +1,6 @@
+import { fileSizeSchema } from '@backbricks/core';
 import { z } from 'zod';
 
-import { UPLOAD_LIMITS } from './constants.ts';
 import { uploadMimeSchema } from './formats.ts';
 import { uploadFilenameSchema } from './values.ts';
 
@@ -8,11 +8,7 @@ import { uploadFilenameSchema } from './values.ts';
 export const uploadDeclarationSchema = z
   .object({
     name: uploadFilenameSchema,
-    size: z
-      .number()
-      .int()
-      .positive()
-      .max(UPLOAD_LIMITS.maxSizeMb * UPLOAD_LIMITS.bytesPerMb),
+    size: fileSizeSchema,
     type: uploadMimeSchema,
   })
   .strict();

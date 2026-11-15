@@ -24,16 +24,20 @@ export const uploadsEnvironment = {
   S3_FORCE_PATH_STYLE: 'true',
 };
 /** Real HTTP/storage/repository fixture, with explicit ownership of every created object key. */
-export async function prepareUploads(base: AuthFixture, config: Partial<UploadsConfigInput> = {}) {
+export async function prepareUploads(
+  base: AuthFixture,
+  config: Partial<UploadsConfigInput> = {},
+  moduleTypes: readonly string[] = ['uploads'],
+) {
   const f = await prepareIsolationFixture(base);
   const storage = createS3Storage(garageStorageConfig, { now: f.now });
   const scope = { organizationId: f.organizationId, projectId: f.a1.id };
-  const withTenant = createWithTenant(f.db, moduleRepositories(moduleCatalog.select(['uploads'])));
+  const withTenant = createWithTenant(f.db, moduleRepositories(moduleCatalog.select(moduleTypes)));
   const use = <T>(read: (tx: TenantTransaction) => Promise<T>) => withTenant(scope, read);
   const secret = await issueKey(f, f.a1.id, {
     kind: 'secret',
     name: 'Upload server',
-    scopes: ['uploads:create'],
+    scopes: ['uploads:create', ...(moduleTypes.includes('forms') ? ['forms:submit'] : [])],
     expiresAt: null,
   });
   const publishable = await issueKey(f, f.a1.id, {

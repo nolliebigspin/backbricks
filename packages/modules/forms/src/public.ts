@@ -1,3 +1,4 @@
+import { instanceKeySchema } from '@backbricks/core';
 import { z } from 'zod';
 
 import type { FormsConfig } from './config.ts';
@@ -19,6 +20,7 @@ export const publicFormFieldSchema = z
     max: z.union([z.number(), z.string()]).optional(),
     options: z.array(option).optional(),
     maxFiles: z.number().optional(),
+    zone: instanceKeySchema.optional(),
     consent: z.object({ text: z.string(), version: z.string() }).strict().optional(),
   })
   .strict();
@@ -63,7 +65,7 @@ export function publicForm(key: string, config: FormsConfig): z.infer<typeof pub
         case 'consent':
           return { ...base, consent: { text: field.text, version: field.version } };
         case 'file':
-          return { ...base, maxFiles: field.maxFiles };
+          return { ...base, maxFiles: field.maxFiles, zone: field.zone };
         default:
           return base;
       }

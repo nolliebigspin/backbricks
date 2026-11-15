@@ -1,4 +1,4 @@
-import { AppError, type JsonValue } from '@backbricks/core';
+import { AppError, type FileScanResult } from '@backbricks/core';
 
 import { UPLOAD_EVENTS, UPLOAD_JOBS } from './constants.ts';
 import type { UploadChanges, UploadRecord } from './repository.ts';
@@ -9,7 +9,7 @@ export async function finishUpload(
   runtime: UploadsRuntime,
   file: UploadRecord,
   status: keyof typeof UPLOAD_EVENTS,
-  scan: JsonValue,
+  scan: FileScanResult,
   changes: UploadChanges,
 ): Promise<void> {
   const queue = runtime.services.optional('queue');

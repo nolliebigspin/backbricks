@@ -253,7 +253,12 @@ export {
   inlineImageTypeSchema,
 } from './storage/schemas.ts';
 export { configApplyResponseSchema } from './configuration/schemas.ts';
-export { FILE_SIZE_LIMITS, fileStatusSchema, type FileStatus } from './storage/files.ts';
+export {
+  FILE_SIZE_LIMITS,
+  fileSizeSchema,
+  fileStatusSchema,
+  type FileStatus,
+} from './storage/files.ts';
 export {
   CONFIG_ACCESS,
   CONFIG_DESTRUCTIVE_SCOPE,
@@ -508,3 +513,16 @@ export {
   parseFileReference,
   type FileReference,
 } from './storage/file-reference.ts';
+
+export {
+  fileScanStatusSchema,
+  fileScanResultSchema,
+  fileAttachmentSchema,
+  fileOwnerSchema,
+  fileClaimSchema,
+  type FileScanResult,
+  type FileAttachment,
+  type FileOwner,
+  type FileClaim,
+} from './storage/file-metadata.ts';
+export { earliestExpiry } from './time/retention.ts';

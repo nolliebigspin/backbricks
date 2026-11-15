@@ -17,3 +17,10 @@ export const MILLISECONDS_PER_DAY = 86_400_000;
 export function expiresAfterDays(now: Date, days: number): Date {
   return new Date(now.getTime() + days * MILLISECONDS_PER_DAY);
 }
+
+/** Null means unlimited; finite bounds can shorten, never outlive, their owning record. */
+export function earliestExpiry(...values: readonly (Date | null)[]): Date | null {
+  let bound: Date | null = null;
+  for (const value of values) if (value && (!bound || value < bound)) bound = value;
+  return bound === null ? null : new Date(bound.getTime());
+}
