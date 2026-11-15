@@ -13,10 +13,12 @@ import {
 } from '@backbricks/core';
 
 import type { UploadsConfig } from './config.ts';
+import { UPLOAD_AUDIT_ACTIONS } from './constants.ts';
 import { requestFileDeletion } from './deletion.ts';
 import { attachmentMetadata } from './metadata.ts';
 import { uploadsRepository, type UploadsRuntime } from './runtime.ts';
 import { verifyUploadToken } from './tokens.ts';
+import { isUsableFile } from './usability.ts';
 import { validateUploadDeclaration } from './validation.ts';
 
 /** Borrowed operations remain bound to the caller's transaction; no other module repository is visible. */
@@ -64,7 +66,7 @@ export function filesCapability(runtime: UploadsRuntime): FilesCapability {
           !file ||
           !zone ||
           file.instanceId !== zone.id ||
-          file.status !== 'ready' ||
+          !isUsableFile(file, now) ||
           file.ownerId ||
           (zone.config.scanRequired && file.scan?.status !== 'clean')
         )
@@ -101,7 +103,7 @@ export function filesCapability(runtime: UploadsRuntime): FilesCapability {
         ...(runtime.tx.context.principal
           ? principalActor(runtime.tx.context.principal)
           : { actorType: 'system' as const, actorId: null }),
-        action: 'uploads.files.claimed',
+        action: UPLOAD_AUDIT_ACTIONS.claimed,
         targetType: request.owner.type,
         targetId: request.owner.id,
         changes: { count: claimed.length },

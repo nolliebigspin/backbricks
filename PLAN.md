@@ -1137,15 +1137,15 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Real HTTP/Postgres filter/search/pagination/precision cases plus isolation suite.
 - **Risks/notes:** Original names and subject information are private management data, not audit/log metadata.
 
-### [ ] P3.6b – Implement audited downloads and durable deletions (est. 5 h)
+### [x] P3.6b – Implement audited downloads and durable deletions (est. 5 h)
 - **Description:** Add 60-second attachment URLs, explicit safe-image preview mode, single/bulk deletion markers and atomic cleanup enqueue/audit.
 - **Files/packages:** uploads management services/routes; cleanup job; isolation/public-response fixtures
 - **Depends on:** P3.6a, approval of ADR-0064
 - **Reuses:** Storage presignGet, core safe MIME list, bulkIdsSchema, audit/queue and member/admin policy patterns
 - **Acceptance criteria:**
-  - [ ] Only ready files download; attachment headers are mandatory and only detected PNG/JPEG/WebP/GIF may preview.
-  - [ ] Single/bulk mutations validate the whole set and audit/enqueue in the same transaction; failed audit cannot delete an object.
-  - [ ] Committed deletion immediately revokes access while physical cleanup is pending and recoverable.
+  - [x] Only ready files download; attachment headers are mandatory and only detected PNG/JPEG/WebP/GIF may preview.
+  - [x] Single/bulk mutations validate the whole set and audit/enqueue in the same transaction; failed audit cannot delete an object.
+  - [x] Committed deletion immediately revokes access while physical cleanup is pending and recoverable.
 - **Tests:** Real download headers, unsafe preview denial, mixed-ID atomicity, audit rollback and storage outage/retry cases.
 - **Risks/notes:** S3 deletion cannot be rolled back; durable intent is required instead of pretending it shares SQL atomicity.
 
@@ -1281,6 +1281,8 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
 
 ### Planning risks and execution notes
+
+- P3.6b complete: audited/rate-limited private download URLs, safe detected-image previews and single/bulk durable revocation reuse the shared usable-file predicate, policies, storage schema and deletion helper. Actual byte responses are no-store attachments by default. URLs are capped at 60 seconds and file expiry; a failing slow-HEAD test led to an after-I/O recheck and provider-neutral absolute signing deadline (ADR-0070), with schema-derived storage inputs. Real HTTP/Garage tests prove bytes/UTF-8 filename headers, preview denial, scope rules, audit/enqueue rollback, rate/audit counts, cleanup outage/recovery and the expiry race. All 16 selected uploads management operations have cookie/key isolation, including mixed foreign-ID atomicity. `CI=true bun run check` passed (535 package + 102 script tests). P3.7a adds scheduled lost-job/late-PUT recovery, including archived projects; storage I/O also needs a bounded deadline so provider hangs cannot retain project locks indefinitely. P3.7b must minimize deleted-row personal metadata and report subject physical cleanup honestly. Next: P3.7a.
 
 - P3.6a complete: private project file list/detail and storage-usage routes use explicit projections, stable keyset paging, literal name search, zone/status/inclusive-date filters and existing member/data:read or stats:read policies. Expired/deleted metadata is hidden. Stored bytes and conservative reservations do not overlap; copy rollback and late PUTs remain reserved until confirmed cleanup. Decimal wire values and bigint SQL avoid truncation. Shared date bounds now serve Forms and uploads; monthly counters remain separate. Three HTTP/schema tests cover projections, filters/paging, credentials/scopes and every selected uploads management operation through cookie/key isolation; denial snapshots now include file lifecycle fields. Real repository tests cover accounting transitions and 5.24 GB aggregates. Upload-ready fixture workflow is shared. `CI=true bun run check` passed (529 package + 102 script tests); strengthened credential probes and sequential aggregate seeding also pass targeted tests/lint/format. Next: P3.6b.
 

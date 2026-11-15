@@ -117,3 +117,30 @@ test('S3 read-stream failures are sanitized after response headers without buffe
     await new Promise<void>((resolve) => server.close(() => resolve()));
   }
 });
+
+test('private GET signing clamps an absolute deadline using its captured signing timestamp', async () => {
+  const at = new Date('2026-11-15T00:00:00Z');
+  let calls = 0;
+  const storage = createS3Storage(config, {
+    now: () => {
+      calls++;
+      return new Date(at.getTime() + calls * 1000);
+    },
+  });
+  try {
+    const url = await storage.presignGet({
+      key: 'opaque/key',
+      expiresInSeconds: 60,
+      notAfter: new Date(at.getTime() + 3000),
+    });
+    expect(new URL(url).searchParams.get('X-Amz-Expires')).toBe('2');
+    expect(calls).toBe(1);
+    expect(
+      await storage
+        .presignGet({ key: 'opaque/key', expiresInSeconds: 60, notAfter: at })
+        .catch((error: unknown) => error),
+    ).toMatchObject({ code: 'not_found' });
+  } finally {
+    storage.close();
+  }
+});

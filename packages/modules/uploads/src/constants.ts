@@ -10,7 +10,11 @@ export const UPLOAD_LIMITS = {
 export const UPLOADS_MODULE_VERSION = 1;
 
 /** Security lifetimes are independent of a zone's configurable owned-file retention. */
-export const UPLOAD_LIFETIMES = { putSeconds: 300, orphanMs: 24 * 60 * 60 * 1000 } as const;
+export const UPLOAD_LIFETIMES = {
+  putSeconds: 300,
+  downloadSeconds: 60,
+  orphanMs: 24 * 60 * 60 * 1000,
+} as const;
 export const UPLOAD_JOBS = { scan: 'uploads.scan', cleanup: 'uploads.cleanup-file' } as const;
 export const UPLOAD_METRICS = { bytes: 'uploads.bytes', files: 'uploads.files' } as const;
 
@@ -40,3 +44,10 @@ export const UPLOAD_RETRIES = {
   scanDelaysMs: [5000, 30_000],
   cleanupDelayMs: 30_000,
 } as const;
+
+export const UPLOAD_AUDIT_ACTIONS = {
+  claimed: 'uploads.files.claimed',
+  deleted: 'uploads.file.deleted',
+  downloaded: 'files.downloaded',
+} as const;
+export const UPLOAD_DOWNLOAD_LIMITS = { limit: 30, windowMs: 60_000 } as const;

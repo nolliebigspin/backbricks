@@ -124,3 +124,9 @@ export async function prepareUploads(
     },
   };
 }
+
+/** Committed real byte fixtures shared by scan and download journeys. */
+export const readUploadFixture = (name: string) =>
+  Bun.file(
+    new URL(`../../../packages/modules/uploads/test/fixtures/${name}`, import.meta.url),
+  ).bytes();

@@ -38,6 +38,7 @@ export async function uploadsIsolationCases(
   const own = await f.ready();
   const sibling = await seed(f.a2, f.owner);
   const foreign = await seed(f.b1, f.other);
+  const bulk = [await f.intent('bulk-a.pdf'), await f.intent('bulk-b.pdf')];
   const root = `/v1/projects/${f.a1.id}`;
   return {
     'uploads.files.list': {
@@ -51,6 +52,65 @@ export async function uploadsIsolationCases(
       kind: 'resource',
       own: { path: `${root}/files/${own.fileId}`, cookie: f.member.cookie },
       foreign: { path: `${root}/files/${foreign.fileId}`, cookie: f.owner.cookie },
+    },
+    'uploads.files.download': {
+      kind: 'mutation',
+      denied: [
+        {
+          request: {
+            path: `${root}/files/${foreign.fileId}/download-url`,
+            body: {},
+            cookie: f.member.cookie,
+          },
+          status: 404,
+        },
+      ],
+      allowed: {
+        path: `${root}/files/${own.fileId}/download-url`,
+        body: {},
+        cookie: f.member.cookie,
+      },
+    },
+    'uploads.files.delete': {
+      kind: 'mutation',
+      successStatus: 204,
+      denied: [
+        {
+          request: {
+            path: `${root}/files/${foreign.fileId}`,
+            method: 'DELETE',
+            cookie: f.member.cookie,
+          },
+          status: 404,
+        },
+      ],
+      allowed: { path: `${root}/files/${own.fileId}`, method: 'DELETE', cookie: f.member.cookie },
+    },
+    'uploads.files.bulk_delete': {
+      kind: 'mutation',
+      denied: [
+        {
+          request: {
+            path: `${root}/files/bulk-delete`,
+            body: { ids: bulk.map((file) => file.fileId) },
+            cookie: f.member.cookie,
+          },
+          status: 403,
+        },
+        {
+          request: {
+            path: `${root}/files/bulk-delete`,
+            body: { ids: [bulk[0]!.fileId, foreign.fileId] },
+            cookie: f.admin.cookie,
+          },
+          status: 404,
+        },
+      ],
+      allowed: {
+        path: `${root}/files/bulk-delete`,
+        body: { ids: bulk.map((file) => file.fileId) },
+        cookie: f.admin.cookie,
+      },
     },
     'uploads.storage.usage': {
       kind: 'resource',

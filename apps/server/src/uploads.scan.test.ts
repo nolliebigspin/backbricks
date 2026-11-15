@@ -7,7 +7,12 @@ import {
   EICAR_TEST_BYTES,
 } from '../../../scripts/test/clamav.ts';
 import { scenario } from '../test/auth-fixture.ts';
-import { prepareUploads, uploadsAvailable, uploadsEnvironment } from '../test/uploads-fixture.ts';
+import {
+  prepareUploads,
+  uploadsAvailable,
+  uploadsEnvironment,
+  readUploadFixture as fixture,
+} from '../test/uploads-fixture.ts';
 
 const scannerAvailable = await clamavAvailable();
 const scannedEnvironment = {
@@ -16,10 +21,6 @@ const scannedEnvironment = {
   CLAMAV_HOST: clamavTestConfig.host,
   CLAMAV_PORT: String(clamavTestConfig.port),
 };
-const fixture = (name: string) =>
-  Bun.file(
-    new URL(`../../../packages/modules/uploads/test/fixtures/${name}`, import.meta.url),
-  ).bytes();
 
 test.skipIf(!uploadsAvailable)(
   'COPY survives SQL rollback; retries never replace its bytes with a second signed PUT',

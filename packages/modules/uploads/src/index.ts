@@ -58,3 +58,5 @@ export {
   filesPageSchema,
   storageUsageSchema,
 } from './admin-schemas.ts';
+
+export { downloadUrlSchema } from './mutations.ts';

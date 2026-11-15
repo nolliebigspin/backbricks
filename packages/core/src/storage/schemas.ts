@@ -25,6 +25,8 @@ export const storageGetSchema = z
   .object({
     key: storageKeySchema,
     expiresInSeconds: z.number().int().positive().max(MAX_SIGNED_GET_TTL_SECONDS),
+    /** An absolute privacy deadline; providers must clamp using the same timestamp they sign with. */
+    notAfter: z.date().optional(),
     downloadName: z
       .string()
       .min(1)

@@ -9,6 +9,7 @@ import {
   storageUsageSchema,
 } from './admin-schemas.ts';
 import { attachmentMetadata } from './metadata.ts';
+import { uploadManagementPolicy } from './policies.ts';
 import type { UploadRecord } from './repository.ts';
 import { uploadsRepository, type UploadsRuntime } from './runtime.ts';
 
@@ -21,16 +22,6 @@ function item(file: UploadRecord) {
     owner: file.ownerType && file.ownerId ? { type: file.ownerType, id: file.ownerId } : null,
   });
 }
-export const uploadReadPolicy = (
-  operation: string,
-  scope: 'data:read' | 'stats:read' = 'data:read',
-) => ({
-  kind: 'management' as const,
-  bodyLimitBytes: 1024,
-  session: { role: 'member' as const },
-  secretKey: { scope },
-  isolationCase: `uploads.${operation}`,
-});
 /** Private projections share the same tenant/policy bridge as every module management route. */
 export function uploadsAdminRoutes(router: ModuleAdminRouter<UploadsRuntime>) {
   router.register(
@@ -47,7 +38,7 @@ export function uploadsAdminRoutes(router: ModuleAdminRouter<UploadsRuntime>) {
           schema: filesPageSchema,
         },
       },
-      policy: uploadReadPolicy('files.list'),
+      policy: uploadManagementPolicy('files.list'),
     },
     async (runtime, { query }) => {
       const rows = await uploadsRepository(runtime).list(
@@ -83,7 +74,7 @@ export function uploadsAdminRoutes(router: ModuleAdminRouter<UploadsRuntime>) {
           schema: fileDetailSchema,
         },
       },
-      policy: uploadReadPolicy('files.read'),
+      policy: uploadManagementPolicy('files.read'),
     },
     async (runtime, { params }) => {
       const file = await uploadsRepository(runtime).get(params.id, runtime.services.clock.now());
@@ -108,7 +99,7 @@ export function uploadsAdminRoutes(router: ModuleAdminRouter<UploadsRuntime>) {
           schema: storageUsageSchema,
         },
       },
-      policy: uploadReadPolicy('storage.usage', 'stats:read'),
+      policy: uploadManagementPolicy('storage.usage', 'stats:read'),
     },
     async (runtime) => {
       const value = await uploadsRepository(runtime).usage(runtime.services.clock.now());

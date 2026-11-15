@@ -175,7 +175,7 @@ test.skipIf(!uploadsAvailable)(
                 ]
               : [],
           );
-          expect(operations).toHaveLength(13);
+          expect(operations).toHaveLength(16);
           assertIsolationCoverage(operations, cases);
           const keys = createKeyProbes(f);
           for (const operation of operations) {

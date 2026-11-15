@@ -15,6 +15,7 @@ import {
   UPLOAD_EVENTS,
 } from './constants.ts';
 import { uploadsInfrastructure } from './infrastructure.ts';
+import { uploadsMutationRoutes } from './mutations.ts';
 import { describeUpload } from './notifications.ts';
 import { eraseUploadScope } from './privacy.ts';
 import { uploadsPublicRoutes } from './public.ts';
@@ -61,7 +62,10 @@ export const uploadsModule = defineModule({
   ],
   provides: { files: filesCapability },
   publicRoutes: uploadsPublicRoutes,
-  adminRoutes: uploadsAdminRoutes,
+  adminRoutes(router) {
+    uploadsAdminRoutes(router);
+    uploadsMutationRoutes(router);
+  },
   jobs(registrar) {
     registrar.register(
       { name: UPLOAD_JOBS.scan, retentionSeconds: 86400, retries: 2 },

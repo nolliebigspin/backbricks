@@ -74,18 +74,27 @@ export function createS3Storage(config: StorageConfig, clock: Clock = systemCloc
     },
     async presignGet(input) {
       const data = storageGetSchema.parse(input);
+      const signingDate = clock.now();
+      const expiresIn = Math.min(
+        data.expiresInSeconds,
+        data.notAfter
+          ? Math.floor((data.notAfter.getTime() - signingDate.getTime()) / 1000)
+          : data.expiresInSeconds,
+      );
+      if (expiresIn < 1) throw new AppError('not_found');
       return getSignedUrl(
         signing,
         new GetObjectCommand({
           Bucket: config.bucket,
           Key: data.key,
           ResponseContentType: data.inlineImageType ?? 'application/octet-stream',
+          ResponseCacheControl: 'private, no-store',
           ResponseContentDisposition: disposition(
             data.inlineImageType !== undefined,
             data.downloadName,
           ),
         }),
-        { expiresIn: data.expiresInSeconds, signingDate: clock.now() },
+        { expiresIn, signingDate },
       ).catch(unavailable);
     },
     async head(key) {
