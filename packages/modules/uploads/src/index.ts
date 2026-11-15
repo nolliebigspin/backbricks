@@ -1,5 +1,25 @@
 import { defineModuleDescriptor, type InfraRequirement } from '@backbricks/core';
 
+export {
+  uploadsConfigSchema,
+  uploadsModuleConfigSchema,
+  uploadsPublicWritePolicy,
+  uploadConfigWarnings,
+  type UploadsConfig,
+  type UploadsConfigInput,
+} from './config.ts';
+export { UPLOAD_LIMITS } from './constants.ts';
+export { uploadDeclarationSchema, type UploadDeclaration } from './declaration.ts';
+export { validateUploadDeclaration } from './validation.ts';
+export {
+  UPLOAD_FORMATS,
+  UPLOAD_PRESETS,
+  uploadMimeSchema,
+  uploadPresetSchema,
+  type UploadPreset,
+} from './formats.ts';
+export { uploadFilenameSchema, uploadStatusSchema, type UploadStatus } from './values.ts';
+
 /**
  * Uploads stores files in S3-compatible storage and scans them when a scanner is configured
  * (`SCANNER=none` is allowed). The full definition arrives in its domain milestone.

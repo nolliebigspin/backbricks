@@ -976,7 +976,7 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 
 **Entry state:** M2 implementation is merged. The signed `v0.1.0` tag points at `354aa9a`; [release PR #13](https://github.com/nolliebigspin/backbricks/pull/13), its CI, main CI and [the publishing workflow](https://github.com/nolliebigspin/backbricks/actions/runs/43704367449) passed on 2026-11-15. Anonymous GHCR manifest retrieval returned 200 for `ghcr.io/nolliebigspin/backbricks:0.1.0`.
 
-**Execution:** Work top to bottom; suffixes preserve the stub IDs. P3.10a intentionally runs before the public flow because storage enforcement/CORS is a security dependency. One checkout/active agent, no concurrent delegation. Read the module plan, approved ADRs, OPEN_QUESTIONS, latest progress report, ARCHITECTURE §B.3/B.5/C/D.6/E.2/F.3–F.4 and ADR-0013/0044/0055/0061. Per task: CodeGraph → implementation → meaningful tests → `bun run check` → checkbox → human-reviewed signed-off commit. No push or M3 release is implied.
+**Execution:** Work top to bottom; suffixes preserve the stub IDs. P3.10a intentionally runs before the public flow because storage enforcement/CORS is a security dependency. One checkout/active agent, no concurrent delegation. On 2026-11-15 the maintainer explicitly instructed execution through M3 without further review prompts, with human review deferred until the end; continue task commits/checks and record this timing override without claiming advance human review of later code. Read the module plan, approved ADRs, OPEN_QUESTIONS, latest progress report, ARCHITECTURE §B.3/B.5/C/D.6/E.2/F.3–F.4 and ADR-0013/0044/0055/0061. Per task: CodeGraph → implementation → meaningful tests → `bun run check` → checkbox → human-reviewed signed-off commit. No push or M3 release is implied.
 
 ### [x] P3.0a – Approve the upload module plan and contract seams (est. 3 h)
 - **Description:** Review docs/modules/uploads.md and proposed ADRs 0063–0065; answer Q17–Q20 before application code. Confirm scope and execution order.
@@ -989,14 +989,14 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Documentation links, task dependencies and version metadata; no application code.
 - **Risks/notes:** MODULES rule 4 requires approval; this is a real gate, not an inferred permission request.
 
-### [ ] P3.1a – Define zone configuration and file value schemas (est. 5 h)
+### [x] P3.1a – Define zone configuration and file value schemas (est. 5 h)
 - **Description:** Implement strict zone config, MIME/extension presets, max-size/retention/scan policy, safe filename and state values. Derive public/internal types from their owning schemas.
 - **Files/packages:** packages/modules/uploads/src/; core value schema only where ADR-0064 requires shared references
 - **Depends on:** P3.0a
 - **Reuses:** Zod, core errors/IDs, existing config/retention semantics, upload infrastructure declaration
 - **Acceptance criteria:**
-  - [ ] Images/PDF/modern Office allowlists have one source; invalid pairs, paths, oversized files and executable/SVG/HTML types fail with structured errors.
-  - [ ] Required scanning fails closed when unavailable; explicit unscanned mode is warned about; size is at most 100 MB.
+  - [x] Images/PDF/modern Office allowlists have one source; invalid pairs, paths, oversized files and executable/SVG/HTML types fail with structured errors.
+  - [x] Required scanning fails closed when unavailable; explicit unscanned mode is warned about; size is at most 100 MB.
 - **Tests:** Table/property cases for bounds, Unicode/control characters, extensions, MIME pairs and scan availability.
 - **Risks/notes:** A MIME container alone is insufficient evidence that an Office subtype is allowed.
 
@@ -1289,6 +1289,7 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - Existing M2 forms retention and subject deletion bypass attachment cleanup. P3.5b is a gate before production file fields are enabled.
 - Quarantine notifications reuse configured verified-member rules. No arbitrary recipient relay or unrequested mail is introduced.
 - P3.0a approved on 2026-11-15 (module plan, ADRs 0063–0065 and 148 h envelope). The maintainer also authorized sign-off of the reviewed planning documents. Next: P3.1a.
+- P3.1a complete: strict zone config, MIME/extension pairs, declaration validation, filename/state values and scanner-availability warnings are implemented. Shared retention validation moved to core and forms reuses it without behavior changes. New runtime dependency is the already-pinned Zod 4.6.7 for schemas; fast-check 4.10.2 is test-only. Nine upload tests, uploads typecheck and all 107 forms tests pass. `CI=true bun run check` passed (459 package tests + 100 script tests, zero failures; OpenAPI drift/additive check and isolation suite included). The maintainer reviewed this change and authorized its signed-off commit on 2026-11-15. Uploads remains a descriptor until P3.3b; no public endpoint has been enabled.
 
 ## Phase P4 – Reviews (M4 · v0.3.0) · stub
 
@@ -1374,3 +1375,4 @@ P1.10b implements locked transactional outbox dispatch, stable selected consumer
 P1.10c adds bounded, locked expiry batches, transaction-local audit purge, absolute job payload deletion and durable scheduled org/project/instance fan-out (ADR-0050). Real services prove concurrent cleanup, exact boundaries, archive/tenant isolation, failure rollback, nonleaking audit settings, failed-mail expiry, cursor pages beyond 100 projects/instances and retry deduplication. Full `bun run check` passes without service skips.
 
 P1.11b commits offline deterministic OpenAPI/types and the separate MIT admin client entry (ADR-0051). The generator resolves local TypeScript 5.9.3; root/application checks remain TS7. Bun/Node HTTP client tests, compile-time selector/body checks and real scoped project/key integration pass. Full `bun run check` is green, with a fresh SDK build/Node smoke check after final build-output cleanup.
+

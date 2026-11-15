@@ -2,17 +2,13 @@ import {
   instanceKeySchema,
   publicWritePolicySchema,
   publicRedirectUrlSchema,
+  retentionDaysSchema,
   PUBLIC_FORM_PROOF_FIELD,
   type PublicWritePolicyInput,
 } from '@backbricks/core';
 import { z } from 'zod';
 
-import {
-  FORMS_BODY_LIMIT_BYTES,
-  FORMS_DEFAULTS,
-  FORMS_LIMITS,
-  FORMS_RETENTION_DAYS,
-} from './constants.ts';
+import { FORMS_BODY_LIMIT_BYTES, FORMS_DEFAULTS, FORMS_LIMITS } from './constants.ts';
 
 // Field keys are API surface for websites and CSV columns, so they are stable and simple.
 export const fieldKeySchema = z
@@ -112,13 +108,7 @@ export const formsConfigSchema = z
       .object({ success: redirectUrlSchema, error: redirectUrlSchema.optional() })
       .strict()
       .optional(),
-    retentionDays: z
-      .number()
-      .int()
-      .min(FORMS_RETENTION_DAYS.min)
-      .max(FORMS_RETENTION_DAYS.max)
-      .nullable()
-      .default(FORMS_DEFAULTS.retentionDays),
+    retentionDays: retentionDaysSchema,
   })
   .strict()
   .superRefine((config, ctx) => {

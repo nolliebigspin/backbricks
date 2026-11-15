@@ -133,7 +133,12 @@ export {
   type Mailer,
 } from './mail/contract.ts';
 export { escapeHtml, renderAuthMail, type AuthMailInput } from './mail/templates.ts';
-export { expiresAfterDays, MILLISECONDS_PER_DAY } from './time/retention.ts';
+export {
+  expiresAfterDays,
+  MILLISECONDS_PER_DAY,
+  MODULE_RETENTION_DAYS,
+  retentionDaysSchema,
+} from './time/retention.ts';
 export {
   principalActor,
   activityMetadataSchema,

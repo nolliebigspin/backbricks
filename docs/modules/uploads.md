@@ -27,15 +27,11 @@ Use the existing policy catalog, error catalog, audit/events/outbox, notificatio
 
 ## 2. Zone configuration
 
-One zone is one generic module instance (`upload-zone`, `upload-zones`). Strict config includes:
+One zone is one generic module instance (`upload-zone`, `upload-zones`). P3.1a implements its [strict configuration and availability check](../../packages/modules/uploads/src/config.ts), [single MIME/extension table](../../packages/modules/uploads/src/formats.ts), [declaration schema](../../packages/modules/uploads/src/declaration.ts), [zone-aware validator](../../packages/modules/uploads/src/validation.ts), and [safe filename/state values](../../packages/modules/uploads/src/values.ts). Types derive from those schemas. [Core retention policy](../../packages/core/src/time/retention.ts) is shared by forms and uploads; existing form behavior is preserved.
 
-- Type preset(s) resolved through one explicit MIME/extension allowlist: PNG/JPEG/WebP/GIF images, PDF, and supported modern Office documents (DOCX/XLSX/PPTX). No SVG, HTML, executables or macro-enabled formats. Unrecognized/container-only detection fails closed.
-- `maxSizeMb`: positive, at most 100; one conversion constant defines bytes. The declared name extension and MIME must agree with an allowed pair, then detection must agree again after copying.
-- `retentionDays`: default 180, 7–3650 or explicit unlimited with the existing retention warning. Orphan expiry is always bounded independently.
-- `scanRequired`: true by default. A zone may explicitly allow unscanned files with a warning when `SCANNER=none`; a required scan may never silently become an unscanned success.
-- Proof-of-work and bounded per-client limits through the existing public-write policy; PoW remains on for upload intents.
+The [public write policy and warnings](../../packages/modules/uploads/src/config.ts) keep proof-of-work enabled, require an explicit unscanned choice when no scanner is available, and warn about unscanned/unlimited retention. [Config tests](../../packages/modules/uploads/src/config.test.ts) cover boundary values, MIME/extension pairs, honeypot collisions, unsafe paths/Unicode controls and arbitrary JSON declarations.
 
-Templates: images, documents, and a one-PDF CV zone, with en/de names. No-scanner creation requires an explicit unscanned choice. Change classification marks tighter type/size rules, retention shortening and scan-policy changes as destructive where they affect existing files. Existing files retain the config version under which they were accepted; scanning also checks the current zone policy, so a tightened rule cannot be bypassed by an old intent. Config-as-code, codegen, revisions and generic CRUD all use this same schema.
+Templates, change classification, codegen and generic module registration remain P3.1b/P3.3b work. Templates will cover images, documents, and a one-PDF CV zone, with en/de names. No-scanner creation requires an explicit unscanned choice. Change classification marks tighter type/size rules, retention shortening and scan-policy changes as destructive where they affect existing files. Existing files retain the config version under which they were accepted; scanning also checks the current zone policy, so a tightened rule cannot be bypassed by an old intent.
 
 ## 3. Stored records and states
 
@@ -47,7 +43,7 @@ Templates: images, documents, and a one-PDF CV zone, with en/de names. No-scanne
 - Optional owner type/ID and normalized subject email, set only by a trusted capability claim; test flag and bounded metadata.
 - A durable deletion marker and retry/progress information for object cleanup (ADR-0064), rather than dropping the last reference to an object before it is erased.
 
-States follow `pending → uploaded → scanning → ready | quarantined | rejected`. A committed deletion marker makes a record immediately unavailable to reads, claims and downloads. A file is usable only when ready, undeleted and unexpired. Original filenames are private user content and are never logged, audited or put in events/jobs.
+Stored states are defined once by [uploadStatusSchema](../../packages/modules/uploads/src/values.ts). The transition workflow remains P3.4 work. A committed deletion marker makes a record immediately unavailable to reads, claims and downloads. A file is usable only when ready, undeleted and unexpired. Original filenames are private user content and are never logged, audited or put in events/jobs.
 
 Indexes cover tenant/zone keyset lists, status/date filters, owner lookup, orphan/expiry cleanup, and deletion work. Constraints enforce positive size, complete owner pairs, unique storage keys, token hash shape, enums and tenant-parent consistency. Generate migrations; never hand-edit an applied migration.
 
