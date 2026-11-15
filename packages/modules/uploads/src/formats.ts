@@ -17,21 +17,25 @@ export const UPLOAD_FORMATS = [
     preset: UPLOAD_PRESETS.office,
     mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     extensions: ['docx'],
+    mainPart: 'word/document.xml',
   },
   {
     preset: UPLOAD_PRESETS.office,
     mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     extensions: ['xlsx'],
+    mainPart: 'xl/workbook.xml',
   },
   {
     preset: UPLOAD_PRESETS.office,
     mime: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
     extensions: ['pptx'],
+    mainPart: 'ppt/presentation.xml',
   },
 ] as const satisfies readonly {
   preset: UploadPreset;
   mime: string;
   extensions: readonly string[];
+  mainPart?: string;
 }[];
 
 /** Normalize MIME case before checking the shared allowlist and its associated extension pair. */

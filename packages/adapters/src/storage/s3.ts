@@ -128,7 +128,37 @@ export function createS3Storage(config: StorageConfig, clock: Clock = systemCloc
         .send(new GetObjectCommand({ Bucket: config.bucket, Key: key }))
         .catch(unavailable);
       if (!result.Body) return unavailable();
-      return result.Body.transformToWebStream();
+      const reader = result.Body.transformToWebStream().getReader();
+      let released = false;
+      const release = () => {
+        if (!released) {
+          released = true;
+          reader.releaseLock();
+        }
+      };
+      return new ReadableStream<Uint8Array>({
+        async pull(controller) {
+          try {
+            const chunk = await reader.read();
+            if (chunk.done) {
+              release();
+              controller.close();
+            } else controller.enqueue(chunk.value);
+          } catch {
+            release();
+            controller.error(
+              new AppError('service_unavailable', { detail: 'Object storage is unavailable.' }),
+            );
+          }
+        },
+        async cancel() {
+          try {
+            await reader.cancel();
+          } finally {
+            release();
+          }
+        },
+      });
     },
   };
   return {

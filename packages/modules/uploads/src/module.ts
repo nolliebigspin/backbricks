@@ -1,4 +1,4 @@
-import { AppError, defineModule, fileIdSchema } from '@backbricks/core';
+import { defineModule, fileIdSchema } from '@backbricks/core';
 import { z } from 'zod';
 
 import { classifyUploadsChange } from './changes.ts';
@@ -12,6 +12,7 @@ import {
 } from './constants.ts';
 import { uploadsInfrastructure } from './infrastructure.ts';
 import { uploadsPublicRoutes } from './public.ts';
+import { scanUpload } from './scan.ts';
 import { defaultUploadsConfig, uploadsTemplates } from './templates.ts';
 
 const label = { en: 'Uploads', de: 'Dateien' };
@@ -56,10 +57,7 @@ export const uploadsModule = defineModule({
     registrar.register(
       { name: UPLOAD_JOBS.scan, retentionSeconds: 86400, retries: 3 },
       z.object({ fileId: fileIdSchema }).strict(),
-      async () => {
-        // Fail closed while P3.4 installs the immutable-copy inspection worker.
-        throw new AppError('service_unavailable');
-      },
+      scanUpload,
     );
   },
   retention: { purgeExpired: async () => 0, recomputeExpiry: async () => 0 },

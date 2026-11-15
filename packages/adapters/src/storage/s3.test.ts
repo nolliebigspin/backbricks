@@ -1,4 +1,5 @@
 import { expect, test } from 'bun:test';
+import { createServer } from 'node:http';
 
 import { storageGetSchema, storageKeySchema } from '@backbricks/core';
 
@@ -88,5 +89,31 @@ test('storage boundaries reject unsafe key, disposition, inline content and long
     });
   } finally {
     unavailable.close();
+  }
+});
+
+test('S3 read-stream failures are sanitized after response headers without buffering private bytes', async () => {
+  const server = createServer((_request, response) => {
+    response.writeHead(200, {
+      'content-type': 'application/octet-stream',
+      'content-length': '100',
+    });
+    response.write('private-content');
+    setTimeout(() => response.destroy(), 10);
+  });
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const address = server.address();
+  if (!address || typeof address === 'string') throw new Error('Expected test listener.');
+  const storage = createS3Storage({ ...config, endpoint: `http://127.0.0.1:${address.port}` });
+  try {
+    const failure = await new Response(await storage.read('test/opaque'))
+      .arrayBuffer()
+      .catch((error: unknown) => error);
+    expect(failure).toMatchObject({ code: 'service_unavailable' });
+    expect(JSON.stringify(failure)).not.toContain('private-content');
+  } finally {
+    storage.close();
+    server.closeAllConnections();
+    await new Promise<void>((resolve) => server.close(() => resolve()));
   }
 });

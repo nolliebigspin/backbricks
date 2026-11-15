@@ -15,3 +15,11 @@ export const UPLOAD_JOBS = { scan: 'uploads.scan' } as const;
 export const UPLOAD_METRICS = { bytes: 'uploads.bytes', files: 'uploads.files' } as const;
 
 export const UPLOAD_CREATE_SCOPE = 'uploads:create';
+
+/** Bounded format metadata, independent of the accepted file byte limit. */
+export const UPLOAD_INSPECTION = {
+  tokenizerBytes: 1024 * 1024,
+  contentTypesBytes: 64 * 1024,
+  zipEntries: 10_000,
+  timeoutMs: 30_000,
+} as const;

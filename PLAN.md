@@ -1078,15 +1078,15 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Local protocol-server edge cases and real ClamAV stream tests, including non-buffered large input.
 - **Risks/notes:** Do not guess the clamd protocol or library APIs; inspect authoritative docs/types when implementing.
 
-### [ ] P3.4b – Implement immutable copy, detection and hashing (est. 6 h)
+### [x] P3.4b – Implement immutable copy, detection and hashing (est. 6 h)
 - **Description:** Build the scan worker transition: copy once to final key, HEAD/read final bytes, detect and revalidate MIME/size, compute SHA-256 and scan the same immutable copy.
 - **Files/packages:** uploads scan workflow; exact file-type dependency; worker wiring
 - **Depends on:** P3.3b, P3.4a
 - **Reuses:** StorageAdapter, Scanner, clocks, module jobs and state schemas
 - **Acceptance criteria:**
-  - [ ] PDF-named executable bytes reject; valid allowed formats detect correctly with bounded memory.
-  - [ ] Crash/retry after COPY never recopies staging over final; a second PUT after complete cannot change the scanned/downloadable final bytes.
-  - [ ] Scanner none is ready only with explicit zone permission and a not-scanned result.
+  - [x] PDF-named executable bytes reject; valid allowed formats detect correctly with bounded memory.
+  - [x] Crash/retry after COPY never recopies staging over final; a second PUT after complete cannot change the scanned/downloadable final bytes.
+  - [x] Scanner none is ready only with explicit zone permission and a not-scanned result.
 - **Tests:** Real Garage/worker cases for replacement, replay/crash, detection mismatch, size drift and memory bounds.
 - **Risks/notes:** file-type 22.3.0 is server-only (Node >=22 metadata); verify Bun compatibility before pinning it.
 
@@ -1281,6 +1281,8 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
 
 ### Planning risks and execution notes
+
+- P3.4b complete: final-object existence/committed-copy markers prevent recopy after SQL rollback or a later signed PUT. Bounded length/detection/hash/scanning reads target only that immutable key; no tee queues full files. Real Garage/worker tests cover all supported image/Office types, executable PDF rejection, clean/EICAR and explicit not-scanned outcomes. Strict bounded OOXML content-type/main-part parsing rejects directory-only guesses, macro/VBA, XML spoofing and oversized metadata. Exact dependency metadata checked 2026-11-15: file-type 22.3.0 (MIT, Node>=22; Bun proved), @tokenizer/inflate 0.6.0 and strtok3 10.8.0 (MIT), saxes 6.0.0 (ISC); all server-only, SDK floor unchanged. S3 mid-stream failures are sanitized and tested. `CI=true bun run check` passed (509 package + 102 script tests). P3.4c adds durable terminal cleanup/events/retries and holds the owning zone stable before taking the file lock to serialize policy edits with scan completion. Next: P3.4c.
 
 - P3.4a complete: bounded NUL-framed ClamAV INSTREAM adapter with 64 KiB backpressure writes, operation timeout/input cancellation, capped strict replies and safe provider errors; PING readiness is selected only for configured uploads. Protocol and real clean/EICAR tests pass; the real 100 MiB generated stream passed in ~3 s without a full-file buffer. Compose's pinned image configuration mechanism was inspected directly; `clamconf` confirms StreamMaxLength/MaxFileSize 104857600 and AlertExceedsMax=yes. `mise run scan` and CI/release service setup reuse the optional profile. Scanner-none/forms-only/failing-daemon readiness cases pass. `CI=true bun run check` passed (503 package + 102 script tests). No runtime dependency added. Next: P3.4b.
 

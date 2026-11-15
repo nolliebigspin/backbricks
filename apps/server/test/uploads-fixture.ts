@@ -3,7 +3,7 @@ import { expect } from 'bun:test';
 import { createS3Storage } from '@backbricks/adapters';
 import { type TenantTransaction } from '@backbricks/core';
 import { createWithTenant } from '@backbricks/db';
-import { uploadIntentResponseSchema } from '@backbricks/module-uploads';
+import { uploadIntentResponseSchema, type UploadsConfigInput } from '@backbricks/module-uploads';
 
 import { garageStorageConfig, garageAvailable } from '../../../scripts/test/garage.ts';
 import { moduleRepositories } from '../src/module-repositories.ts';
@@ -24,7 +24,7 @@ export const uploadsEnvironment = {
   S3_FORCE_PATH_STYLE: 'true',
 };
 /** Real HTTP/storage/repository fixture, with explicit ownership of every created object key. */
-export async function prepareUploads(base: AuthFixture) {
+export async function prepareUploads(base: AuthFixture, config: Partial<UploadsConfigInput> = {}) {
   const f = await prepareIsolationFixture(base);
   const storage = createS3Storage(garageStorageConfig, { now: f.now });
   const scope = { organizationId: f.organizationId, projectId: f.a1.id };
@@ -45,7 +45,11 @@ export async function prepareUploads(base: AuthFixture) {
   const zonePath = `/v1/projects/${f.a1.id}/upload-zones`;
   const zone = await f.request(
     zonePath,
-    { key: 'cv', name: 'CV', config: { presets: ['pdf'], maxSizeMb: 1, scanRequired: false } },
+    {
+      key: 'cv',
+      name: 'CV',
+      config: { presets: ['pdf'], maxSizeMb: 1, scanRequired: false, ...config },
+    },
     f.owner.cookie,
   );
   expect(zone.status).toBe(201);
@@ -53,10 +57,11 @@ export async function prepareUploads(base: AuthFixture) {
   const intent = async (
     name = 'cv.pdf',
     bytes = new TextEncoder().encode('%PDF-1.7\nfixture\n%%EOF'),
+    type = 'application/pdf',
   ) => {
     const response = await f.request(
       '/v1/public/upload-zones/cv/files',
-      { data: { name, size: bytes.byteLength, type: 'application/pdf' } },
+      { data: { name, size: bytes.byteLength, type } },
       undefined,
       headers,
     );
