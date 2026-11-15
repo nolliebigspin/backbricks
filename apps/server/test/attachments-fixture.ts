@@ -2,7 +2,7 @@ import { expect } from 'bun:test';
 
 import { defineModuleCatalog, instanceResponseSchema } from '@backbricks/core';
 import { createFormsModule } from '@backbricks/module-forms';
-import { uploadsModule } from '@backbricks/module-uploads';
+import { uploadsModule, type UploadsConfigInput } from '@backbricks/module-uploads';
 
 import type { AuthFixture } from './auth-fixture.ts';
 import { prepareUploads, uploadsEnvironment } from './uploads-fixture.ts';
@@ -16,11 +16,15 @@ export const attachmentsEnvironment = {
   ...uploadsEnvironment,
   BACKBRICKS_MODULES: 'forms,uploads',
 };
-export async function prepareAttachments(base: AuthFixture) {
-  const f = await prepareUploads(base, { limits: { perMinute: 100, perHour: 1000 } }, [
-    'forms',
-    'uploads',
-  ]);
+export async function prepareAttachments(
+  base: AuthFixture,
+  overrides: Partial<UploadsConfigInput> = {},
+) {
+  const f = await prepareUploads(
+    base,
+    { limits: { perMinute: 100, perHour: 1000 }, ...overrides },
+    ['forms', 'uploads'],
+  );
   const createForm = async (key = 'attachments', zone = 'cv') => {
     const response = await f.request(
       `/v1/projects/${f.a1.id}/forms`,

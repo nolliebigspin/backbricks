@@ -1,7 +1,8 @@
 import { expect } from 'bun:test';
-import { request } from 'node:http';
 
 import type { StorageAdapter } from '@backbricks/core';
+
+import { startSlowPut } from '../../../scripts/test/slow-put.ts';
 
 /** A public PUT can write a part, but cannot create or recreate a private object. */
 export async function storageSessionContract(storage: StorageAdapter) {
@@ -58,25 +59,17 @@ export async function abortedInflightSessionContract(storage: StorageAdapter) {
     key,
     size: 2,
     contentType: 'text/plain',
-    expiresInSeconds: 1,
+    expiresInSeconds: 2,
   });
   const control = { key, handle: session.handle };
-  let finish: (() => void) | undefined;
-  const response = new Promise<number>((resolve, reject) => {
-    const req = request(session.url, { method: 'PUT', headers: session.headers }, (res) => {
-      res.resume();
-      res.on('end', () => resolve(res.statusCode ?? 0));
-    });
-    req.on('error', reject);
-    req.write('a');
-    finish = () => req.end('b');
-  });
+  const put = startSlowPut(session.url, session.headers, 'a');
   try {
+    await put.started;
     await Bun.sleep(150);
     await storage.abortUpload(control);
-    await Bun.sleep(1100);
-    finish?.();
-    await response;
+    await Bun.sleep(2100);
+    put.finish('b');
+    await put.response;
     await storage.abortUpload(control);
     expect(await storage.head(key)).toBeNull();
     expect(
@@ -86,9 +79,35 @@ export async function abortedInflightSessionContract(storage: StorageAdapter) {
       (await fetch(session.url, { method: 'PUT', headers: session.headers, body: 'ab' })).ok,
     ).toBe(false);
   } finally {
-    finish?.();
-    await response.catch(() => undefined);
+    put.close();
+    await put.response;
     await storage.abortUpload(control);
+    await storage.delete(key);
+  }
+}
+
+/** Control proves an accepted part body really can finish after signature expiry. */
+export async function inflightSessionControl(storage: StorageAdapter) {
+  const key = `test/${crypto.randomUUID()}/inflight_control`;
+  const session = await storage.createUploadSession({
+    key,
+    size: 2,
+    contentType: 'text/plain',
+    expiresInSeconds: 2,
+  });
+  const put = startSlowPut(session.url, session.headers, 'a');
+  try {
+    await put.started;
+    await Bun.sleep(2100);
+    put.finish('b');
+    expect(await put.response).toBe(200);
+    expect(await storage.head(key)).toBeNull();
+    await storage.completeUpload({ key, handle: session.handle, size: 2 });
+    expect(await new Response(await storage.read(key)).text()).toBe('ab');
+  } finally {
+    put.close();
+    await put.response;
+    await storage.abortUpload({ key, handle: session.handle });
     await storage.delete(key);
   }
 }

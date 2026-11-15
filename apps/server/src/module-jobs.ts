@@ -18,12 +18,14 @@ export function moduleJobs(
     job: SelectedModules['registry']['modules'][number]['jobs'][number],
     input: unknown,
   ) {
-    if (tx.context.projectId)
+    if (tx.context.projectId) {
       await tx.repositories.projects.get(tx.context.projectId, {
         lock: true,
         includeArchived: tx.context.archivedProject || tx.context.archivedMaintenance,
       });
-    return job.run(runtime.forTenant(tx).execution(moduleType), input);
+      if (await tx.repositories.projects.erasedAt(tx.context.projectId)) return;
+    }
+    await job.run(runtime.forTenant(tx).execution(moduleType), input);
   }
   return Object.freeze(
     modules.registry.modules.flatMap((module) =>

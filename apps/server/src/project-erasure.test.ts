@@ -5,6 +5,7 @@ import { createIds, PLATFORM_JOBS, projectResponseSchema, systemClock } from '@b
 import { available, scenario } from '../test/auth-fixture.ts';
 import { createFormFixture, createSubmissionFixture, validAnswers } from '../test/forms-fixture.ts';
 import { prepareIsolationFixture } from '../test/isolation/setup.ts';
+import { assertProjectDataGone } from '../test/project-erasure-fixture.ts';
 
 test.skipIf(!available)(
   'erasing an archived project leaves no personal record or job payload, resumes after failure and keeps a tombstone',
@@ -109,21 +110,7 @@ test.skipIf(!available)(
         await job.run(context, {});
 
         // Nothing project-scoped remains except the tombstone and structural audit history.
-        const tables = await f.db.execute<{ table_name: string }>(
-          "select table_name from information_schema.columns where table_schema = 'public' and column_name = 'project_id' and table_name <> 'audit_logs'",
-        );
-        expect(tables.rows.length).toBeGreaterThan(6);
-        for (const { table_name: table } of tables.rows) {
-          // oxlint-disable-next-line no-await-in-loop -- One count per project-scoped table.
-          const rows = await f.db.execute<{ one: number }>(
-            `select 1 as one from ${table} where project_id = '${projectId}'`,
-          );
-          expect([table, rows.rows.length]).toEqual([table, 0]);
-        }
-        const jobs = await f.db.execute<{ name: string }>(
-          `select name from pgboss.job where data->>'projectId' = '${projectId}'`,
-        );
-        expect(jobs.rows).toEqual([]);
+        await assertProjectDataGone(f.db, projectId);
         const tombstone = await f.db.execute<Record<string, unknown>>(
           `select name, slug, allowed_origins, settings, erased_at from projects where id = '${projectId}'`,
         );

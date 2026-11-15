@@ -1185,15 +1185,15 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Independent ZIP-reader validation; real scoped HTTP/Garage content, streaming memory, cancellation and concurrent-delete cases.
 - **Risks/notes:** Inspect existing archive tooling before adding a dependency; any new runtime package needs verified version/license and a commit justification.
 
-### [ ] P3.7c – Prove project erasure through object cleanup (est. 5 h)
+### [x] P3.7c – Prove project erasure through object cleanup (est. 5 h)
 - **Description:** Implement the approved deferred eraseScope result and exercise archived-project tombstoning only after objects and outstanding PUTs are settled.
 - **Files/packages:** core erasure contract/host normalization; uploads eraseScope; real project erasure tests
 - **Depends on:** P3.7a1, P3.5b, approval of ADR-0064
 - **Reuses:** Existing project erasure job, archivedProject context, bounded continuation and tombstone lifecycle
 - **Acceptance criteria:**
-  - [ ] More than one batch of rows and real objects disappear; finalization waits for late-PUT expiry and storage recovery.
-  - [ ] Continuations defer without busy looping; audit/enqueue rollback preserves recoverable state; neighbouring projects are untouched.
-  - [ ] No personal tenant rows or project job payloads remain beyond the documented retained audit/tombstone.
+  - [x] More than one batch of rows and real objects disappear; finalization waits for late-PUT expiry and storage recovery.
+  - [x] Continuations defer without busy looping; audit/enqueue rollback preserves recoverable state; neighbouring projects are untouched.
+  - [x] No personal tenant rows or project job payloads remain beyond the documented retained audit/tombstone.
 - **Tests:** Real Postgres/Garage delayed-erasure, late-PUT, partial-failure/resume, audit rollback and two-tenant tests.
 - **Risks/notes:** The M2 zero-object gap is a mandatory M3 exit criterion, not a simulated storage test.
 
@@ -1286,13 +1286,16 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - [ ] **Copy-then-scan:** real second-PUT/browser test proves final hash/content cannot change after complete; late staging object is eventually removed.
 - [x] **Claim integrity:** real forms+uploads tests prove foreign/wrong-zone/expired/already-owned errors, one concurrent winner and full rollback on form/event/audit failure.
 - [ ] **Private downloads/orphans:** HTTP/storage tests prove 60-second attachment disposition and safe-preview restrictions; clock-driven cleanup proves the 24-hour orphan rule.
-- [ ] **Privacy:** real object-backed subject/project erasure including outstanding PUTs; ZIP validation/content/cancellation/bounded-memory tests; no silent export truncation.
+- [x] **Privacy:** real object-backed subject/project erasure including outstanding PUTs; ZIP validation/content/cancellation/bounded-memory tests; no silent export truncation.
 - [ ] **Optional modules:** actual forms-only, uploads-only scanner-none and forms+uploads ClamAV boots; no undeclared infrastructure dependency.
 - [ ] **Quality/contract:** `CI=true bun run check && bun run build`; `bun run api:generate && bun run api:check && bun run api:breaking`; regenerated contract has no unintended drift/breakage; all isolation/I5 manifest cases pass.
 - [ ] **Browser/client/image:** `bun run test:e2e` against fresh real services; SDK Bun/Node20/Node24/browser runs; image smoke in all required module subsets.
 - [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
 
 ### Planning risks and execution notes
+
+- P3.7c complete: actual 105 ready Garage objects and an in-flight upload settle through bounded erasure rounds, storage outage/recovery and audit/enqueue rollback. Neighbour bytes remain intact. Active child jobs are purged while the exact executing erasure job survives its atomic completion; workers blocked behind erasure recheck the tombstone. ADR-0074/D68 records both regressions. `CI=true bun run check` passed (560 package + 102 script tests; `/tmp/backbricks-p3-7c-check.log`, 7m56s). Human review remains deferred under the maintainer instruction. Next: P3.8a.
+
 
 - P3.7b complete: module-owned attachment hooks and a declared admin-session ZIP route implement ADR-0065. Complete JSON metadata and generated-path streaming ZIPs explain unavailable/quarantined/missing/expired/deleted files; record/UTF-8/archive ceilings fail explicitly. Attempts commit before private reads, fresh scoped frames close between files, and completion commits before the end marker. Native CRC32/STORE output passes independent fflate validation and 256 MiB backpressure/cancellation tests; unexpected stream errors are sanitized. Shared enabled-module checks prevent incomplete privacy results. Deletion minimizes personal fields immediately; a generated forward CHECK permits discarded inspection evidence only on marked-deleted records. Email-free delayed settlement audits completion only after physical cleanup, with real outage/recovery, audit/enqueue rollback and neighbour preservation. Real EICAR, clock-crossing expiry, concurrent deletion, Forms-only ZIP and 10,001-record failure tests pass. ADR-0073/D67 records the decisions. fflate 0.8.3 (MIT) is test-only. `CI=true bun run check` passed (557 package + 102 script tests; `/tmp/backbricks-p3-7b-check.log`), including OpenAPI additive/drift and all isolation cases. End review remains deferred. Next: P3.7c.
 

@@ -57,6 +57,7 @@ export function createPostgresQueue(
   boss.on('error', () => report('core.queue'));
   boss.on('warning', () => report('core.queue_warning'));
   let started = false;
+  const executingJobs = new WeakMap<TenantTransaction, { name: string; id: string }>();
   const mail = createMailQueue(
     boss,
     clock,
@@ -143,10 +144,10 @@ export function createPostgresQueue(
     async purgeJobs(tx) {
       const projectId = tx.context.projectId;
       if (!tx.context.archivedProject || !projectId) throw new AppError('not_found');
-      // Every queued or finished payload of the project, including its notification mail; the
-      // running erasure job completes in this transaction and expires with its retention.
+      // Active child payloads must disappear too. Only this exact running job survives for atomic completion.
+      const current = executingJobs.get(tx);
       const result = await transactionFor(tx).execute<{ id: string }>(
-        sql`delete from ${sql.identifier(QUEUE_SCHEMA)}.job where state <> 'active' and (
+        sql`delete from ${sql.identifier(QUEUE_SCHEMA)}.job where ${current ? sql`not (name = ${current.name} and id = ${current.id}::uuid)` : sql`true`} and (
               (data->>'organizationId' = ${tx.context.organizationId} and data->>'projectId' = ${projectId})
               or (name = ${MAIL_JOB_NAME} and data->>'projectId' = ${projectId})
             ) returning id`,
@@ -233,10 +234,15 @@ export function createPostgresQueue(
                     ...(envelope.archivedMaintenance ? { archivedMaintenance: true } : {}),
                   },
                   async (tx) => {
-                    await handler.runInTransaction(tx, envelope.payload);
-                    await boss.complete(handler.name, job.id, null, {
-                      db: fromDrizzle(transactionFor(tx), sql),
-                    });
+                    executingJobs.set(tx, { name: handler.name, id: job.id });
+                    try {
+                      await handler.runInTransaction(tx, envelope.payload);
+                      await boss.complete(handler.name, job.id, null, {
+                        db: fromDrizzle(transactionFor(tx), sql),
+                      });
+                    } finally {
+                      executingJobs.delete(tx);
+                    }
                   },
                 );
               } catch {

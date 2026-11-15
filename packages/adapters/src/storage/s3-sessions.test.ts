@@ -4,6 +4,7 @@ import { garageAvailable, garageStorageConfig } from '../../../../scripts/test/g
 import { storageProviderSettings } from '../../../../scripts/test/storage-provider.ts';
 import {
   storageSessionContract,
+  inflightSessionControl,
   abortedInflightSessionContract,
 } from '../../test/storage-session-contract.ts';
 import { createS3Storage } from './s3.ts';
@@ -13,6 +14,7 @@ async function contract(config: Parameters<typeof createS3Storage>[0]) {
   const storage = createS3Storage(config);
   try {
     await storageSessionContract(storage);
+    await inflightSessionControl(storage);
     await abortedInflightSessionContract(storage);
   } finally {
     storage.close();

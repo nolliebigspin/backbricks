@@ -118,6 +118,7 @@ export function createPlatformJobHandlers(
           lock: true,
           includeArchived: tx.context.archivedMaintenance === true,
         });
+        if (await tx.repositories.projects.erasedAt(tx.context.projectId)) return;
         let count = 0;
         let full = false;
         let notBefore: Date | undefined;
