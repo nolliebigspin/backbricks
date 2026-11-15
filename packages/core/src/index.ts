@@ -257,6 +257,8 @@ export {
   FILE_SIZE_LIMITS,
   fileSizeSchema,
   fileStatusSchema,
+  FILE_INSPECTION_STATES,
+  isAwaitingFileInspection,
   type FileStatus,
 } from './storage/files.ts';
 export {

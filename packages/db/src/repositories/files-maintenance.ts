@@ -1,9 +1,9 @@
-import type { RepositoryPage } from '@backbricks/core';
-import { and, eq, isNotNull, isNull, lte, sql, type SQL } from 'drizzle-orm';
+import { FILE_INSPECTION_STATES, type RepositoryPage } from '@backbricks/core';
+import { and, eq, isNotNull, isNull, lte, lt, or, inArray, sql, type SQL } from 'drizzle-orm';
 
 import type { DbTransaction } from '../client.ts';
 import { files } from '../schema/files.ts';
-import { fileBatchLimit, filesWhere } from './files-values.ts';
+import { fileBatchLimit, filesWhere, visibleFiles } from './files-values.ts';
 import { beforeCursor, type RepositoryScope } from './scope.ts';
 
 export function fileMaintenance(tx: DbTransaction, scope: RepositoryScope) {
@@ -21,15 +21,33 @@ export function fileMaintenance(tx: DbTransaction, scope: RepositoryScope) {
       return batch(and(isNull(t.deletedAt), isNotNull(t.expiresAt), lte(t.expiresAt, now)), limit);
     },
     async findCleanup(now: Date, limit: number) {
-      return batch(and(isNotNull(t.deletedAt), lte(t.cleanupAfter, now)), limit);
+      return batch(
+        and(
+          or(isNotNull(t.deletedAt), inArray(t.status, ['quarantined', 'rejected'])),
+          lte(t.cleanupAfter, now),
+        ),
+        limit,
+      );
     },
     async findStaging(now: Date, limit: number) {
       return batch(
         and(
           isNull(t.deletedAt),
           isNotNull(t.copiedAt),
-          isNull(t.stagingCleanedAt),
+          or(isNull(t.stagingCleanedAt), lt(t.stagingCleanedAt, t.uploadExpiresAt)),
+          or(isNull(t.cleanupAfter), lte(t.cleanupAfter, now)),
           lte(t.uploadExpiresAt, now),
+        ),
+        limit,
+      );
+    },
+    async findRecovery(now: Date, staleBefore: Date, limit: number, maxAttempts: number) {
+      return batch(
+        and(
+          visibleFiles(now),
+          inArray(t.status, FILE_INSPECTION_STATES),
+          lt(t.scanAttempts, maxAttempts),
+          lte(t.updatedAt, staleBefore),
         ),
         limit,
       );
@@ -55,9 +73,8 @@ export function fileMaintenance(tx: DbTransaction, scope: RepositoryScope) {
         .set({
           expiresAt: sql`case when ${t.ownerId} is null then ${t.expiresAt} else least(${expiry}, ${t.ownerExpiresAt}) end`,
         })
-        .where(filesWhere(scope, eq(t.instanceId, instanceId), isNull(t.deletedAt)))
-        .returning({ id: t.id });
-      return rows.length;
+        .where(filesWhere(scope, eq(t.instanceId, instanceId), isNull(t.deletedAt)));
+      return rows.rowCount ?? 0;
     },
   };
 }

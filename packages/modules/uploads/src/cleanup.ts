@@ -24,16 +24,20 @@ export async function cleanupUpload(
   const queue = runtime.services.optional('queue');
   if (!queue) throw new AppError('service_unavailable');
   const storage = runtime.services.require('storage');
+  let stagingStartedAt: Date;
   try {
-    await storage.delete(file.stagingKey);
     if (terminal) await storage.delete(file.storageKey);
+    // A response after expiry cannot prove the DELETE began after the last allowed PUT.
+    stagingStartedAt = runtime.services.clock.now();
+    await storage.delete(file.stagingKey);
   } catch (error) {
     if (!(error instanceof AppError) || error.code !== 'service_unavailable') throw error;
-    const cleanupAfter = new Date(now.getTime() + UPLOAD_RETRIES.cleanupDelayMs);
+    const failedAt = runtime.services.clock.now();
+    const cleanupAfter = new Date(failedAt.getTime() + UPLOAD_RETRIES.cleanupDelayMs);
     await repository.patch(file.id, {
       cleanupAttempts: file.cleanupAttempts + 1,
       cleanupAfter,
-      updatedAt: now,
+      updatedAt: failedAt,
     });
     await queue.enqueue(
       runtime.tx,
@@ -43,21 +47,26 @@ export async function cleanupUpload(
     );
     return;
   }
-  const pendingPut = now < file.uploadExpiresAt;
-  const cleanupAfter = pendingPut ? file.uploadExpiresAt : file.deletedAt ? now : null;
+  const completedAt = runtime.services.clock.now();
+  const pendingPut = stagingStartedAt < file.uploadExpiresAt;
+  const cleanupAfter = pendingPut
+    ? new Date(Math.max(file.uploadExpiresAt.getTime(), completedAt.getTime() + 1000))
+    : file.deletedAt
+      ? completedAt
+      : null;
   await repository.patch(file.id, {
-    stagingCleanedAt: now,
-    ...(terminal ? { storageCleanedAt: now } : {}),
+    stagingCleanedAt: stagingStartedAt,
+    ...(terminal ? { storageCleanedAt: completedAt } : {}),
     cleanupAttempts: file.cleanupAttempts + 1,
     cleanupAfter,
-    updatedAt: now,
+    updatedAt: completedAt,
   });
-  if (pendingPut)
+  if (pendingPut && cleanupAfter)
     await queue.enqueue(
       runtime.tx,
       UPLOAD_JOBS.cleanup,
       { fileId: file.id },
-      { notBefore: file.uploadExpiresAt },
+      { notBefore: cleanupAfter },
     );
-  else if (file.deletedAt) await repository.removeDeleted(file.id, now);
+  else if (file.deletedAt) await repository.removeDeleted(file.id, completedAt);
 }

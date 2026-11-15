@@ -1,5 +1,6 @@
 import {
   FILE_SIZE_LIMITS,
+  FILE_INSPECTION_STATES,
   fileStatusSchema,
   type JsonValue,
   type FileScanResult,
@@ -166,6 +167,16 @@ export const files = pgTable(
       .where(sql`${table.expiresAt} is not null`),
     index('files_cleanup_idx')
       .on(table.organizationId, table.projectId, table.cleanupAfter, table.id)
-      .where(sql`${table.deletedAt} is not null`),
+      .where(sql`${table.cleanupAfter} is not null`),
+    index('files_staging_cleanup_idx')
+      .on(table.organizationId, table.projectId, table.uploadExpiresAt, table.id)
+      .where(
+        sql`${table.deletedAt} is null and ${table.copiedAt} is not null and (${table.stagingCleanedAt} is null or ${table.stagingCleanedAt} < ${table.uploadExpiresAt})`,
+      ),
+    index('files_scan_recovery_idx')
+      .on(table.organizationId, table.projectId, table.updatedAt, table.id)
+      .where(
+        sql`${table.deletedAt} is null and ${table.status} in (${sql.raw(FILE_INSPECTION_STATES.map((status) => `'${status}'`).join(', '))})`,
+      ),
   ],
 );

@@ -144,3 +144,26 @@ test('private GET signing clamps an absolute deadline using its captured signing
     storage.close();
   }
 });
+
+test('storage metadata calls have a bounded provider deadline and sanitize timeouts', async () => {
+  const server = createServer((_request, response) => {
+    const timer = setTimeout(() => {
+      response.writeHead(200, { 'content-length': '0' });
+      response.end();
+    }, 6000);
+    response.on('close', () => clearTimeout(timer));
+  });
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const address = server.address();
+  if (!address || typeof address === 'string') throw new Error('Expected listener');
+  const storage = createS3Storage({ ...config, endpoint: `http://127.0.0.1:${address.port}` });
+  try {
+    expect(await storage.head('test/opaque').catch((error: unknown) => error)).toMatchObject({
+      code: 'service_unavailable',
+    });
+  } finally {
+    storage.close();
+    server.closeAllConnections();
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+  }
+}, 10_000);

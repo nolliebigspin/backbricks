@@ -1,0 +1,181 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "b2ddd089-60dc-4827-b1b6-0541e1d93bdc",
+  "prevIds": [
+    "dac5caa2-1b54-4105-960b-fd034b60f683"
+  ],
+  "footprints": [
+    {
+      "statementType": "recreate_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "files",
+        "files_cleanup_idx"
+      ],
+      "writes": [
+        "s|idx|public.files_cleanup_idx",
+        "n|idx|public.files_cleanup_idx",
+        "e|idx|public.files_cleanup_idx",
+        "n|rel|public.files_cleanup_idx"
+      ],
+      "reads": [
+        "n|tbl|public.files",
+        "n|sch|public",
+        "n|col|public.files.organization_id",
+        "n|col|public.files.project_id",
+        "n|col|public.files.cleanup_after",
+        "n|col|public.files.id"
+      ],
+      "sharedWrites": [],
+      "sqlHash": "48d6bcee106d7695"
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "files",
+        "files_staging_cleanup_idx"
+      ],
+      "writes": [
+        "s|idx|public.files_staging_cleanup_idx",
+        "n|idx|public.files_staging_cleanup_idx",
+        "e|idx|public.files_staging_cleanup_idx",
+        "n|rel|public.files_staging_cleanup_idx"
+      ],
+      "reads": [
+        "n|tbl|public.files",
+        "n|sch|public",
+        "n|col|public.files.organization_id",
+        "n|col|public.files.project_id",
+        "n|col|public.files.upload_expires_at",
+        "n|col|public.files.id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "files",
+        "files_scan_recovery_idx"
+      ],
+      "writes": [
+        "s|idx|public.files_scan_recovery_idx",
+        "n|idx|public.files_scan_recovery_idx",
+        "e|idx|public.files_scan_recovery_idx",
+        "n|rel|public.files_scan_recovery_idx"
+      ],
+      "reads": [
+        "n|tbl|public.files",
+        "n|sch|public",
+        "n|col|public.files.organization_id",
+        "n|col|public.files.project_id",
+        "n|col|public.files.updated_at",
+        "n|col|public.files.id"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "files",
+        "name": "files_staging_cleanup_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "organization_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "project_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "upload_expires_at",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": "\"deleted_at\" is null and \"copied_at\" is not null and (\"staging_cleaned_at\" is null or \"staging_cleaned_at\" < \"upload_expires_at\")",
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "files",
+        "name": "files_scan_recovery_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "organization_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "project_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "updated_at",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": "\"deleted_at\" is null and \"status\" in ('uploaded', 'scanning')",
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "indexes\u0000[\"public\",\"files_cleanup_idx\"]",
+      "set": {
+        "where": "\"cleanup_after\" is not null"
+      }
+    }
+  ]
+}

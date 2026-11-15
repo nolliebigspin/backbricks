@@ -49,15 +49,22 @@ export function createWithTenant(
         const repositories = createTenantRepositories(tx, scope);
         if (context.projectId) {
           const project = await repositories.projects.get(context.projectId, {
-            includeArchived: context.archivedProject === true,
+            includeArchived:
+              context.archivedProject === true || context.archivedMaintenance === true,
           });
           if (
             project.organizationId !== context.organizationId ||
             project.id !== context.projectId ||
-            (context.archivedProject && !project.deletedAt)
+            ((context.archivedProject || context.archivedMaintenance) && !project.deletedAt)
           )
             throw new AppError('not_found');
         }
+        if (
+          context.archivedMaintenance &&
+          context.projectId &&
+          (await repositories.projects.erasedAt(context.projectId))
+        )
+          throw new AppError('not_found');
         const handle: TenantTransaction = Object.freeze({
           context,
           identity: Symbol('tenant transaction'),

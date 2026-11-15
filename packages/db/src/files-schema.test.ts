@@ -162,6 +162,8 @@ describe.skipIf(!available)('files schema (real Postgres)', () => {
       'files_orphan_idx',
       'files_expiry_idx',
       'files_cleanup_idx',
+      'files_staging_cleanup_idx',
+      'files_scan_recovery_idx',
       'files_status_idx',
     ])
       expect(definitions).toContain(name);

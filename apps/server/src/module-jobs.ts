@@ -21,7 +21,7 @@ export function moduleJobs(
     if (tx.context.projectId)
       await tx.repositories.projects.get(tx.context.projectId, {
         lock: true,
-        includeArchived: tx.context.archivedProject,
+        includeArchived: tx.context.archivedProject || tx.context.archivedMaintenance,
       });
     return job.run(runtime.forTenant(tx).execution(moduleType), input);
   }

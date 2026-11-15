@@ -1,4 +1,9 @@
-import { AppError, type ConfiguredInstance, type FileScanResult } from '@backbricks/core';
+import {
+  AppError,
+  isAwaitingFileInspection,
+  type ConfiguredInstance,
+  type FileScanResult,
+} from '@backbricks/core';
 
 import type { UploadsConfig } from './config.ts';
 import { type UPLOAD_EVENTS, UPLOAD_JOBS, UPLOAD_RETRIES } from './constants.ts';
@@ -83,14 +88,13 @@ export async function scanUpload(
     if (error instanceof AppError && error.code === 'not_found') return;
     throw error;
   }
-  if (!['uploaded', 'scanning'].includes(file.status)) return;
+  if (!isAwaitingFileInspection(file.status)) return;
   await repository.lockProject();
   // A shared zone lock precedes file locks; config updates take the same parent-first order.
   const key = await repository.resolveZoneKey(file.id, now, { lock: true });
   const zone = await runtime.instances.get(key);
   file = await repository.get(file.id, now, { lock: true });
-  if (!['uploaded', 'scanning'].includes(file.status) || (input.attempt ?? 0) !== file.scanAttempts)
-    return;
+  if (!isAwaitingFileInspection(file.status) || (input.attempt ?? 0) !== file.scanAttempts) return;
   file = await repository.patch(file.id, {
     scanAttempts: file.scanAttempts + 1,
     status: 'scanning',

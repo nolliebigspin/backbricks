@@ -972,7 +972,7 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 
 ## Phase P3 – Uploads (M3 · v0.2.0) · approved 2026-11-15
 
-**Goal:** Safe direct uploads, private downloads and forms attachments. **25 tasks, 123 h ≈ 15.4 PD; reserve 25 h; approved envelope 148 h ≈ 18.5 PD.** Original allowance: 9–12 PD. Q17–Q20 were approved by the maintainer on 2026-11-15, including all recommendations and contract proposals in [the module plan](docs/modules/uploads.md) and proposed ADRs 0063–0065.
+**Goal:** Safe direct uploads, private downloads and forms attachments. **26 tasks, 129 h ≈ 16.1 PD; reserve 19 h; approved envelope 148 h ≈ 18.5 PD.** Original allowance: 9–12 PD. Q17–Q20 were approved by the maintainer on 2026-11-15, including all recommendations and contract proposals in [the module plan](docs/modules/uploads.md) and proposed ADRs 0063–0065.
 
 **Entry state:** M2 implementation is merged. The signed `v0.1.0` tag points at `354aa9a`; [release PR #13](https://github.com/nolliebigspin/backbricks/pull/13), its CI, main CI and [the publishing workflow](https://github.com/nolliebigspin/backbricks/actions/runs/43704367449) passed on 2026-11-15. Anonymous GHCR manifest retrieval returned 200 for `ghcr.io/nolliebigspin/backbricks:0.1.0`.
 
@@ -1149,22 +1149,34 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Real download headers, unsafe preview denial, mixed-ID atomicity, audit rollback and storage outage/retry cases.
 - **Risks/notes:** S3 deletion cannot be rolled back; durable intent is required instead of pretending it shares SQL atomicity.
 
-### [ ] P3.7a – Purge orphans, expired files and late staging writes (est. 5 h)
+### [x] P3.7a – Purge orphans, expired files and late staging writes (est. 5 h)
 - **Description:** Implement bounded scheduled cleanup and retention recomputation, including archived zones, failed cleanup and late PUT after complete/deletion.
 - **Files/packages:** uploads retention/jobs/repository; shared maintenance fan-out tests
 - **Depends on:** P3.6b
 - **Reuses:** Existing scheduled tenant fan-out, clocks, SKIP LOCKED batches and storage adapter
 - **Acceptance criteria:**
-  - [ ] Pending/unclaimed files expire after 24 hours regardless of unlimited zone retention.
-  - [ ] Ready/terminal/deleted records retain enough identity to remove staging after PUT expiry; no late object becomes untracked.
-  - [ ] Concurrent workers make bounded progress without double accounting or deleting another project.
+  - [x] Pending/unclaimed files expire after 24 hours regardless of unlimited zone retention.
+  - [x] Ready/terminal/deleted records retain both keys through post-expiry cleanup confirmation; P3.7a1 separately settles in-flight requests.
+  - [x] Concurrent workers make bounded progress without double accounting or deleting another project.
 - **Tests:** Clock-driven real Postgres/Garage orphan/retention/late-PUT/concurrency/provider-failure tests.
 - **Risks/notes:** Do not remove the final cleanup row while an issued PUT can still recreate its staging object.
+
+### [ ] P3.7a1 – Close upload sessions before physical erasure (est. 6 h, from reserve)
+- **Description:** Replace public raw PUT signatures with server-finalized, single-part storage sessions while preserving one browser PUT and existing intent/complete responses. A real Garage probe proved a PUT started before signature expiry can finish afterward.
+- **Files/packages:** Core storage port, S3 adapter, private file schema/forward migration, uploads intent/complete/cleanup and storage contracts
+- **Depends on:** P3.7a
+- **Reuses:** Existing S3 multipart primitives, signed headers, durable cleanup, copy-then-scan and transactional state transitions; no resumable-upload product feature.
+- **Acceptance criteria:**
+  - [ ] Only server completion can create the staging object; consumed/aborted sessions cannot recreate it.
+  - [ ] Cleanup aborts sessions and retains opaque identity through confirmed settlement; handles are never returned separately or logged.
+  - [ ] Real Garage tests cover in-flight expiry/abort, exact bytes/headers, completion rollback and browser CORS.
+- **Tests:** Shared storage-session contract plus real HTTP/Postgres/Garage regressions; preserve existing public JSON shape.
+- **Risks/notes:** Consumes 6 h of the approved reserve, keeping the 148 h envelope. ADR-0072 records the security correction; review remains deferred.
 
 ### [ ] P3.7b – Add complete subject metadata and ZIP exports (est. 6 h)
 - **Description:** Implement approved ADR-0065 optional file-export hook and bounded binary stream, preserving existing JSON export and forms-only operation.
 - **Files/packages:** core privacy/binary export contracts; server privacy routes; uploads subject hooks; ZIP helper/tests
-- **Depends on:** P3.7a, approval of ADR-0065
+- **Depends on:** P3.7a1, approval of ADR-0065
 - **Reuses:** ADR-0058 commit barrier/fresh frames, privacy authorization, paging and export audits
 - **Acceptance criteria:**
   - [ ] ZIP contains authorized manifest and ready-file bytes with generated safe paths; unavailable/quarantined files are explicitly explained.
@@ -1176,7 +1188,7 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 ### [ ] P3.7c – Prove project erasure through object cleanup (est. 5 h)
 - **Description:** Implement the approved deferred eraseScope result and exercise archived-project tombstoning only after objects and outstanding PUTs are settled.
 - **Files/packages:** core erasure contract/host normalization; uploads eraseScope; real project erasure tests
-- **Depends on:** P3.7a, P3.5b, approval of ADR-0064
+- **Depends on:** P3.7a1, P3.5b, approval of ADR-0064
 - **Reuses:** Existing project erasure job, archivedProject context, bounded continuation and tombstone lifecycle
 - **Acceptance criteria:**
   - [ ] More than one batch of rows and real objects disappear; finalization waits for late-PUT expiry and storage recovery.
@@ -1281,6 +1293,8 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
 
 ### Planning risks and execution notes
+
+- P3.7a complete: bounded expiry/cleanup/staging/stalled-scan discovery, partial indexes, truthful count/continuation results, archived-project maintenance without erasure authority (ADR-0071), bounded storage I/O and conservative cleanup timestamps. Real Postgres/Garage tests prove 105-record concurrent retention, lost-job recovery, 24-hour orphans under unlimited retention, archived zones/projects and neighbour isolation. `CI=true bun run check` passed (540 package + 102 script tests; `/tmp/backbricks-p3-7a-check.log`). A real Garage slow-body probe confirmed raw PUTs can finish after signature expiry; P3.7a1 closes that gap before privacy acceptance, consuming 6 h reserve within the unchanged 148 h envelope. End review remains deferred. Next: P3.7a1.
 
 - P3.6b complete: audited/rate-limited private download URLs, safe detected-image previews and single/bulk durable revocation reuse the shared usable-file predicate, policies, storage schema and deletion helper. Actual byte responses are no-store attachments by default. URLs are capped at 60 seconds and file expiry; a failing slow-HEAD test led to an after-I/O recheck and provider-neutral absolute signing deadline (ADR-0070), with schema-derived storage inputs. Real HTTP/Garage tests prove bytes/UTF-8 filename headers, preview denial, scope rules, audit/enqueue rollback, rate/audit counts, cleanup outage/recovery and the expiry race. All 16 selected uploads management operations have cookie/key isolation, including mixed foreign-ID atomicity. `CI=true bun run check` passed (535 package + 102 script tests). P3.7a adds scheduled lost-job/late-PUT recovery, including archived projects; storage I/O also needs a bounded deadline so provider hangs cannot retain project locks indefinitely. P3.7b must minimize deleted-row personal metadata and report subject physical cleanup honestly. Next: P3.7a.
 

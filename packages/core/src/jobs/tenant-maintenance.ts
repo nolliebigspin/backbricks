@@ -51,6 +51,7 @@ export function createTenantMaintenanceHandlers(
         const page = pageResult(
           await tx.repositories.projects.list(
             repositoryPage({ limit: MAX_MAINTENANCE_BATCH, cursor: data.cursor }),
+            { includeArchived: !data.job },
           ),
           MAX_MAINTENANCE_BATCH,
         );
@@ -59,8 +60,9 @@ export function createTenantMaintenanceHandlers(
           await scheduling.enqueueProject(tx, {
             projectId: project.id,
             name: PLATFORM_JOBS.projectMaintenance,
-            payload: { runId: data.runId, job: data.job },
+            payload: { runId: data.runId, ...(data.job ? { job: data.job } : {}) },
             singletonKey: `${data.runId}:${data.job ?? 'maintenance'}`,
+            includeArchived: !data.job,
           });
         }
         if (page.nextCursor)
@@ -77,6 +79,11 @@ export function createTenantMaintenanceHandlers(
       async runInTransaction(this: void, tx: TenantTransaction, input: unknown) {
         if (!scheduling) throw new AppError('service_unavailable');
         if (!tx.context.projectId) throw new AppError('not_found');
+        await tx.repositories.projects.get(tx.context.projectId, {
+          lock: true,
+          includeArchived: tx.context.archivedMaintenance === true,
+        });
+        if (await tx.repositories.projects.erasedAt(tx.context.projectId)) return;
         const data = payloadSchema.parse(input);
         if (data.job) {
           const job = selectedJob(data.job);
@@ -90,6 +97,7 @@ export function createTenantMaintenanceHandlers(
             { runId: data.runId },
             { singletonKey: data.runId },
           );
+        if (tx.context.archivedMaintenance) return;
         const page = pageResult(
           await tx.repositories.instances.list(
             repositoryPage({ limit: MAX_MAINTENANCE_BATCH, cursor: data.cursor }),

@@ -9,6 +9,7 @@ import type { ModuleExecution } from './contract.ts';
 import type { ModuleErasureResult } from './erasure.ts';
 import type { InfraRequirement } from './infrastructure.ts';
 import type { ModuleJobSpec } from './jobs.ts';
+import type { ModuleMaintenanceResult } from './maintenance.ts';
 import type { ModuleInputSchema, ModuleResponseDefinition } from './routes.ts';
 import type {
   ConfigChangeReport,
@@ -63,7 +64,10 @@ export type RegisteredModule = Readonly<{
   publicRoutes: readonly RegisteredRoute[];
   jobs: readonly RegisteredJob[];
   retention: {
-    purgeExpired(execution: ModuleExecution, input: { now: Date; limit: number }): Promise<number>;
+    purgeExpired(
+      execution: ModuleExecution,
+      input: { now: Date; limit: number },
+    ): Promise<ModuleMaintenanceResult>;
     recomputeExpiry(execution: ModuleExecution, instance: unknown, now: Date): Promise<number>;
   };
   notifications: {

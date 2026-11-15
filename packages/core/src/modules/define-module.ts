@@ -21,6 +21,7 @@ import type {
 import { moduleErasureResultSchema } from './erasure.ts';
 import { infraRequirementSchema, type InfraRequirement } from './infrastructure.ts';
 import { moduleInstanceReads } from './instances.ts';
+import { moduleMaintenanceResultSchema } from './maintenance.ts';
 import type { RegisteredModule } from './registered.ts';
 import { jobRegistrar, routeRegistrar } from './registrars.ts';
 import { moduleServices } from './services.ts';
@@ -140,7 +141,9 @@ export function defineModule<
           .object({ now: z.date(), limit: z.number().int().min(1).max(1000) })
           .strict()
           .parse(input);
-        return checkedCount(await retention.purgeExpired(runtime(execution), validated));
+        return moduleMaintenanceResultSchema.parse(
+          await retention.purgeExpired(runtime(execution), validated),
+        );
       },
       async recomputeExpiry(execution, input, now) {
         return checkedCount(

@@ -18,3 +18,12 @@ export const fileStatusSchema = z.enum([
   'rejected',
 ]);
 export type FileStatus = z.infer<typeof fileStatusSchema>;
+
+/** Durable states that may still need immutable-copy inspection. */
+export const FILE_INSPECTION_STATES = [
+  'uploaded',
+  'scanning',
+] as const satisfies readonly FileStatus[];
+/** Shared inspection eligibility for workers and maintenance queries. */
+export const isAwaitingFileInspection = (status: FileStatus): boolean =>
+  FILE_INSPECTION_STATES.some((candidate) => candidate === status);

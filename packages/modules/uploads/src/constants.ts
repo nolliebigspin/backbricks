@@ -51,3 +51,5 @@ export const UPLOAD_AUDIT_ACTIONS = {
   downloaded: 'files.downloaded',
 } as const;
 export const UPLOAD_DOWNLOAD_LIMITS = { limit: 30, windowMs: 60_000 } as const;
+
+export const UPLOAD_MAINTENANCE = { staleScanMs: 120_000, recoveryBucketMs: 3_600_000 } as const;

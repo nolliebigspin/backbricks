@@ -34,11 +34,18 @@ export function createProjectRepository(
   const where = () =>
     scope.where({ organizationId: projects.organizationId, projectId: projects.id });
   return {
-    async list(page) {
+    async list(page, options = {}) {
       const rows = await tx
         .select(projectColumns)
         .from(projects)
-        .where(and(where(), isNull(projects.deletedAt), beforeCursor(projects, page)))
+        .where(
+          and(
+            where(),
+            isNull(projects.erasedAt),
+            options.includeArchived ? undefined : isNull(projects.deletedAt),
+            beforeCursor(projects, page),
+          ),
+        )
         .orderBy(desc(projects.createdAt), desc(projects.id))
         .limit(scope.limit(page));
       return rows.map((row) => projectSchema.parse(row));

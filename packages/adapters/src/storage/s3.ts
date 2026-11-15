@@ -20,6 +20,9 @@ import {
   type StorageConfig,
 } from '@backbricks/core';
 
+// Provider stalls must not hold tenant mutations forever; byte streams have their own longer bound.
+const STORAGE_IO_TIMEOUTS = { metadataMs: 5000, readMs: 30_000 } as const;
+
 function unavailable(): never {
   throw new AppError('service_unavailable', { detail: 'Object storage is unavailable.' });
 }
@@ -102,6 +105,7 @@ export function createS3Storage(config: StorageConfig, clock: Clock = systemCloc
       try {
         const value = await internal.send(
           new HeadObjectCommand({ Bucket: config.bucket, Key: key }),
+          { abortSignal: AbortSignal.timeout(STORAGE_IO_TIMEOUTS.metadataMs) },
         );
         return storageObjectSchema.parse({
           size: value.ContentLength,
@@ -122,19 +126,24 @@ export function createS3Storage(config: StorageConfig, clock: Clock = systemCloc
             Key: target,
             CopySource: `${encodeURIComponent(config.bucket)}/${source.split('/').map(encodeURIComponent).join('/')}`,
           }),
+          { abortSignal: AbortSignal.timeout(STORAGE_IO_TIMEOUTS.metadataMs) },
         )
         .catch(unavailable);
     },
     async delete(key) {
       storageKeySchema.parse(key);
       await internal
-        .send(new DeleteObjectCommand({ Bucket: config.bucket, Key: key }))
+        .send(new DeleteObjectCommand({ Bucket: config.bucket, Key: key }), {
+          abortSignal: AbortSignal.timeout(STORAGE_IO_TIMEOUTS.metadataMs),
+        })
         .catch(unavailable);
     },
     async read(key) {
       storageKeySchema.parse(key);
       const result = await internal
-        .send(new GetObjectCommand({ Bucket: config.bucket, Key: key }))
+        .send(new GetObjectCommand({ Bucket: config.bucket, Key: key }), {
+          abortSignal: AbortSignal.timeout(STORAGE_IO_TIMEOUTS.readMs),
+        })
         .catch(unavailable);
       if (!result.Body) return unavailable();
       const reader = result.Body.transformToWebStream().getReader();
@@ -173,7 +182,11 @@ export function createS3Storage(config: StorageConfig, clock: Clock = systemCloc
   return {
     ...adapter,
     async check() {
-      await internal.send(new HeadBucketCommand({ Bucket: config.bucket })).catch(unavailable);
+      await internal
+        .send(new HeadBucketCommand({ Bucket: config.bucket }), {
+          abortSignal: AbortSignal.timeout(STORAGE_IO_TIMEOUTS.metadataMs),
+        })
+        .catch(unavailable);
     },
     close() {
       internal.destroy();

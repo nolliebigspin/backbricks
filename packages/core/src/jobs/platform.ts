@@ -117,17 +117,27 @@ export function createPlatformJobHandlers(
       async runInTransaction(this: void, tx: TenantTransaction, input: unknown) {
         const data = retentionPayload.parse(input);
         if (!tx.context.projectId) throw new AppError('not_found');
-        await tx.repositories.projects.get(tx.context.projectId, { lock: true });
+        await tx.repositories.projects.get(tx.context.projectId, {
+          lock: true,
+          includeArchived: tx.context.archivedMaintenance === true,
+        });
         let count = 0;
         let full = false;
+        let notBefore: Date | undefined;
         for (const module of deps.registry.modules) {
           // oxlint-disable-next-line no-await-in-loop -- Module hooks share this tenant transaction.
           const purged = await module.retention.purgeExpired(execution(tx, module.type), {
             now: deps.clock.now(),
             limit: MAX_MAINTENANCE_BATCH,
           });
-          count += purged;
-          full ||= purged === MAX_MAINTENANCE_BATCH;
+          const result =
+            typeof purged === 'number'
+              ? { count: purged, more: purged === MAX_MAINTENANCE_BATCH }
+              : purged;
+          count += result.count;
+          full ||= result.more;
+          if (result.more && result.notBefore && (!notBefore || result.notBefore < notBefore))
+            notBefore = result.notBefore;
         }
         if (count)
           await deps.audit.record(tx, {
@@ -141,7 +151,7 @@ export function createPlatformJobHandlers(
             tx,
             PLATFORM_JOBS.retentionPurge,
             { runId: data.runId, round: round + 1 },
-            { singletonKey: `${data.runId}:${round + 1}` },
+            { singletonKey: `${data.runId}:${round + 1}`, ...(notBefore ? { notBefore } : {}) },
           );
       },
     },

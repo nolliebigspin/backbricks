@@ -15,6 +15,7 @@ import type { CapabilityFactories, CapabilityName, capabilityView } from './capa
 import type { ModuleErasureResult } from './erasure.ts';
 import type { InfraRequirement } from './infrastructure.ts';
 import type { ModuleJobRegistrar } from './jobs.ts';
+import type { ModuleMaintenanceResult } from './maintenance.ts';
 import type { ModuleAdminRouter, ModulePublicRouter } from './routes.ts';
 import type { BoundCoreServices, ModuleOptionalServices } from './services.ts';
 import type { ModuleStreamPage } from './streams.ts';
@@ -186,7 +187,7 @@ export type ModuleDefinition<
         MT
       >,
       input: { now: Date; limit: number },
-    ): Promise<number>;
+    ): Promise<ModuleMaintenanceResult>;
     recomputeExpiry(
       runtime: ModuleRuntime<
         T,

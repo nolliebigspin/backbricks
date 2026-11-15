@@ -251,3 +251,5 @@ Details: `docs/progress/phase-0.md` → "Deviations".
 - **D63 / P3.5b:** [ADR-0069](docs/adr/0069-erasure-requires-enabled-modules.md) blocks project erasure when a persisted module is disabled and protects file identities with a RESTRICT foreign key. The approved ADR-0064 deferred completion seam is implemented early because enabling production file fields requires a safe project deletion path. Full multi-batch/outage acceptance remains P3.7c; end review deferred.
 
 - **D64 / P3.6b:** [ADR-0070](docs/adr/0070-private-download-deadlines.md) adds a provider-neutral absolute signing deadline. A real delayed-storage regression proved that a TTL calculated before HEAD could outlive file expiry; the handler rechecks after I/O and the adapter clamps using its captured signing timestamp. Review deferred to M3 completion.
+
+- **D65 / P3.7a:** [ADR-0071](docs/adr/0071-archived-project-maintenance.md) separates archived maintenance from erasure authority and adds truthful bounded continuation results. A confirmed in-flight raw PUT gap adds P3.7a1 using 6 h of reserve; the 148 h envelope is unchanged. Review deferred.

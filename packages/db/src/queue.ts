@@ -83,6 +83,7 @@ export function createPostgresQueue(
       organizationId: context.organizationId,
       projectId: context.projectId,
       ...(context.archivedProject ? { archivedProject: true } : {}),
+      ...(context.archivedMaintenance ? { archivedMaintenance: true } : {}),
       payload: wire.data,
     });
     return boss.send(name, envelope, {
@@ -109,10 +110,18 @@ export function createPostgresQueue(
   const enqueueProject: ProjectJobEnqueue = async (tx, input) => {
     if (tx.context.projectId && tx.context.projectId !== input.projectId)
       throw new AppError('not_found');
-    await tx.repositories.projects.get(input.projectId);
+    const project = await tx.repositories.projects.get(input.projectId, {
+      includeArchived: input.includeArchived,
+      lock: true,
+    });
+    if (await tx.repositories.projects.erasedAt(project.id)) return null;
     return send(
       transactionFor(tx),
-      { organizationId: tx.context.organizationId, projectId: input.projectId },
+      {
+        organizationId: tx.context.organizationId,
+        projectId: input.projectId,
+        ...(project.deletedAt ? { archivedMaintenance: true as const } : {}),
+      },
       input.name,
       input.payload,
       { singletonKey: input.singletonKey },
@@ -221,6 +230,7 @@ export function createPostgresQueue(
                     organizationId: envelope.organizationId,
                     projectId: envelope.projectId,
                     ...(envelope.archivedProject ? { archivedProject: true } : {}),
+                    ...(envelope.archivedMaintenance ? { archivedMaintenance: true } : {}),
                   },
                   async (tx) => {
                     await handler.runInTransaction(tx, envelope.payload);

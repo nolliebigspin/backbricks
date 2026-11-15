@@ -15,6 +15,7 @@ import {
   UPLOAD_EVENTS,
 } from './constants.ts';
 import { uploadsInfrastructure } from './infrastructure.ts';
+import { maintainUploads } from './maintenance.ts';
 import { uploadsMutationRoutes } from './mutations.ts';
 import { describeUpload } from './notifications.ts';
 import { eraseUploadScope } from './privacy.ts';
@@ -82,7 +83,7 @@ export const uploadsModule = defineModule({
   },
   notifications: { describe: describeUpload },
   retention: {
-    purgeExpired: async () => 0,
+    purgeExpired: maintainUploads,
     recomputeExpiry: (runtime, instance) =>
       uploadsRepository(runtime).recomputeExpiry(instance.id, instance.config.retentionDays),
   },

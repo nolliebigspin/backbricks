@@ -119,6 +119,12 @@ export interface UploadsRepository {
   findExpired(now: Date, limit: number): Promise<UploadRecord[]>;
   findCleanup(now: Date, limit: number): Promise<UploadRecord[]>;
   findStaging(now: Date, limit: number): Promise<UploadRecord[]>;
+  findRecovery(
+    now: Date,
+    staleBefore: Date,
+    limit: number,
+    maxAttempts: number,
+  ): Promise<UploadRecord[]>;
   forScope(limit: number): Promise<UploadRecord[]>;
   findBySubject(email: string, page: RepositoryPage): Promise<UploadRecord[]>;
   recomputeExpiry(instanceId: string, retentionDays: number | null): Promise<number>;

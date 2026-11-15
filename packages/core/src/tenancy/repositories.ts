@@ -19,7 +19,7 @@ import type { instanceUpdateSchema, projectUpdateSchema } from '../platform/mode
 type ProjectChild<T> = Omit<T, 'organizationId' | 'projectId'>;
 
 export interface ProjectRepository {
-  list(page: RepositoryPage): Promise<Project[]>;
+  list(page: RepositoryPage, options?: { includeArchived?: boolean }): Promise<Project[]>;
   get(id: string, options?: { includeArchived?: boolean; lock?: boolean }): Promise<Project>;
   insert(input: Omit<Project, 'organizationId'>): Promise<Project>;
   update(id: string, input: z.infer<typeof projectUpdateSchema>): Promise<Project>;
