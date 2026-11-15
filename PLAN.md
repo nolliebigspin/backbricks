@@ -1067,14 +1067,14 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Real HTTP/Postgres/Garage intent/PUT/complete, origin/proof/scope/expiry/concurrency and enqueue/usage rollback tests.
 - **Risks/notes:** Token verification must precede any response exposing file state; only the final private copy may become downloadable.
 
-### [ ] P3.4a – Implement the ClamAV streaming adapter (est. 5 h)
+### [x] P3.4a – Implement the ClamAV streaming adapter (est. 5 h)
 - **Description:** Add bounded INSTREAM transport, timeout/backpressure, safe provider errors and scanner readiness/composition; keep none represented explicitly.
 - **Files/packages:** packages/adapters scanner; server composition; compose scan settings
 - **Depends on:** P3.0a
 - **Reuses:** Existing Scanner interface, validated SCANNER config and compose scan profile
 - **Acceptance criteria:**
-  - [ ] Real clean/EICAR streams distinguish OK/FOUND; malformed, oversized, disconnected and timed-out replies fail safely.
-  - [ ] StreamMaxLength covers the upload ceiling; none needs no ClamAV service; errors/logs contain no file content or names.
+  - [x] Real clean/EICAR streams distinguish OK/FOUND; malformed, oversized, disconnected and timed-out replies fail safely.
+  - [x] StreamMaxLength covers the upload ceiling; none needs no ClamAV service; errors/logs contain no file content or names.
 - **Tests:** Local protocol-server edge cases and real ClamAV stream tests, including non-buffered large input.
 - **Risks/notes:** Do not guess the clamd protocol or library APIs; inspect authoritative docs/types when implementing.
 
@@ -1281,6 +1281,8 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
 
 ### Planning risks and execution notes
+
+- P3.4a complete: bounded NUL-framed ClamAV INSTREAM adapter with 64 KiB backpressure writes, operation timeout/input cancellation, capped strict replies and safe provider errors; PING readiness is selected only for configured uploads. Protocol and real clean/EICAR tests pass; the real 100 MiB generated stream passed in ~3 s without a full-file buffer. Compose's pinned image configuration mechanism was inspected directly; `clamconf` confirms StreamMaxLength/MaxFileSize 104857600 and AlertExceedsMax=yes. `mise run scan` and CI/release service setup reuse the optional profile. Scanner-none/forms-only/failing-daemon readiness cases pass. `CI=true bun run check` passed (503 package + 102 script tests). No runtime dependency added. Next: P3.4b.
 
 - P3.3b complete: operational zones, exact 300-second signed PUT intents, 24-hour orphan expiry, shared token/reference schemas and diagnostic redaction. Reuses `uploads:create`. Token-authenticated completion checks the same tenant/zone under lock, pending expiry/current config/HEAD and transactionally enqueues one scan job; repeated completes return only caller-owned state. Raw intents are not idempotency-cached. Three real HTTP/Postgres/Garage tests plus the core reference test pass; manifest fields/preflights and sanitized public snapshot cover both operations. Enqueue failure rolls back status; wrong tenant/token, stale policy, invalid size and missing proof fail. `CI=true bun run check` passed (496 package + 102 script tests), additive contract regenerated. Scan job intentionally fails closed until P3.4; no file is made ready yet. Review remains deferred. Next: P3.4a.
 

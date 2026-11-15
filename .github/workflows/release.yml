@@ -63,7 +63,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Start services
-        run: mise run infra
+        run: |
+          mise run infra
+          mise run scan
       - name: Smoke test (real worker consumption, non-root/read-only roles)
         run: bun scripts/image/smoke.ts backbricks/server:release
       - name: Log in to GHCR

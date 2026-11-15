@@ -31,6 +31,10 @@ run = [
   "docker compose --profile storage run --rm garage-init",
 ]
 
+[tasks.scan]
+description = "Start the optional ClamAV scanner for scanned uploads and integration tests"
+run = "docker compose --profile scan up -d --wait clamav"
+
 [tasks.down]
 description = "Stop the dev environment"
 run = "docker compose --profile storage --profile scan down"

@@ -184,6 +184,10 @@ services:
     # The -debian variant is the one with arm64 images.
     image: clamav/clamav:1.5.4-debian
     profiles: [scan]
+    environment:
+      CLAMD_CONF_StreamMaxLength: 100M
+      CLAMD_CONF_MaxFileSize: 100M
+      CLAMD_CONF_AlertExceedsMax: 'yes'
     ports:
       - '${CLAMAV_PORT:-3310}:3310'
     volumes:
