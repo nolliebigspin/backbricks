@@ -59,6 +59,7 @@ export function createAbuseGuard(deps: {
 }) {
   return async (input: {
     identity: unknown;
+    resolveInstance?: (tx: TenantTransaction) => Promise<string>;
     idempotencyKey?: string;
     request: CredentialRequest;
     module: RegisteredModule;
@@ -88,20 +89,25 @@ export function createAbuseGuard(deps: {
         ? { principal: { kind: 'secret_key' as const, id: identity.id, scopes: identity.scopes } }
         : {}),
     };
-    const key = input.params[access.instanceParam];
-    if (!key) throw new AppError('not_found');
-    const prepared = await deps.withTenant(tenant, async (tx) => {
+    const pathKey = input.params[access.instanceParam];
+    if (!pathKey && !input.resolveInstance) throw new AppError('not_found');
+    const prepared = await deps.withTenant({ ...tenant, readOnly: true }, async (tx) => {
       const project = await tx.repositories.projects.get(identity.projectId);
+      assertPublicOrigin(identity.kind, project.allowedOrigins, request.origin);
+      const key = input.resolveInstance ? await input.resolveInstance(tx) : pathKey;
+      if (!key) throw new AppError('not_found');
       const instance = await tx.repositories.instances.getByKey(module.type, key);
       if (instance.status !== 'active') throw new AppError('not_found');
       const config = validatedConfig(module, instance.config, instance.moduleVersion);
       return {
+        key,
         allowedOrigins: project.allowedOrigins,
         instance,
         config,
         policy: module.publicWritePolicy(config),
       };
     });
+    const key = prepared.key;
     const instanceContext: PublicReadContext = {
       instanceId: prepared.instance.id,
       configVersion: prepared.instance.configVersion,

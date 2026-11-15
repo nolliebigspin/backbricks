@@ -35,6 +35,7 @@ export function createWithTenant(
       ...(ctx.principal ? { principal: principalSchema.parse(ctx.principal) } : {}),
     });
     return db.transaction(async (tx) => {
+      if (context.readOnly) await tx.execute(sql`set transaction read only`);
       await tx.execute(
         sql`select set_config('app.org_id', ${context.organizationId}, true),
                    set_config('app.project_id', ${context.projectId ?? ''}, true)`,

@@ -13,6 +13,26 @@ import type { ModuleExecution } from './contract.ts';
 import type { RegisteredModule } from './registered.ts';
 import { uniqueModuleValues as unique } from './validation.ts';
 
+const HOST_RESOURCE_NAMES = new Set([
+  'audit-logs',
+  'auth',
+  'challenge',
+  'config',
+  'integration',
+  'keys',
+  'meta',
+  'notification-rules',
+  'openapi',
+  'organizations',
+  'privacy',
+  'project-erasures',
+  'projects',
+  'public',
+  'schema',
+  'types',
+  'usage',
+]);
+
 function fail(detail: string): never {
   throw new AppError('invalid_request', { detail });
 }
@@ -22,7 +42,7 @@ function checkDefinitions(modules: readonly RegisteredModule[]) {
     'type',
   );
   unique(
-    modules.flatMap((module) => [module.resourceName.singular, module.resourceName.plural]),
+    modules.flatMap((module) => [module.resourceName.singular, ...module.resourceNamespaces]),
     'resource name',
   );
   unique(
@@ -53,6 +73,12 @@ function checkDefinitions(modules: readonly RegisteredModule[]) {
   );
   const coreEvents = new Set<string>(Object.values(CORE_EVENTS));
   for (const module of modules) {
+    if (
+      [module.resourceName.singular, ...module.resourceNamespaces].some((name) =>
+        HOST_RESOURCE_NAMES.has(name),
+      )
+    )
+      fail('A module resource collides with a host namespace.');
     unique([...module.requires, ...module.optional], 'capability requirement');
     for (const scope of module.scopes) {
       const builtIn = KEY_SCOPES.find((entry) => entry.name === scope.name);
@@ -72,7 +98,8 @@ function checkDefinitions(modules: readonly RegisteredModule[]) {
     for (const routes of [module.adminRoutes, module.publicRoutes]) {
       unique(
         routes.map(
-          (route) => `${route.method} ${route.path.replace(/\{[^}]+\}/g, '{}').replace(/\/$/, '')}`,
+          (route) =>
+            `${route.method} ${route.resource}${route.path.replace(/\{[^}]+\}/g, '{}').replace(/\/$/, '')}`,
         ),
         'route',
       );

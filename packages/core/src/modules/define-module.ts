@@ -53,6 +53,10 @@ export function defineModule<
     metadataSchema.parse({
       ...definition,
       ...services,
+      resourceNamespaces: [
+        definition.resourceName.plural,
+        ...(definition.resourceNamespaces ?? []),
+      ],
       requires: required,
       optional,
       provides: Object.keys(factories),
@@ -98,8 +102,18 @@ export function defineModule<
         : undefined,
     });
   }
-  const admin = routeRegistrar(runtime, 'management');
-  const publicRouter = routeRegistrar(runtime, 'public');
+  const admin = routeRegistrar(
+    runtime,
+    'management',
+    metadata.resourceName.plural,
+    metadata.resourceNamespaces,
+  );
+  const publicRouter = routeRegistrar(
+    runtime,
+    'public',
+    metadata.resourceName.plural,
+    metadata.resourceNamespaces,
+  );
   const jobs = jobRegistrar(runtime);
   definition.adminRoutes?.(admin);
   definition.publicRoutes?.(publicRouter);

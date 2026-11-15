@@ -231,3 +231,88 @@ test('routes and jobs require policy, schemas, bounded retention and unique decl
     ]),
   ).toThrow('undeclared scope');
 });
+
+test('additional resource namespaces are owned, collision checked and selected per route', () => {
+  const spec = {
+    method: 'GET',
+    path: '/{key}/records',
+    operationId: 'sample.additional',
+    input: z.object({ params: z.object({ key: z.string() }), query: z.object({}), body: z.null() }),
+    responses: {
+      200: { kind: 'json', description: 'Records', schema: z.object({ count: z.number() }) },
+    },
+    policy: {
+      kind: 'management',
+      session: { role: 'member' },
+      bodyLimitBytes: 1024,
+      isolationCase: 'sample.additional',
+    },
+  } as const;
+  const module = defineModule({
+    ...base,
+    resourceNamespaces: ['records'],
+    adminRoutes(router) {
+      router.register({ ...spec, resource: 'records' }, async () => Response.json({ count: 0 }));
+      router.register({ ...spec, operationId: 'sample.primary' }, async () =>
+        Response.json({ count: 0 }),
+      );
+    },
+  });
+  expect(defineRegistry([module]).modules[0]?.resourceNamespaces).toEqual(['samples', 'records']);
+  expect(module.adminRoutes.map((route) => route.resource)).toEqual(['records', 'samples']);
+  expect(() =>
+    defineRegistry([
+      module,
+      defineModule({
+        ...base,
+        type: 'other',
+        resourceName: { singular: 'record', plural: 'records' },
+      }),
+    ]),
+  ).toThrow('resource name');
+  expect(() =>
+    defineRegistry([defineModule({ ...base, resourceNamespaces: ['samples'] })]),
+  ).toThrow('resource name');
+  expect(() =>
+    defineRegistry([defineModule({ ...base, resourceNamespaces: ['privacy'] })]),
+  ).toThrow('host namespace');
+  expect(() =>
+    defineModule({
+      ...base,
+      adminRoutes(router) {
+        router.register({ ...spec, resource: 'foreign' }, async () => Response.json({ count: 0 }));
+      },
+    }),
+  ).toThrow('resource ownership');
+  expect(() =>
+    defineModule({
+      ...base,
+      adminRoutes(router) {
+        router.register({ ...spec, path: '/{projectId}' }, async () => Response.json({ count: 0 }));
+      },
+    }),
+  ).toThrow('resource ownership');
+});
+
+test('instance resolution is limited to public JSON writes', () => {
+  const spec = {
+    method: 'GET',
+    path: '/{key}',
+    operationId: 'sample.resolve',
+    input: z.object({ params: z.object({ key: z.string() }), query: z.object({}), body: z.null() }),
+    responses: {
+      200: { kind: 'json', description: 'Resolved', schema: z.object({ ok: z.boolean() }) },
+    },
+    policy: { kind: 'public', bodyLimitBytes: 1024 },
+    access: { kind: 'read' },
+    resolveInstance: async () => 'demo',
+  } as const;
+  expect(() =>
+    defineModule({
+      ...base,
+      publicRoutes(router) {
+        router.register(spec, async () => Response.json({ ok: true }));
+      },
+    }),
+  ).toThrow('public JSON write');
+});

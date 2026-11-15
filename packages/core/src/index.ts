@@ -402,6 +402,7 @@ export type {
   ModuleRouteSpec,
   ModuleAdminRouter,
   ModulePublicRouter,
+  ModuleInstanceResolverContext,
 } from './modules/routes.ts';
 export {
   MAX_JOB_RETENTION_SECONDS,

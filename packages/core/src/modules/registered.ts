@@ -20,11 +20,13 @@ import type {
 export type RegisteredRoute = {
   method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
   path: string;
+  resource: string;
   operationId: string;
   input: ModuleInputSchema;
   responses: Readonly<Record<number, ModuleResponseDefinition>>;
   policy: RoutePolicy;
   access?: PublicAccess;
+  resolveInstance?(this: void, execution: ModuleExecution, input: unknown): Promise<string>;
   run(execution: ModuleExecution, input: unknown): Promise<Response>;
 };
 export type RegisteredJob = ModuleJobSpec & {
@@ -36,6 +38,7 @@ export type RegisteredModule = Readonly<{
   moduleVersion: number;
   displayName: { en: string; de: string };
   resourceName: { singular: string; plural: string };
+  resourceNamespaces: readonly string[];
   infrastructure: readonly InfraRequirement[];
   scopes: readonly ScopeDefinition[];
   events: readonly EventDefinition[];

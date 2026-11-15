@@ -108,6 +108,8 @@ export type ModuleDefinition<
   moduleVersion: number;
   displayName: { en: string; de: string };
   resourceName: { singular: string; plural: string };
+  /** Additional resource namespaces owned by this module (ADR-0063). */
+  resourceNamespaces?: readonly string[];
   infrastructure: I;
   configSchema: z.ZodType<T>;
   defaultConfig(): T;

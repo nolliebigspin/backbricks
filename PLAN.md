@@ -1044,14 +1044,14 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Garage contract tests in CI plus browser CORS; optional provider suite clearly distinguished from required Garage evidence.
 - **Risks/notes:** Browser code cannot manually set Content-Length; actual File/Blob bytes must match the signed declaration.
 
-### [ ] P3.3a – Add module resource namespaces and scoped instance resolution (est. 5 h)
+### [x] P3.3a – Add module resource namespaces and scoped instance resolution (est. 5 h)
 - **Description:** Implement approved ADR-0063 so uploads can register file routes outside its zone namespace and bind a token-authenticated file to its zone.
 - **Files/packages:** core module route/registrar contracts, server module HTTP/public guard wiring
 - **Depends on:** P3.2b, P3.0a approval of ADR-0063
 - **Reuses:** Existing guard, withTenant, module-owned runtime frames, declaration inventories and CORS registrar
 - **Acceptance criteria:**
-  - [ ] Resource ownership/collisions and tenant selector shadowing are rejected at registration; forms routes retain behavior.
-  - [ ] File resolver runs only after credential bootstrap inside the correct module/tenant frame; normal origins/proofs/limits and locked rechecks still apply.
+  - [x] Resource ownership/collisions and tenant selector shadowing are rejected at registration; forms routes retain behavior.
+  - [x] File resolver runs only after credential bootstrap inside the correct module/tenant frame; normal origins/proofs/limits and locked rechecks still apply.
 - **Tests:** Synthetic contract tests and real scoped HTTP tests, including foreign IDs/tokens, body limits and route coverage.
 - **Risks/notes:** No uploads-specific query in the server and no extra unscoped bootstrap exception.
 
@@ -1281,6 +1281,8 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
 
 ### Planning risks and execution notes
+
+- P3.3a complete: explicitly owned resource namespaces, registration collision checks, per-resource CORS mounting and typed module-owned instance locators. ADR-0066 makes locator frames database read-only and exposes only the own repository/clock. Synthetic and real HTTP/Postgres tests prove origin/body/proof/replay/CORS/foreign binding and failed pre-proof mutations; existing forms behavior passes. `CI=true bun run check` passed (492 package + 102 script tests), plus typecheck after the public resolver-context type export. Human review remains deferred as requested. Next: P3.3b.
 
 - P3.10a complete: shared backend-neutral signed-header/private-copy/download/expiry/CORS contract runs against Garage; optional TEST_S3 provider settings fail on partial opt-in and never print secrets. Required browser contract passed in actual Chromium 158 (1 test, no retries), using a real local HTTP fixture so loopback address-space checks are realistic. Root tooling declares adapters/core as workspace dev dependencies and uses their public exports. `CI=true bun run check` passed (488 package + 102 script tests); current browser fixture also passes root typecheck/lint. No optional external provider was configured or claimed as evidence. Instructions: docs/storage-contracts.md. Next: P3.3a.
 

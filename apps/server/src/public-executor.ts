@@ -2,10 +2,12 @@ import {
   AppError,
   createAbuseGuard,
   publicRequestCredential,
+  publicWriteEnvelopeSchema,
   refererPath,
   userAgentFamily,
   type PublicCredentialResolver,
 } from '@backbricks/core';
+import { z } from 'zod';
 
 import type { ModulePublicExecutor } from './routes/modules.ts';
 import type { ServerServices } from './services.ts';
@@ -41,7 +43,37 @@ export function createPublicExecutor(
         .filter(([name]) => name !== 'key')
         .map(([name, values]) => [name, values.length === 1 ? values[0] : values]),
     );
+    let bytes: Uint8Array | undefined;
+    const body = async () => {
+      if (
+        !c.get('publicForm') &&
+        c.req.header('content-type')?.split(';')[0]?.trim().toLowerCase() !== 'application/json'
+      )
+        throw new AppError('unsupported_media_type');
+      bytes ??= new Uint8Array(await c.req.arrayBuffer());
+      if (bytes.byteLength > route.policy.bodyLimitBytes) throw new AppError('payload_too_large');
+      return bytes;
+    };
+    const resolver = route.resolveInstance;
     const response = await guard({
+      resolveInstance: resolver
+        ? async (tx) => {
+            let decoded: unknown;
+            try {
+              decoded = JSON.parse(new TextDecoder().decode(await body()));
+            } catch (error) {
+              if (error instanceof AppError) throw error;
+              throw new AppError('validation_failed');
+            }
+            const envelope = publicWriteEnvelopeSchema(z.unknown()).safeParse(decoded);
+            if (!envelope.success) throw new AppError('validation_failed');
+            return resolver(services.moduleRuntime.forTenant(tx).execution(type), {
+              params: c.req.param(),
+              query,
+              body: envelope.data.data,
+            });
+          }
+        : undefined,
       identity,
       idempotencyKey: c.req.header('idempotency-key'),
       request,
@@ -60,14 +92,7 @@ export function createPublicExecutor(
         c.header('Access-Control-Allow-Origin', origin);
         c.header('Vary', PUBLIC_RESPONSE_VARY);
       },
-      async body() {
-        if (
-          !c.get('publicForm') &&
-          c.req.header('content-type')?.split(';')[0]?.trim().toLowerCase() !== 'application/json'
-        )
-          throw new AppError('unsupported_media_type');
-        return new Uint8Array(await c.req.arrayBuffer());
-      },
+      body,
     });
     const form = c.get('publicForm');
     if (form?.success) {

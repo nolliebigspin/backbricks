@@ -79,6 +79,19 @@ describe.skipIf(!available)('withTenant (needs mise run infra)', () => {
     expect(await settings(handle.db)).toEqual({ org: '', project: '' });
   });
 
+  test('pre-proof read-only frames reject repository writes and restore the pooled connection', async () => {
+    const context = { organizationId: 'org-a', projectId: projectA };
+    const failure = await withTenant()({ ...context, readOnly: true }, async (tx) => {
+      expect(await probe(tx).settings()).toEqual({ org: 'org-a', project: projectA });
+      await probe(tx).write(7);
+    }).catch((error: unknown) => error);
+    expect(failure).toMatchObject({ cause: { code: '25006' } });
+    await withTenant()(context, async (tx) => {
+      await probe(tx).write(8);
+    });
+    await handle.db.execute(sql`delete from probe`);
+  });
+
   test('without a project the project setting is empty', async () => {
     expect(await withTenant()({ organizationId: 'org-a' }, (tx) => probe(tx).settings())).toEqual({
       org: 'org-a',

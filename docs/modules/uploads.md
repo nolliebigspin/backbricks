@@ -43,7 +43,7 @@ The table retains both deterministic keys from intent onward, the PUT expiry, sc
 
 ## 4. Public protocol
 
-The host retains authentication bootstrap, origins/CORS, limits, proof replay, request validation and transaction ownership. The upload module sees only its scoped repository and declared services. ADR-0063 fills the current router's resource-namespace/instance-binding gap without an unscoped file lookup.
+The host retains authentication bootstrap, origins/CORS, limits, proof replay, request validation and transaction ownership. The upload module sees only its scoped repository and declared services. [Module resource declarations](../../packages/core/src/modules/routes.ts), [registration validation](../../packages/core/src/modules/registrars.ts) and [the HTTP bridge](../../apps/server/src/routes/modules.ts) implement ADR-0063. [Public instance preparation](../../packages/core/src/abuse/guard.ts) uses a database-enforced read-only tenant frame ([ADR-0066](../adr/0066-read-only-public-resource-lookups.md)), and the resolver sees only its own repository and clock. [HTTP tests](../../apps/server/src/abuse-guard.test.ts) prove origin/body/proof/replay/CORS behavior; [database tests](../../packages/db/src/with-tenant.test.ts) prove writes fail in locator frames.
 
 | Operation | Request / response |
 |---|---|

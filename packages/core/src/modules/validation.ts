@@ -19,6 +19,7 @@ export const metadataSchema = z.object({
   moduleVersion: z.number().int().positive(),
   displayName: localizedNameSchema,
   resourceName: z.object({ singular: moduleNameSchema, plural: moduleNameSchema }).strict(),
+  resourceNamespaces: z.array(moduleNameSchema),
   scopes: z.array(scopeDefinitionSchema),
   events: z.array(eventDefinitionSchema),
   usageMetrics: z.array(metricDefinitionSchema),
