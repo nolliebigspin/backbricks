@@ -1,16 +1,8 @@
 import { storageGetSchema } from '@backbricks/core';
-import { z } from 'zod';
-
-/** Stored state; logical deletion is a separate marker, so cleanup can finish after access ends. */
-export const uploadStatusSchema = z.enum([
-  'pending',
-  'uploaded',
-  'scanning',
-  'ready',
-  'quarantined',
-  'rejected',
-]);
-export type UploadStatus = z.infer<typeof uploadStatusSchema>;
+export {
+  fileStatusSchema as uploadStatusSchema,
+  type FileStatus as UploadStatus,
+} from '@backbricks/core';
 
 /** A private display/download name, never a path or storage key. */
 export const uploadFilenameSchema = storageGetSchema.shape.downloadName

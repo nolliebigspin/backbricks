@@ -253,6 +253,7 @@ export {
   inlineImageTypeSchema,
 } from './storage/schemas.ts';
 export { configApplyResponseSchema } from './configuration/schemas.ts';
+export { FILE_SIZE_LIMITS, fileStatusSchema, type FileStatus } from './storage/files.ts';
 export {
   CONFIG_ACCESS,
   CONFIG_DESTRUCTIVE_SCOPE,

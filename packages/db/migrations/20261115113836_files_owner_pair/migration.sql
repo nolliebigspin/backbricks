@@ -1,0 +1,1 @@
+ALTER TABLE "files" DROP CONSTRAINT "files_owner_pair", ADD CONSTRAINT "files_owner_pair" CHECK (("owner_type" is null and "owner_id" is null) or ("owner_type" is not null and "owner_id" is not null and length("owner_type") > 0 and length("owner_id") > 0));

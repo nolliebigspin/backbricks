@@ -172,44 +172,12 @@ Implemented core tables are defined in code (ADR-0023), with no parallel SQL spe
 - [Events, audit, notification rules and usage](../packages/db/src/schema/platform.ts)
 - [Idempotency, rate limiting, replay and system settings](../packages/db/src/schema/technical.ts)
 - [Forms entries](../packages/db/src/schema/forms.ts) (`form_submissions`; repository interface in the [forms module](../packages/modules/forms/src/repository.ts), ADR-0055)
+- [Upload files](../packages/db/src/schema/files.ts) (`files`; shared states/size bounds in [core](../packages/core/src/storage/files.ts), durable cleanup lifecycle in ADR-0064)
 - [Custom audit/membership/UNLOGGED constraints](../packages/db/migrations/20261106024528_audit_immutability/migration.sql)
 
-Live child references include organization/project/instance identity; audit IDs are historical references retained without cascading FKs. Platform timestamps are supplied through the injected clock. Expiry/lifecycle rules follow ADR-0022. The SQL below specifies only the unimplemented domain tables.
+Live child references include organization/project/instance identity; audit IDs are historical references retained without cascading FKs. Files additionally bind the parent module type, so a form cannot be used as a zone. Both deterministic opaque object keys are retained from intent through cleanup; their presence in a row is not evidence that an object exists. A durable deletion marker revokes access while cleanup finishes (ADR-0064). Platform timestamps are supplied through the injected clock. Expiry/lifecycle rules follow ADR-0022. The SQL below specifies only the unimplemented domain tables.
 
 ```sql
--- =========================================================
--- Module: uploads
--- =========================================================
-CREATE TABLE files (
-  id                 text PRIMARY KEY,                     -- file_…
-  organization_id    text NOT NULL,
-  project_id         text NOT NULL,
-  instance_id        text NOT NULL REFERENCES module_instances(id) ON DELETE CASCADE, -- upload zone
-  status             text NOT NULL CHECK (status IN
-                       ('pending','uploaded','scanning','ready','quarantined','rejected')),
-  staging_key        text NOT NULL UNIQUE,                 -- target of the presigned URL
-  storage_key        text UNIQUE,                          -- final copy, never writable via URL
-  original_name      text NOT NULL,
-  declared_mime      text,
-  detected_mime      text,
-  size_bytes         bigint NOT NULL CHECK (size_bytes > 0),
-  sha256             bytea,
-  scan               jsonb,                                -- {engine, result, signature, scanned_at}
-  upload_token_hash  bytea NOT NULL,                       -- authorizes complete + claim
-  owner_type         text,                                 -- 'form_submission' | 'review' | NULL
-  owner_id           text,
-  metadata           jsonb NOT NULL DEFAULT '{}',          -- client-provided, validated and bounded
-  is_test            boolean NOT NULL DEFAULT false,
-  subject_email      text,
-  created_at         timestamptz NOT NULL DEFAULT now(),
-  uploaded_at        timestamptz,
-  expires_at         timestamptz
-);
-CREATE INDEX files_list_idx    ON files (instance_id, created_at DESC);
-CREATE INDEX files_owner_idx   ON files (owner_type, owner_id) WHERE owner_id IS NOT NULL;
-CREATE INDEX files_orphan_idx  ON files (created_at) WHERE owner_id IS NULL;
-CREATE INDEX files_expiry_idx  ON files (expires_at) WHERE expires_at IS NOT NULL;
-
 -- =========================================================
 -- Module: reviews
 -- =========================================================

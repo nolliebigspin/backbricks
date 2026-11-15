@@ -1011,14 +1011,14 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Template, change-classification, migration and generated-code fixtures.
 - **Risks/notes:** Tightening rules must not leave old intents able to bypass current policy.
 
-### [ ] P3.2a – Generate the files table and integrity constraints (est. 5 h)
+### [x] P3.2a – Generate the files table and integrity constraints (est. 5 h)
 - **Description:** Add db-owned files schema with composite zone identity, token hash, owner/expiry, scan metadata and durable deletion/late-PUT cleanup fields. Generate the forward migration.
 - **Files/packages:** packages/db/src/schema/, packages/db/migrations/, ARCHITECTURE §B.3
 - **Depends on:** P3.1a
 - **Reuses:** ADR-0055, tenant columns, composite live-parent FKs and central migration runner
 - **Acceptance criteria:**
-  - [ ] Tenant, enum, positive-size, owner-pair and unique-key constraints are enforced by real Postgres.
-  - [ ] Fresh/no-op migrations work; architecture replaces the uploads SQL sketch with the implemented schema link.
+  - [x] Tenant, enum, positive-size, owner-pair and unique-key constraints are enforced by real Postgres.
+  - [x] Fresh/no-op migrations work; architecture replaces the uploads SQL sketch with the implemented schema link.
 - **Tests:** Real Postgres migration, constraint and expiry/index cases; no database mocks.
 - **Risks/notes:** No row may lose the last cleanup identity before its storage objects and outstanding PUT have been handled.
 
@@ -1281,6 +1281,8 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
 
 ### Planning risks and execution notes
+
+- P3.2a complete: db-owned files table with tenant/project/module-bound zone FK, opaque deterministic keys, hash/size/state/expiry constraints and durable cleanup fields/indexes. States/size bounds moved to core because db and uploads now share them. Real Postgres tests exposed SQL NULL semantics in the owner-pair CHECK; corrected via a second generated forward migration, without editing an applied migration. Fresh/no-op migration tests pass. `CI=true bun run check` passed (482 package + 100 script tests); review remains deferred to the end. Next: P3.2b.
 
 - P3.1b complete: 6 protected en/de templates plus explicitly named unscanned variants, destructive change classification, format version 1 and SDK declaration generation. Shared declaration envelope extracted to core and adopted by Forms. TypeScript 7 compile fixtures reject wrong MIME/unknown zones; uploads has 27 passing tests. `CI=true bun run check` passed (477 package + 100 script tests). Review of this and subsequent tasks is deferred to the end by the maintainer’s explicit instruction on 2026-11-15; no further prompts. Next: P3.2a.
 

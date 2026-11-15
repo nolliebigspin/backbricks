@@ -35,17 +35,11 @@ P3.1b implements [en/de templates and protected defaults](../../packages/modules
 
 ## 3. Stored records and states
 
-`files` has tenant columns and a composite live-zone parent FK, plus:
+The implemented [files table](../../packages/db/src/schema/files.ts) and [generated migrations](../../packages/db/migrations/) own the stored fields and constraints. Shared states/size limits live in [core](../../packages/core/src/storage/files.ts); the upload module reexports/derives them rather than copying enums or bounds.
 
-- TypeID, zone/config version, state, declared name/MIME/size, detected MIME, SHA-256 and safe scan result.
-- Opaque keys `stg/{org}/{prj}/{fileId}` and `fil/{org}/{prj}/{fileId}`; original names never enter keys.
-- SHA-256 upload-token hash; never the raw token. Intent expiry, creation/upload/scan timestamps and bounded record expiry.
-- Optional owner type/ID and normalized subject email, set only by a trusted capability claim; test flag and bounded metadata.
-- A durable deletion marker and retry/progress information for object cleanup (ADR-0064), rather than dropping the last reference to an object before it is erased.
+[Real Postgres schema tests](../../packages/db/src/files-schema.test.ts) prove tenant/project/module parent consistency, byte/hash/name/state/expiry constraints, complete owner pairs, deterministic opaque keys and cleanup indexes. A generated forward correction tightens the owner-pair CHECK against SQL NULL semantics; no applied migration was hand-edited.
 
-Stored states are defined once by [uploadStatusSchema](../../packages/modules/uploads/src/values.ts). The transition workflow remains P3.4 work. A committed deletion marker makes a record immediately unavailable to reads, claims and downloads. A file is usable only when ready, undeleted and unexpired. Original filenames are private user content and are never logged, audited or put in events/jobs.
-
-Indexes cover tenant/zone keyset lists, status/date filters, owner lookup, orphan/expiry cleanup, and deletion work. Constraints enforce positive size, complete owner pairs, unique storage keys, token hash shape, enums and tenant-parent consistency. Generate migrations; never hand-edit an applied migration.
+The table retains both deterministic keys from intent onward, the PUT expiry, scan/copy timestamps, and a durable deletion marker plus cleanup retry fields. Key presence does not imply that storage contains an object. Only a ready, unexpired, undeleted record may become usable; original names/tokens never enter keys, logs or job payloads. Workflow/repository implementation remains P3.2b onward.
 
 ## 4. Public protocol
 
