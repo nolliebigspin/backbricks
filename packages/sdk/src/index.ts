@@ -23,3 +23,6 @@ export function createClient(options: ClientOptions): BackbricksClient {
 export type { ClientOptions } from './transport.ts';
 export type { FormValues, FormsClient, SubmitOptions, SubmitResult } from './forms.ts';
 export { BackbricksError, type FieldError } from './errors.ts';
+
+export type { UploadDeclaration, UploadOptions, UploadResult, UploadsClient } from './uploads.ts';
+export type { UploadProgress } from './upload-put.ts';

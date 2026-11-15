@@ -79,6 +79,7 @@ jobs:
           mise run scan
       - run: bunx turbo run build --filter @backbricks/web --filter @backbricks/example-html
       - run: bunx playwright install --with-deps chromium
+      - run: bun run test:sdk-browser
       - run: bun run test:e2e
       - name: Playwright report
         if: failure()

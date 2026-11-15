@@ -1232,15 +1232,15 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Capability-bound HTTP projection, component escaping/state/role tests and browser attachment download.
 - **Risks/notes:** Historical form configs must retain readable fields without granting access to unrelated upload files.
 
-### [ ] P3.9a – Ship the private-upload SDK method (est. 5 h)
+### [x] P3.9a – Ship the private-upload SDK method (est. 5 h)
 - **Description:** Add uploads.upload intent/PUT/complete/readiness handling with progress, cancellation and bounded polling; reuse existing errors/proof/auth transport.
 - **Files/packages:** packages/sdk source/tests/build; real-server runtime tests
 - **Depends on:** P3.4c, P3.5a
 - **Reuses:** Existing createClient, proof solver, BackbricksError and generated API types
 - **Acceptance criteria:**
-  - [ ] Browser File/Blob, Node >=20 and Bun work without AGPL/runtime imports or new root dependencies.
-  - [ ] Abort propagates through proof, PUT and polling; failures map structured errors; retry cannot create duplicate intents or unsafe replacement PUTs.
-  - [ ] Progress reports meaningful upload/readiness state and terminal rejection/quarantine fails clearly.
+  - [x] Browser File/Blob, Node >=20 and Bun work without AGPL/runtime imports or new root dependencies.
+  - [x] Abort propagates through proof, PUT and polling; failures map structured errors; retry cannot create duplicate intents or unsafe replacement PUTs.
+  - [x] Progress reports meaningful upload/readiness state and terminal rejection/quarantine fails clearly.
 - **Tests:** Bun/Node20/Node24 real server/Garage cases plus actual browser progress/CORS/abort tests.
 - **Risks/notes:** Avoid setting forbidden browser headers; file-type stays on the server and does not raise the SDK runtime floor.
 
@@ -1293,6 +1293,9 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
 
 ### Planning risks and execution notes
+
+- P3.9a complete: dependency-free `uploads.upload` supports File/Blob, one intent/PUT, fresh completion proofs, native browser byte progress, cancellation and a bounded whole-operation deadline. It returns only ready references; scan rejection/quarantine, soft drops, malformed responses and sanitized provider failures are explicit errors. Shared proof/response handling also serves Forms. Six SDK behavior cases plus a real Bun/Node upload-and-claim test pass; Node 20.20.2 and Node 24.22.1 probes pass. `test:sdk-browser` is a separate real-service Chromium acceptance command, wired into CI after browser installation; it proves CORS/native progress and cancellation of a throttled PUT without completion or replay. Server TypeScript consumers need no DOM globals, and no dependency was added. `CI=true bun run check` passed (581 package + 102 script tests; `/tmp/backbricks-p3-9a-check.log`); final browser and Node20 probes also pass (`/tmp/backbricks-p3-9a-browser-verified.log`, `/tmp/backbricks-p3-9a-node20-verified.log`). Review remains deferred. Next: P3.9b.
+
 
 - P3.8c complete: entry drawers use only owner-bound attachment metadata and the shared audited download/preview controls. Historical removed file fields resolve their stored IDs from Additional data without rendering those IDs or issuing unrelated lookups; missing/expired/disabled attachments are explained. A deterministic failing historical-field test now passes. Operational metadata controls file type choices and a paged zone selector preserves historical keys. Scoped remounts clear entry selection and transient access; file details refresh pending inspection. Four new component cases pass alongside Forms-only regressions and en/de parity. `CI=true bun run check` passed (574 package + 102 script tests; `/tmp/backbricks-p3-8c-check.log`). Review remains deferred. Next: P3.9a.
 

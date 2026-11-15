@@ -82,3 +82,11 @@ export const networkError = (cause: unknown) =>
     message: 'Backbricks could not be reached.',
     cause,
   });
+
+/** A successful response that violates the committed public API contract. */
+export const unexpectedResponse = () =>
+  new BackbricksError({
+    code: 'unexpected_response',
+    status: 200,
+    message: 'Backbricks sent a response this SDK version does not understand.',
+  });

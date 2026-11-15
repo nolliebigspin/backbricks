@@ -1,4 +1,4 @@
-import { errorFromResponse, networkError } from './errors.ts';
+import { errorFromResponse, networkError, unexpectedResponse } from './errors.ts';
 
 type Credentials =
   | { publishableKey: string; secretKey?: never }
@@ -14,6 +14,8 @@ export type ClientOptions = Credentials & {
 export type Transport = {
   /** Publishable keys run in browsers and must solve proof-of-work; secret keys skip it. */
   readonly publishable: boolean;
+  readonly send: (url: string, init: RequestInit) => Promise<Response>;
+  readonly nativeProgress: boolean;
   request(
     path: string,
     init: { method: 'GET' | 'POST'; body?: unknown; headers?: Record<string, string> },
@@ -46,6 +48,8 @@ export function createTransport(options: ClientOptions): Transport {
     publishableKey ? `${base}${path}?key=${encodeURIComponent(publishableKey)}` : `${base}${path}`;
   return {
     publishable: Boolean(publishableKey),
+    send,
+    nativeProgress: options.fetch === undefined,
     async request(path, init, signal) {
       let response: Response;
       try {
@@ -65,7 +69,12 @@ export function createTransport(options: ClientOptions): Transport {
         throw networkError(cause);
       }
       if (!response.ok) throw await errorFromResponse(response);
-      return response.json();
+      try {
+        return await response.json();
+      } catch {
+        if (signal?.aborted) throw signal.reason;
+        throw unexpectedResponse();
+      }
     },
   };
 }
