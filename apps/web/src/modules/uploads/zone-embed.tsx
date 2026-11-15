@@ -6,6 +6,7 @@ import { useIntegration } from '../../dashboard/integration.ts';
 import { useProject } from '../../dashboard/project-shell.tsx';
 import { Code } from '../code.tsx';
 import type { UploadZone } from './api.ts';
+import { uploadApplicationSnippets, uploadExampleCopy } from './application-snippets.ts';
 import { uploadSnippets } from './snippets.ts';
 export function ZoneEmbed({ zone }: { zone: UploadZone }) {
   const { t } = useTranslation();
@@ -18,6 +19,15 @@ export function ZoneEmbed({ zone }: { zone: UploadZone }) {
     publishableKey: integration.data.publicKey,
     zoneKey: zone.key,
   });
+  const application = uploadApplicationSnippets(
+    {
+      baseUrl: integration.data.baseUrl,
+      publishableKey: integration.data.publicKey,
+      zoneKey: zone.key,
+      formKey: 'application',
+    },
+    uploadExampleCopy(t),
+  );
   return (
     <div className="space-y-5">
       <p>{t('uploads.embedHint', { key: zone.key })}</p>
@@ -35,6 +45,17 @@ export function ZoneEmbed({ zone }: { zone: UploadZone }) {
             id: 'browser',
             label: t('forms.embed.sdk'),
             content: <Code value={snippets.browser} />,
+          },
+          {
+            id: 'attachment',
+            label: t('uploads.attachmentExample'),
+            content: (
+              <div className="space-y-4">
+                <p>{t('uploads.attachmentSetup')}</p>
+                <Code value={application.form} />
+                <Code value={application.script} />
+              </div>
+            ),
           },
           {
             id: 'server',

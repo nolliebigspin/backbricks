@@ -1,4 +1,4 @@
-import { SECRET_KEY_ENV } from '../forms/snippets.ts';
+import { SECRET_KEY_ENV } from '../snippet-values.ts';
 /** JSON string literals keep addresses and zone keys from changing generated script syntax. */
 export function uploadSnippets(input: {
   baseUrl: string;

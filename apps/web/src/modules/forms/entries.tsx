@@ -98,7 +98,7 @@ function ScopedEntriesTab({
     getNextPageParam: (last) => last.nextCursor ?? undefined,
   });
   const rows = entries.data?.pages.flatMap((page) => page.data) ?? [];
-  const fields = listColumns(form.config);
+  const fields = listColumns(form.config, new Set(rows.flatMap((row) => Object.keys(row.data))));
   const refresh = async () => {
     setSelection(new Set());
     await client.invalidateQueries({ queryKey: [...scope.prefix, form.key] });
@@ -123,11 +123,18 @@ function ScopedEntriesTab({
       id: `data.${field.key}`,
       header: field.label,
       className: index === 0 ? undefined : 'hidden sm:table-cell',
-      renderCell: (row: Entry) => (
-        <span className={row.read ? undefined : 'font-semibold'}>
-          <FieldValue value={row.data[field.key]} options={field.options} labels={labels} />
-        </span>
-      ),
+      renderCell: (row: Entry) => {
+        const value = row.data[field.key];
+        return (
+          <span className={row.read ? undefined : 'font-semibold'}>
+            {field.type === 'file' ? (
+              t('uploads.attachmentCount', { count: Array.isArray(value) ? value.length : 0 })
+            ) : (
+              <FieldValue value={value} options={field.options} labels={labels} />
+            )}
+          </span>
+        );
+      },
     })),
     {
       id: 'received',

@@ -3,6 +3,14 @@
  * `examples.test.ts` checks that `examples/html` contains exactly these texts, so this module is
  * the only place they are written. Pure functions over the form's config; no React.
  */
+import {
+  escapeHtml,
+  quote,
+  PUBLISHABLE_KEY_PLACEHOLDER,
+  SECRET_KEY_ENV,
+  sdkFormId,
+} from '../snippet-values.ts';
+export { PUBLISHABLE_KEY_PLACEHOLDER, SECRET_KEY_ENV, sdkFormId } from '../snippet-values.ts';
 import type { ConfigField } from './entries-view.ts';
 
 export type SnippetInput = {
@@ -17,23 +25,9 @@ export type SnippetInput = {
 /** `sdkForm` is the markup the `sdk` script expects; together they are the SDK variant. */
 export type FormSnippets = { html: string; sdkForm: string; sdk: string; server: string };
 
-export const PUBLISHABLE_KEY_PLACEHOLDER = 'YOUR_PUBLISHABLE_KEY';
-export const SECRET_KEY_ENV = 'BACKBRICKS_SECRET_KEY';
-
-/** Generated code is pasted into websites, so labels and texts from the config are escaped. */
-const escapeHtml = (value: string) =>
-  value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
-/** A single-quoted JavaScript string literal. */
-const quote = (value: string) => `'${value.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`;
 const required = (field: ConfigField) => (field.required ? ' required' : '');
 const publishableKey = (input: SnippetInput) => input.publishableKey ?? PUBLISHABLE_KEY_PLACEHOLDER;
 /** Element ID of the SDK variant's form; form keys are lowercase letters, digits and dashes. */
-export const sdkFormId = (formKey: string) => `backbricks-${formKey}`;
 
 const INPUT_TYPES: Record<string, string> = {
   text: 'text',

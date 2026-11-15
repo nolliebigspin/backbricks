@@ -1,10 +1,11 @@
 import { randomUUID } from 'node:crypto';
 
-import { expect, type Page } from '@playwright/test';
+import { expect, type Browser, type Page } from '@playwright/test';
 
 import de from '../apps/web/src/i18n/de.json' with { type: 'json' };
 import en from '../apps/web/src/i18n/en.json' with { type: 'json' };
 import { receivedMail } from '../scripts/test/mailpit.ts';
+import { testHeaders } from './fixtures.ts';
 
 export type TestLanguage = 'en' | 'de';
 export const messages = (language: TestLanguage) => (language === 'de' ? de : en);
@@ -61,4 +62,35 @@ export async function createProject(page: Page, name: string, language: TestLang
   await page.getByRole('button', { name: copy.projects.create, exact: true }).click();
   await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
   return new URL(page.url()).pathname.split('/')[2]!;
+}
+
+/** Shared real invitation signup/acceptance, with its own browser identity and organization. */
+export async function acceptInvitation(
+  browser: Browser,
+  link: string,
+  email: string,
+  organizationId: string,
+  language: TestLanguage = 'en',
+) {
+  const copy = messages(language);
+  const context = await browser.newContext({
+    locale: language === 'de' ? 'de-DE' : 'en-US',
+    extraHTTPHeaders: testHeaders(),
+  });
+  const page = await context.newPage();
+  try {
+    await page.goto(link);
+    await page.getByLabel(copy.auth.name).fill('Invited teammate');
+    await page.getByLabel(copy.auth.email).fill(email);
+    await page.getByLabel(copy.auth.password, { exact: true }).fill(accountPassword);
+    await page.getByRole('button', { name: copy.auth.invitation.submit, exact: true }).click();
+    await expect(page.getByRole('button', { name: copy.common.signOut })).toBeVisible();
+    await page
+      .getByLabel(copy.dashboard.organization, { exact: true })
+      .selectOption(organizationId);
+    return { context, page };
+  } catch (error) {
+    await context.close();
+    throw error;
+  }
 }

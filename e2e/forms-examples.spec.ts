@@ -1,17 +1,11 @@
 import { readFile } from 'node:fs/promises';
-import { createServer, type Server } from 'node:http';
 
 import type { APIRequestContext, Page } from '@playwright/test';
 import { z } from 'zod';
 
 import { receivedMail } from '../scripts/test/mailpit.ts';
-import {
-  createAccount,
-  createOrganization,
-  createProject,
-  messages,
-  type TestLanguage,
-} from './accounts.ts';
+import { messages, type TestLanguage } from './accounts.ts';
+import { setUpExample } from './example-site.ts';
 import { expect, test, testHeaders } from './fixtures.ts';
 
 /**
@@ -19,43 +13,10 @@ import { expect, test, testHeaders } from './fixtures.ts';
  * unchanged except for the two placeholders a website owner replaces, against the real server.
  */
 const exampleDirectory = new URL('../examples/html/', import.meta.url);
-const EXAMPLE_BASE_URL = 'http://localhost:5173/v1';
-const PLACEHOLDER = 'YOUR_PUBLISHABLE_KEY';
-
-type Example = { url: string; close: () => Promise<void> };
-
-async function serveExample(publishableKey: string, apiBase: string): Promise<Example> {
-  const server: Server = createServer((request, response) => {
-    void (async () => {
-      const path = new URL(request.url ?? '/', 'http://site').pathname;
-      try {
-        const name = path === '/' ? 'index.html' : path.slice(1);
-        if (!/^(dist\/)?[a-z-]+\.(html|js)$/.test(name)) throw new Error('not found');
-        const text = (await readFile(new URL(name, exampleDirectory), 'utf8'))
-          .replaceAll(PLACEHOLDER, publishableKey)
-          .replaceAll(EXAMPLE_BASE_URL, apiBase);
-        response.setHeader('Content-Type', name.endsWith('.js') ? 'text/javascript' : 'text/html');
-        response.end(text);
-      } catch {
-        response.statusCode = 404;
-        response.end();
-      }
-    })();
-  });
-  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
-  const address = server.address();
-  if (!address || typeof address === 'string') throw new Error('Expected a local address');
-  return {
-    url: `http://127.0.0.1:${address.port}`,
-    close: () => new Promise((resolve, reject) => server.close((e) => (e ? reject(e) : resolve()))),
-  };
-}
-
 const exampleFields = async () =>
   z
     .object({ fields: z.array(z.unknown()) })
     .parse(JSON.parse(await readFile(new URL('form.json', exampleDirectory), 'utf8')));
-const tokenSchema = z.object({ token: z.string() });
 const idSchema = z.object({ id: z.string() });
 const summarySchema = z.object({ total: z.number() });
 const optionsSchema = z.object({
@@ -64,30 +25,8 @@ const optionsSchema = z.object({
 
 /** Owner, organization, project, publishable key and the example site as an allowed origin. */
 async function setUp(page: Page, baseURL: string, language: TestLanguage) {
-  const email = await createAccount(page, language);
-  const organizationId = await createOrganization(
-    page,
-    'Example organization',
-    undefined,
-    language,
-  );
-  const projectId = await createProject(page, 'Example website', language);
-  const headers = {
-    origin: baseURL,
-    'x-backbricks-csrf': '1',
-    'x-backbricks-organization-id': organizationId,
-  };
-  const project = `/v1/projects/${projectId}`;
-  const key = await page.request.post(`${project}/keys`, {
-    headers,
-    data: { kind: 'publishable', name: 'Example website', expiresAt: null },
-  });
-  expect(key.status()).toBe(201);
-  const { token } = tokenSchema.parse(await key.json());
-  const site = await serveExample(token, `${baseURL}/v1`);
-  expect(
-    (await page.request.patch(project, { headers, data: { allowedOrigins: [site.url] } })).status(),
-  ).toBe(200);
+  const setup = await setUpExample(page, baseURL, language);
+  const { headers, project } = setup;
   const createForm = async (formKey: string, settings: Record<string, unknown>) => {
     const response = await page.request.post(`${project}/forms`, {
       headers,
@@ -100,7 +39,7 @@ async function setUp(page: Page, baseURL: string, language: TestLanguage) {
     expect(response.status(), await response.text()).toBe(201);
     return idSchema.parse(await response.json()).id;
   };
-  return { email, projectId, project, headers, site, createForm, request: page.request };
+  return { ...setup, createForm };
 }
 
 async function entryCount(

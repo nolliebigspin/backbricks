@@ -70,7 +70,11 @@ const detail = {
 };
 
 type Call = { method: string; path: string; body: unknown; signal: AbortSignal };
-function mount(role: Tenant['role'], respond?: (call: Call) => Promise<Response> | undefined) {
+function mount(
+  role: Tenant['role'],
+  respond?: (call: Call) => Promise<Response> | undefined,
+  activeForm: FormInstance = form,
+) {
   const calls: Call[] = [];
   globalThis.fetch = Object.assign(
     async (input: string | URL | Request, init?: RequestInit) => {
@@ -97,7 +101,7 @@ function mount(role: Tenant['role'], respond?: (call: Call) => Promise<Response>
     <QueryClientProvider client={queries}>
       <TenantContext value={{ organizationId: 'org_test', role }}>
         <ProjectContext value={project}>
-          <EntriesTab form={form} />
+          <EntriesTab form={activeForm} />
         </ProjectContext>
       </TenantContext>
     </QueryClientProvider>,
@@ -206,4 +210,29 @@ test('historical file fields use owner metadata instead of rendering stored IDs'
   expect(await drawer.findByText('Historical CV.pdf')).toBeDefined();
   expect(drawer.queryByText('file_missing')).toBeNull();
   expect(drawer.queryByText('file_1')).toBeNull();
+});
+
+test('file list fields show attachment counts rather than opaque stored IDs', async () => {
+  await initI18n('en');
+  mount(
+    'member',
+    (call) =>
+      call.path.endsWith('/submissions')
+        ? Promise.resolve(
+            Response.json({
+              data: [{ ...entry, data: { cv: ['file_one', 'file_two'] } }],
+              nextCursor: null,
+            }),
+          )
+        : undefined,
+    {
+      ...form,
+      config: {
+        fields: [{ key: 'cv', type: 'file', label: 'CV', zone: 'cv' }],
+        listFields: ['cv'],
+      },
+    },
+  );
+  expect(await screen.findByText('2 attachments')).toBeDefined();
+  expect(screen.queryByText('file_one')).toBeNull();
 });

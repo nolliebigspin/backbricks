@@ -1,0 +1,5 @@
+{
+  "presets": ["pdf"],
+  "maxSizeMb": 5,
+  "scanRequired": true
+}

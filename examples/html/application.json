@@ -1,0 +1,19 @@
+{
+  "fields": [
+    {
+      "key": "email",
+      "type": "email",
+      "label": "Email",
+      "required": true,
+      "identifiesSubject": true
+    },
+    {
+      "key": "cv",
+      "type": "file",
+      "label": "CV (PDF)",
+      "zone": "cv",
+      "maxFiles": 1,
+      "required": true
+    }
+  ]
+}
