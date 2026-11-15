@@ -12,6 +12,7 @@ import type { OptionalServiceName } from '../services/container.ts';
 import type { ModuleRepositories, RepositoryPage } from '../tenancy/repositories.ts';
 import type { TenantHandle } from '../tenancy/tenant-context.ts';
 import type { CapabilityFactories, CapabilityName, capabilityView } from './capabilities.ts';
+import type { ModuleErasureResult } from './erasure.ts';
 import type { InfraRequirement } from './infrastructure.ts';
 import type { ModuleJobRegistrar } from './jobs.ts';
 import type { ModuleAdminRouter, ModulePublicRouter } from './routes.ts';
@@ -30,6 +31,8 @@ export type ConfiguredInstance<T> = Omit<ModuleInstance, 'config'> & { config: T
 export type ModuleInstanceReads<T> = Readonly<{
   get(key: string): Promise<ConfiguredInstance<T>>;
   revision(key: string, version: number): Promise<ConfiguredInstance<T>>;
+  /** Own-module historical reads for maintenance, including archived instances. */
+  revisionById(id: string, version: number): Promise<ConfiguredInstance<T>>;
   revisions(
     key: string,
     page: RepositoryPage,
@@ -112,6 +115,8 @@ export type ModuleDefinition<
   resourceNamespaces?: readonly string[];
   infrastructure: I;
   configSchema: z.ZodType<T>;
+  /** Pure deployment-availability validation for new/changed configurations; stored reads use configSchema. */
+  validateConfigWrite?(config: T): void;
   defaultConfig(): T;
   templates?: Readonly<Record<string, { name: string; config: T }>>;
   migrateConfig?(fromVersion: number, config: unknown): T;
@@ -247,6 +252,6 @@ export type ModuleDefinition<
         MT
       >,
       input: { limit: number },
-    ): Promise<number>;
+    ): Promise<ModuleErasureResult>;
   };
 };

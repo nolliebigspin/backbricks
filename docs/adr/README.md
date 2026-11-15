@@ -76,3 +76,6 @@ Short documents that record significant decisions: deviations from or refinement
 | [0064](0064-upload-ownership-and-durable-erasure.md) | Upload ownership and durable object erasure | accepted; Q17–Q20 approved 2026-11-15 |
 | [0065](0065-subject-file-zip-exports.md) | Authorized streaming ZIP exports for subject files | accepted; Q17–Q20 approved 2026-11-15 |
 | [0066](0066-read-only-public-resource-lookups.md) | Read-only public resource lookups | accepted during execution; end review deferred |
+| [0067](0067-configuration-write-availability.md) | Configuration availability applies to writes | accepted during execution; end review deferred |
+| [0068](0068-attachment-owner-lifetimes.md) | Synchronize attachment owner lifetimes | accepted during execution; end review deferred |
+| [0069](0069-erasure-requires-enabled-modules.md) | Erasure requires every persisted module | accepted during execution; end review deferred |

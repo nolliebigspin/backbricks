@@ -41,6 +41,26 @@ export const PROJECT_ERASURE_JOB_DEFINITION = Object.freeze({
 export const erasedProjectSlug = (projectId: string) =>
   `erased-${projectId.replace(/^prj_/, '').toLowerCase()}`;
 
+async function requireErasureModules(tx: TenantTransaction, registry: ModuleRegistry) {
+  let before: { id: string; createdAt: Date } | undefined;
+  for (;;) {
+    // oxlint-disable-next-line no-await-in-loop -- Inspect every bounded configuration page before removing any data.
+    const page = await tx.repositories.instances.list(
+      { limit: MAX_MAINTENANCE_BATCH, before },
+      undefined,
+      { includeArchived: true },
+    );
+    if (page.some((instance) => !registry.get(instance.moduleType)))
+      throw new AppError('capability_unavailable', {
+        detail: 'Enable all modules used by this project before erasing it.',
+      });
+    if (page.length < MAX_MAINTENANCE_BATCH) return;
+    const last = page.at(-1);
+    if (!last) return;
+    before = { id: last.id, createdAt: last.createdAt };
+  }
+}
+
 /** Owner-only request; the job does the work in bounded, resumable rounds. */
 export function createProjectErasureService(deps: {
   audit: AuditService;
@@ -97,6 +117,8 @@ export function createProjectErasureHandler(deps: {
       if (!tx.context.archivedProject || !projectId) throw new AppError('not_found');
       await tx.repositories.projects.get(projectId, { includeArchived: true, lock: true });
       if (await tx.repositories.projects.erasedAt(projectId)) return;
+      await requireErasureModules(tx, deps.registry);
+      let pendingUntil: Date | undefined;
       let records = 0;
       let full = false;
       for (const module of deps.registry.modules) {
@@ -105,17 +127,29 @@ export function createProjectErasureHandler(deps: {
           deps.runtime.forTenant(tx).execution(module.type),
           { limit: MAX_MAINTENANCE_BATCH },
         );
-        records += erased;
-        full ||= erased === MAX_MAINTENANCE_BATCH;
+        const result = typeof erased === 'number' ? { count: erased } : erased;
+        records += result.count;
+        full ||= result.count === MAX_MAINTENANCE_BATCH;
+        if (result.pendingUntil && (!pendingUntil || result.pendingUntil < pendingUntil))
+          pendingUntil = result.pendingUntil;
       }
       const round = data.round ?? 1;
-      if (full) {
+      if (full || pendingUntil) {
         if (!deps.queue) throw new AppError('service_unavailable');
         await deps.queue.enqueue(
           tx,
           PLATFORM_JOBS.projectErasure,
           { round: round + 1 },
-          { singletonKey: `erase:${round + 1}` },
+          {
+            singletonKey: `erase:${round + 1}`,
+            ...(pendingUntil
+              ? {
+                  notBefore: new Date(
+                    Math.max(deps.clock.now().getTime() + 1000, pendingUntil.getTime()),
+                  ),
+                }
+              : {}),
+          },
         );
         return;
       }

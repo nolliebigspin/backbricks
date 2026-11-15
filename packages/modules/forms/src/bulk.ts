@@ -7,8 +7,9 @@ import {
 } from '@backbricks/core';
 import { z } from 'zod';
 
+import { deleteEntryFiles, syncEntryFileExpiry } from './attachments.ts';
 import { FORMS_AUDIT_ACTIONS, FORMS_JOBS } from './constants.ts';
-import { auditEntry, deleteEntryFiles, entryChanges, mutationPolicy } from './mutations.ts';
+import { auditEntry, entryChanges, mutationPolicy } from './mutations.ts';
 import { formKeyParams } from './public.ts';
 import { formsRepository, type FormsRuntime } from './runtime.ts';
 
@@ -55,16 +56,19 @@ export function formsBulkRoutes(router: ModuleAdminRouter<FormsRuntime>) {
           : action === 'open' || action === 'done'
             ? { status: action }
             : { spamVerdict: action === 'spam' ? ('spam' as const) : ('clean' as const) };
+      const owners = [];
       for (const id of body.ids) {
         // oxlint-disable-next-line no-await-in-loop -- Rows remain locked in the caller's single transaction.
         const row = await repository.get(instance.id, id);
         // oxlint-disable-next-line no-await-in-loop -- Expiry/read timestamps depend on each locked row.
-        await repository.patch(
+        const saved = await repository.patch(
           instance.id,
           id,
           entryChanges(runtime, row, patch, instance.config.retentionDays),
         );
+        owners.push(saved);
       }
+      if ('spamVerdict' in patch) await syncEntryFileExpiry(runtime, owners);
       await auditEntry(
         runtime,
         FORMS_AUDIT_ACTIONS.bulkUpdated,
@@ -99,9 +103,12 @@ export function formsBulkRoutes(router: ModuleAdminRouter<FormsRuntime>) {
       await repository.bulkPatch(instance.id, body.ids, {
         updatedAt: runtime.services.clock.now(),
       });
-      for (const id of body.ids)
+      for (const id of body.ids) {
+        // oxlint-disable-next-line no-await-in-loop -- Entries remain locked through attachment cleanup.
+        const row = await repository.get(instance.id, id);
         // oxlint-disable-next-line no-await-in-loop -- File deletion borrows the same transaction as every selected entry.
-        await deleteEntryFiles(runtime, id);
+        await deleteEntryFiles(runtime, row);
+      }
       const count = await repository.bulkDelete(instance.id, body.ids);
       await auditEntry(
         runtime,
@@ -162,9 +169,9 @@ export function formsJobs(registrar: ModuleJobRegistrar<FormsRuntime>) {
     async (runtime, payload) => {
       const repository = formsRepository(runtime);
       const ids = await repository.deleteBatch(payload.instanceId, MAX_MAINTENANCE_BATCH);
-      for (const id of ids)
+      for (const row of ids)
         // oxlint-disable-next-line no-await-in-loop -- Optional attachment cleanup shares this batch transaction.
-        await deleteEntryFiles(runtime, id);
+        await deleteEntryFiles(runtime, row);
       const deletedCount = payload.deletedCount + ids.length;
       if ((await repository.counts(payload.instanceId)).total > 0) {
         const queue = runtime.services.optional('queue');

@@ -520,6 +520,8 @@ export {
   fileAttachmentSchema,
   fileOwnerSchema,
   fileClaimSchema,
+  fileOwnerExpirySchema,
+  type FileOwnerExpiry,
   type FileScanResult,
   type FileAttachment,
   type FileOwner,

@@ -1,0 +1,50 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "dac5caa2-1b54-4105-960b-fd034b60f683",
+  "prevIds": [
+    "0268b43f-e57f-448f-a015-e5e758fd307b"
+  ],
+  "footprints": [
+    {
+      "statementType": "recreate_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "files"
+      ],
+      "writes": [
+        "s|fk|public.files.files_n1PyKkTclozn_fkey",
+        "n|fk|public.files.files_n1PyKkTclozn_fkey",
+        "e|fk|public.files.files_n1PyKkTclozn_fkey",
+        "n|con|public.files.files_n1PyKkTclozn_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.files",
+        "n|sch|public",
+        "n|tbl|public.module_instances",
+        "n|sch|public",
+        "n|col|public.files.organization_id",
+        "n|col|public.files.project_id",
+        "n|col|public.files.instance_id",
+        "n|col|public.files.module_type",
+        "n|col|public.module_instances.organization_id",
+        "n|col|public.module_instances.project_id",
+        "n|col|public.module_instances.id",
+        "n|col|public.module_instances.module_type",
+        "e|uniqueness|public.module_instances.id.module_type.organization_id.project_id"
+      ],
+      "sqlHash": "5dfdb97128d942db"
+    }
+  ],
+  "deltas": [
+    {
+      "op": "alter",
+      "key": "fks\u0000[\"public\",\"files\",\"files_n1PyKkTclozn_fkey\"]",
+      "set": {
+        "onDelete": "RESTRICT"
+      }
+    }
+  ]
+}

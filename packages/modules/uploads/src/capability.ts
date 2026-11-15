@@ -3,6 +3,7 @@ import {
   principalActor,
   fileClaimSchema,
   fileOwnerSchema,
+  fileOwnerExpirySchema,
   parseFileReference,
   earliestExpiry,
   expiresAfterDays,
@@ -114,6 +115,26 @@ export function filesCapability(runtime: UploadsRuntime): FilesCapability {
       );
       if (rows.length > MAX_BULK_ITEMS) throw new AppError('internal_error');
       return rows.map(attachmentMetadata);
+    },
+    async syncOwnerExpiry(_tx, input) {
+      const request = fileOwnerExpirySchema.parse(input);
+      const now = runtime.services.clock.now();
+      await repository.lockProject();
+      for (const owner of request.owners) {
+        // oxlint-disable-next-line no-await-in-loop -- Bounded owner batches share the caller transaction.
+        const rows = await repository.byOwner({ type: request.type, id: owner.id }, now, {
+          includeInactive: true,
+        });
+        if (rows.length > MAX_BULK_ITEMS) throw new AppError('internal_error');
+        for (const file of rows) {
+          // oxlint-disable-next-line no-await-in-loop -- Preserve earlier zone/file bounds while updating the owner bound.
+          await repository.patch(file.id, {
+            ownerExpiresAt: owner.expiresAt,
+            expiresAt: earliestExpiry(file.expiresAt, owner.expiresAt),
+            updatedAt: now,
+          });
+        }
+      }
     },
     async deleteByOwner(_tx, owner) {
       const now = runtime.services.clock.now();

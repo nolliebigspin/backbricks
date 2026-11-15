@@ -60,6 +60,10 @@ type Filters = Readonly<{
 }>;
 const MAX_BATCH = 1000;
 
+function answers(data: Row['data']): Readonly<Record<string, JsonValue>> {
+  // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- jsonb written from validated module answers.
+  return data as Record<string, JsonValue>;
+}
 // Stored values were validated by the module before insert; rows map back without re-validation.
 function record(row: Row): FormSubmissionRow {
   return {
@@ -68,8 +72,7 @@ function record(row: Row): FormSubmissionRow {
     projectId: row.projectId,
     instanceId: row.instanceId,
     configVersion: row.configVersion,
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- jsonb written from validated JSON.
-    data: row.data as Record<string, JsonValue>,
+    data: answers(row.data),
     status: row.status,
     readAt: row.readAt,
     spamVerdict: row.spamVerdict,
@@ -117,8 +120,13 @@ export function createFormsRepository(tx: DbTransaction, scope: RepositoryScope)
     const rows = await tx
       .delete(t)
       .where(and(scope.where(t), inArray(t.id, victims)))
-      .returning({ id: t.id });
-    return rows.map((row) => row.id);
+      .returning({
+        id: t.id,
+        instanceId: t.instanceId,
+        configVersion: t.configVersion,
+        data: t.data,
+      });
+    return rows.map((row) => Object.assign({}, row, { data: answers(row.data) }));
   }
   return {
     async insert(
@@ -230,7 +238,23 @@ export function createFormsRepository(tx: DbTransaction, scope: RepositoryScope)
         and(scope.where(t), isNotNull(t.expiresAt), lte(t.expiresAt, now)),
         bounded(limit, MAX_BATCH),
       );
-      return ids.length;
+      return ids;
+    },
+    async ownerExpiryPage(instanceId: string, page: RepositoryPage) {
+      const rows = await tx
+        .select({
+          id: t.id,
+          createdAt: t.createdAt,
+          expiresAt: t.expiresAt,
+          instanceId: t.instanceId,
+          configVersion: t.configVersion,
+          data: t.data,
+        })
+        .from(t)
+        .where(inForm(instanceId, beforeCursor(t, page)))
+        .orderBy(desc(t.createdAt), desc(t.id))
+        .limit(scope.limit(page));
+      return rows.map((row) => Object.assign({}, row, { data: answers(row.data) }));
     },
     async recomputeExpiry(instanceId: string, retentionDays: number | null) {
       const retention =
@@ -243,9 +267,8 @@ export function createFormsRepository(tx: DbTransaction, scope: RepositoryScope)
         .set({
           expiresAt: sql`case when ${t.spamVerdict} = 'spam' then least(${t.expiresAt}, ${retention}) else ${retention} end`,
         })
-        .where(inForm(instanceId))
-        .returning({ id: t.id });
-      return rows.length;
+        .where(inForm(instanceId));
+      return rows.rowCount ?? 0;
     },
     async findBySubject(email: string, page: RepositoryPage) {
       const rows = await tx

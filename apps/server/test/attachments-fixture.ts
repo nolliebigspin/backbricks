@@ -7,7 +7,7 @@ import { uploadCompleteResponseSchema, uploadsModule } from '@backbricks/module-
 import type { AuthFixture } from './auth-fixture.ts';
 import { prepareUploads, uploadsEnvironment } from './uploads-fixture.ts';
 
-/** Explicit test composition; production file fields stay disabled until every deletion path is covered. */
+/** Explicit composition for testing the transaction-bound attachment seam. */
 export const attachmentsCatalog = defineModuleCatalog([
   uploadsModule,
   createFormsModule({ files: true }),

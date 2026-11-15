@@ -242,4 +242,10 @@ Details: `docs/progress/phase-0.md` → "Deviations".
 
 - **D53 – Plain HTML transport:** [ADR-0046's P2.4b addendum](docs/adr/0046-public-write-guard-and-cors.md#p24b-addendum-2026-11-09-d53) makes urlencoded posts an explicit per-route opt-in, with shared flat-field/proof decoding and trusted transport context. Configured redirects are checked against current project origins before processing and under the transaction lock; absent/disallowed success targets prevent storage. Errors contain only structural codes/paths, through a validated error redirect or escaped HTML/CSP fallback, including early body/auth failures. `altcha` is reserved for proof; native forms rely on proof replay protection/rate limits rather than an idempotency header.
 
+### Decided during P3 execution, review deferred
+
 - **D61 / P3.3a:** [ADR-0066](docs/adr/0066-read-only-public-resource-lookups.md) enforces pre-proof module resource resolution with a read-only database transaction and a repository/clock-only callback. Chosen during execution; maintainer requested review at M3 completion.
+
+- **D62 / P3.5b:** [ADR-0067](docs/adr/0067-configuration-write-availability.md) separates configuration write availability from historical shape reads; [ADR-0068](docs/adr/0068-attachment-owner-lifetimes.md) synchronizes owner lifetimes through bounded capability batches and uses parent-first mutation locks. Chosen during execution; review deferred to M3 completion as requested.
+
+- **D63 / P3.5b:** [ADR-0069](docs/adr/0069-erasure-requires-enabled-modules.md) blocks project erasure when a persisted module is disabled and protects file identities with a RESTRICT foreign key. The approved ADR-0064 deferred completion seam is implemented early because enabling production file fields requires a safe project deletion path. Full multi-batch/outage acceptance remains P3.7c; end review deferred.

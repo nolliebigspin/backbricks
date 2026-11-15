@@ -273,7 +273,7 @@ describe.skipIf(!available)('forms repository (real Postgres)', () => {
       await repo.insert(entry(form, { spamVerdict: 'spam', expiresAt: at(30) })),
       await repo.insert(entry(form, { expiresAt: null })),
     ]);
-    expect(await forms(project, (repo) => repo.purgeExpired(at(5), 100))).toBe(1);
+    expect(await forms(project, (repo) => repo.purgeExpired(at(5), 100))).toHaveLength(1);
     const remaining = await forms(project, (repo) => repo.list(form, {}, { limit: 100 }));
     expect(remaining.map((row) => row.id).toSorted()).toEqual(
       [kept.id, spam.id, unlimited.id].toSorted(),
@@ -301,7 +301,9 @@ describe.skipIf(!available)('forms repository (real Postgres)', () => {
     expect(
       (await forms(a2, (repo) => repo.findBySubject(email, { limit: 100 }))).map((row) => row.id),
     ).toEqual([own.id]);
-    expect(await forms(a2, (repo) => repo.deleteBySubject(email, 100))).toEqual([own.id]);
+    expect(
+      (await forms(a2, (repo) => repo.deleteBySubject(email, 100))).map((row) => row.id),
+    ).toEqual([own.id]);
     expect(await forms(a1, (repo) => repo.findBySubject(email, { limit: 100 }))).toHaveLength(1);
     const before = await forms(a1, (repo) => repo.list(instance.a1, {}, { limit: 100 }));
     const erased = await forms(a2, (repo) => repo.eraseBatch(1000));

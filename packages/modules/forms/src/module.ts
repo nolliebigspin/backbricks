@@ -2,10 +2,10 @@ import { AppError, defineModule, type InfraRequirement, type JsonValue } from '@
 import { z } from 'zod';
 
 import { formsAdminRoutes } from './admin.ts';
-import { claimEntryFiles } from './attachments.ts';
+import { claimEntryFiles, deleteEntryFiles } from './attachments.ts';
 import { classifyFormsChange } from './changes.ts';
 import { formsCodegen } from './codegen.ts';
-import { formsModuleConfigSchema, formsPublicWritePolicy } from './config.ts';
+import { formsConfigSchema, formsModuleConfigSchema, formsPublicWritePolicy } from './config.ts';
 import {
   FORMS_BODY_LIMIT_BYTES,
   FORMS_MODULE_VERSION,
@@ -16,7 +16,8 @@ export { FORMS_EVENTS, FORMS_METRICS } from './constants.ts';
 import { formsBulkRoutes, formsJobs } from './bulk.ts';
 import { entryExpiry, searchText } from './entries.ts';
 import { formsExportRoutes } from './export.ts';
-import { deleteEntryFiles, formsMutationRoutes } from './mutations.ts';
+import { purgeExpiredEntries, recomputeEntryExpiry } from './lifecycle.ts';
+import { formsMutationRoutes } from './mutations.ts';
 import { describeEntry } from './notifications.ts';
 import {
   formKeyParams,
@@ -40,7 +41,7 @@ const PUBLIC_SCHEMA_MAX_AGE_SECONDS = 60;
 
 /**
  * The operational forms module (docs/modules/forms.md). `files` tells whether the optional
- * `files` capability (uploads) exists; M2 ships without it, so `file` fields are rejected.
+ * `files` capability exists in the selected deployment; historical configs remain readable.
  */
 export function createFormsModule(options: { files: boolean } = { files: false }) {
   return defineModule({
@@ -49,7 +50,10 @@ export function createFormsModule(options: { files: boolean } = { files: false }
     displayName: { en: 'Forms', de: 'Formulare' },
     resourceName: { singular: 'form', plural: 'forms' },
     infrastructure: formsInfrastructure,
-    configSchema: formsModuleConfigSchema(options),
+    configSchema: formsConfigSchema,
+    validateConfigWrite: (config) => {
+      formsModuleConfigSchema(options).parse(config);
+    },
     defaultConfig: defaultFormsConfig,
     templates: formsTemplates(options),
     validateConfigChange: classifyFormsChange,
@@ -202,9 +206,8 @@ export function createFormsModule(options: { files: boolean } = { files: false }
       );
     },
     retention: {
-      purgeExpired: (runtime, { now, limit }) => repositoryOf(runtime).purgeExpired(now, limit),
-      recomputeExpiry: (runtime, instance) =>
-        repositoryOf(runtime).recomputeExpiry(instance.id, instance.config.retentionDays),
+      purgeExpired: purgeExpiredEntries,
+      recomputeExpiry: recomputeEntryExpiry,
     },
     notifications: { describe: describeEntry },
     privacy: {
@@ -238,6 +241,10 @@ export function createFormsModule(options: { files: boolean } = { files: false }
         for (;;) {
           // oxlint-disable-next-line no-await-in-loop -- Bounded batches in one erasure transaction.
           const deleted = await repository.deleteBySubject(email, SUBJECT_BATCH);
+          for (const row of deleted) {
+            // oxlint-disable-next-line no-await-in-loop -- Subject deletion and attachment cleanup are atomic.
+            await deleteEntryFiles(runtime, row);
+          }
           total += deleted.length;
           if (deleted.length < SUBJECT_BATCH) return total;
         }
@@ -245,9 +252,9 @@ export function createFormsModule(options: { files: boolean } = { files: false }
       async eraseScope(runtime, { limit }) {
         const erased = await repositoryOf(runtime).eraseBatch(limit);
         // Linked uploads go through the optional files capability, as for every other deletion.
-        for (const id of erased) {
+        for (const row of erased) {
           // oxlint-disable-next-line no-await-in-loop -- File cleanup shares the erasure transaction.
-          await deleteEntryFiles(runtime, id);
+          await deleteEntryFiles(runtime, row);
         }
         return erased.length;
       },

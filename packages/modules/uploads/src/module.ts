@@ -15,6 +15,7 @@ import {
 } from './constants.ts';
 import { uploadsInfrastructure } from './infrastructure.ts';
 import { describeUpload } from './notifications.ts';
+import { eraseUploadScope } from './privacy.ts';
 import { uploadsPublicRoutes } from './public.ts';
 import { uploadsRepository } from './runtime.ts';
 import { scanUpload } from './scan.ts';
@@ -82,6 +83,6 @@ export const uploadsModule = defineModule({
   privacy: {
     exportSubject: async () => ({ files: [] }),
     deleteSubject: async () => 0,
-    eraseScope: async () => 0,
+    eraseScope: eraseUploadScope,
   },
 });

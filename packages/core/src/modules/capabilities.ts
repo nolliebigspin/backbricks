@@ -1,11 +1,17 @@
 import { AppError } from '../errors/app-error.ts';
-import type { FileAttachment, FileClaim, FileOwner } from '../storage/file-metadata.ts';
+import type {
+  FileAttachment,
+  FileClaim,
+  FileOwner,
+  FileOwnerExpiry,
+} from '../storage/file-metadata.ts';
 import type { TenantHandle } from '../tenancy/tenant-context.ts';
 
 /** Transaction-first attachment ownership; the provider validates and commits the entire claim set atomically. */
 export interface FilesCapability {
   claim(tx: TenantHandle, input: FileClaim): Promise<readonly FileAttachment[]>;
   listByOwner(tx: TenantHandle, owner: FileOwner): Promise<readonly FileAttachment[]>;
+  syncOwnerExpiry(tx: TenantHandle, input: FileOwnerExpiry): Promise<void>;
   deleteByOwner(tx: TenantHandle, owner: FileOwner): Promise<void>;
 }
 

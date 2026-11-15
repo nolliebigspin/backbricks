@@ -1114,14 +1114,14 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Real HTTP/Postgres claims, cross-tenant/scope matrix, concurrent submissions and forced audit/event rollback.
 - **Risks/notes:** Search for and replace the dormant forms file-reference regex with the shared schema; do not duplicate protocol validation.
 
-### [ ] P3.5b – Cover every forms attachment deletion path (est. 5 h)
+### [x] P3.5b – Cover every forms attachment deletion path (est. 5 h)
 - **Description:** Integrate capability cleanup into retention/spam and subject deletion, then verify single/bulk/delete-all/project paths and drawer metadata.
 - **Files/packages:** forms module/repository interface; db forms repository; cross-module tests
 - **Depends on:** P3.5a
 - **Reuses:** deleteEntryFiles, existing bulk/retention/privacy hooks and transactional capability binding
 - **Acceptance criteria:**
-  - [ ] No deletion path leaves live owned files: single, bulk, delete-all, retention/spam, subject and project erasure.
-  - [ ] Affected-ID batches remain bounded; failures preserve both the entry and cleanup intent; forms-only behavior remains unchanged.
+  - [x] No deletion path leaves live owned files: single, bulk, delete-all, retention/spam, subject and project erasure.
+  - [x] Affected-ID batches remain bounded; failures preserve both the entry and cleanup intent; forms-only behavior remains unchanged.
 - **Tests:** Real forms+uploads deletion matrix with object cleanup; capability/audit failure rollback; forms-only regression tests.
 - **Risks/notes:** M2 purgeExpired/deleteBySubject currently delete directly; production file fields must not be enabled until these are covered.
 
@@ -1281,6 +1281,8 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
 
 ### Planning risks and execution notes
+
+- P3.5b complete: every Forms deletion path now invokes durable attachment cleanup; owner retention/spam changes synchronize bounded capability batches in the same transaction. Historical configuration reads are separate from provider availability on writes (ADR-0067); disabled-provider entries with historical attachments fail owner deletion/lifetime changes atomically, while ordinary reads/status edits remain usable. ADR-0068 adds scoped historical reads by instance ID and parent-first mutation locks. Production composition enables file fields only with the selected files provider. The approved deferred project-erasure seam was implemented early to make production activation safe: cleanup/late-PUT identity survives until confirmed removal, and disabled persisted modules block finalization with a RESTRICT FK backstop (ADR-0069/generated forward migration). Real Postgres/Garage tests cover retention, single/bulk/delete-all/subject/project deletion, audit rollback, late writes, disabled-provider rollback and Forms-only behavior. `CI=true bun run check` passed (524 package + 102 script tests). Full multi-batch/outage project-erasure acceptance remains P3.7c. Review remains deferred to M3 completion. Next: P3.6a.
 
 - P3.5a complete: core owns reference/claim/owner/attachment/scan schemas and shared expiry arithmetic. Uploads provides atomic whole-set claims, bounded owner reads and durable owner deletion; parent/zone/file locks, token/current-policy/ready checks and one owner set prevent partial or duplicate ownership. Forms stores IDs and reads owner metadata only through the capability; public file-field schemas expose zone/count and are snapshotted. Generated owner-expiry migration plus SQL clamp prevent zone retention from extending the recorded owner bound. Four real claim tests prove invalid/foreign/expired/duplicate/already-owned rejection, current scan-policy tightening, one concurrent winner and form/audit/event/usage rollback without private diagnostics. `CI=true bun run check` passed (518 package + 102 script tests); the added file-field public-schema snapshot also passed a targeted run. Production file fields remain gated until P3.5b. P3.5b must preserve historical file-config reads when uploads is disabled and propagate shortened owner lifetimes in bounded capability batches; P3.7c must prevent disabled-module instances/FK cascades from discarding the last object reference. Next: P3.5b.
 

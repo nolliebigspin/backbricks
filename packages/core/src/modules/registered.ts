@@ -6,6 +6,7 @@ import type { NotificationSubject, NotificationSubjectInput } from '../notificat
 import type { OptionalServiceName } from '../services/container.ts';
 import type { Capability, CapabilityName } from './capabilities.ts';
 import type { ModuleExecution } from './contract.ts';
+import type { ModuleErasureResult } from './erasure.ts';
 import type { InfraRequirement } from './infrastructure.ts';
 import type { ModuleJobSpec } from './jobs.ts';
 import type { ModuleInputSchema, ModuleResponseDefinition } from './routes.ts';
@@ -74,6 +75,6 @@ export type RegisteredModule = Readonly<{
   privacy: {
     exportSubject(execution: ModuleExecution, email: string): Promise<JsonValue>;
     deleteSubject(execution: ModuleExecution, email: string): Promise<number>;
-    eraseScope(execution: ModuleExecution, input: { limit: number }): Promise<number>;
+    eraseScope(execution: ModuleExecution, input: { limit: number }): Promise<ModuleErasureResult>;
   };
 }>;

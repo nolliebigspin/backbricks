@@ -117,6 +117,7 @@ export function createPlatformJobHandlers(
       async runInTransaction(this: void, tx: TenantTransaction, input: unknown) {
         const data = retentionPayload.parse(input);
         if (!tx.context.projectId) throw new AppError('not_found');
+        await tx.repositories.projects.get(tx.context.projectId, { lock: true });
         let count = 0;
         let full = false;
         for (const module of deps.registry.modules) {
@@ -149,6 +150,7 @@ export function createPlatformJobHandlers(
       async runInTransaction(this: void, tx: TenantTransaction, input: unknown) {
         const data = erasurePayload.parse(input);
         if (!tx.context.projectId) throw new AppError('not_found');
+        await tx.repositories.projects.get(tx.context.projectId, { lock: true });
         let count = 0;
         for (const module of deps.registry.modules) {
           // oxlint-disable-next-line no-await-in-loop -- All module erasure effects enlist in one transaction.

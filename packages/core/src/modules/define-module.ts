@@ -18,6 +18,7 @@ import type {
   RequiredInfrastructure,
   OptionalInfrastructure,
 } from './contract.ts';
+import { moduleErasureResultSchema } from './erasure.ts';
 import { infraRequirementSchema, type InfraRequirement } from './infrastructure.ts';
 import { moduleInstanceReads } from './instances.ts';
 import type { RegisteredModule } from './registered.ts';
@@ -180,7 +181,9 @@ export function defineModule<
           .object({ limit: z.number().int().min(1).max(1000) })
           .strict()
           .parse(input);
-        return checkedCount(await privacy.eraseScope(runtime(execution), validated));
+        return moduleErasureResultSchema.parse(
+          await privacy.eraseScope(runtime(execution), validated),
+        );
       },
     },
   });

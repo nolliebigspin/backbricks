@@ -73,7 +73,7 @@ export const files = pgTable(
         moduleInstances.id,
         moduleInstances.moduleType,
       ],
-    }).onDelete('cascade'),
+    }).onDelete('restrict'),
     check('files_uploads_parent', sql`${table.moduleType} = 'uploads'`),
     check('files_positive_version', sql`${table.configVersion} > 0`),
     check(

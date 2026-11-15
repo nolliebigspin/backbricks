@@ -7,6 +7,7 @@ import {
 } from '@backbricks/core';
 import { z } from 'zod';
 
+import { deleteEntryFiles, syncEntryFileExpiry } from './attachments.ts';
 import { FORMS_AUDIT_ACTIONS } from './constants.ts';
 import { entryExpiry, markedSpamExpiry } from './entries.ts';
 import { formKeyParams, submissionAcceptedSchema } from './public.ts';
@@ -82,13 +83,6 @@ export function entryChanges(
   };
 }
 
-/** Delete optional attachments through the borrowed capability on this exact transaction. */
-export async function deleteEntryFiles(runtime: FormsRuntime, id: string) {
-  await runtime.capabilities
-    .optional('files')
-    ?.deleteByOwner(runtime.tx, { type: 'form_submission', id });
-}
-
 /** Register bounded entry metadata edits and individual erasure. */
 export function formsMutationRoutes(router: ModuleAdminRouter<FormsRuntime>) {
   router.register(
@@ -110,11 +104,12 @@ export function formsMutationRoutes(router: ModuleAdminRouter<FormsRuntime>) {
       const instance = await runtime.instances.get(input.params.key);
       const repository = formsRepository(runtime);
       const row = await repository.get(instance.id, input.params.id, { lock: true });
-      await repository.patch(
+      const saved = await repository.patch(
         instance.id,
         row.id,
         entryChanges(runtime, row, input.body, instance.config.retentionDays),
       );
+      if (input.body.spamVerdict !== undefined) await syncEntryFileExpiry(runtime, [saved]);
       await auditEntry(
         runtime,
         FORMS_AUDIT_ACTIONS.submissionUpdated,
@@ -140,7 +135,7 @@ export function formsMutationRoutes(router: ModuleAdminRouter<FormsRuntime>) {
       const instance = await runtime.instances.get(input.params.key);
       const repository = formsRepository(runtime);
       const row = await repository.get(instance.id, input.params.id, { lock: true });
-      await deleteEntryFiles(runtime, row.id);
+      await deleteEntryFiles(runtime, row);
       await repository.delete(instance.id, row.id);
       await auditEntry(
         runtime,

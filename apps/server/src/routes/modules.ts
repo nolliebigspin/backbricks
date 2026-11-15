@@ -184,7 +184,12 @@ export function moduleRoutes(
           };
           const tenant = requireTenantContext(c);
           if (!Object.values(route.responses).some((response) => response.kind === 'csv'))
-            return services.withTenant(tenant, (tx) => run(tx, input));
+            return services.withTenant(tenant, async (tx) => {
+              // Parent-first locks serialize cross-module mutations with configuration and erasure.
+              if (route.method !== 'GET' && tx.context.projectId)
+                await tx.repositories.projects.get(tx.context.projectId, { lock: true });
+              return run(tx, input);
+            });
           let release: (() => void) | undefined;
           let committed = false;
           const ready = new Promise<void>((resolve) => {

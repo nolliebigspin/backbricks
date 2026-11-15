@@ -61,7 +61,10 @@ export function createInstanceService(deps: InstanceDependencies) {
       const now = deps.clock.now();
       const instance = await tx.repositories.instances.insert({
         ...data,
-        config: initial === undefined ? module.defaultConfig() : validatedConfig(module, initial),
+        config:
+          initial === undefined
+            ? module.defaultConfig()
+            : validatedConfig(module, initial, module.moduleVersion, { write: true }),
         id: deps.ids.generate('mod'),
         moduleType: type,
         configVersion: 1,

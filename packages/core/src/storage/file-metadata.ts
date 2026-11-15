@@ -54,3 +54,14 @@ export const fileClaimSchema = z
   })
   .strict();
 export type FileClaim = z.infer<typeof fileClaimSchema>;
+/** Trusted owner lifetimes, synchronized in bounded batches in the owner's mutation transaction. */
+export const fileOwnerExpirySchema = z
+  .object({
+    type: fileOwnerSchema.shape.type,
+    owners: z
+      .array(z.object({ id: fileOwnerSchema.shape.id, expiresAt: z.date().nullable() }).strict())
+      .min(1)
+      .max(MAX_BULK_ITEMS),
+  })
+  .strict();
+export type FileOwnerExpiry = z.infer<typeof fileOwnerExpirySchema>;
