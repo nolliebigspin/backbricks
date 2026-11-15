@@ -536,3 +536,19 @@ export {
 export { earliestExpiry } from './time/retention.ts';
 
 export { dateRangeQuerySchema } from './http/filters.ts';
+
+export {
+  SUBJECT_EXPORT_LIMITS,
+  createSubjectCollection,
+  subjectMetadataBytes,
+} from './privacy/limits.ts';
+export {
+  subjectAttachmentSchema,
+  subjectAttachmentPageSchema,
+  subjectAttachmentSourceSchema,
+  type SubjectAttachment,
+  type SubjectAttachmentSource,
+} from './privacy/attachments.ts';
+
+export type { ModulePrivacyHooks } from './modules/privacy.ts';
+export type { SubjectAttachmentPage } from './privacy/attachments.ts';

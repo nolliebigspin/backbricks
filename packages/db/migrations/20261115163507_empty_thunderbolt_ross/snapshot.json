@@ -1,0 +1,45 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "d892e575-8983-46e1-b300-9074c47d4212",
+  "prevIds": [
+    "5eccdc98-8dab-4d19-9aa2-eb00937bd343"
+  ],
+  "footprints": [
+    {
+      "statementType": "alter_check",
+      "statementTarget": [
+        "table",
+        "public",
+        "files"
+      ],
+      "writes": [
+        "s|ck|public.files.files_ready_inspected"
+      ],
+      "reads": [
+        "n|tbl|public.files",
+        "n|sch|public",
+        "n|col|public.files.deleted_at",
+        "n|col|public.files.status",
+        "n|col|public.files.detected_mime",
+        "n|col|public.files.sha256",
+        "n|col|public.files.scan",
+        "e|col|public.files.status",
+        "e|col|public.files.detected_mime",
+        "e|col|public.files.sha256",
+        "e|col|public.files.scan"
+      ],
+      "sqlHash": "ef9b7672b9f2e212"
+    }
+  ],
+  "deltas": [
+    {
+      "op": "alter",
+      "key": "checks\u0000[\"public\",\"files\",\"files_ready_inspected\"]",
+      "set": {
+        "value": "\"deleted_at\" is not null or \"status\" <> 'ready' or (\"detected_mime\" is not null and \"sha256\" is not null and \"scan\" is not null)"
+      }
+    }
+  ]
+}

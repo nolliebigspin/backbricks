@@ -1,8 +1,8 @@
-import { AppError, defineModule, type InfraRequirement, type JsonValue } from '@backbricks/core';
+import { AppError, defineModule, type InfraRequirement } from '@backbricks/core';
 import { z } from 'zod';
 
 import { formsAdminRoutes } from './admin.ts';
-import { claimEntryFiles, deleteEntryFiles } from './attachments.ts';
+import { claimEntryFiles } from './attachments.ts';
 import { classifyFormsChange } from './changes.ts';
 import { formsCodegen } from './codegen.ts';
 import { formsConfigSchema, formsModuleConfigSchema, formsPublicWritePolicy } from './config.ts';
@@ -19,6 +19,7 @@ import { formsExportRoutes } from './export.ts';
 import { purgeExpiredEntries, recomputeEntryExpiry } from './lifecycle.ts';
 import { formsMutationRoutes } from './mutations.ts';
 import { describeEntry } from './notifications.ts';
+import { exportEntrySubject, deleteEntrySubject, eraseEntryScope } from './privacy.ts';
 import {
   formKeyParams,
   publicForm,
@@ -32,10 +33,6 @@ import { validateSubmission } from './validator.ts';
 
 /** Forms needs nothing besides Postgres (ARCHITECTURE §C.7). */
 export const formsInfrastructure = [] as const satisfies readonly InfraRequirement[];
-/** Subject erasure deletes in bounded batches inside the one erasure transaction. */
-const SUBJECT_BATCH = 1000;
-const SUBJECT_EXPORT_PAGE = 100;
-const SUBJECT_EXPORT_MAX = 10_000;
 /** Browsers and CDNs may cache a form's public schema briefly (D48). */
 const PUBLIC_SCHEMA_MAX_AGE_SECONDS = 60;
 
@@ -211,53 +208,9 @@ export function createFormsModule(options: { files: boolean } = { files: false }
     },
     notifications: { describe: describeEntry },
     privacy: {
-      async exportSubject(runtime, email) {
-        const repository = repositoryOf(runtime);
-        const entries: JsonValue[] = [];
-        let before: { createdAt: Date; id: string } | undefined;
-        while (entries.length < SUBJECT_EXPORT_MAX) {
-          // oxlint-disable-next-line no-await-in-loop -- Keyset pages follow the previous page.
-          const page = await repository.findBySubject(email, {
-            limit: SUBJECT_EXPORT_PAGE,
-            before,
-          });
-          for (const entry of page)
-            entries.push({
-              id: entry.id,
-              formId: entry.instanceId,
-              receivedAt: entry.createdAt.toISOString(),
-              status: entry.status,
-              data: entry.data,
-            });
-          const last = page.at(-1);
-          if (page.length < SUBJECT_EXPORT_PAGE || !last) break;
-          before = last;
-        }
-        return { entries };
-      },
-      async deleteSubject(runtime, email) {
-        const repository = repositoryOf(runtime);
-        let total = 0;
-        for (;;) {
-          // oxlint-disable-next-line no-await-in-loop -- Bounded batches in one erasure transaction.
-          const deleted = await repository.deleteBySubject(email, SUBJECT_BATCH);
-          for (const row of deleted) {
-            // oxlint-disable-next-line no-await-in-loop -- Subject deletion and attachment cleanup are atomic.
-            await deleteEntryFiles(runtime, row);
-          }
-          total += deleted.length;
-          if (deleted.length < SUBJECT_BATCH) return total;
-        }
-      },
-      async eraseScope(runtime, { limit }) {
-        const erased = await repositoryOf(runtime).eraseBatch(limit);
-        // Linked uploads go through the optional files capability, as for every other deletion.
-        for (const row of erased) {
-          // oxlint-disable-next-line no-await-in-loop -- File cleanup shares the erasure transaction.
-          await deleteEntryFiles(runtime, row);
-        }
-        return erased.length;
-      },
+      exportSubject: exportEntrySubject,
+      deleteSubject: deleteEntrySubject,
+      eraseScope: eraseEntryScope,
     },
   });
 }

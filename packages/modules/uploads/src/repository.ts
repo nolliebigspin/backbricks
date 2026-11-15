@@ -70,6 +70,8 @@ export type UploadInsert = Pick<
 export type UploadChanges = Partial<
   Pick<
     UploadRecord,
+    | 'originalName'
+    | 'metadata'
     | 'status'
     | 'detectedMime'
     | 'sha256'
@@ -127,6 +129,7 @@ export interface UploadsRepository {
     limit: number,
     maxAttempts: number,
   ): Promise<UploadRecord[]>;
+  hasPendingDeletion(): Promise<boolean>;
   forScope(limit: number): Promise<UploadRecord[]>;
   findBySubject(email: string, page: RepositoryPage): Promise<UploadRecord[]>;
   recomputeExpiry(instanceId: string, retentionDays: number | null): Promise<number>;

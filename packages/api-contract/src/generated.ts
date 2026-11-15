@@ -544,6 +544,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/projects/{projectId}/privacy/subject-export.zip': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['privacy.subjectExportZip'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/projects/{projectId}/storage-usage': {
     parameters: {
       query?: never;
@@ -3949,6 +3965,60 @@ export interface operations {
               [key: string]: unknown;
             };
           };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'privacy.subjectExportZip': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: email */
+          email: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Bounded streaming ZIP with a complete manifest and available private file contents. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/zip': string;
         };
       };
       /** @description A structured API error. */

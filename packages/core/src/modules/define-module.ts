@@ -6,9 +6,15 @@ import {
   publicWritePolicySchema,
 } from '../abuse/policy.ts';
 import { AppError } from '../errors/app-error.ts';
+import { pageQuerySchema } from '../http/pagination.ts';
 import { notificationSubjectSchema } from '../notifications/schemas.ts';
 import { emailAddressSchema } from '../platform/values.ts';
+import {
+  subjectAttachmentPageSchema,
+  subjectAttachmentSourceSchema,
+} from '../privacy/attachments.ts';
 import type { OptionalServiceName } from '../services/container.ts';
+import { fileIdSchema } from '../storage/file-reference.ts';
 import { capabilityView, type CapabilityName } from './capabilities.ts';
 import { configuration } from './configuration.ts';
 import type {
@@ -67,6 +73,12 @@ export function defineModule<
   const config = configuration(definition);
   const retention = { ...definition.retention };
   const privacy = { ...definition.privacy };
+  const attachmentHooks = privacy.attachments;
+  const pendingErasure = privacy.pendingErasure;
+  if (attachmentHooks && !services.requiredServices.includes('storage'))
+    throw new AppError('invalid_request', {
+      detail: 'Attachment exports require declared storage.',
+    });
   const notifications = definition.notifications ? { ...definition.notifications } : null;
   type Runtime = ModuleRuntime<
     T,
@@ -169,6 +181,35 @@ export function defineModule<
         }
       : null,
     privacy: {
+      pendingErasure: pendingErasure
+        ? async (execution) =>
+            z
+              .date()
+              .nullable()
+              .parse(await pendingErasure(runtime(execution)))
+        : undefined,
+      attachments: attachmentHooks
+        ? {
+            async list(execution, email, cursor) {
+              return subjectAttachmentPageSchema.parse(
+                await attachmentHooks.list(
+                  runtime(execution),
+                  emailAddressSchema.parse(email),
+                  pageQuerySchema.shape.cursor.parse(cursor),
+                ),
+              );
+            },
+            async open(execution, email, id) {
+              return subjectAttachmentSourceSchema.parse(
+                await attachmentHooks.open(
+                  runtime(execution),
+                  emailAddressSchema.parse(email),
+                  fileIdSchema.parse(id),
+                ),
+              );
+            },
+          }
+        : undefined,
       async exportSubject(execution, email) {
         return jsonValueSchema.parse(
           await privacy.exportSubject(runtime(execution), emailAddressSchema.parse(email)),

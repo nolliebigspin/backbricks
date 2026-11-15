@@ -4,6 +4,7 @@ import { AppError } from '../errors/app-error.ts';
 import { requireSessionRole } from '../identity/permissions.ts';
 import { MAX_MAINTENANCE_BATCH, type QueueJobHandler } from '../jobs/contract.ts';
 import { PLATFORM_JOBS } from '../jobs/platform-names.ts';
+import { requireEnabledProjectModules } from '../modules/availability.ts';
 import type { ModuleRegistry } from '../modules/registry.ts';
 import { principalActor, type AuditService } from '../services/activity.ts';
 import type { Queue } from '../services/providers.ts';
@@ -40,26 +41,6 @@ export const PROJECT_ERASURE_JOB_DEFINITION = Object.freeze({
 /** The tombstone slug keeps the per-organization slug reservation without the chosen name. */
 export const erasedProjectSlug = (projectId: string) =>
   `erased-${projectId.replace(/^prj_/, '').toLowerCase()}`;
-
-async function requireErasureModules(tx: TenantTransaction, registry: ModuleRegistry) {
-  let before: { id: string; createdAt: Date } | undefined;
-  for (;;) {
-    // oxlint-disable-next-line no-await-in-loop -- Inspect every bounded configuration page before removing any data.
-    const page = await tx.repositories.instances.list(
-      { limit: MAX_MAINTENANCE_BATCH, before },
-      undefined,
-      { includeArchived: true },
-    );
-    if (page.some((instance) => !registry.get(instance.moduleType)))
-      throw new AppError('capability_unavailable', {
-        detail: 'Enable all modules used by this project before erasing it.',
-      });
-    if (page.length < MAX_MAINTENANCE_BATCH) return;
-    const last = page.at(-1);
-    if (!last) return;
-    before = { id: last.id, createdAt: last.createdAt };
-  }
-}
 
 /** Owner-only request; the job does the work in bounded, resumable rounds. */
 export function createProjectErasureService(deps: {
@@ -117,7 +98,7 @@ export function createProjectErasureHandler(deps: {
       if (!tx.context.archivedProject || !projectId) throw new AppError('not_found');
       await tx.repositories.projects.get(projectId, { includeArchived: true, lock: true });
       if (await tx.repositories.projects.erasedAt(projectId)) return;
-      await requireErasureModules(tx, deps.registry);
+      await requireEnabledProjectModules(tx, deps.registry);
       let pendingUntil: Date | undefined;
       let records = 0;
       let full = false;

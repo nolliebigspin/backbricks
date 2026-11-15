@@ -148,6 +148,7 @@ describe.skipIf(!available)('files schema (real Postgres)', () => {
       scan: { status: 'not_scanned' },
     });
     await insert({ deletedAt: now, cleanupAfter: expires });
+    await insert({ status: 'ready', uploadedAt: now, deletedAt: now, cleanupAfter: expires });
     await insert({ ownerType: 'form_submission', ownerId: ids.generate('sub'), expiresAt: null });
   });
 

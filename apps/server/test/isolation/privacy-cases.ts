@@ -8,7 +8,7 @@ import type { Cases } from './suite.ts';
 /** Subject requests reach only the authorized project and never another tenant's records. */
 export function privacyIsolationCases(f: IsolationFixture): Cases {
   const body = { email: 'subject-fixture@example.invalid' };
-  const cases = (operation: 'export' | 'delete', successStatus: 200 | 202) => {
+  const cases = (operation: 'export' | 'export.zip' | 'delete', successStatus: 200 | 202) => {
     const own = `/v1/projects/${f.a1.id}/privacy/subject-${operation}`;
     return {
       kind: 'creation' as const,
@@ -26,6 +26,11 @@ export function privacyIsolationCases(f: IsolationFixture): Cases {
       ] as const,
       allowed: { path: own, body, cookie: f.admin.cookie },
       verify: async (response: Response) => {
+        if (operation === 'export.zip') {
+          expect(response.headers.get('content-type')).toContain('application/zip');
+          expect((await response.bytes()).length).toBeGreaterThan(22);
+          return;
+        }
         const json: unknown = await response.json();
         if (operation === 'export')
           expect(subjectExportResponseSchema.parse(json).modules).toHaveProperty('forms');
@@ -33,5 +38,9 @@ export function privacyIsolationCases(f: IsolationFixture): Cases {
       },
     };
   };
-  return { 'privacy.export': cases('export', 200), 'privacy.delete': cases('delete', 202) };
+  return {
+    'privacy.export': cases('export', 200),
+    'privacy.export_zip': cases('export.zip', 200),
+    'privacy.delete': cases('delete', 202),
+  };
 }

@@ -140,6 +140,7 @@ export function createServerServices(
     }),
     privacy: createSubjectPrivacyService({
       ...container.core,
+      withTenant,
       registry: modules.registry,
       runtime: moduleRuntime,
       queue: options.queue,

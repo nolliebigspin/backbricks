@@ -4,6 +4,7 @@ import { garageStorageConfig } from '../../../scripts/test/garage.ts';
 export function createStorageProxy() {
   let unavailable = false;
   let headDelayMs = 0;
+  let onHead: (() => void) | undefined;
   const backend = new URL(garageStorageConfig.endpoint);
   const server = Bun.serve({
     hostname: '127.0.0.1',
@@ -14,6 +15,7 @@ export function createStorageProxy() {
           status: 503,
           headers: { 'content-type': 'application/xml' },
         });
+      if (request.method === 'HEAD') onHead?.();
       if (request.method === 'HEAD' && headDelayMs)
         await new Promise((resolve) => setTimeout(resolve, headDelayMs));
       const target = new URL(request.url);
@@ -29,6 +31,9 @@ export function createStorageProxy() {
   });
   return {
     endpoint: server.url.origin,
+    onHead(callback: () => void) {
+      onHead = callback;
+    },
     delayHeads(ms: number) {
       headDelayMs = ms;
     },

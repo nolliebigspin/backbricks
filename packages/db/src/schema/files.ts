@@ -135,7 +135,7 @@ export const files = pgTable(
     ),
     check(
       'files_ready_inspected',
-      sql`${table.status} <> 'ready' or (${table.detectedMime} is not null and ${table.sha256} is not null and ${table.scan} is not null)`,
+      sql`${table.deletedAt} is not null or ${table.status} <> 'ready' or (${table.detectedMime} is not null and ${table.sha256} is not null and ${table.scan} is not null)`,
     ),
     index('files_list_idx').on(
       table.organizationId,

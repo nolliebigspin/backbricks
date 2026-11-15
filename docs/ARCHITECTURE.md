@@ -852,3 +852,5 @@ Milestones, scope, exit criteria and effort: `docs/MILESTONES.md`. Tasks: `PLAN.
 *Changes to decisions in §0 or §J.2 require an ADR.*
 
 The implemented upload storage session protocol is documented in [ADR-0072](adr/0072-server-finalized-upload-sessions.md) and the [module implementation](modules/uploads.md): one direct part PUT, server completion, then immutable copy/inspection. Signature expiry alone does not settle an in-flight request.
+
+Subject exports and physical-erasure settlement are implemented through [ADR-0065](adr/0065-subject-file-zip-exports.md) and [ADR-0073](adr/0073-subject-export-bounds-and-settlement.md). The [privacy service](../packages/core/src/privacy/subjects.ts), [archive generator](../packages/core/src/privacy/archive.ts) and [settlement worker](../packages/core/src/privacy/erasure.ts) own those contracts and limits.

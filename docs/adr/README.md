@@ -82,3 +82,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0070](0070-private-download-deadlines.md) | Private download deadlines | accepted during execution; end review deferred |
 | [0071](0071-archived-project-maintenance.md) | Archived project maintenance and bounded recovery | accepted during execution; end review deferred |
 | [0072](0072-server-finalized-upload-sessions.md) | Server-finalized direct upload sessions | accepted during execution; end review deferred |
+| [0073](0073-subject-export-bounds-and-settlement.md) | Complete subject exports and identity-free erasure settlement | accepted during execution; end review deferred |

@@ -12,6 +12,8 @@ export type FileInsert = Omit<
 export type FileChanges = Partial<
   Pick<
     FileRow,
+    | 'originalName'
+    | 'metadata'
     | 'status'
     | 'detectedMime'
     | 'scan'

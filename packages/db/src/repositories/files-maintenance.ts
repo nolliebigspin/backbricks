@@ -52,6 +52,14 @@ export function fileMaintenance(tx: DbTransaction, scope: RepositoryScope) {
         limit,
       );
     },
+    async hasPendingDeletion() {
+      const rows = await tx
+        .select({ id: t.id })
+        .from(t)
+        .where(filesWhere(scope, isNotNull(t.deletedAt), isNotNull(t.cleanupAfter)))
+        .limit(1);
+      return rows.length > 0;
+    },
     async forScope(limit: number) {
       return batch(undefined, limit);
     },

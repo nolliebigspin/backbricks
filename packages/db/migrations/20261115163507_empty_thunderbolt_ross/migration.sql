@@ -1,0 +1,1 @@
+ALTER TABLE "files" DROP CONSTRAINT "files_ready_inspected", ADD CONSTRAINT "files_ready_inspected" CHECK ("deleted_at" is not null or "status" <> 'ready' or ("detected_mime" is not null and "sha256" is not null and "scan" is not null));

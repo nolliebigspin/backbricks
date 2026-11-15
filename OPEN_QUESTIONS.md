@@ -255,3 +255,5 @@ Details: `docs/progress/phase-0.md` → "Deviations".
 - **D65 / P3.7a:** [ADR-0071](docs/adr/0071-archived-project-maintenance.md) separates archived maintenance from erasure authority and adds truthful bounded continuation results. A confirmed in-flight raw PUT gap adds P3.7a1 using 6 h of reserve; the 148 h envelope is unchanged. Review deferred.
 
 - **D66 / P3.7a1:** [ADR-0072](docs/adr/0072-server-finalized-upload-sessions.md) closes the confirmed in-flight PUT gap with server-finalized single-part sessions. Public intent/complete JSON and one browser PUT remain unchanged; no new infrastructure/dependency. Real Garage and browser contracts pass. Review deferred to M3 completion.
+
+- **D67 / P3.7b:** [ADR-0073](docs/adr/0073-subject-export-bounds-and-settlement.md) makes subject exports complete or explicitly bounded, requires enabled persisted modules, minimizes deletion metadata immediately, and settles physical erasure with email-free continuations. The optional attachment hooks implement approved ADR-0065. Review deferred to M3 completion.

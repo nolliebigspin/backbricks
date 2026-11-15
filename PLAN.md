@@ -1173,15 +1173,15 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Shared storage-session contract plus real HTTP/Postgres/Garage regressions; preserve existing public JSON shape.
 - **Risks/notes:** Consumes 6 h of the approved reserve, keeping the 148 h envelope. ADR-0072 records the security correction; review remains deferred.
 
-### [ ] P3.7b – Add complete subject metadata and ZIP exports (est. 6 h)
+### [x] P3.7b – Add complete subject metadata and ZIP exports (est. 6 h)
 - **Description:** Implement approved ADR-0065 optional file-export hook and bounded binary stream, preserving existing JSON export and forms-only operation.
 - **Files/packages:** core privacy/binary export contracts; server privacy routes; uploads subject hooks; ZIP helper/tests
 - **Depends on:** P3.7a1, approval of ADR-0065
 - **Reuses:** ADR-0058 commit barrier/fresh frames, privacy authorization, paging and export audits
 - **Acceptance criteria:**
-  - [ ] ZIP contains authorized manifest and ready-file bytes with generated safe paths; unavailable/quarantined files are explicitly explained.
-  - [ ] Export attempts/completions are audited; cancellation/errors/large subjects do not leak transactions or buffer full files.
-  - [ ] No silent truncation; explicit failure/continuation for any bound; forms-only exports require no storage.
+  - [x] ZIP contains authorized manifest and ready-file bytes with generated safe paths; unavailable/quarantined files are explicitly explained.
+  - [x] Export attempts/completions are audited; cancellation/errors/large subjects do not leak transactions or buffer full files.
+  - [x] No silent truncation; explicit failure/continuation for any bound; forms-only exports require no storage.
 - **Tests:** Independent ZIP-reader validation; real scoped HTTP/Garage content, streaming memory, cancellation and concurrent-delete cases.
 - **Risks/notes:** Inspect existing archive tooling before adding a dependency; any new runtime package needs verified version/license and a commit justification.
 
@@ -1293,6 +1293,8 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
 
 ### Planning risks and execution notes
+
+- P3.7b complete: module-owned attachment hooks and a declared admin-session ZIP route implement ADR-0065. Complete JSON metadata and generated-path streaming ZIPs explain unavailable/quarantined/missing/expired/deleted files; record/UTF-8/archive ceilings fail explicitly. Attempts commit before private reads, fresh scoped frames close between files, and completion commits before the end marker. Native CRC32/STORE output passes independent fflate validation and 256 MiB backpressure/cancellation tests; unexpected stream errors are sanitized. Shared enabled-module checks prevent incomplete privacy results. Deletion minimizes personal fields immediately; a generated forward CHECK permits discarded inspection evidence only on marked-deleted records. Email-free delayed settlement audits completion only after physical cleanup, with real outage/recovery, audit/enqueue rollback and neighbour preservation. Real EICAR, clock-crossing expiry, concurrent deletion, Forms-only ZIP and 10,001-record failure tests pass. ADR-0073/D67 records the decisions. fflate 0.8.3 (MIT) is test-only. `CI=true bun run check` passed (557 package + 102 script tests; `/tmp/backbricks-p3-7b-check.log`), including OpenAPI additive/drift and all isolation cases. End review remains deferred. Next: P3.7c.
 
 - P3.7a1 complete: public upload URLs now write only one part of an opaque storage session; server completion validates/finalizes it before HEAD and atomic scan enqueue. Completed/aborted sessions cannot recreate staging, including a body spanning expiry/abort. Cleanup confirms session closure and retains conservative identity through post-expiry deletion. Generated private-handle migration, explicit response projections and redaction preserve the public JSON shape. Actual Garage and Chromium contracts pass; real HTTP tests prove completion/queue rollback recovery without another PUT. The full run exposed a scanner-cancellation race; a deterministic failing test led to preserving provider errors/retries while still rejecting natural short EOF. `CI=true bun run check` passed (543 package + 102 script tests; `/tmp/backbricks-p3-7a1-check-final.log`), and Chromium storage acceptance passed 2/2 with no retries. ADR-0072 records the correction. Review remains deferred. Next: P3.7b.
 

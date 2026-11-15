@@ -2,26 +2,15 @@ import { fileIdSchema, pageResult, repositoryPage, type ModuleAdminRouter } from
 import { z } from 'zod';
 
 import {
-  fileItemSchema,
   fileDetailSchema,
   filesPageSchema,
   filesQuerySchema,
   storageUsageSchema,
 } from './admin-schemas.ts';
-import { attachmentMetadata } from './metadata.ts';
+import { fileManagementMetadata } from './metadata.ts';
 import { uploadManagementPolicy } from './policies.ts';
-import type { UploadRecord } from './repository.ts';
 import { uploadsRepository, type UploadsRuntime } from './runtime.ts';
 
-function item(file: UploadRecord) {
-  return fileItemSchema.parse({
-    ...attachmentMetadata(file),
-    createdAt: file.createdAt.toISOString(),
-    updatedAt: file.updatedAt.toISOString(),
-    isTest: file.isTest,
-    owner: file.ownerType && file.ownerId ? { type: file.ownerType, id: file.ownerId } : null,
-  });
-}
 /** Private projections share the same tenant/policy bridge as every module management route. */
 export function uploadsAdminRoutes(router: ModuleAdminRouter<UploadsRuntime>) {
   router.register(
@@ -53,7 +42,7 @@ export function uploadsAdminRoutes(router: ModuleAdminRouter<UploadsRuntime>) {
         runtime.services.clock.now(),
       );
       const page = pageResult(rows, query.limit);
-      return Response.json({ ...page, data: page.data.map(item) });
+      return Response.json({ ...page, data: page.data.map(fileManagementMetadata) });
     },
   );
   router.register(
@@ -78,7 +67,9 @@ export function uploadsAdminRoutes(router: ModuleAdminRouter<UploadsRuntime>) {
     },
     async (runtime, { params }) => {
       const file = await uploadsRepository(runtime).get(params.id, runtime.services.clock.now());
-      return Response.json(fileDetailSchema.parse({ ...item(file), metadata: file.metadata }));
+      return Response.json(
+        fileDetailSchema.parse({ ...fileManagementMetadata(file), metadata: file.metadata }),
+      );
     },
   );
   router.register(

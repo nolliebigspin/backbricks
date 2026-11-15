@@ -16,7 +16,10 @@ import {
   createNotificationDispatchHandler,
   NOTIFICATION_JOB_DEFINITIONS,
 } from '../notifications/jobs.ts';
-import { emailAddressSchema } from '../platform/values.ts';
+import {
+  createSubjectErasureHandlers,
+  SUBJECT_ERASURE_JOB_DEFINITIONS,
+} from '../privacy/erasure.ts';
 import {
   createProjectErasureHandler,
   PROJECT_ERASURE_JOB_DEFINITION,
@@ -46,7 +49,6 @@ const retentionPayload = z
     round: z.number().int().min(1).max(MAX_RETENTION_ROUNDS).optional(),
   })
   .strict();
-const erasurePayload = z.object({ email: emailAddressSchema }).strict();
 export const PLATFORM_JOB_DEFINITIONS = Object.freeze([
   ...NOTIFICATION_JOB_DEFINITIONS,
   ...TENANT_MAINTENANCE_DEFINITIONS,
@@ -63,12 +65,7 @@ export const PLATFORM_JOB_DEFINITIONS = Object.freeze([
     retentionSeconds: 3600,
     retries: 2,
   },
-  {
-    name: PLATFORM_JOBS.subjectErasure,
-    payload: erasurePayload,
-    retentionSeconds: 86_400,
-    retries: 2,
-  },
+  ...SUBJECT_ERASURE_JOB_DEFINITIONS,
 ]);
 
 /** Trusted worker-only handlers; these are never registered as HTTP erasure or migration bypasses. */
@@ -155,23 +152,6 @@ export function createPlatformJobHandlers(
           );
       },
     },
-    {
-      name: PLATFORM_JOBS.subjectErasure,
-      async runInTransaction(this: void, tx: TenantTransaction, input: unknown) {
-        const data = erasurePayload.parse(input);
-        if (!tx.context.projectId) throw new AppError('not_found');
-        await tx.repositories.projects.get(tx.context.projectId, { lock: true });
-        let count = 0;
-        for (const module of deps.registry.modules) {
-          // oxlint-disable-next-line no-await-in-loop -- All module erasure effects enlist in one transaction.
-          count += await module.privacy.deleteSubject(execution(tx, module.type), data.email);
-        }
-        await deps.audit.record(tx, {
-          actorType: 'system',
-          action: 'privacy.module_subject_erased',
-          changes: { count },
-        });
-      },
-    },
+    ...createSubjectErasureHandlers({ ...deps, queue: scheduling?.queue }),
   ];
 }

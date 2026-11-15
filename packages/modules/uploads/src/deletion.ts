@@ -14,6 +14,17 @@ export async function requestFileDeletion(
   if (!queue) throw new AppError('service_unavailable');
   const now = runtime.services.clock.now();
   await uploadsRepository(runtime).patch(file.id, {
+    // Personal fields disappear immediately; only opaque operational cleanup identity survives outages.
+    originalName: 'deleted',
+    metadata: {},
+    subjectEmail: null,
+    ownerType: null,
+    ownerId: null,
+    ownerExpiresAt: null,
+    sha256: null,
+    detectedMime: null,
+    scan: null,
+    expiresAt: new Date(Math.max(now.getTime(), file.createdAt.getTime() + 1)),
     deletedAt: now,
     cleanupAfter: now,
     updatedAt: now,

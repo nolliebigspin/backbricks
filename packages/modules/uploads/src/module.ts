@@ -22,6 +22,12 @@ import { eraseUploadScope } from './privacy.ts';
 import { uploadsPublicRoutes } from './public.ts';
 import { uploadsRepository } from './runtime.ts';
 import { scanUpload } from './scan.ts';
+import {
+  exportUploadSubject,
+  deleteUploadSubject,
+  pendingUploadErasure,
+  uploadSubjectAttachments,
+} from './subject.ts';
 import { defaultUploadsConfig, uploadsTemplates } from './templates.ts';
 
 const label = { en: 'Uploads', de: 'Dateien' };
@@ -88,8 +94,10 @@ export const uploadsModule = defineModule({
       uploadsRepository(runtime).recomputeExpiry(instance.id, instance.config.retentionDays),
   },
   privacy: {
-    exportSubject: async () => ({ files: [] }),
-    deleteSubject: async () => 0,
+    exportSubject: exportUploadSubject,
+    deleteSubject: deleteUploadSubject,
+    pendingErasure: pendingUploadErasure,
+    attachments: uploadSubjectAttachments,
     eraseScope: eraseUploadScope,
   },
 });

@@ -47,7 +47,7 @@ export async function claimEntryFiles(
 /** A disabled provider must not leave attached files live after their owner changes or disappears. */
 async function requireAttachmentProvider(runtime: FormsRuntime, row: ErasedSubmission) {
   if (runtime.capabilities.optional('files')) return;
-  if (!Object.values(row.data).some((value) => Array.isArray(value) && value.length)) return;
+  if (!hasPossibleAttachments(row.data)) return;
   const historical = await runtime.instances.revisionById(row.instanceId, row.configVersion);
   if (
     historical.config.fields.some((field) => {
@@ -84,4 +84,18 @@ export async function syncEntryFileExpiry(
     type: FORM_SUBMISSION_OWNER,
     owners: owners.map(({ id, expiresAt }) => ({ id, expiresAt })),
   });
+}
+
+/** One owner-bound metadata read for entry details and privacy manifests. */
+export async function listEntryFiles(runtime: FormsRuntime, id: string) {
+  return (
+    (await runtime.capabilities
+      .optional('files')
+      ?.listByOwner(runtime.tx, { type: FORM_SUBMISSION_OWNER, id })) ?? []
+  );
+}
+
+/** Cheap historical-read guard; only nonempty array answers can contain file identifiers. */
+export function hasPossibleAttachments(data: Readonly<Record<string, JsonValue>>) {
+  return Object.values(data).some((value) => Array.isArray(value) && value.length > 0);
 }

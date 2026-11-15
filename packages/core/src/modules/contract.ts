@@ -12,17 +12,16 @@ import type { OptionalServiceName } from '../services/container.ts';
 import type { ModuleRepositories, RepositoryPage } from '../tenancy/repositories.ts';
 import type { TenantHandle } from '../tenancy/tenant-context.ts';
 import type { CapabilityFactories, CapabilityName, capabilityView } from './capabilities.ts';
-import type { ModuleErasureResult } from './erasure.ts';
 import type { InfraRequirement } from './infrastructure.ts';
 import type { ModuleJobRegistrar } from './jobs.ts';
 import type { ModuleMaintenanceResult } from './maintenance.ts';
+import type { ModulePrivacyHooks } from './privacy.ts';
 import type { ModuleAdminRouter, ModulePublicRouter } from './routes.ts';
 import type { BoundCoreServices, ModuleOptionalServices } from './services.ts';
 import type { ModuleStreamPage } from './streams.ts';
 import type {
   ConfigChangeReport,
   EventDefinition,
-  JsonValue,
   MetricDefinition,
   ScopeDefinition,
 } from './values.ts';
@@ -216,43 +215,7 @@ export type ModuleDefinition<
       input: NotificationSubjectInput<ConfiguredInstance<T>>,
     ): Promise<NotificationSubject | null>;
   };
-  privacy: {
-    exportSubject(
-      runtime: ModuleRuntime<
-        T,
-        R,
-        O,
-        SR | RequiredInfrastructure<I>,
-        SO | OptionalInfrastructure<I>,
-        MT
-      >,
-      email: string,
-    ): Promise<JsonValue>;
-    deleteSubject(
-      runtime: ModuleRuntime<
-        T,
-        R,
-        O,
-        SR | RequiredInfrastructure<I>,
-        SO | OptionalInfrastructure<I>,
-        MT
-      >,
-      email: string,
-    ): Promise<number>;
-    /**
-     * Project hard erasure (ADR-0061): delete up to `limit` of the project's records, including
-     * stored objects, and return how many went. The platform calls it until it returns < limit.
-     */
-    eraseScope(
-      runtime: ModuleRuntime<
-        T,
-        R,
-        O,
-        SR | RequiredInfrastructure<I>,
-        SO | OptionalInfrastructure<I>,
-        MT
-      >,
-      input: { limit: number },
-    ): Promise<ModuleErasureResult>;
-  };
+  privacy: ModulePrivacyHooks<
+    ModuleRuntime<T, R, O, SR | RequiredInfrastructure<I>, SO | OptionalInfrastructure<I>, MT>
+  >;
 };
