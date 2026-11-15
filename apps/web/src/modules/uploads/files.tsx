@@ -8,7 +8,7 @@ import { canManage, useTenant } from '../../dashboard/context.tsx';
 import { dateFilter } from '../../dashboard/date-filter.ts';
 import { Feedback, unwrap, useAction } from '../../dashboard/feedback.tsx';
 import { useOperationalModules } from '../../dashboard/shell.tsx';
-import { uploadsError, useUploadsScope, type FileItem } from './api.ts';
+import { isProcessingFile, uploadsError, useUploadsScope, type FileItem } from './api.ts';
 import { FileSize, FileStatus } from './file-access.tsx';
 import { FileDrawer } from './file-drawer.tsx';
 import { FilesFilters, type Filters } from './files-filters.tsx';
@@ -86,12 +86,7 @@ function ScopedFiles({ zoneId, initialFile }: { zoneId?: string; initialFile?: s
           signal,
         }),
       ),
-    refetchInterval: (query) =>
-      query.state.data?.data.some(
-        (file) => file.status === 'uploaded' || file.status === 'scanning',
-      )
-        ? 3000
-        : false,
+    refetchInterval: (query) => (query.state.data?.data.some(isProcessingFile) ? 3000 : false),
   });
   const usage = useQuery({
     queryKey: [...scope.prefix, 'usage'],

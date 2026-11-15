@@ -5,22 +5,25 @@ import { useTranslation } from 'react-i18next';
 import {
   changeType,
   FIELD_RULES,
-  FIELD_TYPES,
+  fieldTypes,
   hasOptions,
   optionsOf,
   setProperty,
   type FieldDraft,
 } from './fields-config.ts';
+import { UploadZoneField } from './upload-zone-field.tsx';
 
 const text = (value: unknown) => (typeof value === 'string' ? value : '');
 const numberText = (value: unknown) => (typeof value === 'number' ? String(value) : '');
 
 /** Label, short name, type, help, required and the rules of one field's type. */
 export function FieldEditor({
+  uploads = false,
   draft,
   typeName,
   onChange,
 }: {
+  uploads?: boolean;
   draft: FieldDraft;
   typeName: (type: string) => string;
   onChange: (draft: FieldDraft) => void;
@@ -30,9 +33,8 @@ export function FieldEditor({
   const type = text(draft.field['type']);
   const set = (name: string, value: Parameters<typeof setProperty>[2]) =>
     onChange(setProperty(draft, name, value));
-  const types: readonly string[] = FIELD_TYPES.some((known) => known === type)
-    ? FIELD_TYPES
-    : [...FIELD_TYPES, type];
+  const available = fieldTypes(uploads);
+  const types = available.includes(type) ? available : [...available, type];
   const numeric = (name: string, kind: 'number' | 'date' = 'number') => (
     <div key={name} className="space-y-2">
       <Label htmlFor={`${id}-${name}`}>{t(`forms.fields.rules.${name}`)}</Label>
@@ -71,6 +73,14 @@ export function FieldEditor({
             onChange={(event) => set(name, event.target.value)}
           />
         </div>
+      );
+    if (name === 'zone' && uploads)
+      return (
+        <UploadZoneField
+          key={name}
+          value={text(draft.field[name])}
+          onChange={(value) => set(name, value)}
+        />
       );
     if (name === 'version' || name === 'zone')
       return (

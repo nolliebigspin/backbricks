@@ -501,6 +501,8 @@
     "confirmHint": "Bestehende Uploads erfüllen diese Regeln möglicherweise nicht mehr. Kürzere Aufbewahrungszeiten können Dateien endgültig entfernen.",
     "zoneSections": "Abschnitte des Upload-Bereichs",
     "embedHint": "Verwende den Upload-Bereich „{{key}}“ auf deiner Website. Warte, bis die Datei bereit ist, bevor du ihren Verweis mit einem Formular sendest.",
-    "integration": "Upload einbinden"
+    "integration": "Upload einbinden",
+    "missingAttachment": "Dieser Anhang ist abgelaufen, wurde gelöscht oder ist in dieser Installation nicht verfügbar.",
+    "chooseZone": "Upload-Bereich auswählen"
   }
 }

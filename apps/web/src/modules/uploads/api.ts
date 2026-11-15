@@ -58,3 +58,8 @@ export function useUploadZones() {
     getNextPageParam: (last) => last.nextCursor ?? undefined,
   });
 }
+
+/** Only accepted byte streams awaiting inspection need readiness refreshes. */
+export function isProcessingFile(file: Pick<FileItem, 'status'>) {
+  return file.status === 'uploaded' || file.status === 'scanning';
+}

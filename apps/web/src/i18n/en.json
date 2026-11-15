@@ -501,6 +501,8 @@
     "confirmHint": "Existing uploads may stop meeting these rules. Shorter storage lifetimes can permanently remove files.",
     "zoneSections": "Upload area sections",
     "embedHint": "Use upload area “{{key}}” in your website. Wait until the file is ready before sending its reference with a form.",
-    "integration": "Upload integration"
+    "integration": "Upload integration",
+    "missingAttachment": "This attachment has expired, was deleted, or is unavailable on this installation.",
+    "chooseZone": "Choose an upload area"
   }
 }

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { admin } from '../../auth/client.ts';
 import { Feedback, unwrap } from '../../dashboard/feedback.tsx';
-import { uploadsError, useUploadsScope } from './api.ts';
+import { isProcessingFile, uploadsError, useUploadsScope, type FileDetail } from './api.ts';
 import { FileAccess, FileSize } from './file-access.tsx';
 
 export function FileDrawer({
@@ -18,8 +18,10 @@ export function FileDrawer({
 }) {
   const { t, i18n } = useTranslation();
   const scope = useUploadsScope();
-  const file = useQuery({
+  const file = useQuery<FileDetail>({
     queryKey: [...scope.prefix, 'file', id],
+    refetchInterval: (query) =>
+      query.state.data && isProcessingFile(query.state.data) ? 3000 : false,
     queryFn: async ({ signal }) =>
       unwrap(
         await admin.GET('/v1/projects/{projectId}/files/{id}', {

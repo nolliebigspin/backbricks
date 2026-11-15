@@ -170,3 +170,40 @@ test('switching organizations cancels in-flight entry queries', async () => {
   const list = calls.find((call) => call.path.endsWith('/submissions'));
   expect(list?.signal.aborted).toBe(true);
 });
+
+test('historical file fields use owner metadata instead of rendering stored IDs', async () => {
+  await initI18n('en');
+  mount('member', (call) =>
+    call.path.endsWith('/submissions/sub_1') && call.method === 'GET'
+      ? Promise.resolve(
+          Response.json({
+            ...detail,
+            read: true,
+            fields: [
+              ...detail.fields,
+              { key: 'cv', type: 'file', label: 'Original CV', zone: 'cv', maxFiles: 2 },
+            ],
+            additionalData: { cv: ['file_1', 'file_missing'] },
+            attachments: [
+              {
+                id: 'file_1',
+                zoneId: 'mod_cv',
+                name: 'Historical CV.pdf',
+                size: 123,
+                type: 'application/pdf',
+                status: 'ready',
+                scanStatus: 'clean',
+                previewable: false,
+                expiresAt: null,
+              },
+            ],
+          }),
+        )
+      : undefined,
+  );
+  fireEvent.click(await screen.findByRole('button', { name: /Open the entry/ }));
+  const drawer = within(await screen.findByRole('dialog'));
+  expect(await drawer.findByText('Historical CV.pdf')).toBeDefined();
+  expect(drawer.queryByText('file_missing')).toBeNull();
+  expect(drawer.queryByText('file_1')).toBeNull();
+});

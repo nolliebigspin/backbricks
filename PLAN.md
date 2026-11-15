@@ -1220,15 +1220,15 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Component config bodies/stale/destructive/role cases and en/de parity.
 - **Risks/notes:** Expose product choices and consequences, not internal adapter/protocol implementation details.
 
-### [ ] P3.8c – Show form attachments through the files capability (est. 4 h)
+### [x] P3.8c – Show form attachments through the files capability (est. 4 h)
 - **Description:** Extend authorized entry details/drawer with safe attachment metadata, state and download actions, and make file fields selectable only when uploads is available.
 - **Files/packages:** forms admin projection; apps/web form field editor/drawer; generated contract
 - **Depends on:** P3.5b, P3.6b, P3.8a
 - **Reuses:** FilesCapability.listByOwner, existing FieldValue/RecordDrawer and module availability metadata
 - **Acceptance criteria:**
-  - [ ] No bearer reference/token appears in stored entry detail, rendered copy, audit or export.
-  - [ ] Expired/missing attachments are explained; successful download uses the same audited file endpoint.
-  - [ ] Forms-only field editor and existing no-file entry behavior remain correct.
+  - [x] No bearer reference/token appears in stored entry detail, rendered copy, audit or export.
+  - [x] Expired/missing attachments are explained; successful download uses the same audited file endpoint.
+  - [x] Forms-only field editor and existing no-file entry behavior remain correct.
 - **Tests:** Capability-bound HTTP projection, component escaping/state/role tests and browser attachment download.
 - **Risks/notes:** Historical form configs must retain readable fields without granting access to unrelated upload files.
 
@@ -1293,6 +1293,9 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
 
 ### Planning risks and execution notes
+
+- P3.8c complete: entry drawers use only owner-bound attachment metadata and the shared audited download/preview controls. Historical removed file fields resolve their stored IDs from Additional data without rendering those IDs or issuing unrelated lookups; missing/expired/disabled attachments are explained. A deterministic failing historical-field test now passes. Operational metadata controls file type choices and a paged zone selector preserves historical keys. Scoped remounts clear entry selection and transient access; file details refresh pending inspection. Four new component cases pass alongside Forms-only regressions and en/de parity. `CI=true bun run check` passed (574 package + 102 script tests; `/tmp/backbricks-p3-8c-check.log`). Review remains deferred. Next: P3.9a.
+
 
 - P3.8b complete: conditional area list/templates, paged zone selection, notification deep links, role-aware settings and integration instructions. Saves preserve hidden limits/honeypot policy, use optimistic versions and the shared server-classified destructive plan; risky changes require typing the area key. Scanning failures explain recovery and unscanned templates require explicit selection. Shared template filtering, config-object reads, code blocks and planning replace duplicate implementations. Mobile Files rows now keep full names and move status below them (Chromium 390px, no overflow). Five new component/snippet cases pass. `CI=true bun run check` passed (570 package + 102 script tests; `/tmp/backbricks-p3-8b-check.log`). Review remains deferred. Next: P3.8c.
 

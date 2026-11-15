@@ -32,6 +32,11 @@ export const FIELD_TYPES = [
   'hidden',
 ] as const;
 
+/** Available choices come from installation metadata; stored historical file fields remain readable. */
+export function fieldTypes(uploads: boolean): readonly string[] {
+  return uploads ? [...FIELD_TYPES, 'file'] : FIELD_TYPES;
+}
+
 /** Rule inputs per type, beyond label, help and required. */
 export const FIELD_RULES: Record<string, readonly string[]> = {
   text: ['minLength', 'maxLength'],

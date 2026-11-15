@@ -15,13 +15,14 @@ import { admin } from '../../auth/client.ts';
 import { instanceConfigIsDestructive } from '../../dashboard/config-plan.ts';
 import { canManage, useTenant } from '../../dashboard/context.tsx';
 import { Feedback, unwrap } from '../../dashboard/feedback.tsx';
+import { useOperationalModules } from '../../dashboard/shell.tsx';
 import { formsError, useFormsScope, type FormInstance } from './api.ts';
 import { FieldEditor } from './field-editor.tsx';
 import {
   describeChanges,
   firstOption,
   FIELD_PRESETS,
-  FIELD_TYPES,
+  fieldTypes,
   hasOptions,
   newDraft,
   readDrafts,
@@ -52,6 +53,8 @@ function FieldsForm({ form, disabled }: { form: FormInstance; disabled: boolean 
   const { t } = useTranslation();
   const scope = useFormsScope();
   const client = useQueryClient();
+  const modules = useOperationalModules();
+  const uploads = modules.data?.some((module) => module.type === 'uploads') ?? false;
   const [drafts, setDrafts] = useState(() => readDrafts(form.config));
   const [pending, setPending] = useState<{
     config: Record<string, unknown>;
@@ -123,6 +126,7 @@ function FieldsForm({ form, disabled }: { form: FormInstance; disabled: boolean 
           }
           renderEditor={(draft, index) => (
             <FieldEditor
+              uploads={uploads}
               draft={draft}
               typeName={typeName}
               onChange={(next) => update(drafts.map((item, at) => (at === index ? next : item)))}
@@ -142,6 +146,7 @@ function FieldsForm({ form, disabled }: { form: FormInstance; disabled: boolean 
               ? undefined
               : (add) => (
                   <AddField
+                    uploads={uploads}
                     typeName={typeName}
                     onAdd={(start) =>
                       add(
@@ -231,9 +236,11 @@ type Start = { type: string } | { preset: FieldPreset };
 
 /** Common fields first, then every type; `file` arrives with uploads (M3). */
 function AddField({
+  uploads,
   typeName,
   onAdd,
 }: {
+  uploads: boolean;
   typeName: (type: string) => string;
   onAdd: (start: Start) => void;
 }) {
@@ -253,7 +260,7 @@ function AddField({
             ))}
           </NativeSelectOptGroup>
           <NativeSelectOptGroup label={t('forms.fields.allTypes')}>
-            {FIELD_TYPES.map((type) => (
+            {fieldTypes(uploads).map((type) => (
               <NativeSelectOption key={type} value={`type:${type}`}>
                 {typeName(type)}
               </NativeSelectOption>
