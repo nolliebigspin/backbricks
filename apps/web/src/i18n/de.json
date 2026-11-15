@@ -443,5 +443,41 @@
       "sdkScript": "Skript",
       "serverHint": "Für deinen eigenen Server-Code. Nutze einen geheimen Schlüssel mit der Vorlage „Servereinbindung“ in der Umgebungsvariable {{env}}. Ein geheimer Schlüssel gehört nie in Website-Code."
     }
+  },
+  "uploads": {
+    "title": "Dateien",
+    "unavailable": "Uploads sind für diese Installation nicht aktiviert.",
+    "stale": "Dieser Upload-Bereich wurde geändert. Lade die Einstellungen vor dem Speichern neu.",
+    "size": "Größe",
+    "download": "Herunterladen",
+    "preview": "Bildvorschau",
+    "unscanned": "Nicht auf Viren geprüft",
+    "notReady": "Diese Datei kann nicht heruntergeladen werden. Sie wird möglicherweise noch verarbeitet, ist abgelaufen oder wurde gesperrt.",
+    "storedBytes": "Gespeicherte Dateien",
+    "reservedBytes": "Verarbeitung und Löschung",
+    "storageHint": "Uploads in Bearbeitung und Dateien vor der endgültigen Löschung belegen weiterhin Speicher.",
+    "zone": "Upload-Bereich",
+    "search": "Dateinamen suchen",
+    "moreZones": "Weitere Upload-Bereiche laden",
+    "grid": "Raster",
+    "table": "Tabelle",
+    "empty": "Keine passenden Dateien",
+    "emptyHint": "Dateien von deiner Website erscheinen hier. Versuche andere Filter.",
+    "select": "{{name}} auswählen",
+    "selectAll": "Alle Dateien dieser Seite auswählen",
+    "open": "{{name}} öffnen",
+    "deleteSelected": "Ausgewählte löschen ({{count}})",
+    "deleteTitle": "{{count}} Datei(en) löschen?",
+    "deleteHint": "Der Zugriff endet sofort. Die Datei und ihr Formularanhang werden endgültig entfernt. Dies kann nicht rückgängig gemacht werden.",
+    "previous": "Vorherige Seite",
+    "next": "Nächste Seite",
+    "status": {
+      "pending": "Wartet auf Upload",
+      "uploaded": "Hochgeladen",
+      "scanning": "Datei wird geprüft",
+      "ready": "Bereit",
+      "quarantined": "Gesperrt: unsichere Datei",
+      "rejected": "Abgelehnt"
+    }
   }
 }

@@ -41,6 +41,7 @@ test.skipIf(!uploadsAvailable)(
             name: '100%_!.pdf',
             status: 'ready',
             scanStatus: 'not_scanned',
+            previewable: false,
             owner: null,
             metadata: {},
           });

@@ -97,7 +97,7 @@ export function filesCapability(runtime: UploadsRuntime): FilesCapability {
           expiresAt: earliestExpiry(request.expiresAt, zoneExpiry),
           updatedAt: now,
         });
-        claimed.push(attachmentMetadata(saved));
+        claimed.push(attachmentMetadata(saved, now));
       }
       await runtime.services.audit.record(runtime.tx, {
         ...(runtime.tx.context.principal
@@ -116,7 +116,7 @@ export function filesCapability(runtime: UploadsRuntime): FilesCapability {
         runtime.services.clock.now(),
       );
       if (rows.length > MAX_BULK_ITEMS) throw new AppError('internal_error');
-      return rows.map(attachmentMetadata);
+      return rows.map((file) => attachmentMetadata(file, runtime.services.clock.now()));
     },
     async syncOwnerExpiry(_tx, input) {
       const request = fileOwnerExpirySchema.parse(input);

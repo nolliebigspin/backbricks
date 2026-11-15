@@ -443,5 +443,41 @@
       "sdkScript": "Script",
       "serverHint": "For your own server code. Use a secret key with the \"Server integration\" preset in the {{env}} environment variable. Never put a secret key in website code."
     }
+  },
+  "uploads": {
+    "title": "Files",
+    "unavailable": "Uploads aren't switched on for this installation.",
+    "stale": "Someone changed this upload area. Reload its settings before saving again.",
+    "size": "Size",
+    "download": "Download",
+    "preview": "Preview image",
+    "unscanned": "Not virus checked",
+    "notReady": "This file is unavailable for download. It may still be processing, have expired, or have been blocked.",
+    "storedBytes": "Stored files",
+    "reservedBytes": "Processing and cleanup",
+    "storageHint": "Processing uploads and files awaiting permanent cleanup still use storage.",
+    "zone": "Upload area",
+    "search": "Search file names",
+    "moreZones": "Load more upload areas",
+    "grid": "Grid",
+    "table": "Table",
+    "empty": "No matching files",
+    "emptyHint": "Files uploaded from your website appear here. Try changing the filters.",
+    "select": "Select {{name}}",
+    "selectAll": "Select all files on this page",
+    "open": "Open {{name}}",
+    "deleteSelected": "Delete selected ({{count}})",
+    "deleteTitle": "Delete {{count}} file(s)?",
+    "deleteHint": "Access stops immediately. The file and any form attachment are permanently removed. This cannot be undone.",
+    "previous": "Previous page",
+    "next": "Next page",
+    "status": {
+      "pending": "Waiting for upload",
+      "uploaded": "Uploaded",
+      "scanning": "Checking file",
+      "ready": "Ready",
+      "quarantined": "Blocked: unsafe file",
+      "rejected": "Rejected"
+    }
   }
 }

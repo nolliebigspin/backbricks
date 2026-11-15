@@ -42,7 +42,10 @@ export function uploadsAdminRoutes(router: ModuleAdminRouter<UploadsRuntime>) {
         runtime.services.clock.now(),
       );
       const page = pageResult(rows, query.limit);
-      return Response.json({ ...page, data: page.data.map(fileManagementMetadata) });
+      return Response.json({
+        ...page,
+        data: page.data.map((file) => fileManagementMetadata(file, runtime.services.clock.now())),
+      });
     },
   );
   router.register(
@@ -68,7 +71,10 @@ export function uploadsAdminRoutes(router: ModuleAdminRouter<UploadsRuntime>) {
     async (runtime, { params }) => {
       const file = await uploadsRepository(runtime).get(params.id, runtime.services.clock.now());
       return Response.json(
-        fileDetailSchema.parse({ ...fileManagementMetadata(file), metadata: file.metadata }),
+        fileDetailSchema.parse({
+          ...fileManagementMetadata(file, runtime.services.clock.now()),
+          metadata: file.metadata,
+        }),
       );
     },
   );

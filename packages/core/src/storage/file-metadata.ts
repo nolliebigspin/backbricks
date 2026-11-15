@@ -34,6 +34,7 @@ export const fileAttachmentSchema = z
     type: z.string().nullable(),
     status: fileStatusSchema,
     scanStatus: fileScanStatusSchema.nullable(),
+    previewable: z.boolean(),
     expiresAt: z.iso.datetime().nullable(),
   })
   .strict();

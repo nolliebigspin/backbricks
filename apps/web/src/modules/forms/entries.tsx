@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next';
 
 import { admin } from '../../auth/client.ts';
 import { canManage, useTenant } from '../../dashboard/context.tsx';
+import { dateFilter } from '../../dashboard/date-filter.ts';
 import { Feedback, unwrap, useAction } from '../../dashboard/feedback.tsx';
 import { useBrowserTime } from '../../dashboard/use-browser-time.ts';
 import { formsError, useFormsScope, type FormInstance } from './api.ts';
@@ -45,8 +46,7 @@ function queryOf(filters: Filters) {
     ...(filters.status ? { status: filters.status } : {}),
     ...(filters.read ? { read: filters.read } : {}),
     ...(filters.q ? { q: filters.q } : {}),
-    ...(filters.from ? { from: new Date(`${filters.from}T00:00:00`).toISOString() } : {}),
-    ...(filters.to ? { to: new Date(`${filters.to}T23:59:59.999`).toISOString() } : {}),
+    ...dateFilter(filters.from, filters.to),
   };
 }
 

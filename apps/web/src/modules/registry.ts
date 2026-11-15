@@ -3,7 +3,10 @@
  * entry shows up only when `/v1/meta` reports its module as operational, so disabled modules
  * contribute no navigation.
  */
-export const dashboardModules = [{ type: 'forms', labelKey: 'forms.inbox' }] as const;
+export const dashboardModules = [
+  { type: 'forms', labelKey: 'forms.inbox', resource: 'forms' },
+  { type: 'uploads', labelKey: 'uploads.title', resource: 'files' },
+] as const;
 
 export type ModuleAvailability = { type: string; resourceName: { plural: string } };
 
@@ -16,7 +19,7 @@ export function moduleNavigation(projectId: string, operational: readonly Module
           {
             type: entry.type,
             labelKey: entry.labelKey,
-            href: `/projects/${encodeURIComponent(projectId)}/${module.resourceName.plural}`,
+            href: `/projects/${encodeURIComponent(projectId)}/${entry.resource}`,
           },
         ]
       : [];

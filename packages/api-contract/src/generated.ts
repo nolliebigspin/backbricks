@@ -1724,6 +1724,7 @@ export interface operations {
                 id: string;
                 type: string;
               } | null;
+              previewable: boolean;
               /** @enum {string|null} */
               scanStatus: 'clean' | 'not_scanned' | 'infected' | 'failed' | 'retrying' | null;
               size: number;
@@ -1853,6 +1854,7 @@ export interface operations {
               id: string;
               type: string;
             } | null;
+            previewable: boolean;
             /** @enum {string|null} */
             scanStatus: 'clean' | 'not_scanned' | 'infected' | 'failed' | 'retrying' | null;
             size: number;
@@ -3014,6 +3016,7 @@ export interface operations {
               expiresAt: string | null;
               id: string;
               name: string;
+              previewable: boolean;
               /** @enum {string|null} */
               scanStatus: 'clean' | 'not_scanned' | 'infected' | 'failed' | 'retrying' | null;
               size: number;

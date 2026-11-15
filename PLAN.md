@@ -1197,15 +1197,15 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Real Postgres/Garage delayed-erasure, late-PUT, partial-failure/resume, audit rollback and two-tenant tests.
 - **Risks/notes:** The M2 zero-object gap is a mandatory M3 exit criterion, not a simulated storage test.
 
-### [ ] P3.8a – Build the Files table/grid and storage view (est. 6 h)
+### [x] P3.8a – Build the Files table/grid and storage view (est. 6 h)
 - **Description:** Register conditional Files navigation and build filtered/paged table/grid, status/scan badges, selection, previews, downloads and confirmed bulk delete.
 - **Files/packages:** apps/web upload module; packages/ui only for reused cross-screen components
 - **Depends on:** P3.6b
 - **Reuses:** Module registry, generated admin client, DataTable/RecordDrawer/ConfirmDialog/StatusBadge and query cancellation
 - **Acceptance criteria:**
-  - [ ] Views share one server query/selection model, work on mobile, and hide unavailable actions by role/state.
-  - [ ] Names are text, unsafe types never preview, and storage values preserve precision; en/de copy is complete.
-  - [ ] Organization/project switches cancel queries and clear stale selections/URLs.
+  - [x] Views share one server query/selection model, work on mobile, and hide unavailable actions by role/state.
+  - [x] Names are text, unsafe types never preview, and storage values preserve precision; en/de copy is complete.
+  - [x] Organization/project switches cancel queries and clear stale selections/URLs.
 - **Tests:** Component behavior/accessibility and browser cases for filtering, actions, unsafe names and tenant switches.
 - **Risks/notes:** Reuse existing primitives; do not create a second table, error or permission framework.
 
@@ -1293,6 +1293,9 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
 
 ### Planning risks and execution notes
+
+- P3.8a complete: conditional Files navigation, one paged/filterable table/grid model, bounded selection, role-aware confirmation, safe plain-text details, authoritative preview eligibility and transient audited download URLs. Shared module scopes, calendar filters and BigInt capacity formatting avoid duplicate contracts. Four component cases cover hostile names, member restrictions, filters/selection and project-switch cancellation; en/de parity and large-capacity formatting pass. Chromium layout inspection at 1440px and 390px confirms no page overflow; mobile filename layout receives a further refinement with P3.8b. `CI=true bun run check` passed (565 package + 102 script tests; `/tmp/backbricks-p3-8a-check.log`); dashboard build passed. Actual-service browser journeys follow in P3.9b. Human review remains deferred. Next: P3.8b.
+
 
 - P3.7c complete: actual 105 ready Garage objects and an in-flight upload settle through bounded erasure rounds, storage outage/recovery and audit/enqueue rollback. Neighbour bytes remain intact. Active child jobs are purged while the exact executing erasure job survives its atomic completion; workers blocked behind erasure recheck the tombstone. ADR-0074/D68 records both regressions. `CI=true bun run check` passed (560 package + 102 script tests; `/tmp/backbricks-p3-7c-check.log`, 7m56s). Human review remains deferred under the maintainer instruction. Next: P3.8a.
 

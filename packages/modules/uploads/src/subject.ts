@@ -40,7 +40,10 @@ export async function exportUploadSubject(runtime: UploadsRuntime, email: string
     );
     for (const file of page.data)
       collection.add(
-        fileDetailSchema.parse({ ...fileManagementMetadata(file), metadata: file.metadata }),
+        fileDetailSchema.parse({
+          ...fileManagementMetadata(file, runtime.services.clock.now()),
+          metadata: file.metadata,
+        }),
       );
     cursor = page.nextCursor ?? undefined;
   } while (cursor);
@@ -78,7 +81,7 @@ export const uploadSubjectAttachments = {
       ...page,
       data: page.data.map((file) =>
         subjectAttachmentSchema.parse({
-          ...attachmentMetadata(file),
+          ...attachmentMetadata(file, now),
           availability: availability(file, now),
         }),
       ),

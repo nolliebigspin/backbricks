@@ -2500,6 +2500,9 @@
                             "required": ["type", "id"],
                             "type": ["object", "null"]
                           },
+                          "previewable": {
+                            "type": "boolean"
+                          },
                           "scanStatus": {
                             "enum": [
                               "clean",
@@ -2546,6 +2549,7 @@
                           "type",
                           "status",
                           "scanStatus",
+                          "previewable",
                           "expiresAt",
                           "createdAt",
                           "updatedAt",
@@ -2964,6 +2968,9 @@
                       "required": ["type", "id"],
                       "type": ["object", "null"]
                     },
+                    "previewable": {
+                      "type": "boolean"
+                    },
                     "scanStatus": {
                       "enum": ["clean", "not_scanned", "infected", "failed", "retrying", null],
                       "type": ["string", "null"]
@@ -3003,6 +3010,7 @@
                     "type",
                     "status",
                     "scanStatus",
+                    "previewable",
                     "expiresAt",
                     "createdAt",
                     "updatedAt",
@@ -6191,6 +6199,9 @@
                             "pattern": "^[^\\x00-\\x1f\\x7f]*$",
                             "type": "string"
                           },
+                          "previewable": {
+                            "type": "boolean"
+                          },
                           "scanStatus": {
                             "enum": [
                               "clean",
@@ -6233,6 +6244,7 @@
                           "type",
                           "status",
                           "scanStatus",
+                          "previewable",
                           "expiresAt"
                         ],
                         "type": "object"

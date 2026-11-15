@@ -23,6 +23,7 @@ import { Route as DashboardOrganizationsNewRouteImport } from './routes/_dashboa
 import { Route as DashboardProjectsProjectIdRouteImport } from './routes/_dashboard.projects.$projectId'
 import { Route as DashboardProjectsProjectIdIndexRouteImport } from './routes/_dashboard.projects.$projectId.index'
 import { Route as DashboardProjectsProjectIdEmbedRouteImport } from './routes/_dashboard.projects.$projectId.embed'
+import { Route as DashboardProjectsProjectIdFilesRouteImport } from './routes/_dashboard.projects.$projectId.files'
 import { Route as DashboardProjectsProjectIdSettingsRouteImport } from './routes/_dashboard.projects.$projectId.settings'
 import { Route as DashboardProjectsProjectIdFormsIndexRouteImport } from './routes/_dashboard.projects.$projectId.forms.index'
 import { Route as DashboardProjectsProjectIdFormsFormKeyRouteImport } from './routes/_dashboard.projects.$projectId.forms.$formKey'
@@ -100,6 +101,12 @@ const DashboardProjectsProjectIdEmbedRoute =
     path: '/embed',
     getParentRoute: () => DashboardProjectsProjectIdRoute,
   } as any)
+const DashboardProjectsProjectIdFilesRoute =
+  DashboardProjectsProjectIdFilesRouteImport.update({
+    id: '/files',
+    path: '/files',
+    getParentRoute: () => DashboardProjectsProjectIdRoute,
+  } as any)
 const DashboardProjectsProjectIdSettingsRoute =
   DashboardProjectsProjectIdSettingsRouteImport.update({
     id: '/settings',
@@ -132,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/organizations/new': typeof DashboardOrganizationsNewRoute
   '/projects/$projectId': typeof DashboardProjectsProjectIdRouteWithChildren
   '/projects/$projectId/embed': typeof DashboardProjectsProjectIdEmbedRoute
+  '/projects/$projectId/files': typeof DashboardProjectsProjectIdFilesRoute
   '/projects/$projectId/settings': typeof DashboardProjectsProjectIdSettingsRoute
   '/projects/$projectId/': typeof DashboardProjectsProjectIdIndexRoute
   '/projects/$projectId/forms/$formKey': typeof DashboardProjectsProjectIdFormsFormKeyRoute
@@ -149,6 +157,7 @@ export interface FileRoutesByTo {
   '/': typeof DashboardIndexRoute
   '/organizations/new': typeof DashboardOrganizationsNewRoute
   '/projects/$projectId/embed': typeof DashboardProjectsProjectIdEmbedRoute
+  '/projects/$projectId/files': typeof DashboardProjectsProjectIdFilesRoute
   '/projects/$projectId/settings': typeof DashboardProjectsProjectIdSettingsRoute
   '/projects/$projectId': typeof DashboardProjectsProjectIdIndexRoute
   '/projects/$projectId/forms/$formKey': typeof DashboardProjectsProjectIdFormsFormKeyRoute
@@ -169,6 +178,7 @@ export interface FileRoutesById {
   '/_dashboard/organizations/new': typeof DashboardOrganizationsNewRoute
   '/_dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRouteWithChildren
   '/_dashboard/projects/$projectId/embed': typeof DashboardProjectsProjectIdEmbedRoute
+  '/_dashboard/projects/$projectId/files': typeof DashboardProjectsProjectIdFilesRoute
   '/_dashboard/projects/$projectId/settings': typeof DashboardProjectsProjectIdSettingsRoute
   '/_dashboard/projects/$projectId/': typeof DashboardProjectsProjectIdIndexRoute
   '/_dashboard/projects/$projectId/forms/$formKey': typeof DashboardProjectsProjectIdFormsFormKeyRoute
@@ -189,6 +199,7 @@ export interface FileRouteTypes {
     | '/organizations/new'
     | '/projects/$projectId'
     | '/projects/$projectId/embed'
+    | '/projects/$projectId/files'
     | '/projects/$projectId/settings'
     | '/projects/$projectId/'
     | '/projects/$projectId/forms/$formKey'
@@ -206,6 +217,7 @@ export interface FileRouteTypes {
     | '/'
     | '/organizations/new'
     | '/projects/$projectId/embed'
+    | '/projects/$projectId/files'
     | '/projects/$projectId/settings'
     | '/projects/$projectId'
     | '/projects/$projectId/forms/$formKey'
@@ -225,6 +237,7 @@ export interface FileRouteTypes {
     | '/_dashboard/organizations/new'
     | '/_dashboard/projects/$projectId'
     | '/_dashboard/projects/$projectId/embed'
+    | '/_dashboard/projects/$projectId/files'
     | '/_dashboard/projects/$projectId/settings'
     | '/_dashboard/projects/$projectId/'
     | '/_dashboard/projects/$projectId/forms/$formKey'
@@ -341,6 +354,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProjectsProjectIdEmbedRouteImport
       parentRoute: typeof DashboardProjectsProjectIdRoute
     }
+    '/_dashboard/projects/$projectId/files': {
+      id: '/_dashboard/projects/$projectId/files'
+      path: '/files'
+      fullPath: '/projects/$projectId/files'
+      preLoaderRoute: typeof DashboardProjectsProjectIdFilesRouteImport
+      parentRoute: typeof DashboardProjectsProjectIdRoute
+    }
     '/_dashboard/projects/$projectId/settings': {
       id: '/_dashboard/projects/$projectId/settings'
       path: '/settings'
@@ -367,6 +387,7 @@ declare module '@tanstack/react-router' {
 
 interface DashboardProjectsProjectIdRouteChildren {
   DashboardProjectsProjectIdEmbedRoute: typeof DashboardProjectsProjectIdEmbedRoute
+  DashboardProjectsProjectIdFilesRoute: typeof DashboardProjectsProjectIdFilesRoute
   DashboardProjectsProjectIdSettingsRoute: typeof DashboardProjectsProjectIdSettingsRoute
   DashboardProjectsProjectIdIndexRoute: typeof DashboardProjectsProjectIdIndexRoute
   DashboardProjectsProjectIdFormsFormKeyRoute: typeof DashboardProjectsProjectIdFormsFormKeyRoute
@@ -376,6 +397,7 @@ interface DashboardProjectsProjectIdRouteChildren {
 const DashboardProjectsProjectIdRouteChildren: DashboardProjectsProjectIdRouteChildren =
   {
     DashboardProjectsProjectIdEmbedRoute: DashboardProjectsProjectIdEmbedRoute,
+    DashboardProjectsProjectIdFilesRoute: DashboardProjectsProjectIdFilesRoute,
     DashboardProjectsProjectIdSettingsRoute:
       DashboardProjectsProjectIdSettingsRoute,
     DashboardProjectsProjectIdIndexRoute: DashboardProjectsProjectIdIndexRoute,
