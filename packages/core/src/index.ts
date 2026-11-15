@@ -409,6 +409,7 @@ export {
 } from './modules/jobs.ts';
 
 export { defineModule } from './modules/define-module.ts';
+export { sdkSchemaDeclaration } from './modules/codegen.ts';
 export { defineRegistry, type ModuleRegistry } from './modules/registry.ts';
 export type { RegisteredModule, RegisteredRoute, RegisteredJob } from './modules/registered.ts';
 

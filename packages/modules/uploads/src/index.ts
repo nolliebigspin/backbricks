@@ -8,7 +8,10 @@ export {
   type UploadsConfig,
   type UploadsConfigInput,
 } from './config.ts';
-export { UPLOAD_LIMITS } from './constants.ts';
+export { UPLOAD_LIMITS, UPLOADS_MODULE_VERSION } from './constants.ts';
+export { uploadsTemplates, defaultUploadsConfig, type UploadTemplateName } from './templates.ts';
+export { classifyUploadsChange } from './changes.ts';
+export { uploadsCodegen } from './codegen.ts';
 export { uploadDeclarationSchema, type UploadDeclaration } from './declaration.ts';
 export { validateUploadDeclaration } from './validation.ts';
 export {

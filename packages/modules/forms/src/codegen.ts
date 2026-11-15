@@ -1,4 +1,4 @@
-import type { ConfiguredInstance } from '@backbricks/core';
+import { sdkSchemaDeclaration, type ConfiguredInstance } from '@backbricks/core';
 
 import type { FormField, FormsConfig } from './config.ts';
 
@@ -35,14 +35,5 @@ export function formsCodegen(instance: ConfiguredInstance<FormsConfig>): string 
         `      ${JSON.stringify(field.key)}${field.required ? '' : '?'}: ${valueType(field)};`,
     )
     .join('\n');
-  return [
-    `declare module '@backbricks/sdk' {`,
-    `  interface BackbricksSchema {`,
-    `    ${JSON.stringify(`forms/${instance.key}`)}: {`,
-    members,
-    `    };`,
-    `  }`,
-    `}`,
-    `export {};`,
-  ].join('\n');
+  return sdkSchemaDeclaration('forms', instance.key, `{\n${members}\n    }`);
 }

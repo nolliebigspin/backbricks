@@ -5,3 +5,5 @@ export const UPLOAD_LIMITS = {
   defaultSizeMb: 10,
   bodyBytes: 4 * 1024,
 } as const;
+/** First persisted config format; core parses version 1 directly, with no invented legacy migration. */
+export const UPLOADS_MODULE_VERSION = 1;

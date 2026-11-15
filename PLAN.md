@@ -1000,14 +1000,14 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Table/property cases for bounds, Unicode/control characters, extensions, MIME pairs and scan availability.
 - **Risks/notes:** A MIME container alone is insufficient evidence that an Office subtype is allowed.
 
-### [ ] P3.1b – Add templates, change classification and codegen (est. 4 h)
+### [x] P3.1b – Add templates, change classification and codegen (est. 4 h)
 - **Description:** Add images/documents/CV templates, config migration/version handling, change reports and SDK-facing generated types.
 - **Files/packages:** packages/modules/uploads/src/
 - **Depends on:** P3.1a
 - **Reuses:** Generic instance/revision/config-as-code pipeline; forms implementation patterns
 - **Acceptance criteria:**
-  - [ ] en/de templates round-trip through the one schema; unscanned choices are explicit.
-  - [ ] Every relevant config change is classified; generated code typechecks and does not import AGPL runtime into clients.
+  - [x] en/de templates round-trip through the one schema; unscanned choices are explicit.
+  - [x] Every relevant config change is classified; generated code typechecks and does not import AGPL runtime into clients.
 - **Tests:** Template, change-classification, migration and generated-code fixtures.
 - **Risks/notes:** Tightening rules must not leave old intents able to bypass current policy.
 
@@ -1281,6 +1281,8 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
 
 ### Planning risks and execution notes
+
+- P3.1b complete: 6 protected en/de templates plus explicitly named unscanned variants, destructive change classification, format version 1 and SDK declaration generation. Shared declaration envelope extracted to core and adopted by Forms. TypeScript 7 compile fixtures reject wrong MIME/unknown zones; uploads has 27 passing tests. `CI=true bun run check` passed (477 package + 100 script tests). Review of this and subsequent tasks is deferred to the end by the maintainer’s explicit instruction on 2026-11-15; no further prompts. Next: P3.2a.
 
 - New runtime candidate checked via `npm view file-type version engines --json` on 2026-11-15: 22.3.0, Node >=22. It is server-only; verify Bun behavior when adding it and preserve the SDK's Node20 floor.
 - The larger estimate includes late-PUT erasure and ZIP export required by the architecture, not only a successful upload demo (Q20).
