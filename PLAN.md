@@ -1125,15 +1125,15 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Real forms+uploads deletion matrix with object cleanup; capability/audit failure rollback; forms-only regression tests.
 - **Risks/notes:** M2 purgeExpired/deleteBySubject currently delete directly; production file fields must not be enabled until these are covered.
 
-### [ ] P3.6a – Expose file reads and current storage usage (est. 5 h)
+### [x] P3.6a – Expose file reads and current storage usage (est. 5 h)
 - **Description:** Add project-wide list/detail and usage routes, explicit response projections, zone/status/date/name filters and safe precision handling.
 - **Files/packages:** uploads admin routes/schemas; scoped repository; generated API contract/isolation cases
 - **Depends on:** P3.5a
 - **Reuses:** Management policies, pagination/query helpers, data:read/stats:read scopes and generated client
 - **Acceptance criteria:**
-  - [ ] Lists/detail never reveal tokens or storage keys; marked-deleted/expired files are inaccessible.
-  - [ ] Filtering/paging and current stored/reserved totals are accurate without conflating monthly accepted-byte counters with current usage.
-  - [ ] Every route has cookie/key isolation, role/scope and undeclared-route coverage.
+  - [x] Lists/detail never reveal tokens or storage keys; marked-deleted/expired files are inaccessible.
+  - [x] Filtering/paging and current stored/reserved totals are accurate without conflating monthly accepted-byte counters with current usage.
+  - [x] Every route has cookie/key isolation, role/scope and undeclared-route coverage.
 - **Tests:** Real HTTP/Postgres filter/search/pagination/precision cases plus isolation suite.
 - **Risks/notes:** Original names and subject information are private management data, not audit/log metadata.
 
@@ -1281,6 +1281,8 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
 
 ### Planning risks and execution notes
+
+- P3.6a complete: private project file list/detail and storage-usage routes use explicit projections, stable keyset paging, literal name search, zone/status/inclusive-date filters and existing member/data:read or stats:read policies. Expired/deleted metadata is hidden. Stored bytes and conservative reservations do not overlap; copy rollback and late PUTs remain reserved until confirmed cleanup. Decimal wire values and bigint SQL avoid truncation. Shared date bounds now serve Forms and uploads; monthly counters remain separate. Three HTTP/schema tests cover projections, filters/paging, credentials/scopes and every selected uploads management operation through cookie/key isolation; denial snapshots now include file lifecycle fields. Real repository tests cover accounting transitions and 5.24 GB aggregates. Upload-ready fixture workflow is shared. `CI=true bun run check` passed (529 package + 102 script tests); strengthened credential probes and sequential aggregate seeding also pass targeted tests/lint/format. Next: P3.6b.
 
 - P3.5b complete: every Forms deletion path now invokes durable attachment cleanup; owner retention/spam changes synchronize bounded capability batches in the same transaction. Historical configuration reads are separate from provider availability on writes (ADR-0067); disabled-provider entries with historical attachments fail owner deletion/lifetime changes atomically, while ordinary reads/status edits remain usable. ADR-0068 adds scoped historical reads by instance ID and parent-first mutation locks. Production composition enables file fields only with the selected files provider. The approved deferred project-erasure seam was implemented early to make production activation safe: cleanup/late-PUT identity survives until confirmed removal, and disabled persisted modules block finalization with a RESTRICT FK backstop (ADR-0069/generated forward migration). Real Postgres/Garage tests cover retention, single/bulk/delete-all/subject/project deletion, audit rollback, late writes, disabled-provider rollback and Forms-only behavior. `CI=true bun run check` passed (524 package + 102 script tests). Full multi-batch/outage project-erasure acceptance remains P3.7c. Review remains deferred to M3 completion. Next: P3.6a.
 

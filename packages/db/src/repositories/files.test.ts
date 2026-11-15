@@ -212,7 +212,7 @@ describe.skipIf(!available)('uploads repository (real Postgres)', () => {
         (row) => row.id,
       ),
     ).toEqual([file.id]);
-    const usage = await use(a, (repo) => repo.usage());
+    const usage = await use(a, (repo) => repo.usage(now));
     expect(typeof usage.reservedBytes).toBe('bigint');
     expect(usage.reservedBytes).toBeGreaterThanOrEqual(4096n);
   });
@@ -241,5 +241,65 @@ describe.skipIf(!available)('uploads repository (real Postgres)', () => {
     expect(
       await selected(a, (tx) => Promise.resolve(Reflect.get(tx.modules, 'uploads'))),
     ).toBeUndefined();
+  });
+  test('current usage separates usable final bytes from possible writes and confirmed cleanup', async () => {
+    const base = await use(sibling, (repo) => repo.usage(now));
+    const file = await use(sibling, (repo) => repo.insert(draft(sibling, zones.sibling)));
+    const delta = async (at = now) => {
+      const value = await use(sibling, (repo) => repo.usage(at));
+      return {
+        count: value.count - base.count,
+        storedBytes: value.storedBytes - base.storedBytes,
+        reservedBytes: value.reservedBytes - base.reservedBytes,
+      };
+    };
+    expect(await delta()).toEqual({ count: 1n, storedBytes: 0n, reservedBytes: 4096n });
+    await use(sibling, (repo) =>
+      repo.patch(file.id, { status: 'uploaded', uploadedAt: now, updatedAt: now }),
+    );
+    expect((await delta()).reservedBytes).toBe(8192n);
+    await use(sibling, (repo) =>
+      repo.patch(file.id, {
+        status: 'ready',
+        copiedAt: now,
+        stagingCleanedAt: now,
+        detectedMime: 'application/pdf',
+        sha256: new Uint8Array(32),
+        scan: { status: 'not_scanned' },
+        updatedAt: now,
+      }),
+    );
+    expect(await delta()).toEqual({ count: 1n, storedBytes: 4096n, reservedBytes: 4096n });
+    const expiredPut = new Date(now.getTime() + 301_000);
+    expect((await delta(expiredPut)).reservedBytes).toBe(4096n);
+    await use(sibling, (repo) =>
+      repo.patch(file.id, { stagingCleanedAt: expiredPut, updatedAt: expiredPut }),
+    );
+    expect((await delta(expiredPut)).reservedBytes).toBe(0n);
+    await use(sibling, (repo) =>
+      repo.patch(file.id, {
+        deletedAt: expiredPut,
+        cleanupAfter: expiredPut,
+        updatedAt: expiredPut,
+      }),
+    );
+    expect(await delta(expiredPut)).toEqual({ count: 0n, storedBytes: 0n, reservedBytes: 4096n });
+    await use(sibling, (repo) =>
+      repo.patch(file.id, { storageCleanedAt: expiredPut, updatedAt: expiredPut }),
+    );
+    expect(await delta(expiredPut)).toEqual({ count: 0n, storedBytes: 0n, reservedBytes: 0n });
+  });
+  test('current capacity aggregates exceed 32-bit integers without truncation', async () => {
+    const before = await use(a, (repo) => repo.usage(now));
+    const size = 100 * 1024 * 1024;
+    await use(a, async (repo) => {
+      for (let index = 0; index < 50; index++) {
+        // oxlint-disable-next-line no-await-in-loop -- One transaction owns one physical connection.
+        await repo.insert({ ...draft(), sizeBytes: size });
+      }
+    });
+    const after = await use(a, (repo) => repo.usage(now));
+    expect(after.reservedBytes - before.reservedBytes).toBe(5_242_880_000n);
+    expect(after.count - before.count).toBe(50n);
   });
 });

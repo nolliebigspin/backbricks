@@ -50,3 +50,11 @@ export const uploadsDescriptor = defineModuleDescriptor({
   resourceName: { singular: 'upload-zone', plural: 'upload-zones' },
   infrastructure: uploadsInfrastructure,
 });
+
+export {
+  filesQuerySchema,
+  fileItemSchema,
+  fileDetailSchema,
+  filesPageSchema,
+  storageUsageSchema,
+} from './admin-schemas.ts';

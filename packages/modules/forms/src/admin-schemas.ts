@@ -1,5 +1,6 @@
 import {
   jsonValueWireSchema,
+  dateRangeQuerySchema,
   fileAttachmentSchema,
   pageQuerySchema,
   spamVerdictSchema,
@@ -10,21 +11,13 @@ import { z } from 'zod';
 import { publicFormFieldSchema } from './public.ts';
 
 const booleanQuery = z.enum(['true', 'false']).transform((value) => value === 'true');
-export const submissionFiltersSchema = z
-  .object({
-    status: z.enum(['open', 'done']).optional(),
-    read: booleanQuery.optional(),
-    folder: z.enum(['inbox', 'spam']).default('inbox'),
-    test: booleanQuery.optional(),
-    from: z.iso.datetime().optional(),
-    to: z.iso.datetime().optional(),
-    q: z.string().trim().max(200).optional(),
-  })
-  .strict()
-  .refine((query) => !query.from || !query.to || query.from <= query.to, {
-    message: 'from cannot be after to.',
-    path: ['from'],
-  });
+export const submissionFiltersSchema = dateRangeQuerySchema.safeExtend({
+  status: z.enum(['open', 'done']).optional(),
+  read: booleanQuery.optional(),
+  folder: z.enum(['inbox', 'spam']).default('inbox'),
+  test: booleanQuery.optional(),
+  q: z.string().trim().max(200).optional(),
+});
 export const submissionsQuerySchema = submissionFiltersSchema.safeExtend(pageQuerySchema.shape);
 export const submissionSummarySchema = z
   .object({

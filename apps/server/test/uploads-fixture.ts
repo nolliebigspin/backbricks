@@ -3,7 +3,11 @@ import { expect } from 'bun:test';
 import { createS3Storage } from '@backbricks/adapters';
 import { type TenantTransaction } from '@backbricks/core';
 import { createWithTenant } from '@backbricks/db';
-import { uploadIntentResponseSchema, type UploadsConfigInput } from '@backbricks/module-uploads';
+import {
+  uploadCompleteResponseSchema,
+  uploadIntentResponseSchema,
+  type UploadsConfigInput,
+} from '@backbricks/module-uploads';
 
 import { garageStorageConfig, garageAvailable } from '../../../scripts/test/garage.ts';
 import { moduleRepositories } from '../src/module-repositories.ts';
@@ -82,6 +86,25 @@ export async function prepareUploads(
       undefined,
       headers,
     );
+  const put = async (file: Awaited<ReturnType<typeof intent>>) => {
+    const response = await fetch(file.uploadUrl, {
+      method: 'PUT',
+      headers: file.headers,
+      body: file.bytes,
+    });
+    expect(response.status).toBe(200);
+  };
+  const ready = async (...args: Parameters<typeof intent>) => {
+    const file = await intent(...args);
+    await put(file);
+    expect((await complete(file)).status).toBe(200);
+    const scan = f.jobs().find((job) => job.name === 'uploads.scan');
+    if (!scan) throw new Error('Missing scan handler.');
+    await scan.run(scope, { fileId: file.fileId });
+    const response = uploadCompleteResponseSchema.parse(await (await complete(file)).json());
+    expect(response.status).toBe('ready');
+    return { ...file, fileRef: response.fileRef };
+  };
   return {
     ...f,
     storage,
@@ -93,14 +116,8 @@ export async function prepareUploads(
     zonePath,
     intent,
     complete,
-    async put(file: Awaited<ReturnType<typeof intent>>) {
-      const response = await fetch(file.uploadUrl, {
-        method: 'PUT',
-        headers: file.headers,
-        body: file.bytes,
-      });
-      expect(response.status).toBe(200);
-    },
+    put,
+    ready,
     async cleanup() {
       await Promise.all([...owned].map((key) => storage.delete(key)));
       storage.close();

@@ -1,6 +1,7 @@
 import { defineModule, fileIdSchema } from '@backbricks/core';
 import { z } from 'zod';
 
+import { uploadsAdminRoutes } from './admin.ts';
 import { filesCapability } from './capability.ts';
 import { classifyUploadsChange } from './changes.ts';
 import { cleanupUpload } from './cleanup.ts';
@@ -60,6 +61,7 @@ export const uploadsModule = defineModule({
   ],
   provides: { files: filesCapability },
   publicRoutes: uploadsPublicRoutes,
+  adminRoutes: uploadsAdminRoutes,
   jobs(registrar) {
     registrar.register(
       { name: UPLOAD_JOBS.scan, retentionSeconds: 86400, retries: 2 },

@@ -2,7 +2,7 @@ import { expect } from 'bun:test';
 
 import { defineModuleCatalog, instanceResponseSchema } from '@backbricks/core';
 import { createFormsModule } from '@backbricks/module-forms';
-import { uploadCompleteResponseSchema, uploadsModule } from '@backbricks/module-uploads';
+import { uploadsModule } from '@backbricks/module-uploads';
 
 import type { AuthFixture } from './auth-fixture.ts';
 import { prepareUploads, uploadsEnvironment } from './uploads-fixture.ts';
@@ -59,17 +59,6 @@ export async function prepareAttachments(base: AuthFixture) {
         undefined,
         f.headers,
       );
-    },
-    async ready(name = 'cv.pdf') {
-      const file = await f.intent(name);
-      await f.put(file);
-      expect((await f.complete(file)).status).toBe(200);
-      const scan = f.jobs().find((job) => job.name === 'uploads.scan');
-      if (!scan) throw new Error('Missing scan handler.');
-      await scan.run(f.scope, { fileId: file.fileId });
-      const complete = uploadCompleteResponseSchema.parse(await (await f.complete(file)).json());
-      expect(complete.status).toBe('ready');
-      return { ...file, fileRef: complete.fileRef };
     },
   };
 }

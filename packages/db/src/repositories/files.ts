@@ -156,12 +156,18 @@ export function createUploadsRepository(tx: DbTransaction, scope: RepositoryScop
         .orderBy(t.id)
         .limit(MAX_BULK_ITEMS + 1);
     },
-    async usage() {
+    async usage(now: Date) {
+      const visible = visibleFiles(now);
+      const stored = sql`case when ${visible} and ${t.status} = 'ready' and ${t.copiedAt} is not null and ${t.storageCleanedAt} is null then ${t.sizeBytes} else 0 end`;
+      // Uploaded rows reserve a final copy even before its SQL marker commits: COPY can survive rollback.
+      const final = sql`case when ${t.status} <> 'pending' and ${t.storageCleanedAt} is null then ${t.sizeBytes} else 0 end`;
+      // An early DELETE cannot rule out a second PUT; release only after post-expiry confirmation.
+      const staging = sql`case when ${t.stagingCleanedAt} is null or ${t.stagingCleanedAt} < ${t.uploadExpiresAt} or ${t.uploadExpiresAt} > ${now} then ${t.sizeBytes} else 0 end`;
       const [row] = await tx
         .select({
-          count: sql<string>`count(*)::text`,
-          stored: sql<string>`coalesce(sum(case when ${t.status} = 'ready' and ${t.deletedAt} is null then ${t.sizeBytes} else 0 end), 0)::text`,
-          reserved: sql<string>`coalesce(sum(${t.sizeBytes} * case when ${t.copiedAt} is not null and ${t.stagingCleanedAt} is null then 2 else 1 end), 0)::text`,
+          count: sql<string>`count(*) filter (where ${visible})::text`,
+          stored: sql<string>`coalesce(sum(${stored}), 0)::text`,
+          reserved: sql<string>`coalesce(sum(${final} + ${staging} - ${stored}), 0)::text`,
         })
         .from(t)
         .where(filesWhere(scope));

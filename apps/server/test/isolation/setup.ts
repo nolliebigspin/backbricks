@@ -106,6 +106,11 @@ export async function prepareIsolationFixture(fixture: AuthFixture) {
       notificationRules: (
         await db.execute<Record<string, unknown>>('select * from notification_rules order by id')
       ).rows,
+      files: (
+        await db.execute<Record<string, unknown>>(
+          'select id, organization_id, project_id, instance_id, status, owner_type, owner_id, owner_expires_at, expires_at, deleted_at, cleanup_after, staging_cleaned_at, storage_cleaned_at, updated_at from files order by id',
+        )
+      ).rows,
       submissions: (
         await db.execute<Record<string, unknown>>(
           'select id, organization_id, project_id, instance_id, data, status, read_at, spam_verdict, expires_at, updated_at from form_submissions order by id',

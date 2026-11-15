@@ -17,10 +17,11 @@ export const auditPageSchema = z.object({
   nextCursor: z.string().nullable(),
 });
 export const usageQuerySchema = z.object({ period: usagePeriodSchema.optional() }).strict();
+export const unsignedIntegerStringSchema = z.string().regex(/^\d+$/);
 /** Decimal strings preserve counters above JavaScript's safe integer range. */
 export const usageResponseSchema = z.object({
   period: usagePeriodSchema,
-  data: z.array(z.object({ metric: metricNameSchema, value: z.string().regex(/^\d+$/) })),
+  data: z.array(z.object({ metric: metricNameSchema, value: unsignedIntegerStringSchema })),
 });
 export const integrationResponseSchema = z
   .object({

@@ -144,6 +144,38 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/projects/{projectId}/files': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['uploads.files.list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/files/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['uploads.files.read'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/projects/{projectId}/forms': {
     parameters: {
       query?: never;
@@ -474,6 +506,22 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations['privacy.subjectExport'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/storage-usage': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['uploads.storage.usage'];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -1590,6 +1638,157 @@ export interface operations {
       };
     };
   };
+  'uploads.files.list': {
+    parameters: {
+      query?: {
+        from?: string;
+        to?: string;
+        limit?: number;
+        cursor?: string;
+        zoneId?: string;
+        status?: 'pending' | 'uploaded' | 'scanning' | 'ready' | 'quarantined' | 'rejected';
+        q?: string;
+      };
+      header?: never;
+      path: {
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A bounded page of private file metadata. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data: {
+              /** Format: date-time */
+              createdAt: string;
+              /** Format: date-time */
+              expiresAt: string | null;
+              id: string;
+              isTest: boolean;
+              name: string;
+              owner: {
+                id: string;
+                type: string;
+              } | null;
+              /** @enum {string|null} */
+              scanStatus: 'clean' | 'not_scanned' | 'infected' | 'failed' | 'retrying' | null;
+              size: number;
+              /** @enum {string} */
+              status: 'pending' | 'uploaded' | 'scanning' | 'ready' | 'quarantined' | 'rejected';
+              type: string | null;
+              /** Format: date-time */
+              updatedAt: string;
+              zoneId: string;
+            }[];
+            nextCursor: string | null;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'uploads.files.read': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Private file metadata, without credentials or object keys. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            expiresAt: string | null;
+            id: string;
+            isTest: boolean;
+            metadata: {
+              [key: string]: unknown;
+            };
+            name: string;
+            owner: {
+              id: string;
+              type: string;
+            } | null;
+            /** @enum {string|null} */
+            scanStatus: 'clean' | 'not_scanned' | 'infected' | 'failed' | 'retrying' | null;
+            size: number;
+            /** @enum {string} */
+            status: 'pending' | 'uploaded' | 'scanning' | 'ready' | 'quarantined' | 'rejected';
+            type: string | null;
+            /** Format: date-time */
+            updatedAt: string;
+            zoneId: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
   'forms.instance.list': {
     parameters: {
       query?: {
@@ -2007,12 +2206,12 @@ export interface operations {
   'forms.submissions.export': {
     parameters: {
       query?: {
+        from?: string;
+        to?: string;
         status?: 'open' | 'done';
         read?: 'true' | 'false';
         folder?: 'inbox' | 'spam';
         test?: 'true' | 'false';
-        from?: string;
-        to?: string;
         q?: string;
       };
       header?: never;
@@ -2333,12 +2532,12 @@ export interface operations {
   'forms.submissions.list': {
     parameters: {
       query?: {
+        from?: string;
+        to?: string;
         status?: 'open' | 'done';
         read?: 'true' | 'false';
         folder?: 'inbox' | 'spam';
         test?: 'true' | 'false';
-        from?: string;
-        to?: string;
         q?: string;
         limit?: number;
         cursor?: string;
@@ -3556,6 +3755,57 @@ export interface operations {
             modules: {
               [key: string]: unknown;
             };
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'uploads.storage.usage': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current stored and reserved capacity in bytes, as decimal strings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            count: string;
+            reservedBytes: string;
+            storedBytes: string;
           };
         };
       };

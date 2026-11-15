@@ -362,6 +362,7 @@ export {
   auditPageSchema,
   usageQuerySchema,
   usageResponseSchema,
+  unsignedIntegerStringSchema,
   integrationResponseSchema,
 } from './queries/schemas.ts';
 export { createPlatformQueries, type PlatformQueries } from './queries/platform.ts';
@@ -528,3 +529,5 @@ export {
   type FileClaim,
 } from './storage/file-metadata.ts';
 export { earliestExpiry } from './time/retention.ts';
+
+export { dateRangeQuerySchema } from './http/filters.ts';

@@ -114,7 +114,7 @@ export interface UploadsRepository {
     changes: UploadChanges,
   ): Promise<UploadRecord | null>;
   byOwner(owner: UploadOwner, now: Date, options?: UploadReadOptions): Promise<UploadRecord[]>;
-  usage(): Promise<{ count: bigint; storedBytes: bigint; reservedBytes: bigint }>;
+  usage(now: Date): Promise<{ count: bigint; storedBytes: bigint; reservedBytes: bigint }>;
   removeDeleted(id: string, now: Date): Promise<boolean>;
   findExpired(now: Date, limit: number): Promise<UploadRecord[]>;
   findCleanup(now: Date, limit: number): Promise<UploadRecord[]>;
