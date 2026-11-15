@@ -111,7 +111,7 @@ Hourly bounded cleanup handles pending/unclaimed files after 24 hours, expired r
 
 Unit/property tests cover config pairs/bounds, transitions, token/reference validation, claim sets, safe filenames, expiry and abort/error mapping. Real Postgres tests cover constraints, scoping, locks, audit/enqueue rollback, competing claims, duplicate complete, retention, cleanup retries and erasure.
 
-The storage contract suite runs against Garage in CI and can target another explicitly configured S3-compatible provider. Prove signed type/length rejection, COPY/HEAD/read/delete, private access, attachment headers and real browser CORS. Isolate fixture objects by unique prefixes and remove only those objects.
+The [shared storage contract](../../packages/adapters/test/storage-contract.ts) runs against Garage in CI and can target another explicitly configured S3-compatible provider ([instructions](../storage-contracts.md)). The [Chromium contract](../../e2e/storage.spec.ts) exercises real browser CORS and computed Content-Length. Prove signed type/length rejection, COPY/HEAD/read/delete, private access, attachment headers and real browser CORS. Isolate fixture objects by unique prefixes and remove only those objects.
 
 Acceptance must demonstrate:
 

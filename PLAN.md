@@ -1033,14 +1033,14 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Real Postgres cross-tenant, competing-lock, pagination, expired/marked-deleted visibility and lifetime tests.
 - **Risks/notes:** Keep repository storage operations thin; validation and state decisions belong in uploads.
 
-### [ ] P3.10a – Establish the reusable storage contract suite (est. 5 h)
+### [x] P3.10a – Establish the reusable storage contract suite (est. 5 h)
 - **Description:** Promote the existing Garage signing/COPY/read/delete checks into reusable contracts and prove browser CORS before building the public upload flow.
 - **Files/packages:** packages/adapters tests, server/browser storage tests, CI fixtures
 - **Depends on:** P3.0a
 - **Reuses:** Existing S3 adapter, ADR-0020/0044, Garage compose/init and unique fixture prefixes
 - **Acceptance criteria:**
-  - [ ] Wrong length/type is rejected by storage; private objects, COPY/HEAD/read/delete and forced download headers are proved.
-  - [ ] Real browser PUT/preflight works; optional provider runs use explicit env config and delete only their unique fixture objects.
+  - [x] Wrong length/type is rejected by storage; private objects, COPY/HEAD/read/delete and forced download headers are proved.
+  - [x] Real browser PUT/preflight works; optional provider runs use explicit env config and delete only their unique fixture objects.
 - **Tests:** Garage contract tests in CI plus browser CORS; optional provider suite clearly distinguished from required Garage evidence.
 - **Risks/notes:** Browser code cannot manually set Content-Length; actual File/Blob bytes must match the signed declaration.
 
@@ -1281,6 +1281,8 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
 
 ### Planning risks and execution notes
+
+- P3.10a complete: shared backend-neutral signed-header/private-copy/download/expiry/CORS contract runs against Garage; optional TEST_S3 provider settings fail on partial opt-in and never print secrets. Required browser contract passed in actual Chromium 158 (1 test, no retries), using a real local HTTP fixture so loopback address-space checks are realistic. Root tooling declares adapters/core as workspace dev dependencies and uses their public exports. `CI=true bun run check` passed (488 package + 102 script tests); current browser fixture also passes root typecheck/lint. No optional external provider was configured or claimed as evidence. Instructions: docs/storage-contracts.md. Next: P3.3a.
 
 - P3.2b complete: module-owned Zod-derived file model/repository interface, tenant-scoped db factory, state CAS/locks, visibility/paging/search, precision-safe storage aggregates and bounded maintenance. Driver bytea conversion stays in db; modules use Uint8Array. Six real repository tests pass. P3.5a must persist the owner expiry bound and clamp zone-retention recomputation when production claiming is added; there is no production claim path yet. `CI=true bun run check` passed (488 package + 100 script tests); the production-factory inventory now explicitly includes uploads. Next: P3.10a.
 
