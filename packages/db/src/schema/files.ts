@@ -46,6 +46,7 @@ export const files = pgTable(
     scan: jsonb('scan').$type<FileScanResult>(),
     scanAttempts: integer('scan_attempts').notNull().default(0),
     uploadTokenHash: bytea('upload_token_hash').notNull(),
+    uploadHandle: text('upload_handle'),
     uploadExpiresAt: timestampColumn('upload_expires_at').notNull(),
     uploadedAt: timestampColumn('uploaded_at'),
     copiedAt: timestampColumn('copied_at'),

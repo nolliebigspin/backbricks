@@ -35,7 +35,18 @@ export async function createProjectUploadIntent(
     { authorization: `Bearer ${credential.token}` },
   );
   expect(response.status).toBe(200);
-  return uploadIntentResponseSchema.parse(await response.json());
+  const result = uploadIntentResponseSchema.parse(await response.json());
+  await f.trackIntent(result, { organizationId: project.organizationId, projectId: project.id });
+  return {
+    ...result,
+    complete: () =>
+      f.request(
+        `/v1/public/files/${result.fileId}/complete`,
+        { data: { uploadToken: result.uploadToken } },
+        undefined,
+        { authorization: `Bearer ${credential.token}` },
+      ),
+  };
 }
 
 /** Actual private rows in sibling projects and a foreign organization, with session-issued credentials. */

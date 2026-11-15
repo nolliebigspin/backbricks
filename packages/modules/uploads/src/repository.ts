@@ -28,6 +28,7 @@ export const uploadRecordSchema = z
     scanAttempts: z.number().int().nonnegative(),
     uploadTokenHash: bytes,
     uploadExpiresAt: z.date(),
+    uploadHandle: z.string().min(1).max(2048).nullable(),
     uploadedAt: z.date().nullable(),
     copiedAt: z.date().nullable(),
     stagingCleanedAt: z.date().nullable(),
@@ -59,6 +60,7 @@ export type UploadInsert = Pick<
   | 'sizeBytes'
   | 'uploadTokenHash'
   | 'uploadExpiresAt'
+  | 'uploadHandle'
   | 'metadata'
   | 'isTest'
   | 'createdAt'

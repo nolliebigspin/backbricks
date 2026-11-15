@@ -4,7 +4,7 @@ import { UPLOAD_TOKEN_PREFIX, UPLOAD_TOKEN_BYTES } from '../storage/file-referen
 export const REDACTED = '[redacted]';
 // IDs stay visible; credential-bearing fields are masked regardless of their contents.
 const SECRET_FIELD =
-  /authorization|cookie|passw(or)?d|secret|token|credential|signature|fileRef|uploadUrl|key$/i;
+  /authorization|cookie|passw(or)?d|secret|token|credential|signature|fileRef|uploadUrl|upload_?handle|key$/i;
 const SECRET_VALUE = new RegExp(
   `${API_KEY_PREFIXES.secret}[${API_KEY_ALPHABET}]{${API_KEY_TOKEN_LENGTH}}|${UPLOAD_TOKEN_PREFIX}[a-f0-9]{${UPLOAD_TOKEN_BYTES * 2}}`,
   'g',

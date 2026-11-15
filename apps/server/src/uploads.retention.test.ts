@@ -16,9 +16,19 @@ test.skipIf(!uploadsAvailable)(
         const f = await prepareUploads(base);
         try {
           const file = await f.ready();
-          await f.put(file);
           const row = await f.use(async (tx) => tx.modules.uploads?.get(file.fileId, f.now()));
           if (!row) throw new Error('Missing file');
+          // Trusted fixture PUT simulates a legacy/out-of-band staging object; public sessions are consumed.
+          const legacy = await f.storage.presignPut({
+            key: row.stagingKey,
+            size: file.bytes.length,
+            contentType: 'application/pdf',
+            expiresInSeconds: 300,
+          });
+          expect(
+            (await fetch(legacy.url, { method: 'PUT', headers: legacy.headers, body: file.bytes }))
+              .status,
+          ).toBe(200);
           await f.db.execute("delete from pgboss.job where name = 'uploads.cleanup-file'");
           shift = 360_000;
           const purge = f.jobs().find((job) => job.name === PLATFORM_JOBS.retentionPurge);
@@ -121,6 +131,7 @@ test.skipIf(!uploadsAvailable)(
               })
             ).status,
           ).toBe(200);
+          expect((await neighbour.complete()).status).toBe(200);
           neighbourKey = `stg/${f.a2.organizationId}/${f.a2.id}/${neighbour.fileId}`;
           const files = await f.use(async (tx) => {
             const repo = tx.modules.uploads;

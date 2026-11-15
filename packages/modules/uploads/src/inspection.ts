@@ -19,11 +19,15 @@ function boundedBytes(
   const reader = stream.getReader();
   let count = 0;
   let invalidSize = false;
+  let canceled = false;
+  let released = false;
   const abort = () => {
     void reader.cancel().catch(() => {});
   };
   signal.addEventListener('abort', abort, { once: true });
   const stop = () => {
+    if (released) return;
+    released = true;
     signal.removeEventListener('abort', abort);
     reader.releaseLock();
   };
@@ -32,6 +36,7 @@ function boundedBytes(
       try {
         signal.throwIfAborted();
         const { done, value } = await reader.read();
+        if (canceled) return;
         signal.throwIfAborted();
         if (done) {
           invalidSize = count !== size;
@@ -52,6 +57,7 @@ function boundedBytes(
       }
     },
     async cancel() {
+      canceled = true;
       try {
         await reader.cancel();
       } finally {
@@ -63,8 +69,8 @@ function boundedBytes(
 }
 /** Inspect only the immutable final key. Independent reads avoid an unbounded tee between consumers. */
 export async function inspectFinalFile(
-  storage: StorageAdapter,
-  file: UploadRecord,
+  storage: Pick<StorageAdapter, 'read'>,
+  file: Pick<UploadRecord, 'storageKey' | 'sizeBytes'>,
   scanner: Scanner | null,
 ) {
   const signal = AbortSignal.timeout(UPLOAD_INSPECTION.timeoutMs);

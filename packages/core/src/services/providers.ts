@@ -2,6 +2,9 @@ import type { z } from 'zod';
 
 import type {
   signedStorageRequestSchema,
+  storageUploadSessionSchema,
+  storageUploadControlSchema,
+  storageUploadCompleteSchema,
   storageObjectSchema,
   storagePutSchema,
   storageGetSchema,
@@ -15,6 +18,13 @@ export type InlineImageType = z.infer<typeof inlineImageTypeSchema>;
 
 /** Private object storage. Implementations validate TTL/headers and default downloads to attachment. */
 export interface StorageAdapter {
+  /** A public URL writes one part; only completeUpload may create the object. */
+  createUploadSession(
+    input: z.infer<typeof storagePutSchema>,
+  ): Promise<z.infer<typeof storageUploadSessionSchema>>;
+  completeUpload(input: z.infer<typeof storageUploadCompleteSchema>): Promise<void>;
+  /** Confirm session closure or throw a safe retryable error. */
+  abortUpload(input: z.infer<typeof storageUploadControlSchema>): Promise<void>;
   presignPut(input: z.infer<typeof storagePutSchema>): Promise<SignedStorageRequest>;
   presignGet(input: z.infer<typeof storageGetSchema>): Promise<string>;
   head(key: string): Promise<StorageObject | null>;

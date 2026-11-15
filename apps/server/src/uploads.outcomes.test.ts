@@ -113,6 +113,9 @@ test.skipIf(!uploadsAvailable)(
           const cleanup = f.jobs().find((job) => job.name === 'uploads.cleanup-file');
           if (!scan || !cleanup) throw new Error('Missing upload handlers.');
           await scan.run(f.scope, { fileId: file.fileId });
+          expect(
+            await f.use(async (tx) => tx.modules.uploads?.get(file.fileId, f.now())),
+          ).toMatchObject({ status: 'scanning', scan: { status: 'retrying' } });
           await scan.run(f.scope, { fileId: file.fileId });
           expect(
             (await f.use(async (tx) => tx.modules.uploads?.get(file.fileId, f.now())))

@@ -43,3 +43,17 @@ export const storageObjectSchema = z
 export const signedStorageRequestSchema = z
   .object({ url: z.url(), headers: z.record(z.string(), z.string()) })
   .strict();
+
+/** Provider-private identity for a direct upload that only the server may finalize. */
+export const storageUploadControlSchema = z
+  .object({
+    key: storageKeySchema,
+    handle: z.string().min(1).max(2048),
+  })
+  .strict();
+export const storageUploadCompleteSchema = storageUploadControlSchema.extend({
+  size: storagePutSchema.shape.size,
+});
+export const storageUploadSessionSchema = signedStorageRequestSchema.extend({
+  handle: storageUploadControlSchema.shape.handle,
+});

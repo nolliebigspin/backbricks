@@ -23,7 +23,7 @@ const scannedEnvironment = {
 };
 
 test.skipIf(!uploadsAvailable)(
-  'COPY survives SQL rollback; retries never replace its bytes with a second signed PUT',
+  'COPY survives SQL rollback; consumed upload sessions cannot replace its bytes',
   async () => {
     await scenario(
       async (base) => {
@@ -54,7 +54,7 @@ test.skipIf(!uploadsAvailable)(
                 body: replacement,
               })
             ).status,
-          ).toBe(200);
+          ).toBe(404);
           await f.db.execute('alter table files drop constraint fixture_scan_commit_failure');
           await job.run(f.scope, { fileId: file.fileId });
           const ready = await f.use(async (tx) => tx.modules.uploads?.get(file.fileId, f.now()));

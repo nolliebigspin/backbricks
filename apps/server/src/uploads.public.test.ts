@@ -111,17 +111,8 @@ test.skipIf(!uploadsAvailable)(
               })
             ).status,
           ).toBe(404);
-          const wrong = await f.storage.presignPut({
-            key: row!.stagingKey,
-            contentType: 'application/pdf',
-            size: 3,
-            expiresInSeconds: 300,
-          });
-          expect(
-            (await fetch(wrong.url, { method: 'PUT', headers: wrong.headers, body: 'bad' })).status,
-          ).toBe(200);
-          expect((await f.complete(file)).status).toBe(422);
           await f.put(file);
+          expect(await f.storage.head(row!.stagingKey)).toBeNull();
           const results = await Promise.all(Array.from({ length: 5 }, () => f.complete(file)));
           expect(results.map((response) => response.status)).toEqual([200, 200, 200, 200, 200]);
           for (const response of results) {
@@ -145,6 +136,21 @@ test.skipIf(!uploadsAvailable)(
           expect(usage.find((value) => value.metric === 'uploads.bytes')?.value).toBe(
             BigInt(file.bytes.byteLength),
           );
+          const mismatch = await f.intent('mismatch.pdf');
+          const mismatchRow = await f.use(async (tx) =>
+            tx.modules.uploads?.get(mismatch.fileId, f.now()),
+          );
+          if (!mismatchRow) throw new Error('Missing mismatch file');
+          const wrong = await f.storage.presignPut({
+            key: mismatchRow.stagingKey,
+            contentType: 'application/pdf',
+            size: 3,
+            expiresInSeconds: 300,
+          });
+          expect(
+            (await fetch(wrong.url, { method: 'PUT', headers: wrong.headers, body: 'bad' })).status,
+          ).toBe(200);
+          expect((await f.complete(mismatch)).status).toBe(422);
           const foreign = await issueKey(f, f.a2.id, {
             kind: 'secret',
             name: 'Foreign project',
@@ -252,6 +258,7 @@ test.skipIf(!uploadsAvailable)(
           expect(browser.status).toBe(200);
           const intent = uploadIntentResponseSchema.parse(await browser.json());
           expect(intent.uploadToken).toStartWith('bbu_');
+          await f.trackIntent(intent);
           const file = await f.intent();
           await f.put(file);
           await f.db.execute(
@@ -264,6 +271,22 @@ test.skipIf(!uploadsAvailable)(
           await f.db.execute(
             'alter table pgboss.job drop constraint fixture_upload_enqueue_failure',
           );
+          const persisted = await f.use(async (tx) =>
+            tx.modules.uploads?.get(file.fileId, f.now()),
+          );
+          if (!persisted) throw new Error('Missing rollback file');
+          expect(await f.storage.head(persisted.stagingKey)).not.toBeNull();
+          expect(
+            (
+              await fetch(file.uploadUrl, {
+                method: 'PUT',
+                headers: file.headers,
+                body: file.bytes,
+              })
+            ).status,
+          ).toBe(404);
+          expect((await f.complete(file)).status).toBe(200);
+          const stale = await f.intent('stale.pdf');
           const config = instanceResponseSchema.parse(
             await (await f.request(`${f.zonePath}/cv`, undefined, f.owner.cookie)).json(),
           );
@@ -278,7 +301,7 @@ test.skipIf(!uploadsAvailable)(
               )
             ).status,
           ).toBe(200);
-          expect((await f.complete(file)).status).toBe(409);
+          expect((await f.complete(stale)).status).toBe(409);
           expect(
             (
               await f.request(

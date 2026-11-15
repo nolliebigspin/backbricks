@@ -20,23 +20,9 @@ import {
   type StorageConfig,
 } from '@backbricks/core';
 
-// Provider stalls must not hold tenant mutations forever; byte streams have their own longer bound.
-const STORAGE_IO_TIMEOUTS = { metadataMs: 5000, readMs: 30_000 } as const;
+import { isMissing, unavailable, STORAGE_IO_TIMEOUTS } from './s3-io.ts';
+import { createS3UploadSessions } from './s3-sessions.ts';
 
-function unavailable(): never {
-  throw new AppError('service_unavailable', { detail: 'Object storage is unavailable.' });
-}
-function isMissing(error: unknown) {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    '$metadata' in error &&
-    typeof error.$metadata === 'object' &&
-    error.$metadata !== null &&
-    'httpStatusCode' in error.$metadata &&
-    error.$metadata.httpStatusCode === 404
-  );
-}
 function disposition(inline: boolean, name = 'download') {
   const encoded = encodeURIComponent(name).replaceAll(
     /['()*]/g,
@@ -58,6 +44,7 @@ export function createS3Storage(config: StorageConfig, clock: Clock = systemCloc
   const internal = new S3Client({ ...options, endpoint: config.endpoint });
   const signing = new S3Client({ ...options, endpoint: config.publicEndpoint ?? config.endpoint });
   const adapter: StorageAdapter = {
+    ...createS3UploadSessions(internal, signing, config, clock),
     async presignPut(input) {
       const data = storagePutSchema.parse(input);
       const headers = { 'content-length': String(data.size), 'content-type': data.contentType };

@@ -20,6 +20,7 @@ test.skipIf(!uploadsAvailable)(
         try {
           const seed = await f.intent();
           await f.put(seed);
+          expect((await f.complete(seed)).status).toBe(200);
           const row = await f.use(async (tx) => tx.modules.uploads?.get(seed.fileId, f.now()));
           if (!row) throw new Error('Missing seed');
           const ids = createIds({ now: f.now });
@@ -32,6 +33,7 @@ test.skipIf(!uploadsAvailable)(
               await repository.insert({
                 ...row,
                 id,
+                uploadHandle: null,
                 stagingKey: `stg/${row.organizationId}/${row.projectId}/${id}`,
                 storageKey: `fil/${row.organizationId}/${row.projectId}/${id}`,
               });

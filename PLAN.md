@@ -1161,15 +1161,15 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Clock-driven real Postgres/Garage orphan/retention/late-PUT/concurrency/provider-failure tests.
 - **Risks/notes:** Do not remove the final cleanup row while an issued PUT can still recreate its staging object.
 
-### [ ] P3.7a1 – Close upload sessions before physical erasure (est. 6 h, from reserve)
+### [x] P3.7a1 – Close upload sessions before physical erasure (est. 6 h, from reserve)
 - **Description:** Replace public raw PUT signatures with server-finalized, single-part storage sessions while preserving one browser PUT and existing intent/complete responses. A real Garage probe proved a PUT started before signature expiry can finish afterward.
 - **Files/packages:** Core storage port, S3 adapter, private file schema/forward migration, uploads intent/complete/cleanup and storage contracts
 - **Depends on:** P3.7a
 - **Reuses:** Existing S3 multipart primitives, signed headers, durable cleanup, copy-then-scan and transactional state transitions; no resumable-upload product feature.
 - **Acceptance criteria:**
-  - [ ] Only server completion can create the staging object; consumed/aborted sessions cannot recreate it.
-  - [ ] Cleanup aborts sessions and retains opaque identity through confirmed settlement; handles are never returned separately or logged.
-  - [ ] Real Garage tests cover in-flight expiry/abort, exact bytes/headers, completion rollback and browser CORS.
+  - [x] Only server completion can create the staging object; consumed/aborted sessions cannot recreate it.
+  - [x] Cleanup aborts sessions and retains opaque identity through confirmed settlement; handles are never returned separately or logged.
+  - [x] Real Garage tests cover in-flight expiry/abort, exact bytes/headers, completion rollback and browser CORS.
 - **Tests:** Shared storage-session contract plus real HTTP/Postgres/Garage regressions; preserve existing public JSON shape.
 - **Risks/notes:** Consumes 6 h of the approved reserve, keeping the 148 h envelope. ADR-0072 records the security correction; review remains deferred.
 
@@ -1293,6 +1293,8 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
 
 ### Planning risks and execution notes
+
+- P3.7a1 complete: public upload URLs now write only one part of an opaque storage session; server completion validates/finalizes it before HEAD and atomic scan enqueue. Completed/aborted sessions cannot recreate staging, including a body spanning expiry/abort. Cleanup confirms session closure and retains conservative identity through post-expiry deletion. Generated private-handle migration, explicit response projections and redaction preserve the public JSON shape. Actual Garage and Chromium contracts pass; real HTTP tests prove completion/queue rollback recovery without another PUT. The full run exposed a scanner-cancellation race; a deterministic failing test led to preserving provider errors/retries while still rejecting natural short EOF. `CI=true bun run check` passed (543 package + 102 script tests; `/tmp/backbricks-p3-7a1-check-final.log`), and Chromium storage acceptance passed 2/2 with no retries. ADR-0072 records the correction. Review remains deferred. Next: P3.7b.
 
 - P3.7a complete: bounded expiry/cleanup/staging/stalled-scan discovery, partial indexes, truthful count/continuation results, archived-project maintenance without erasure authority (ADR-0071), bounded storage I/O and conservative cleanup timestamps. Real Postgres/Garage tests prove 105-record concurrent retention, lost-job recovery, 24-hour orphans under unlimited retention, archived zones/projects and neighbour isolation. `CI=true bun run check` passed (540 package + 102 script tests; `/tmp/backbricks-p3-7a-check.log`). A real Garage slow-body probe confirmed raw PUTs can finish after signature expiry; P3.7a1 closes that gap before privacy acceptance, consuming 6 h reserve within the unchanged 148 h envelope. End review remains deferred. Next: P3.7a1.
 

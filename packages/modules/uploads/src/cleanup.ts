@@ -26,6 +26,8 @@ export async function cleanupUpload(
   const storage = runtime.services.require('storage');
   let stagingStartedAt: Date;
   try {
+    if (file.uploadHandle)
+      await storage.abortUpload({ key: file.stagingKey, handle: file.uploadHandle });
     if (terminal) await storage.delete(file.storageKey);
     // A response after expiry cannot prove the DELETE began after the last allowed PUT.
     stagingStartedAt = runtime.services.clock.now();

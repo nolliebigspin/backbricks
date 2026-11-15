@@ -15,6 +15,15 @@ import {
 } from '../index.ts';
 
 const storage: StorageAdapter = {
+  createUploadSession: async () => {
+    throw new Error('Not used by catalog tests.');
+  },
+  completeUpload: async () => {
+    throw new Error('Not used by catalog tests.');
+  },
+  abortUpload: async () => {
+    throw new Error('Not used by catalog tests.');
+  },
   presignPut: async () => ({ url: 'https://storage.invalid/object', headers: {} }),
   presignGet: async () => 'https://storage.invalid/object',
   head: async () => null,

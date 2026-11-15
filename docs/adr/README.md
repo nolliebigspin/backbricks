@@ -81,3 +81,4 @@ Short documents that record significant decisions: deviations from or refinement
 | [0069](0069-erasure-requires-enabled-modules.md) | Erasure requires every persisted module | accepted during execution; end review deferred |
 | [0070](0070-private-download-deadlines.md) | Private download deadlines | accepted during execution; end review deferred |
 | [0071](0071-archived-project-maintenance.md) | Archived project maintenance and bounded recovery | accepted during execution; end review deferred |
+| [0072](0072-server-finalized-upload-sessions.md) | Server-finalized direct upload sessions | accepted during execution; end review deferred |

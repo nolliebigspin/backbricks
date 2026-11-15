@@ -475,12 +475,14 @@ sequenceDiagram
 
   B->>API: POST /v1/public/upload-zones/cv/files {name, size, type} + PoW
   API->>API: AbuseGuard, zone rules (type, size), quota
+  API->>S3: Create private single-part upload session
   API->>API: files row status=pending, staging_key=stg/{org}/{prj}/{fileId}
   API-->>B: {fileId, uploadUrl (PUT, 5 min, Content-Length+Type signed), uploadToken}
-  B->>S3: PUT uploadUrl (file)
+  B->>S3: PUT uploadUrl (one part; no object yet)
   S3-->>B: 200
   B->>API: POST /v1/public/files/{fileId}/complete {uploadToken}
-  API->>S3: HEAD staging_key (verify size)
+  API->>S3: Validate part and finalize upload session
+  API->>S3: HEAD staging_key (verify size and type)
   API->>API: status=uploaded, enqueue scan_file
   API-->>B: {fileId, fileRef}
   W->>S3: COPY staging_key → storage_key (fil/{org}/{prj}/{fileId})
@@ -848,3 +850,5 @@ Milestones, scope, exit criteria and effort: `docs/MILESTONES.md`. Tasks: `PLAN.
 ---
 
 *Changes to decisions in §0 or §J.2 require an ADR.*
+
+The implemented upload storage session protocol is documented in [ADR-0072](adr/0072-server-finalized-upload-sessions.md) and the [module implementation](modules/uploads.md): one direct part PUT, server completion, then immutable copy/inspection. Signature expiry alone does not settle an in-flight request.

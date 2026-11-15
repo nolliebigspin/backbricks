@@ -85,46 +85,55 @@ export function uploadsPublicRoutes(router: ModulePublicRouter<UploadsRuntime>):
       if (!projectId) throw new AppError('internal_error');
       const stagingKey = `stg/${organizationId}/${projectId}/${fileId}`;
       const expiresAt = new Date(now.getTime() + UPLOAD_LIFETIMES.putSeconds * 1000);
-      const signed = await runtime.services.require('storage').presignPut({
+      const signed = await runtime.services.require('storage').createUploadSession({
         key: stagingKey,
         contentType: input.body.type,
         size: input.body.size,
         expiresInSeconds: UPLOAD_LIFETIMES.putSeconds,
       });
-      await uploadsRepository(runtime).insert({
-        id: fileId,
-        instanceId: context.instanceId,
-        configVersion: context.configVersion,
-        stagingKey,
-        storageKey: `fil/${organizationId}/${projectId}/${fileId}`,
-        originalName: input.body.name,
-        declaredMime: input.body.type,
-        sizeBytes: input.body.size,
-        uploadTokenHash: await hashApiKey(token),
-        uploadExpiresAt: expiresAt,
-        metadata: input.body.metadata ?? {},
-        isTest: false,
-        createdAt: now,
-        updatedAt: now,
-        expiresAt: new Date(now.getTime() + UPLOAD_LIFETIMES.orphanMs),
-      });
-      await runtime.services.usage.increment(runtime.tx, {
-        metric: UPLOAD_METRICS.bytes,
-        delta: BigInt(input.body.size),
-      });
-      await runtime.services.usage.increment(runtime.tx, {
-        metric: UPLOAD_METRICS.files,
-        delta: 1n,
-      });
-      return Response.json(
-        uploadIntentResponseSchema.parse({
-          fileId,
-          uploadUrl: signed.url,
-          headers: signed.headers,
-          uploadToken: token,
-          expiresAt: expiresAt.toISOString(),
-        }),
-      );
+      try {
+        await uploadsRepository(runtime).insert({
+          id: fileId,
+          instanceId: context.instanceId,
+          configVersion: context.configVersion,
+          stagingKey,
+          storageKey: `fil/${organizationId}/${projectId}/${fileId}`,
+          originalName: input.body.name,
+          declaredMime: input.body.type,
+          sizeBytes: input.body.size,
+          uploadTokenHash: await hashApiKey(token),
+          uploadExpiresAt: expiresAt,
+          uploadHandle: signed.handle,
+          metadata: input.body.metadata ?? {},
+          isTest: false,
+          createdAt: now,
+          updatedAt: now,
+          expiresAt: new Date(now.getTime() + UPLOAD_LIFETIMES.orphanMs),
+        });
+        await runtime.services.usage.increment(runtime.tx, {
+          metric: UPLOAD_METRICS.bytes,
+          delta: BigInt(input.body.size),
+        });
+        await runtime.services.usage.increment(runtime.tx, {
+          metric: UPLOAD_METRICS.files,
+          delta: 1n,
+        });
+        return Response.json(
+          uploadIntentResponseSchema.parse({
+            fileId,
+            uploadUrl: signed.url,
+            headers: signed.headers,
+            uploadToken: token,
+            expiresAt: expiresAt.toISOString(),
+          }),
+        );
+      } catch (error) {
+        await runtime.services
+          .require('storage')
+          .abortUpload({ key: stagingKey, handle: signed.handle })
+          .catch(() => undefined);
+        throw error;
+      }
     },
   );
   router.register(
@@ -173,7 +182,16 @@ export function uploadsPublicRoutes(router: ModulePublicRouter<UploadsRuntime>):
         });
         if (config.scanRequired && !runtime.services.optional('scanner'))
           throw new AppError('capability_unavailable');
-        const head = await runtime.services.require('storage').head(file.stagingKey);
+        const storage = runtime.services.require('storage');
+        let head = await storage.head(file.stagingKey);
+        if (!head && file.uploadHandle) {
+          await storage.completeUpload({
+            key: file.stagingKey,
+            handle: file.uploadHandle,
+            size: file.sizeBytes,
+          });
+          head = await storage.head(file.stagingKey);
+        }
         if (!head || head.size !== file.sizeBytes || head.contentType !== file.declaredMime)
           throw new AppError('validation_failed');
         const queue = runtime.services.optional('queue');

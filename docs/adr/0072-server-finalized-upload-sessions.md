@@ -1,0 +1,13 @@
+# ADR-0072: Server-finalized direct upload sessions
+
+Status: accepted during P3.7a1 execution; maintainer review deferred to M3 completion.
+
+A real Garage experiment started a signed PUT before its one-second expiry and finished afterward; the object still appeared. [S3 checks signature expiry when a request starts](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html). Waiting for URL expiry and then deleting the key cannot by itself settle an already accepted body.
+
+The private storage port therefore adds opaque upload sessions, completion and abort. The S3 adapter creates one multipart session and signs only part 1 with exact byte length and content type. The browser still makes one direct PUT and the public intent/complete JSON shapes are unchanged. Only the server can complete the session into the staging object, after checking the one part's size and ETag. A completed or aborted handle cannot create another object. This is an internal safety mechanism, not a resumable-upload product API.
+
+Completion reuses an existing staging object after an ambiguous provider/SQL outcome, then checks HEAD and enqueues inspection atomically. COPY remains mandatory: scanned/downloadable keys have never been writable by an upload URL. Cleanup aborts the session before deleting objects, checks that it is no longer listable, and retains the handle through post-expiry cleanup confirmation. [S3 documents repeated abort/list checks for in-flight parts](https://docs.aws.amazon.com/cli/latest/reference/s3api/abort-multipart-upload.html). Provider failure retains durable cleanup identity and delays completion. [Garage's compatibility table](https://garagehq.deuxfleurs.fr/documentation/reference-manual/s3-compatibility/) lists the required multipart primitives; the real provider contract is the acceptance gate.
+
+Session handles are private persistence, redacted in diagnostics and never returned as a separate JSON field. The opaque signed PUT URL necessarily contains provider control parameters; clients treat that URL as a short-lived credential. A forward nullable column supports pre-existing development rows; all new public intents use sessions. Low-level trusted `presignPut` remains in the adapter contract for internal use/tests and is never used for managed public uploads. Unreturned sessions contain no visitor bytes and are best-effort aborted on intent failure.
+
+No new dependency, infrastructure or invariant change. P3.7a1 consumes six hours of the approved reserve. Real Garage tests exercise exact signed headers, server-only object creation, consumed URL rejection, completion rollback, abort of a body spanning expiry, and browser CORS.

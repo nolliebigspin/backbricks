@@ -192,9 +192,17 @@ test.skipIf(!uploadsAvailable)(
           ).toBeNull();
           await cleanup.run(context, { fileId: file.fileId });
           expect(await f.storage.head(row.storageKey)).toBeNull();
-          // The issued URL can still create a late staging object; the retained row tracks it.
-          await f.put(file);
-          expect(await f.storage.head(row.stagingKey)).not.toBeNull();
+          // A finalized session cannot recreate an object even while its signature is live.
+          expect(
+            (
+              await fetch(file.uploadUrl, {
+                method: 'PUT',
+                headers: file.headers,
+                body: file.bytes,
+              })
+            ).status,
+          ).toBe(404);
+          expect(await f.storage.head(row.stagingKey)).toBeNull();
           await erase.run(context, { round: 2 });
           expect(
             (await f.db.execute<{ id: string }>(`select id from files where id = '${file.fileId}'`))

@@ -62,6 +62,16 @@ export async function prepareUploads(
   );
   expect(zone.status).toBe(201);
   const owned = new Set<string>();
+  const sessions: { key: string; handle: string }[] = [];
+  const trackIntent = async (file: { fileId: string }, context = scope) => {
+    const row = await withTenant(context, async (tx) =>
+      tx.modules.uploads?.get(file.fileId, f.now()),
+    );
+    if (!row) throw new Error('Missing fixture file.');
+    owned.add(row.stagingKey);
+    owned.add(row.storageKey);
+    if (row.uploadHandle) sessions.push({ key: row.stagingKey, handle: row.uploadHandle });
+  };
   const intent = async (
     name = 'cv.pdf',
     bytes = new TextEncoder().encode('%PDF-1.7\nfixture\n%%EOF'),
@@ -75,8 +85,7 @@ export async function prepareUploads(
     );
     expect(response.status).toBe(200);
     const result = uploadIntentResponseSchema.parse(await response.json());
-    owned.add(`stg/${scope.organizationId}/${scope.projectId}/${result.fileId}`);
-    owned.add(`fil/${scope.organizationId}/${scope.projectId}/${result.fileId}`);
+    await trackIntent(result);
     return { ...result, bytes };
   };
   const complete = (file: { fileId: string; uploadToken: string }) =>
@@ -118,7 +127,9 @@ export async function prepareUploads(
     complete,
     put,
     ready,
+    trackIntent,
     async cleanup() {
+      await Promise.all(sessions.map((session) => storage.abortUpload(session)));
       await Promise.all([...owned].map((key) => storage.delete(key)));
       storage.close();
     },
