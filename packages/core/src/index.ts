@@ -498,3 +498,13 @@ export {
   authCapabilitiesSchema,
   authCapabilities,
 } from './identity/auth-settings.ts';
+
+export {
+  UPLOAD_TOKEN_PREFIX,
+  UPLOAD_TOKEN_BYTES,
+  uploadTokenSchema,
+  fileIdSchema,
+  fileReferenceSchema,
+  parseFileReference,
+  type FileReference,
+} from './storage/file-reference.ts';

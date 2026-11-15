@@ -1,4 +1,4 @@
-import { defineModuleDescriptor, type InfraRequirement } from '@backbricks/core';
+import { defineModuleDescriptor } from '@backbricks/core';
 export { uploadRecordSchema } from './repository.ts';
 export type {
   UploadRecord,
@@ -33,14 +33,15 @@ export {
 } from './formats.ts';
 export { uploadFilenameSchema, uploadStatusSchema, type UploadStatus } from './values.ts';
 
-/**
- * Uploads stores files in S3-compatible storage and scans them when a scanner is configured
- * (`SCANNER=none` is allowed). The full definition arrives in its domain milestone.
- */
-export const uploadsInfrastructure = [
-  { service: 'storage' },
-  { service: 'scanner', optional: true },
-] as const satisfies readonly InfraRequirement[];
+export { uploadsInfrastructure } from './infrastructure.ts';
+import { uploadsInfrastructure } from './infrastructure.ts';
+export { uploadsModule } from './module.ts';
+export {
+  uploadIntentSchema,
+  uploadIntentResponseSchema,
+  uploadCompleteResponseSchema,
+} from './public.ts';
+export { UPLOAD_LIFETIMES, UPLOAD_JOBS, UPLOAD_METRICS } from './constants.ts';
 
 /** M1 descriptor only; the domain milestone supplies the operational definition. */
 export const uploadsDescriptor = defineModuleDescriptor({

@@ -1055,15 +1055,15 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Synthetic contract tests and real scoped HTTP tests, including foreign IDs/tokens, body limits and route coverage.
 - **Risks/notes:** No uploads-specific query in the server and no extra unscoped bootstrap exception.
 
-### [ ] P3.3b – Implement intent and repeatable completion (est. 6 h)
+### [x] P3.3b – Implement intent and repeatable completion (est. 6 h)
 - **Description:** Make uploads operational. Validate intent, issue exact 300-second PUT/token, check HEAD on completion and atomically enqueue one scan job; repeated completion returns caller-owned state.
 - **Files/packages:** uploads public routes/services; server catalog/composition; isolation/public-response fixtures
 - **Depends on:** P3.1b, P3.2b, P3.10a, P3.3a
 - **Reuses:** Public guard, quota amountField, usage counters, token hashing, storage adapter and transactional queue
 - **Acceptance criteria:**
-  - [ ] Intent/complete follow the module plan with 4 KiB limits; credentials/signed URLs are never cached, audited or logged.
-  - [ ] Duplicate/concurrent complete enqueues once; wrong token/tenant/zone, stale policy and mismatched/missing HEAD fail without persistent partial work.
-  - [ ] Uploads-only and forms-only boot correctly; every new operation has manifest coverage.
+  - [x] Intent/complete follow the module plan with 4 KiB limits; credentials/signed URLs are never cached, audited or logged.
+  - [x] Duplicate/concurrent complete enqueues once; wrong token/tenant/zone, stale policy and mismatched/missing HEAD fail without persistent partial work.
+  - [x] Uploads-only and forms-only boot correctly; every new operation has manifest coverage.
 - **Tests:** Real HTTP/Postgres/Garage intent/PUT/complete, origin/proof/scope/expiry/concurrency and enqueue/usage rollback tests.
 - **Risks/notes:** Token verification must precede any response exposing file state; only the final private copy may become downloadable.
 
@@ -1281,6 +1281,8 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
 
 ### Planning risks and execution notes
+
+- P3.3b complete: operational zones, exact 300-second signed PUT intents, 24-hour orphan expiry, shared token/reference schemas and diagnostic redaction. Reuses `uploads:create`. Token-authenticated completion checks the same tenant/zone under lock, pending expiry/current config/HEAD and transactionally enqueues one scan job; repeated completes return only caller-owned state. Raw intents are not idempotency-cached. Three real HTTP/Postgres/Garage tests plus the core reference test pass; manifest fields/preflights and sanitized public snapshot cover both operations. Enqueue failure rolls back status; wrong tenant/token, stale policy, invalid size and missing proof fail. `CI=true bun run check` passed (496 package + 102 script tests), additive contract regenerated. Scan job intentionally fails closed until P3.4; no file is made ready yet. Review remains deferred. Next: P3.4a.
 
 - P3.3a complete: explicitly owned resource namespaces, registration collision checks, per-resource CORS mounting and typed module-owned instance locators. ADR-0066 makes locator frames database read-only and exposes only the own repository/clock. Synthetic and real HTTP/Postgres tests prove origin/body/proof/replay/CORS/foreign binding and failed pre-proof mutations; existing forms behavior passes. `CI=true bun run check` passed (492 package + 102 script tests), plus typecheck after the public resolver-context type export. Human review remains deferred as requested. Next: P3.3b.
 

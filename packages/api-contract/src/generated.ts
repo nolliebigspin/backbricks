@@ -496,6 +496,102 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/projects/{projectId}/upload-zones': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['uploads.instance.list'];
+    put?: never;
+    post: operations['uploads.instance.create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/upload-zones/{key}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['uploads.instance.read'];
+    put: operations['uploads.instance.replace'];
+    post?: never;
+    delete: operations['uploads.instance.archive'];
+    options?: never;
+    head?: never;
+    patch: operations['uploads.instance.update'];
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/upload-zones/{key}/migrate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['uploads.instance.migrate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/upload-zones/{key}/revisions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['uploads.instance.revisions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/upload-zones/{key}/revisions/{version}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['uploads.instance.revision'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/upload-zones/{key}/revisions/{version}/rollback': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['uploads.instance.rollback'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/projects/{projectId}/usage': {
     parameters: {
       query?: never;
@@ -528,6 +624,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/public/files/{fileId}/complete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['uploads.public.complete'];
+    delete?: never;
+    options: operations['uploads.preflight.1'];
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/public/forms/{key}': {
     parameters: {
       query?: never;
@@ -556,6 +668,22 @@ export interface paths {
     post: operations['forms.public.submit'];
     delete?: never;
     options: operations['forms.preflight.1'];
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/public/upload-zones/{key}/files': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['uploads.public.intent'];
+    delete?: never;
+    options: operations['uploads.preflight.0'];
     head?: never;
     patch?: never;
     trace?: never;
@@ -3493,6 +3621,690 @@ export interface operations {
       };
     };
   };
+  'uploads.instance.list': {
+    parameters: {
+      query?: {
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Active and paused instance configurations. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data: {
+              config: unknown;
+              configVersion: number;
+              /** Format: date-time */
+              createdAt: string;
+              id: string;
+              key: string;
+              moduleType: string;
+              moduleVersion: number;
+              name: string;
+              organizationId: string;
+              projectId: string;
+              /** @enum {string} */
+              status: 'active' | 'paused' | 'archived';
+              storedModuleVersion?: number;
+              /** Format: date-time */
+              updatedAt: string;
+            }[];
+            nextCursor: string | null;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'uploads.instance.create': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          config?: unknown;
+          key: string;
+          name: string;
+          /**
+           * @default active
+           * @enum {string}
+           */
+          status?: 'active' | 'paused';
+          template?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Instance created with its initial revision. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            config: unknown;
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            key: string;
+            moduleType: string;
+            moduleVersion: number;
+            name: string;
+            organizationId: string;
+            projectId: string;
+            /** @enum {string} */
+            status: 'active' | 'paused' | 'archived';
+            storedModuleVersion?: number;
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'uploads.instance.read': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Instance configuration. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            config: unknown;
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            key: string;
+            moduleType: string;
+            moduleVersion: number;
+            name: string;
+            organizationId: string;
+            projectId: string;
+            /** @enum {string} */
+            status: 'active' | 'paused' | 'archived';
+            storedModuleVersion?: number;
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'uploads.instance.replace': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          config: unknown;
+          configVersion: number;
+          name?: string;
+          /**
+           * @default active
+           * @enum {string}
+           */
+          status?: 'active' | 'paused';
+        };
+      };
+    };
+    responses: {
+      /** @description Full configuration replace (null values are kept, unlike a merge patch); destructive changes additionally require config:destructive. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            config: unknown;
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            key: string;
+            moduleType: string;
+            moduleVersion: number;
+            name: string;
+            organizationId: string;
+            projectId: string;
+            /** @enum {string} */
+            status: 'active' | 'paused' | 'archived';
+            storedModuleVersion?: number;
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'uploads.instance.archive': {
+    parameters: {
+      query: {
+        configVersion: number;
+      };
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Configuration archived, key reserved, revisions retained. Requires config:write and config:destructive; personal records are not erased. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'uploads.instance.update': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          config?: unknown;
+          configVersion: number;
+          name?: string;
+          /** @enum {string} */
+          status?: 'active' | 'paused';
+        };
+      };
+    };
+    responses: {
+      /** @description Configuration merge patch; destructive changes additionally require config:destructive. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            config: unknown;
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            key: string;
+            moduleType: string;
+            moduleVersion: number;
+            name: string;
+            organizationId: string;
+            projectId: string;
+            /** @enum {string} */
+            status: 'active' | 'paused' | 'archived';
+            storedModuleVersion?: number;
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'uploads.instance.migrate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          configVersion: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Persist the current format with transactional revision and audit. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            config: unknown;
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            key: string;
+            moduleType: string;
+            moduleVersion: number;
+            name: string;
+            organizationId: string;
+            projectId: string;
+            /** @enum {string} */
+            status: 'active' | 'paused' | 'archived';
+            storedModuleVersion?: number;
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'uploads.instance.revisions': {
+    parameters: {
+      query?: {
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Immutable revision history. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data: {
+              /** @enum {string} */
+              actorType: 'user' | 'api_key' | 'mcp' | 'system';
+              config?: unknown;
+              configVersion: number;
+              /** Format: date-time */
+              createdAt: string;
+              id: string;
+              instanceId: string;
+              moduleVersion: number;
+              organizationId: string;
+              projectId: string;
+            }[];
+            nextCursor: string | null;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'uploads.instance.revision': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+        version: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Stored format and configuration of one revision. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            actorType: 'user' | 'api_key' | 'mcp' | 'system';
+            config?: unknown;
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            instanceId: string;
+            moduleVersion: number;
+            organizationId: string;
+            projectId: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'uploads.instance.rollback': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+        version: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          configVersion: number;
+        };
+      };
+    };
+    responses: {
+      /** @description New revision restoring the selected historical configuration. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            config: unknown;
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            key: string;
+            moduleType: string;
+            moduleVersion: number;
+            name: string;
+            organizationId: string;
+            projectId: string;
+            /** @enum {string} */
+            status: 'active' | 'paused' | 'archived';
+            storedModuleVersion?: number;
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
   getProjectUsage: {
     parameters: {
       query?: {
@@ -3612,6 +4424,122 @@ export interface operations {
     };
   };
   'public.challenge.preflight': {
+    parameters: {
+      query: {
+        key: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Permitted public request preflight. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'uploads.public.complete': {
+    parameters: {
+      query?: {
+        key?: string;
+      };
+      header?: {
+        'idempotency-key'?: string;
+      };
+      path: {
+        fileId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          data: {
+            uploadToken: string;
+          };
+          honeypot?: string;
+          proof?: unknown;
+        };
+      };
+    };
+    responses: {
+      /** @description Accepted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json':
+            | {
+                fileId: string;
+                fileRef: string;
+                /** @enum {string} */
+                status: 'pending' | 'uploaded' | 'scanning' | 'ready' | 'quarantined' | 'rejected';
+              }
+            | {
+                /** @enum {boolean} */
+                accepted: true;
+              };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'uploads.preflight.1': {
     parameters: {
       query: {
         key: string;
@@ -3854,6 +4782,132 @@ export interface operations {
     };
   };
   'forms.preflight.1': {
+    parameters: {
+      query: {
+        key: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Permitted public request preflight. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'uploads.public.intent': {
+    parameters: {
+      query?: {
+        key?: string;
+      };
+      header?: {
+        'idempotency-key'?: string;
+      };
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          data: {
+            metadata?: {
+              [key: string]: string;
+            };
+            name: string;
+            size: number;
+            type: string;
+          };
+          honeypot?: string;
+          proof?: unknown;
+        };
+      };
+    };
+    responses: {
+      /** @description Accepted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json':
+            | {
+                /** Format: date-time */
+                expiresAt: string;
+                fileId: string;
+                headers: {
+                  [key: string]: string;
+                };
+                uploadToken: string;
+                /** Format: uri */
+                uploadUrl: string;
+              }
+            | {
+                /** @enum {boolean} */
+                accepted: true;
+              };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'uploads.preflight.0': {
     parameters: {
       query: {
         key: string;
