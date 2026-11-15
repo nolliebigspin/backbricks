@@ -72,3 +72,6 @@ Short documents that record significant decisions: deviations from or refinement
 | [0060](0060-notification-delivery-and-throttling.md) | Notification delivery and throttling | accepted during execution; D58 |
 | [0061](0061-project-hard-erasure.md) | Project hard erasure | accepted during execution; D59 |
 | [0062](0062-minimal-sdk-snippets-and-release-version.md) | Minimal SDK transport, integration snippets and the product version | accepted during execution; D60 |
+| [0063](0063-module-resource-routes.md) | Module-owned resource routes and public instance resolution | accepted; Q17–Q20 approved 2026-11-15 |
+| [0064](0064-upload-ownership-and-durable-erasure.md) | Upload ownership and durable object erasure | accepted; Q17–Q20 approved 2026-11-15 |
+| [0065](0065-subject-file-zip-exports.md) | Authorized streaming ZIP exports for subject files | accepted; Q17–Q20 approved 2026-11-15 |

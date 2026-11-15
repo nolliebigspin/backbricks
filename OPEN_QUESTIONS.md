@@ -104,6 +104,32 @@ Decisions for the maintainer, started in P0 planning (2026-11-04), extended for 
 - **Needed by:** start of P2 execution.
 - **Answer (2026-11-09):** The maintainer accepted the recommendation (“Do all the recommended ones”). The detailed estimate (124 h + 25 h reserve, 149 h envelope) is the P2 planning envelope; no scope trims.
 
+## P3 planning: approval gates
+
+### Q17 – Approve module-owned file resource routes?
+- **Context:** The existing bridge prefixes every route with `upload-zones` and resolves public instances by a zone-key URL parameter. The planned project-level `files` and public completion routes need another resource namespace and a tenant-scoped file-to-zone resolver.
+- **Recommendation:** Approve [ADR-0063](docs/adr/0063-module-resource-routes.md). Declare/validate resource ownership centrally; invoke a module-owned token-validating resolver only after credential bootstrap inside `withTenant`, then retain the existing guard and locked rechecks. No unscoped file query or new bootstrap exception.
+- **Needed by:** P3.3a; approve as part of the module plan before application code.
+- **Answer (2026-11-15):** Approved by the maintainer ("Approved") in response to the module plan, ADRs 0063–0065 and execution-envelope approval request.
+
+### Q18 – Approve durable object deletion and deferred project erasure?
+- **Context:** SQL rollback cannot restore an S3 object, and a still-valid PUT can recreate staging after deletion. Current `eraseScope` returns a count only; M2 retention/subject deletion also need attachment cleanup before file fields become operational.
+- **Recommendation:** Approve [ADR-0064](docs/adr/0064-upload-ownership-and-durable-erasure.md): one shared reference/claim contract, atomic deletion marker + audit + job, immediately revoked access, idempotent physical cleanup through PUT expiry, and a typed deferred erasure result before final project tombstoning. Retain recoverable cleanup identity on provider failure.
+- **Needed by:** P3.5–P3.7; approve the core/form contract changes before implementation.
+- **Answer (2026-11-15):** Approved by the maintainer ("Approved") in response to the module plan, ADRs 0063–0065 and execution-envelope approval request.
+
+### Q19 – Approve streaming subject ZIP exports?
+- **Context:** ARCHITECTURE §F.4 requires file contents in ZIP exports from M3, while current privacy hooks return JSON and the streaming port is CSV-only.
+- **Recommendation:** Approve [ADR-0065](docs/adr/0065-subject-file-zip-exports.md): preserve JSON, add an explicit authorized ZIP option, optional module-owned attachment readers and bounded binary streaming using the existing audited export pattern. No temporary public archive, silent truncation or forms-only storage dependency.
+- **Needed by:** P3.7b; approve the core export contract first.
+- **Answer (2026-11-15):** Approved by the maintainer ("Approved") in response to the module plan, ADRs 0063–0065 and execution-envelope approval request.
+
+### Q20 – Approve the uploads module plan and revised envelope?
+- **Context:** [The module plan](docs/modules/uploads.md) and 25 tasks in `PLAN.md` include all M3 exit criteria, object-backed project erasure and ZIP exports. Detailed effort is 123 h (~15.4 PD), plus 25 h reserve: 148 h (~18.5 PD), above the original 9–12 PD allowance. No application code has been written.
+- **Recommendation:** Approve the complete module plan, Q17–Q19 contract proposals and this execution envelope. Execute in plan order, with storage contracts before public uploads. Keep proxy/multipart/transforms/cloud billing outside M3 and keep v0.2.0 tagging a separate authorization.
+- **Needed by:** P3.0a, before P3.1a application code (`docs/MODULES.md`, rule 4).
+- **Answer (2026-11-15):** Approved by the maintainer ("Approved") in response to the module plan, ADRs 0063–0065 and execution-envelope approval request.
+
 ## Decided in planning, please confirm
 
 - **D0 – TypeScript:** stay on TypeScript 7 if it works; TypeScript 6.0.3 is an acceptable fallback (maintainer guidance in the planning session). The decision rule in `PLAN.md` applies: tool-local fallback first, repo-wide TS 6 only as a last resort, recorded in ADR-0020.

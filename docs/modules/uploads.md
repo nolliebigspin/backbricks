@@ -1,0 +1,137 @@
+# Module plan: Uploads
+
+- **Status:** approved; maintainer approved the plan, ADRs 0063–0065 and Q17–Q20 on 2026-11-15 ("Approved").
+- **Prepared:** 2026-11-15, after the signed `v0.1.0` release.
+- **Milestone:** M3 · `v0.2.0`; executable tasks in `PLAN.md`, phase P3.
+- **Contract proposals:** ADR-0063 (resource routes), ADR-0064 (file ownership and durable erasure), ADR-0065 (subject ZIP export). All three proposals were approved on 2026-11-15; their contract changes land in the tasks below.
+- **Lifecycle:** replace specifications below with implementation links as tasks land. Code remains the source of truth after implementation.
+
+Uploads gives websites private, direct-to-storage file uploads, optional malware scanning, and attachments on form entries. It must run alone, alongside forms, or with any other enabled-module subset. Forms-only must continue to need only the app and Postgres.
+
+Out of scope: proxy uploads (P6.3), multipart/resume, transformations/thumbnails, public file hosting, SVG/HTML previews, archives as general uploads, SDK publication (M5), and cloud billing (C1/C2).
+
+## 1. Ownership and reuse
+
+| Piece | Owner / reuse |
+|---|---|
+| Config, validation, state transitions, repository interface, routes, jobs, capability implementation | `packages/modules/uploads/src/`; existing `defineModule` runtime and transaction-bound services |
+| Table, constraints, generated migration, scoped repository implementation | `packages/db`; ADR-0055, tenant columns, composite parent FKs, scoped query/pagination helpers |
+| S3 access and signing | Existing `StorageAdapter` and S3 adapter (ADR-0044); no second storage client |
+| ClamAV wire protocol | `packages/adapters`, implementing the existing `Scanner` interface; server composes it |
+| Shared attachment contract | `packages/core`; transaction-first `FilesCapability`, one file-reference schema (ADR-0064) |
+| Runtime/module/repository selection | Existing server composition and module catalog; replace the uploads descriptor with the operational module |
+| Dashboard | `apps/web/src/modules/uploads/`; existing registry, generated admin client, `DataTable`, `RecordDrawer`, `ConfirmDialog`, `StatusBadge`, `RetentionPicker` |
+| SDK and HTML example | MIT packages; generated contract types only, existing client/error/proof solver |
+
+Use the existing policy catalog, error catalog, audit/events/outbox, notification rules, job registry, bulk-ID ceiling, clocks/IDs, config versions and privacy/retention fan-out. No new infrastructure.
+
+## 2. Zone configuration
+
+One zone is one generic module instance (`upload-zone`, `upload-zones`). Strict config includes:
+
+- Type preset(s) resolved through one explicit MIME/extension allowlist: PNG/JPEG/WebP/GIF images, PDF, and supported modern Office documents (DOCX/XLSX/PPTX). No SVG, HTML, executables or macro-enabled formats. Unrecognized/container-only detection fails closed.
+- `maxSizeMb`: positive, at most 100; one conversion constant defines bytes. The declared name extension and MIME must agree with an allowed pair, then detection must agree again after copying.
+- `retentionDays`: default 180, 7–3650 or explicit unlimited with the existing retention warning. Orphan expiry is always bounded independently.
+- `scanRequired`: true by default. A zone may explicitly allow unscanned files with a warning when `SCANNER=none`; a required scan may never silently become an unscanned success.
+- Proof-of-work and bounded per-client limits through the existing public-write policy; PoW remains on for upload intents.
+
+Templates: images, documents, and a one-PDF CV zone, with en/de names. No-scanner creation requires an explicit unscanned choice. Change classification marks tighter type/size rules, retention shortening and scan-policy changes as destructive where they affect existing files. Existing files retain the config version under which they were accepted; scanning also checks the current zone policy, so a tightened rule cannot be bypassed by an old intent. Config-as-code, codegen, revisions and generic CRUD all use this same schema.
+
+## 3. Stored records and states
+
+`files` has tenant columns and a composite live-zone parent FK, plus:
+
+- TypeID, zone/config version, state, declared name/MIME/size, detected MIME, SHA-256 and safe scan result.
+- Opaque keys `stg/{org}/{prj}/{fileId}` and `fil/{org}/{prj}/{fileId}`; original names never enter keys.
+- SHA-256 upload-token hash; never the raw token. Intent expiry, creation/upload/scan timestamps and bounded record expiry.
+- Optional owner type/ID and normalized subject email, set only by a trusted capability claim; test flag and bounded metadata.
+- A durable deletion marker and retry/progress information for object cleanup (ADR-0064), rather than dropping the last reference to an object before it is erased.
+
+States follow `pending → uploaded → scanning → ready | quarantined | rejected`. A committed deletion marker makes a record immediately unavailable to reads, claims and downloads. A file is usable only when ready, undeleted and unexpired. Original filenames are private user content and are never logged, audited or put in events/jobs.
+
+Indexes cover tenant/zone keyset lists, status/date filters, owner lookup, orphan/expiry cleanup, and deletion work. Constraints enforce positive size, complete owner pairs, unique storage keys, token hash shape, enums and tenant-parent consistency. Generate migrations; never hand-edit an applied migration.
+
+## 4. Public protocol
+
+The host retains authentication bootstrap, origins/CORS, limits, proof replay, request validation and transaction ownership. The upload module sees only its scoped repository and declared services. ADR-0063 fills the current router's resource-namespace/instance-binding gap without an unscoped file lookup.
+
+| Operation | Request / response |
+|---|---|
+| `POST /v1/public/upload-zones/{key}/files` | Existing `{data, proof}` envelope; data contains bounded `name`, positive `size`, `type` and optional bounded metadata. Returns only `{fileId, uploadUrl, headers, uploadToken, expiresAt}`. Body ≤ 4 KiB. |
+| `POST /v1/public/files/{fileId}/complete` | Same envelope with `{uploadToken}`. Token is in the body. The tenant-scoped resolver verifies it and binds the zone; the handler rechecks it under lock. Returns only the caller's `{fileId, fileRef, status}`. |
+
+Intent validates zone/type/size, checks the declared `uploads.bytes` quota, records usage and reserves the row in one project-serialized transaction. Presign lasts 300 seconds and signs exact length/type. Browser transports let the browser supply `Content-Length` for the exact `File`/`Blob`; they must not try to set that forbidden header manually.
+
+`complete` checks staging HEAD size/type before leaving pending, then atomically records uploaded state and enqueues one ID-only scan job. Duplicate completes do not enqueue again or recopy a final object. Repeating a token-authenticated complete returns current state; the SDK uses bounded backoff and a fresh proof for each poll until terminal state or cancellation/timeout. This reuses the guard rather than introducing an unprotected public status endpoint. Intent responses are not stored in the acknowledgement-only idempotency cache, because they contain bearer credentials and signed URLs.
+
+`fileRef` binds the file ID and claim secret using the shared core schema. It never grants downloading or management rights. Unknown, foreign, wrong-token and wrong-zone references fail without revealing another tenant's data. No public response contains a filename, source, owner, storage key, hash or scan signature.
+
+## 5. Copy, inspect and scan
+
+1. Lock the file and verify the allowed transition and current zone.
+2. Copy staging to its final opaque key, which has never had a PUT URL. Retries reuse an existing final copy and never overwrite it from staging.
+3. HEAD/read the final copy, enforce exact size, detect type using `file-type`, check extension/MIME allowlist again, and compute SHA-256 with bounded memory.
+4. Scan that final copy with the injected ClamAV adapter. `SCANNER=none` can produce ready only when the zone explicitly permits it; store/display an explicit not-scanned result.
+5. Persist terminal state and metadata-only events in the worker transaction. Infection quarantines the record and deletes its objects; a type/size mismatch rejects it. Scanner/network failures retry; after three attempts reject safely and schedule cleanup.
+
+The ClamAV adapter streams `INSTREAM` chunks with bounded lengths, timeout, backpressure and sanitized errors. It rejects malformed/truncated replies and distinguishes `OK`, `FOUND` and provider failure. Compose `StreamMaxLength` must cover the configured 100 MB ceiling. Tests use real ClamAV for EICAR acceptance, plus a local protocol server for malformed/time-out cases.
+
+Delete staging immediately after a successful copy, and again after the PUT URL expires: a late PUT must not leave a permanent object. Retain cleanup identity until then. Repeated scans, crashes after COPY, audit failures and cleanup failures must be resumable.
+
+## 6. Forms capability and erasure
+
+ADR-0064 extends the existing `FilesCapability` with transaction-first `claim` and `listByOwner`, preserving `deleteByOwner`.
+
+- Claim checks every reference before changing any: exact tenant/project, configured zone, token, ready/unexpired/undeleted state, max count, no duplicate or prior owner. Acquire locks in stable order. The form's owner row, claims, usage and event commit or roll back together.
+- Forms persists file IDs/attachment metadata after claim, never the raw claim secret. The normalized subject identity is propagated for privacy erasure. Attachment retention may be shorter than the form entry; the drawer explains an expired attachment.
+- List returns safe owner-bound metadata without tokens or storage keys. It does not let forms read upload repositories directly.
+- Every forms deletion path participates: single/bulk/delete-all, retention, spam purge, subject erasure and project erasure. In particular, M2's direct `purgeExpired` and `deleteBySubject` paths must return affected IDs and call the capability before M3 is enabled.
+
+Object storage is outside a SQL transaction. Administrative deletes therefore commit a deletion marker, audit and cleanup job together; object deletion happens after that commit. Cleanup removes both keys idempotently and removes private metadata only when deletion is confirmed and a late PUT is no longer possible. Failed cleanup remains discoverable/retryable. No row can disappear while its object becomes untracked.
+
+Project hard erasure must wait for outstanding PUT URLs and object cleanup before declaring completion/tombstoning. ADR-0064 adds a bounded deferred-result form to the existing project erasure hook so the platform can resume at a future time without busy loops or falsely reporting completion. Subject erasure remains an asynchronous request and reports pending object cleanup honestly.
+
+## 7. Management, events, metrics and privacy
+
+| Operation | Policy / behavior |
+|---|---|
+| Generic zone CRUD | Existing config roles/scopes, destructive plans and optimistic versions |
+| `GET …/files`, `GET …/files/{id}` | Member / `data:read`; bounded keyset pages; zone/status/date/name filters; explicit private management projections |
+| `POST …/files/{id}/download-url` | Member / `data:read`; ready files only; audited, rate-limited 60-second attachment URL. Explicit preview mode only for detected PNG/JPEG/WebP/GIF, also audited. |
+| `DELETE …/files/{id}` | Member / `data:delete`; audited durable deletion request |
+| `POST …/files/bulk-delete` | Admin / `data:delete`; existing 100 distinct-ID ceiling; validate/lock the full set before any mutation |
+| `GET …/storage-usage` | Member / `stats:read`; current stored/reserved byte counts as precision-safe values; no names or subject data |
+
+All management routes have manifest isolation cases for cookie and key credentials. Public response shapes join the manifest-driven I5 gate. Downloads/previews never become public list/read endpoints.
+
+Events `uploads.file.ready`, `uploads.file.quarantined`, `uploads.file.rejected` carry IDs and structural status flags only. Quarantine notifications reuse member-only notification rules and the existing throttled delivery pipeline; no filename/content by default. Upload count and declared accepted bytes are monthly counters; current storage is a repository aggregate, not a mislabeled cumulative counter or a new cloud billing system.
+
+Hourly bounded cleanup handles pending/unclaimed files after 24 hours, expired records, late staging objects and failed deletions; archived zones keep cleaning up. Retention changes recompute expiry using the shared clock/semantics. Subject JSON export includes authorized metadata; an additive ZIP option includes a manifest and available ready-file contents (ADR-0065). Quarantined/rejected/missing files are explained in the manifest and never silently omitted. Project erasure proves both tenant rows and real Garage objects are gone.
+
+## 8. Dashboard, SDK and example
+
+- Files navigation appears only for operational uploads. Zones have templates, config, retention, scanning warnings and Embed instructions.
+- Table/grid shares one server-filtered query and selection state; names are plain text. Show scanning, quarantined/rejected, ready and not-scanned states, storage totals, downloads and confirmed bulk deletion.
+- Preview only safe detected image formats through audited short-lived URLs. No SVG/HTML rendering. Forms drawer lists attachments and supports authorized downloads without rendering claim secrets.
+- All copy en/de. Member settings stay read-only. Mutations use config versions and explain stale-state errors with the existing patterns.
+- `uploads.upload(file, {zone, onProgress, signal})` reuses client errors/auth/proofs, creates intent, PUTs exact bytes, completes and waits for readiness. Browser XHR provides progress; Node/Bun use fetch with coarse progress. Cancel applies during proof, PUT and polling; automatic retries never create a second intent or replay an unsafe PUT.
+- Extend the HTML SDK example with a CV upload and form attachment. Keep the original no-JS form example working; direct file uploads need JavaScript until the later proxy feature.
+
+## 9. Verification and release
+
+Unit/property tests cover config pairs/bounds, transitions, token/reference validation, claim sets, safe filenames, expiry and abort/error mapping. Real Postgres tests cover constraints, scoping, locks, audit/enqueue rollback, competing claims, duplicate complete, retention, cleanup retries and erasure.
+
+The storage contract suite runs against Garage in CI and can target another explicitly configured S3-compatible provider. Prove signed type/length rejection, COPY/HEAD/read/delete, private access, attachment headers and real browser CORS. Isolate fixture objects by unique prefixes and remove only those objects.
+
+Acceptance must demonstrate:
+
+1. Real EICAR → quarantined, objects removed, content-free notification delivered to Mailpit.
+2. Oversized PUT rejected by storage; executable bytes named `.pdf` rejected after detection.
+3. Second PUT after complete cannot alter the final scanned file; its late staging object is eventually removed.
+4. Foreign/wrong-zone/expired/already-claimed references fail and competing claims have one winner; failed form/audit writes leave no claim.
+5. Attachment downloads force `Content-Disposition: attachment`; only safe images can preview; orphans expire after 24 hours.
+6. Subject and archived-project erasure remove real objects, including late PUTs, without false completion; ZIP export is complete and authorized.
+7. Uploads-only with scanner none, forms-only, and forms+uploads with ClamAV all boot with exactly their required infrastructure.
+8. `bun run check`, build, browser journeys, SDK Node 20/Bun/browser checks, OpenAPI drift/additive comparison and image smoke pass without service skips.
+
+Prepare a `0.2.0` changeset/quickstart and `docs/progress/phase-3.md`. Tagging/publishing requires explicit user authorization, as given separately for `v0.1.0`; M3 implementation does not automatically authorize its release.

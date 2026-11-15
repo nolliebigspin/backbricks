@@ -1,7 +1,7 @@
 # PLAN – Backbricks
 
 > The only task list. Milestones, scope and exit criteria: [`docs/MILESTONES.md`](docs/MILESTONES.md). Decisions for the maintainer: [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md). Key decisions: [`docs/adr/`](docs/adr/). How phases are planned and executed: `AGENTS.md` §9.
-> **State:** P0 done (report: [`docs/progress/phase-0.md`](docs/progress/phase-0.md)). P1 implemented and merged ([report](docs/progress/phase-1.md), [review](docs/progress/review-phase-1.md)). P2 planned on 2026-11-09; Q12–Q16 answered the same day (all recommendations accepted). P3–P6 and C1–C3 remain stubs.
+> **State:** P0 done (report: [`docs/progress/phase-0.md`](docs/progress/phase-0.md)). P1 implemented and merged ([report](docs/progress/phase-1.md), [review](docs/progress/review-phase-1.md)). P2 implemented, merged and released as v0.1.0 on 2026-11-15; P3 is approved and executing (Q17–Q20, 2026-11-15). P4–P6 and C1–C3 remain stubs.
 
 ## Task format
 
@@ -23,7 +23,7 @@ Each phase ends with a **Phase acceptance** checklist: the milestone's exit crit
 
 ## Overview
 
-- **Total estimate:** P0 **47 h ≈ 5.9 PD**; P1 **182 h ≈ 22.8 PD**, plus a **36 h (~20%) reserve**, giving **218 h ≈ 27.3 PD** as the planning envelope. P2 **124 h ≈ 15.5 PD**, plus a **25 h reserve**, giving **149 h ≈ 18.6 PD** (allowance 9–11 PD; accepted as the P2 envelope, Q16). P3–P6 retain their milestone ranges (**32–42 PD**). **OSS track ≈ 76–86 PD before reserves, 84–94 PD including them.** Cloud track (C1–C3): **15–21 PD**. P1's detailed estimate is a proposed revision to its original 12–15 PD allowance, not an approved budget increase or scope change.
+- **Total estimate:** P0 **47 h ≈ 5.9 PD**; P1 **182 h ≈ 22.8 PD**, plus a **36 h (~20%) reserve**, giving **218 h ≈ 27.3 PD** as the planning envelope. P2 **124 h ≈ 15.5 PD**, plus a **25 h reserve**, giving **149 h ≈ 18.6 PD** (allowance 9–11 PD; accepted as the P2 envelope, Q16). P3 has an approved **123 h ≈ 15.4 PD**, plus **25 h reserve**, giving **148 h ≈ 18.5 PD** (Q20, approved 2026-11-15). P4–P6 retain their milestone ranges (**23–30 PD**). **OSS track ≈ 83–90 PD before reserves, 93–100 PD including them.** Cloud track (C1–C3): **15–21 PD**. P1's detailed estimate is a proposed revision to its original 12–15 PD allowance, not an approved budget increase or scope change.
 - P0 is about 1 PD over the planned 4–5 PD. The extra comes from the library spike, the Garage init (the Garage image has no shell) and the Docker setup for Bun's isolated linker. DEV-4 and DEV-7 keep P1 work out of P0.
 - **Milestones:** see [`docs/MILESTONES.md`](docs/MILESTONES.md) (M0–M6, C1–C3). Phase P*n* → milestone M*n*.
 - **P0 execution order** (IDs unchanged): P0.1 → P0.2 → P0.3a → P0.3b → **P0.9a → P0.9b** → P0.4 → P0.6 → P0.5a → P0.5b → P0.7 → P0.8a → P0.8b. The spike runs early because it needs the compose services (Postgres, Garage), and its findings feed P0.2, P0.5 and P0.6.
@@ -76,7 +76,7 @@ P0 versions checked 2026-11-04. New P1 dependencies rechecked 2026-11-06 with `n
 | | altcha-lib | 2.8.0 | yes (ADR-0020) | v2 API with `altcha-lib/algorithms/sha` |
 | | @modelcontextprotocol/sdk | 1.32.2 | yes, Bun and Node 24 (ADR-0020) | must also run on Node ≥ 20 (I18) |
 | | nodemailer / @types/nodemailer | 10.3.1 / 8.0.2 | yes (P1.8b) | Bun Mailpit delivery and safe failure tests pass; Node delivery probe passes; used API typechecks despite types' older major |
-| | file-type | 22.3.0 | to verify (P3.4) | |
+| | file-type | 22.3.0 | to verify (P3.4b) | Rechecked 2026-11-15 via npm; Node >=22, server-only; verify Bun before adding, preserve SDK Node20 floor |
 | P2 (checked 2026-11-09) | @tanstack/react-table | 9.3.1 | verify in P2.8b | New major (v9); peer `react >=18`; pulls `@tanstack/table-core` 9.3.1 and `@tanstack/react-store`. Read the installed types, not v8 docs |
 | | @changesets/cli / @changesets/changelog-github | 3.0.3 / 1.0.1 | yes (P2.10a) | requires Node ≥ 22.11 (mise Node 24); `release:version` on a committed changeset needs `GITHUB_TOKEN` |
 | | actionlint | 1.7.12 | yes (P2.10a) | native binary pinned in `mise.toml` (`aqua:rhysd/actionlint`); `bun run lint:workflows` in `check` and CI |
@@ -889,7 +889,7 @@ Run after `mise install && mise run infra` with isolated test tenants and Mailpi
 - [x] **Isolation covers new routes:** the automatic suite (cookies and keys) and the I5 public gate fail for any uncovered route; `bun run test:scripts` architecture fixtures pass.
 - [x] **Release gate:** P2.7c erasure test proves no personal data remains for an erased project.
 - [x] **Contract and quality:** `bun run api:generate && bun run api:check && bun run api:breaking` (additive only vs. the M1 base), `bun run check && bun run build`, image smoke with `BACKBRICKS_MODULES=forms` (app + Postgres only).
-- [ ] **Release:** `v0.1.0` changelog, tag-built GHCR image, README quickstart verified; `docs/progress/phase-2.md` written; green CI on the maintainer's PR. *(Quickstart verified and report written; changelog version step, tag/image and PR CI are the maintainer's.)*
+- [x] **Release:** `v0.1.0` changelog, signed tag and tag-built GHCR image; README quickstart and phase report already verified. Release completed 2026-11-15 through [PR #13](https://github.com/nolliebigspin/backbricks/pull/13) with green PR/main CI and [publishing workflow](https://github.com/nolliebigspin/backbricks/actions/runs/43704367449); anonymous image access verified.
 
 ### Planning risks and sources
 
@@ -970,20 +970,325 @@ P2.10a implementation and verification complete except the GitHub-hosted run. Ch
 P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fresh services (E2E on a newly created database, no retries); results and the remaining maintainer gates are in [`docs/progress/phase-2.md`](docs/progress/phase-2.md). P2.9–P2.10 decisions recorded as [ADR-0062](docs/adr/0062-minimal-sdk-snippets-and-release-version.md)/D60. Open for the maintainer: PR with green CI, fresh-session phase review, `release:version` on `main`, signed `v0.1.0` tag (publishes the image), optional manual release run.
 
 
-## Phase P3 – Uploads (M3 · v0.2.0) · stub
+## Phase P3 – Uploads (M3 · v0.2.0) · approved 2026-11-15
 
-**Goal:** Safe direct uploads with scanning and linking. **Estimate:** 9–12 PD.
+**Goal:** Safe direct uploads, private downloads and forms attachments. **25 tasks, 123 h ≈ 15.4 PD; reserve 25 h; approved envelope 148 h ≈ 18.5 PD.** Original allowance: 9–12 PD. Q17–Q20 were approved by the maintainer on 2026-11-15, including all recommendations and contract proposals in [the module plan](docs/modules/uploads.md) and proposed ADRs 0063–0065.
 
-- [ ] P3.1 – Upload zone config: type presets (images, PDF, office) as allowlist of MIME + extension, `maxSizeMb` (≤ 100), `retentionDays`, scan required
-- [ ] P3.2 – Table `files` + migration; key scheme `stg/{org}/{prj}/{fileId}` and `fil/{org}/{prj}/{fileId}`; replace its SQL in §B.3 with a link
-- [ ] P3.3 – Public: intent → presigned PUT (5 min, content length and type signed) + `uploadToken`; `complete` → HEAD check → `uploaded` → scan job
-- [ ] P3.4 – Scan job: COPY to final key, delete staging, magic-byte detection (`file-type`), allowlist re-check, SHA-256, ClamAV `INSTREAM` adapter (`SCANNER=none|clamav`), statuses `ready/quarantined/rejected`, retries, events, admin notification on quarantine
-- [ ] P3.5 – `files` capability (`claim`, `listByOwner`, `deleteByOwner`) with checks (project, zone, token, status, single use, `maxFiles`); forms field type `file` uses it in the same transaction; deleting a submission deletes its files
-- [ ] P3.6 – Admin: zones (generic), file list (zone/status/date filters, name search), detail, `POST …/download-url` (60 s, attachment, audited), single/bulk delete (object + row), storage usage
-- [ ] P3.7 – Jobs: orphan cleanup (pending or unclaimed > 24 h), retention purge, `privacy` handler
-- [ ] P3.8 – Dashboard "Files": table/grid with safe previews, status badges incl. "not scanned", download, multi-select + ConfirmDialog, storage meter; attachments in the forms RecordDrawer
-- [ ] P3.9 – SDK `uploads.upload(file, { zone, onProgress, signal })`; example extended with CV upload
-- [ ] P3.10 – Storage contract suite (presign with signed length, COPY, HEAD, DELETE, CORS preflight) against Garage in CI and optionally a real provider via env
+**Entry state:** M2 implementation is merged. The signed `v0.1.0` tag points at `354aa9a`; [release PR #13](https://github.com/nolliebigspin/backbricks/pull/13), its CI, main CI and [the publishing workflow](https://github.com/nolliebigspin/backbricks/actions/runs/43704367449) passed on 2026-11-15. Anonymous GHCR manifest retrieval returned 200 for `ghcr.io/nolliebigspin/backbricks:0.1.0`.
+
+**Execution:** Work top to bottom; suffixes preserve the stub IDs. P3.10a intentionally runs before the public flow because storage enforcement/CORS is a security dependency. One checkout/active agent, no concurrent delegation. Read the module plan, approved ADRs, OPEN_QUESTIONS, latest progress report, ARCHITECTURE §B.3/B.5/C/D.6/E.2/F.3–F.4 and ADR-0013/0044/0055/0061. Per task: CodeGraph → implementation → meaningful tests → `bun run check` → checkbox → human-reviewed signed-off commit. No push or M3 release is implied.
+
+### [x] P3.0a – Approve the upload module plan and contract seams (est. 3 h)
+- **Description:** Review docs/modules/uploads.md and proposed ADRs 0063–0065; answer Q17–Q20 before application code. Confirm scope and execution order.
+- **Files/packages:** PLAN.md, OPEN_QUESTIONS.md, docs/modules/uploads.md, docs/adr/
+- **Depends on:** M2 implementation and signed v0.1.0 release
+- **Reuses:** ADR-0013/0037/0039/0044/0046/0048/0055/0057/0058/0061; existing upload descriptor
+- **Acceptance criteria:**
+  - [x] Module plan and contract proposals explicitly approved; proposed architecture changes remain unimplemented until approval.
+  - [x] New dependency candidate checked: file-type 22.3.0 (2026-11-15); existing pinned packages stay unchanged.
+- **Tests:** Documentation links, task dependencies and version metadata; no application code.
+- **Risks/notes:** MODULES rule 4 requires approval; this is a real gate, not an inferred permission request.
+
+### [ ] P3.1a – Define zone configuration and file value schemas (est. 5 h)
+- **Description:** Implement strict zone config, MIME/extension presets, max-size/retention/scan policy, safe filename and state values. Derive public/internal types from their owning schemas.
+- **Files/packages:** packages/modules/uploads/src/; core value schema only where ADR-0064 requires shared references
+- **Depends on:** P3.0a
+- **Reuses:** Zod, core errors/IDs, existing config/retention semantics, upload infrastructure declaration
+- **Acceptance criteria:**
+  - [ ] Images/PDF/modern Office allowlists have one source; invalid pairs, paths, oversized files and executable/SVG/HTML types fail with structured errors.
+  - [ ] Required scanning fails closed when unavailable; explicit unscanned mode is warned about; size is at most 100 MB.
+- **Tests:** Table/property cases for bounds, Unicode/control characters, extensions, MIME pairs and scan availability.
+- **Risks/notes:** A MIME container alone is insufficient evidence that an Office subtype is allowed.
+
+### [ ] P3.1b – Add templates, change classification and codegen (est. 4 h)
+- **Description:** Add images/documents/CV templates, config migration/version handling, change reports and SDK-facing generated types.
+- **Files/packages:** packages/modules/uploads/src/
+- **Depends on:** P3.1a
+- **Reuses:** Generic instance/revision/config-as-code pipeline; forms implementation patterns
+- **Acceptance criteria:**
+  - [ ] en/de templates round-trip through the one schema; unscanned choices are explicit.
+  - [ ] Every relevant config change is classified; generated code typechecks and does not import AGPL runtime into clients.
+- **Tests:** Template, change-classification, migration and generated-code fixtures.
+- **Risks/notes:** Tightening rules must not leave old intents able to bypass current policy.
+
+### [ ] P3.2a – Generate the files table and integrity constraints (est. 5 h)
+- **Description:** Add db-owned files schema with composite zone identity, token hash, owner/expiry, scan metadata and durable deletion/late-PUT cleanup fields. Generate the forward migration.
+- **Files/packages:** packages/db/src/schema/, packages/db/migrations/, ARCHITECTURE §B.3
+- **Depends on:** P3.1a
+- **Reuses:** ADR-0055, tenant columns, composite live-parent FKs and central migration runner
+- **Acceptance criteria:**
+  - [ ] Tenant, enum, positive-size, owner-pair and unique-key constraints are enforced by real Postgres.
+  - [ ] Fresh/no-op migrations work; architecture replaces the uploads SQL sketch with the implemented schema link.
+- **Tests:** Real Postgres migration, constraint and expiry/index cases; no database mocks.
+- **Risks/notes:** No row may lose the last cleanup identity before its storage objects and outstanding PUT have been handled.
+
+### [ ] P3.2b – Implement the tenant-scoped upload repository (est. 5 h)
+- **Description:** Implement scoped reads, locked transitions/claims, pages/filters, aggregates and bounded maintenance selection. Wire the factory with compile-time interface matching.
+- **Files/packages:** uploads repository interface; packages/db repositories; server module-repositories
+- **Depends on:** P3.2a
+- **Reuses:** RepositoryScope, beforeCursor/repositoryPage, module factory/lifetime guards
+- **Acceptance criteria:**
+  - [ ] Foreign zone/file IDs return 404; every query is tenant/project scoped, including worker-only deletion queries.
+  - [ ] Competing claims/transitions serialize; aggregate byte counts retain precision; deletion and cleanup queries are bounded and indexed.
+- **Tests:** Real Postgres cross-tenant, competing-lock, pagination, expired/marked-deleted visibility and lifetime tests.
+- **Risks/notes:** Keep repository storage operations thin; validation and state decisions belong in uploads.
+
+### [ ] P3.10a – Establish the reusable storage contract suite (est. 5 h)
+- **Description:** Promote the existing Garage signing/COPY/read/delete checks into reusable contracts and prove browser CORS before building the public upload flow.
+- **Files/packages:** packages/adapters tests, server/browser storage tests, CI fixtures
+- **Depends on:** P3.0a
+- **Reuses:** Existing S3 adapter, ADR-0020/0044, Garage compose/init and unique fixture prefixes
+- **Acceptance criteria:**
+  - [ ] Wrong length/type is rejected by storage; private objects, COPY/HEAD/read/delete and forced download headers are proved.
+  - [ ] Real browser PUT/preflight works; optional provider runs use explicit env config and delete only their unique fixture objects.
+- **Tests:** Garage contract tests in CI plus browser CORS; optional provider suite clearly distinguished from required Garage evidence.
+- **Risks/notes:** Browser code cannot manually set Content-Length; actual File/Blob bytes must match the signed declaration.
+
+### [ ] P3.3a – Add module resource namespaces and scoped instance resolution (est. 5 h)
+- **Description:** Implement approved ADR-0063 so uploads can register file routes outside its zone namespace and bind a token-authenticated file to its zone.
+- **Files/packages:** core module route/registrar contracts, server module HTTP/public guard wiring
+- **Depends on:** P3.2b, P3.0a approval of ADR-0063
+- **Reuses:** Existing guard, withTenant, module-owned runtime frames, declaration inventories and CORS registrar
+- **Acceptance criteria:**
+  - [ ] Resource ownership/collisions and tenant selector shadowing are rejected at registration; forms routes retain behavior.
+  - [ ] File resolver runs only after credential bootstrap inside the correct module/tenant frame; normal origins/proofs/limits and locked rechecks still apply.
+- **Tests:** Synthetic contract tests and real scoped HTTP tests, including foreign IDs/tokens, body limits and route coverage.
+- **Risks/notes:** No uploads-specific query in the server and no extra unscoped bootstrap exception.
+
+### [ ] P3.3b – Implement intent and repeatable completion (est. 6 h)
+- **Description:** Make uploads operational. Validate intent, issue exact 300-second PUT/token, check HEAD on completion and atomically enqueue one scan job; repeated completion returns caller-owned state.
+- **Files/packages:** uploads public routes/services; server catalog/composition; isolation/public-response fixtures
+- **Depends on:** P3.1b, P3.2b, P3.10a, P3.3a
+- **Reuses:** Public guard, quota amountField, usage counters, token hashing, storage adapter and transactional queue
+- **Acceptance criteria:**
+  - [ ] Intent/complete follow the module plan with 4 KiB limits; credentials/signed URLs are never cached, audited or logged.
+  - [ ] Duplicate/concurrent complete enqueues once; wrong token/tenant/zone, stale policy and mismatched/missing HEAD fail without persistent partial work.
+  - [ ] Uploads-only and forms-only boot correctly; every new operation has manifest coverage.
+- **Tests:** Real HTTP/Postgres/Garage intent/PUT/complete, origin/proof/scope/expiry/concurrency and enqueue/usage rollback tests.
+- **Risks/notes:** Token verification must precede any response exposing file state; only the final private copy may become downloadable.
+
+### [ ] P3.4a – Implement the ClamAV streaming adapter (est. 5 h)
+- **Description:** Add bounded INSTREAM transport, timeout/backpressure, safe provider errors and scanner readiness/composition; keep none represented explicitly.
+- **Files/packages:** packages/adapters scanner; server composition; compose scan settings
+- **Depends on:** P3.0a
+- **Reuses:** Existing Scanner interface, validated SCANNER config and compose scan profile
+- **Acceptance criteria:**
+  - [ ] Real clean/EICAR streams distinguish OK/FOUND; malformed, oversized, disconnected and timed-out replies fail safely.
+  - [ ] StreamMaxLength covers the upload ceiling; none needs no ClamAV service; errors/logs contain no file content or names.
+- **Tests:** Local protocol-server edge cases and real ClamAV stream tests, including non-buffered large input.
+- **Risks/notes:** Do not guess the clamd protocol or library APIs; inspect authoritative docs/types when implementing.
+
+### [ ] P3.4b – Implement immutable copy, detection and hashing (est. 6 h)
+- **Description:** Build the scan worker transition: copy once to final key, HEAD/read final bytes, detect and revalidate MIME/size, compute SHA-256 and scan the same immutable copy.
+- **Files/packages:** uploads scan workflow; exact file-type dependency; worker wiring
+- **Depends on:** P3.3b, P3.4a
+- **Reuses:** StorageAdapter, Scanner, clocks, module jobs and state schemas
+- **Acceptance criteria:**
+  - [ ] PDF-named executable bytes reject; valid allowed formats detect correctly with bounded memory.
+  - [ ] Crash/retry after COPY never recopies staging over final; a second PUT after complete cannot change the scanned/downloadable final bytes.
+  - [ ] Scanner none is ready only with explicit zone permission and a not-scanned result.
+- **Tests:** Real Garage/worker cases for replacement, replay/crash, detection mismatch, size drift and memory bounds.
+- **Risks/notes:** file-type 22.3.0 is server-only (Node >=22 metadata); verify Bun compatibility before pinning it.
+
+### [ ] P3.4c – Finish scan retries, terminal cleanup and notifications (est. 4 h)
+- **Description:** Persist ready/quarantined/rejected outcomes, retry provider failures three times, remove dangerous objects and publish ID-only events; reuse existing notification rules/delivery.
+- **Files/packages:** uploads jobs/events/notification descriptor; server tests
+- **Depends on:** P3.4b
+- **Reuses:** Outbox, notification rules, bounded delivery/throttling and transactional jobs
+- **Acceptance criteria:**
+  - [ ] Real EICAR quarantines, removes both objects and sends a content-free Mailpit notification.
+  - [ ] Failed scans/retries and duplicate delivery cannot create usable or orphaned final objects; failures remain recoverable.
+  - [ ] Events/audits/jobs contain no names, tokens, signed URLs or user content.
+- **Tests:** Real ClamAV/Garage/Mailpit acceptance and forced transition/event/audit/provider failures.
+- **Risks/notes:** Quarantine keeps only bounded private metadata; late staging writes still need expiry cleanup.
+
+### [ ] P3.5a – Provide atomic file claiming and owner reads (est. 6 h)
+- **Description:** Implement approved ADR-0064 shared reference/capability types and uploads provider; claim sets are all-or-nothing and owner reads are scoped.
+- **Files/packages:** core FilesCapability/reference schema; uploads capability; forms submit integration
+- **Depends on:** P3.4c, approval of ADR-0064
+- **Reuses:** bindCapability, caller transaction, existing forms validator and optional files declaration
+- **Acceptance criteria:**
+  - [ ] Foreign/wrong-zone/wrong-token/unready/expired/duplicate/already-owned references fail; competing claims have one winner.
+  - [ ] Form insert, claims, subject identity, event and usage roll back together; persisted answers contain IDs, never claim secrets.
+  - [ ] Forms rejects file fields without uploads, while uploads runs independently of forms.
+- **Tests:** Real HTTP/Postgres claims, cross-tenant/scope matrix, concurrent submissions and forced audit/event rollback.
+- **Risks/notes:** Search for and replace the dormant forms file-reference regex with the shared schema; do not duplicate protocol validation.
+
+### [ ] P3.5b – Cover every forms attachment deletion path (est. 5 h)
+- **Description:** Integrate capability cleanup into retention/spam and subject deletion, then verify single/bulk/delete-all/project paths and drawer metadata.
+- **Files/packages:** forms module/repository interface; db forms repository; cross-module tests
+- **Depends on:** P3.5a
+- **Reuses:** deleteEntryFiles, existing bulk/retention/privacy hooks and transactional capability binding
+- **Acceptance criteria:**
+  - [ ] No deletion path leaves live owned files: single, bulk, delete-all, retention/spam, subject and project erasure.
+  - [ ] Affected-ID batches remain bounded; failures preserve both the entry and cleanup intent; forms-only behavior remains unchanged.
+- **Tests:** Real forms+uploads deletion matrix with object cleanup; capability/audit failure rollback; forms-only regression tests.
+- **Risks/notes:** M2 purgeExpired/deleteBySubject currently delete directly; production file fields must not be enabled until these are covered.
+
+### [ ] P3.6a – Expose file reads and current storage usage (est. 5 h)
+- **Description:** Add project-wide list/detail and usage routes, explicit response projections, zone/status/date/name filters and safe precision handling.
+- **Files/packages:** uploads admin routes/schemas; scoped repository; generated API contract/isolation cases
+- **Depends on:** P3.5a
+- **Reuses:** Management policies, pagination/query helpers, data:read/stats:read scopes and generated client
+- **Acceptance criteria:**
+  - [ ] Lists/detail never reveal tokens or storage keys; marked-deleted/expired files are inaccessible.
+  - [ ] Filtering/paging and current stored/reserved totals are accurate without conflating monthly accepted-byte counters with current usage.
+  - [ ] Every route has cookie/key isolation, role/scope and undeclared-route coverage.
+- **Tests:** Real HTTP/Postgres filter/search/pagination/precision cases plus isolation suite.
+- **Risks/notes:** Original names and subject information are private management data, not audit/log metadata.
+
+### [ ] P3.6b – Implement audited downloads and durable deletions (est. 5 h)
+- **Description:** Add 60-second attachment URLs, explicit safe-image preview mode, single/bulk deletion markers and atomic cleanup enqueue/audit.
+- **Files/packages:** uploads management services/routes; cleanup job; isolation/public-response fixtures
+- **Depends on:** P3.6a, approval of ADR-0064
+- **Reuses:** Storage presignGet, core safe MIME list, bulkIdsSchema, audit/queue and member/admin policy patterns
+- **Acceptance criteria:**
+  - [ ] Only ready files download; attachment headers are mandatory and only detected PNG/JPEG/WebP/GIF may preview.
+  - [ ] Single/bulk mutations validate the whole set and audit/enqueue in the same transaction; failed audit cannot delete an object.
+  - [ ] Committed deletion immediately revokes access while physical cleanup is pending and recoverable.
+- **Tests:** Real download headers, unsafe preview denial, mixed-ID atomicity, audit rollback and storage outage/retry cases.
+- **Risks/notes:** S3 deletion cannot be rolled back; durable intent is required instead of pretending it shares SQL atomicity.
+
+### [ ] P3.7a – Purge orphans, expired files and late staging writes (est. 5 h)
+- **Description:** Implement bounded scheduled cleanup and retention recomputation, including archived zones, failed cleanup and late PUT after complete/deletion.
+- **Files/packages:** uploads retention/jobs/repository; shared maintenance fan-out tests
+- **Depends on:** P3.6b
+- **Reuses:** Existing scheduled tenant fan-out, clocks, SKIP LOCKED batches and storage adapter
+- **Acceptance criteria:**
+  - [ ] Pending/unclaimed files expire after 24 hours regardless of unlimited zone retention.
+  - [ ] Ready/terminal/deleted records retain enough identity to remove staging after PUT expiry; no late object becomes untracked.
+  - [ ] Concurrent workers make bounded progress without double accounting or deleting another project.
+- **Tests:** Clock-driven real Postgres/Garage orphan/retention/late-PUT/concurrency/provider-failure tests.
+- **Risks/notes:** Do not remove the final cleanup row while an issued PUT can still recreate its staging object.
+
+### [ ] P3.7b – Add complete subject metadata and ZIP exports (est. 6 h)
+- **Description:** Implement approved ADR-0065 optional file-export hook and bounded binary stream, preserving existing JSON export and forms-only operation.
+- **Files/packages:** core privacy/binary export contracts; server privacy routes; uploads subject hooks; ZIP helper/tests
+- **Depends on:** P3.7a, approval of ADR-0065
+- **Reuses:** ADR-0058 commit barrier/fresh frames, privacy authorization, paging and export audits
+- **Acceptance criteria:**
+  - [ ] ZIP contains authorized manifest and ready-file bytes with generated safe paths; unavailable/quarantined files are explicitly explained.
+  - [ ] Export attempts/completions are audited; cancellation/errors/large subjects do not leak transactions or buffer full files.
+  - [ ] No silent truncation; explicit failure/continuation for any bound; forms-only exports require no storage.
+- **Tests:** Independent ZIP-reader validation; real scoped HTTP/Garage content, streaming memory, cancellation and concurrent-delete cases.
+- **Risks/notes:** Inspect existing archive tooling before adding a dependency; any new runtime package needs verified version/license and a commit justification.
+
+### [ ] P3.7c – Prove project erasure through object cleanup (est. 5 h)
+- **Description:** Implement the approved deferred eraseScope result and exercise archived-project tombstoning only after objects and outstanding PUTs are settled.
+- **Files/packages:** core erasure contract/host normalization; uploads eraseScope; real project erasure tests
+- **Depends on:** P3.7a, P3.5b, approval of ADR-0064
+- **Reuses:** Existing project erasure job, archivedProject context, bounded continuation and tombstone lifecycle
+- **Acceptance criteria:**
+  - [ ] More than one batch of rows and real objects disappear; finalization waits for late-PUT expiry and storage recovery.
+  - [ ] Continuations defer without busy looping; audit/enqueue rollback preserves recoverable state; neighbouring projects are untouched.
+  - [ ] No personal tenant rows or project job payloads remain beyond the documented retained audit/tombstone.
+- **Tests:** Real Postgres/Garage delayed-erasure, late-PUT, partial-failure/resume, audit rollback and two-tenant tests.
+- **Risks/notes:** The M2 zero-object gap is a mandatory M3 exit criterion, not a simulated storage test.
+
+### [ ] P3.8a – Build the Files table/grid and storage view (est. 6 h)
+- **Description:** Register conditional Files navigation and build filtered/paged table/grid, status/scan badges, selection, previews, downloads and confirmed bulk delete.
+- **Files/packages:** apps/web upload module; packages/ui only for reused cross-screen components
+- **Depends on:** P3.6b
+- **Reuses:** Module registry, generated admin client, DataTable/RecordDrawer/ConfirmDialog/StatusBadge and query cancellation
+- **Acceptance criteria:**
+  - [ ] Views share one server query/selection model, work on mobile, and hide unavailable actions by role/state.
+  - [ ] Names are text, unsafe types never preview, and storage values preserve precision; en/de copy is complete.
+  - [ ] Organization/project switches cancel queries and clear stale selections/URLs.
+- **Tests:** Component behavior/accessibility and browser cases for filtering, actions, unsafe names and tenant switches.
+- **Risks/notes:** Reuse existing primitives; do not create a second table, error or permission framework.
+
+### [ ] P3.8b – Build zone configuration and integration instructions (est. 5 h)
+- **Description:** Add templates, size/type/retention/scan policy settings and Embed guidance with stale/destructive confirmation.
+- **Files/packages:** apps/web uploads settings/embed; shared i18n/types
+- **Depends on:** P3.1b, P3.8a
+- **Reuses:** Generic instance/config plan pipeline, RetentionPicker, existing settings/Embed patterns
+- **Acceptance criteria:**
+  - [ ] Required/unavailable scanning and explicit unscanned choices are understandable; member settings remain read-only.
+  - [ ] Saves use versions and destructive plans; instructions identify the zone and keep secret keys server-side.
+- **Tests:** Component config bodies/stale/destructive/role cases and en/de parity.
+- **Risks/notes:** Expose product choices and consequences, not internal adapter/protocol implementation details.
+
+### [ ] P3.8c – Show form attachments through the files capability (est. 4 h)
+- **Description:** Extend authorized entry details/drawer with safe attachment metadata, state and download actions, and make file fields selectable only when uploads is available.
+- **Files/packages:** forms admin projection; apps/web form field editor/drawer; generated contract
+- **Depends on:** P3.5b, P3.6b, P3.8a
+- **Reuses:** FilesCapability.listByOwner, existing FieldValue/RecordDrawer and module availability metadata
+- **Acceptance criteria:**
+  - [ ] No bearer reference/token appears in stored entry detail, rendered copy, audit or export.
+  - [ ] Expired/missing attachments are explained; successful download uses the same audited file endpoint.
+  - [ ] Forms-only field editor and existing no-file entry behavior remain correct.
+- **Tests:** Capability-bound HTTP projection, component escaping/state/role tests and browser attachment download.
+- **Risks/notes:** Historical form configs must retain readable fields without granting access to unrelated upload files.
+
+### [ ] P3.9a – Ship the private-upload SDK method (est. 5 h)
+- **Description:** Add uploads.upload intent/PUT/complete/readiness handling with progress, cancellation and bounded polling; reuse existing errors/proof/auth transport.
+- **Files/packages:** packages/sdk source/tests/build; real-server runtime tests
+- **Depends on:** P3.4c, P3.5a
+- **Reuses:** Existing createClient, proof solver, BackbricksError and generated API types
+- **Acceptance criteria:**
+  - [ ] Browser File/Blob, Node >=20 and Bun work without AGPL/runtime imports or new root dependencies.
+  - [ ] Abort propagates through proof, PUT and polling; failures map structured errors; retry cannot create duplicate intents or unsafe replacement PUTs.
+  - [ ] Progress reports meaningful upload/readiness state and terminal rejection/quarantine fails clearly.
+- **Tests:** Bun/Node20/Node24 real server/Garage cases plus actual browser progress/CORS/abort tests.
+- **Risks/notes:** Avoid setting forbidden browser headers; file-type stays on the server and does not raise the SDK runtime floor.
+
+### [ ] P3.9b – Extend the example and browser acceptance journeys (est. 5 h)
+- **Description:** Add SDK CV upload plus form claim to the HTML example and exercise owner-visible files/attachments, notifications and downloads.
+- **Files/packages:** examples/html, e2e, example/snippet sync tests
+- **Depends on:** P3.8b, P3.8c, P3.9a, P3.7b, P3.7c
+- **Reuses:** Existing HTML example and real-service Playwright fixtures/Mailpit assertions
+- **Acceptance criteria:**
+  - [ ] Original no-JS form still works; the upload example creates one ready attachment visible in Files and Inbox.
+  - [ ] Browser tests demonstrate second-PUT isolation, structured failures, role rules, safe downloads and en/de UI.
+  - [ ] Scanner-none and ClamAV paths are explicitly distinguished in acceptance evidence.
+- **Tests:** Playwright on fresh fixtures with real Garage/ClamAV/Mailpit; no retry counted as proof of deterministic success.
+- **Risks/notes:** Document bounded scanning/polling waits so slow scanner startup is not misdiagnosed as successful acceptance.
+
+### [ ] P3.10b – Prepare the v0.2.0 release metadata and quickstart (est. 4 h)
+- **Description:** Add product changeset and document uploads/scanner setup, CORS, storage exposure, migration/cleanup semantics and current platform-image limits.
+- **Files/packages:** .changeset, README, CONTRIBUTING if behavior changes, module/architecture links
+- **Depends on:** P3.9b
+- **Reuses:** Existing Changesets/product-version pipeline and signed-tag release workflow
+- **Acceptance criteria:**
+  - [ ] Changeset targets server 0.2.0; quickstart distinguishes forms-only, uploads without scanner and scanned uploads.
+  - [ ] Examples use private downloads and explicit unscanned warnings; docs link to implemented contracts rather than retaining parallel SQL/type specs.
+- **Tests:** Changesets status/version dry run, actionlint, quickstart smoke and dependency/license justification review.
+- **Risks/notes:** Do not tag/push v0.2.0 without explicit release authorization; v0.1.0 permission is specific to that release.
+
+### [ ] P3.10c – Demonstrate M3 and write the progress handoff (est. 4 h)
+- **Description:** Run every exit criterion on current source with real services, full quality/contract checks, subset image boots and client runtime evidence; write the phase report.
+- **Files/packages:** docs/progress/phase-3.md; PLAN acceptance/evidence; relevant test fixes only
+- **Depends on:** All preceding P3 implementation tasks
+- **Reuses:** Existing check/build/OpenAPI/isolation/public-response/image/SDK/browser commands
+- **Acceptance criteria:**
+  - [ ] Every M3 exit criterion has a concrete passing command, source location and result; skipped services are not counted.
+  - [ ] Report records ADRs, actual counts/platform coverage, deviations, remaining review/release gates and risks.
+  - [ ] Task checkboxes are ticked only after checks pass and human-reviewed signed-off commits exist.
+- **Tests:** CI=true bun run check; build; contract drift/additive comparison; storage contracts; real ClamAV/Garage/Mailpit/browser/runtime/image acceptance.
+- **Risks/notes:** Fresh phase review belongs in a session that did not implement the application changes; keep outstanding release/review gates explicit.
+
+### Phase acceptance
+
+- [ ] **EICAR:** real ClamAV/Garage worker tests and Mailpit assertion prove quarantined state, object deletion and content-free notification.
+- [ ] **Enforced bytes/types:** storage contract rejects oversized/wrong-header PUT; worker test rejects EXE bytes declared as PDF.
+- [ ] **Copy-then-scan:** real second-PUT/browser test proves final hash/content cannot change after complete; late staging object is eventually removed.
+- [ ] **Claim integrity:** real forms+uploads tests prove foreign/wrong-zone/expired/already-owned errors, one concurrent winner and full rollback on form/event/audit failure.
+- [ ] **Private downloads/orphans:** HTTP/storage tests prove 60-second attachment disposition and safe-preview restrictions; clock-driven cleanup proves the 24-hour orphan rule.
+- [ ] **Privacy:** real object-backed subject/project erasure including outstanding PUTs; ZIP validation/content/cancellation/bounded-memory tests; no silent export truncation.
+- [ ] **Optional modules:** actual forms-only, uploads-only scanner-none and forms+uploads ClamAV boots; no undeclared infrastructure dependency.
+- [ ] **Quality/contract:** `CI=true bun run check && bun run build`; `bun run api:generate && bun run api:check && bun run api:breaking`; regenerated contract has no unintended drift/breakage; all isolation/I5 manifest cases pass.
+- [ ] **Browser/client/image:** `bun run test:e2e` against fresh real services; SDK Bun/Node20/Node24/browser runs; image smoke in all required module subsets.
+- [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
+
+### Planning risks and execution notes
+
+- New runtime candidate checked via `npm view file-type version engines --json` on 2026-11-15: 22.3.0, Node >=22. It is server-only; verify Bun behavior when adding it and preserve the SDK's Node20 floor.
+- The larger estimate includes late-PUT erasure and ZIP export required by the architecture, not only a successful upload demo (Q20).
+- SQL cannot roll back S3 changes. Durable deletion, no recopy on retry, late-write cleanup and deferred project completion are mandatory acceptance cases (Q18).
+- The generic router currently assumes primary-resource, key-bound routes. Keep the new locator scoped and module-owned; do not add an unscoped file query (Q17).
+- Existing M2 forms retention and subject deletion bypass attachment cleanup. P3.5b is a gate before production file fields are enabled.
+- Quarantine notifications reuse configured verified-member rules. No arbitrary recipient relay or unrequested mail is introduced.
+- P3.0a approved on 2026-11-15 (module plan, ADRs 0063–0065 and 148 h envelope). The maintainer also authorized sign-off of the reviewed planning documents. Next: P3.1a.
 
 ## Phase P4 – Reviews (M4 · v0.3.0) · stub
 
