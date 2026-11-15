@@ -111,6 +111,8 @@ Stack: Bun · TypeScript 7 · Turborepo · Hono · PostgreSQL + Drizzle · pg-bo
 
 Development uses the dashboard's Vite URL (`http://localhost:5173`) as `PUBLIC_URL`, with API requests proxied to the server. Update `PUBLIC_URL` when changing the browser-facing address. Production authentication requires HTTPS. Signup defaults to `invite_only`; Compose and `.env.example` explicitly enable `open` for development with Mailpit. Verification is required before login. Runtime policy and the current auth surface are documented in [ADR-0026](docs/adr/0026-dashboard-auth-runtime.md).
 
+Keep the application, Postgres and storage clocks synchronized. Host-based expiry tests need the Docker VM clock aligned after laptop suspension.
+
 Storage compatibility and real-browser CORS checks, including an optional S3-provider run: [storage contracts](docs/storage-contracts.md).
 
 ## Documentation

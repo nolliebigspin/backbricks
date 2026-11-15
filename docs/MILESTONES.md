@@ -60,9 +60,10 @@ flowchart LR
 
 ### M3 · Uploads → `v0.2.0`
 - **Phase:** P3 · **Effort:** 9–12 PD
-- **Planning:** [executable plan](../PLAN.md#phase-p3--uploads-m3--v020--approved-2026-11-15) and [module plan](modules/uploads.md) prepared 2026-11-15; 123 h plus 25 h reserve approved on 2026-11-15 (Q17–Q20).
+- **Planning:** [executable plan](../PLAN.md#phase-p3--uploads-m3--v020--approved-2026-11-15) and [module plan](modules/uploads.md) prepared 2026-11-15; 148 h envelope approved on 2026-11-15 (Q17–Q20); current plan is 129 h plus 19 h reserve after the in-flight PUT correction.
+- **Implementation:** completed locally 2026-11-16; [acceptance report](progress/phase-3.md). End review, fresh phase review and release authorization remain separate gates.
 - **Goal:** Safe direct-to-storage uploads, linked to forms.
-- **Scope:** upload zones, presigned PUT with signed size/type, copy-then-scan with ClamAV, magic-byte checks, `files` capability + form file fields, admin API + downloads, cleanup jobs, dashboard files view, SDK `uploads.upload`, storage contract suite.
+- **Scope:** upload zones, server-finalized direct upload sessions with signed size/type, copy-then-scan with ClamAV, magic-byte checks, `files` capability + form file fields, admin API + downloads, cleanup jobs, dashboard files view, SDK `uploads.upload`, storage contract suite.
 - **Exit criteria:**
   - EICAR → `quarantined`, object deleted, notification sent
   - An upload larger than declared is rejected by storage; PDF extension with EXE content → `rejected`

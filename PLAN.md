@@ -976,7 +976,7 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 
 **Entry state:** M2 implementation is merged. The signed `v0.1.0` tag points at `354aa9a`; [release PR #13](https://github.com/nolliebigspin/backbricks/pull/13), its CI, main CI and [the publishing workflow](https://github.com/nolliebigspin/backbricks/actions/runs/43704367449) passed on 2026-11-15. Anonymous GHCR manifest retrieval returned 200 for `ghcr.io/nolliebigspin/backbricks:0.1.0`.
 
-**Execution:** Work top to bottom; suffixes preserve the stub IDs. P3.10a intentionally runs before the public flow because storage enforcement/CORS is a security dependency. One checkout/active agent, no concurrent delegation. On 2026-11-15 the maintainer explicitly instructed execution through M3 without further review prompts, with human review deferred until the end; continue task commits/checks and record this timing override without claiming advance human review of later code. Read the module plan, approved ADRs, OPEN_QUESTIONS, latest progress report, ARCHITECTURE §B.3/B.5/C/D.6/E.2/F.3–F.4 and ADR-0013/0044/0055/0061. Per task: CodeGraph → implementation → meaningful tests → `bun run check` → checkbox → human-reviewed signed-off commit. No push or M3 release is implied.
+**Execution:** Work top to bottom; suffixes preserve the stub IDs. P3.10a intentionally runs before the public flow because storage enforcement/CORS is a security dependency. One checkout/active agent, no concurrent delegation. On 2026-11-15 the maintainer explicitly instructed execution through M3 without further review prompts, with human review deferred until the end; continue task commits/checks and record this timing override without claiming advance human review of later code. Read the module plan, approved ADRs, OPEN_QUESTIONS, latest progress report, ARCHITECTURE §B.3/B.5/C/D.6/E.2/F.3–F.4 and ADR-0013/0044/0055/0061. Per task: CodeGraph → implementation → meaningful tests → `bun run check` → checkbox → signed-off task commit under the explicit deferred-review instruction. Final human review remains outstanding. No push or M3 release is implied.
 
 ### [x] P3.0a – Approve the upload module plan and contract seams (est. 3 h)
 - **Description:** Review docs/modules/uploads.md and proposed ADRs 0063–0065; answer Q17–Q20 before application code. Confirm scope and execution order.
@@ -1267,32 +1267,35 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Changesets status/version dry run, actionlint, quickstart smoke and dependency/license justification review.
 - **Risks/notes:** Do not tag/push v0.2.0 without explicit release authorization; v0.1.0 permission is specific to that release.
 
-### [ ] P3.10c – Demonstrate M3 and write the progress handoff (est. 4 h)
+### [x] P3.10c – Demonstrate M3 and write the progress handoff (est. 4 h)
 - **Description:** Run every exit criterion on current source with real services, full quality/contract checks, subset image boots and client runtime evidence; write the phase report.
 - **Files/packages:** docs/progress/phase-3.md; PLAN acceptance/evidence; relevant test fixes only
 - **Depends on:** All preceding P3 implementation tasks
 - **Reuses:** Existing check/build/OpenAPI/isolation/public-response/image/SDK/browser commands
 - **Acceptance criteria:**
-  - [ ] Every M3 exit criterion has a concrete passing command, source location and result; skipped services are not counted.
-  - [ ] Report records ADRs, actual counts/platform coverage, deviations, remaining review/release gates and risks.
-  - [ ] Task checkboxes are ticked only after checks pass and human-reviewed signed-off commits exist.
+  - [x] Every M3 exit criterion has a concrete passing command, source location and result; skipped services are not counted.
+  - [x] Report records ADRs, actual counts/platform coverage, deviations, remaining review/release gates and risks.
+  - [x] Task checkboxes are ticked only after checks pass and signed-off commits exist under the maintainer’s explicit deferred-review instruction; final human review remains a separate gate.
 - **Tests:** CI=true bun run check; build; contract drift/additive comparison; storage contracts; real ClamAV/Garage/Mailpit/browser/runtime/image acceptance.
 - **Risks/notes:** Fresh phase review belongs in a session that did not implement the application changes; keep outstanding release/review gates explicit.
 
 ### Phase acceptance
 
 - [x] **EICAR:** real ClamAV/Garage worker tests and Mailpit assertion prove quarantined state, object deletion and content-free notification.
-- [ ] **Enforced bytes/types:** storage contract rejects oversized/wrong-header PUT; worker test rejects EXE bytes declared as PDF.
-- [ ] **Copy-then-scan:** real second-PUT/browser test proves final hash/content cannot change after complete; late staging object is eventually removed.
+- [x] **Enforced bytes/types:** storage contract rejects oversized/wrong-header PUT; worker test rejects EXE bytes declared as PDF.
+- [x] **Copy-then-scan:** real second-PUT/browser test proves final hash/content cannot change after complete; late staging object is eventually removed.
 - [x] **Claim integrity:** real forms+uploads tests prove foreign/wrong-zone/expired/already-owned errors, one concurrent winner and full rollback on form/event/audit failure.
-- [ ] **Private downloads/orphans:** HTTP/storage tests prove 60-second attachment disposition and safe-preview restrictions; clock-driven cleanup proves the 24-hour orphan rule.
+- [x] **Private downloads/orphans:** HTTP/storage tests prove 60-second attachment disposition and safe-preview restrictions; clock-driven cleanup proves the 24-hour orphan rule.
 - [x] **Privacy:** real object-backed subject/project erasure including outstanding PUTs; ZIP validation/content/cancellation/bounded-memory tests; no silent export truncation.
-- [ ] **Optional modules:** actual forms-only, uploads-only scanner-none and forms+uploads ClamAV boots; no undeclared infrastructure dependency.
-- [ ] **Quality/contract:** `CI=true bun run check && bun run build`; `bun run api:generate && bun run api:check && bun run api:breaking`; regenerated contract has no unintended drift/breakage; all isolation/I5 manifest cases pass.
-- [ ] **Browser/client/image:** `bun run test:e2e` against fresh real services; SDK Bun/Node20/Node24/browser runs; image smoke in all required module subsets.
-- [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
+- [x] **Optional modules:** actual forms-only, uploads-only scanner-none and forms+uploads ClamAV boots; no undeclared infrastructure dependency.
+- [x] **Quality/contract:** `CI=true bun run check && bun run build`; `bun run api:generate && bun run api:check && bun run api:breaking`; regenerated contract has no unintended drift/breakage; all isolation/I5 manifest cases pass.
+- [x] **Browser/client/image:** `bun run test:e2e` against fresh real services; SDK Bun/Node20/Node24/browser runs; image smoke in all required module subsets.
+- [x] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, signed-off commits under the deferred-review instruction; human end review, fresh review and any future tag/push remain explicitly separate gates.
 
 ### Planning risks and execution notes
+
+- P3.10c complete: all six M3 exits and additional privacy/optional-module gates are demonstrated in `docs/progress/phase-3.md`. Final `CI=true bun run check` passed (584 package + 103 script tests, zero failures/skips, uncached tests; `/tmp/backbricks-p3-final-check-aligned.log`); build and explicit additive comparison against `v0.1.0` pass with no generated drift. Fresh Chromium passed 17/17 with ClamAV, 1/1 unscanned and 1/1 native SDK progress/abort; Node20 probes passed 2/2 and Node24/Bun are in the full check. The permanent image smoke proves three required subsets, non-root/read-only roles, exact operational metadata, worker consumption and clean shutdown on linux/amd64 (emulated on arm64); image ID `45dfaa5c6c1c9ef115065a22b6788339b449e9605767d094a69586ece0a45cd0`. All seven owned browser databases were dropped after settling 19 remaining revoked records and confirming 38 scoped keys absent. Host suspension/VM clock skew interrupted earlier runs; aligned-clock checks pass, and a reproducible sub-second audit-fixture race now uses the trigger-owning database clock without changing production protections. All 26 tasks are complete under the maintainer's deferred-review instruction. Human end review, fresh phase review, remote CI/PR and any v0.2.0 tag/push remain separate gates. Nothing from M3 is pushed.
+
 
 - P3.10b complete: a minor server changeset prepares 0.2.0, with Forms-only/unscanned/ClamAV quickstarts and private storage/CORS/session/migration/cleanup guidance. An isolated detached-worktree Changesets dry run produced 0.2.0, consumed the changeset and generated its changelog without changing this checkout. A failing Compose regression now proves scanner selection and internal ClamAV addresses for all roles. Production image acceptance caught an undeclared direct Zod import; the existing pinned dependency is now explicitly declared by the server. The linux/amd64 image and all three subset probes pass; parser dependencies are MIT/ISC and the SDK adds no runtime dependency. After recovery from a host clock jump/unresponsive engine, all seven affected tests passed unchanged and `CI=true bun run check` passed (584 package + 103 script tests; `/tmp/backbricks-p3-10b-check-awake.log`); build passed. Fresh Chromium acceptance passed 17/17 with ClamAV, 1/1 explicitly unscanned and 1/1 native SDK progress/abort, with Node20 probes 2/2. No M3 version/tag/push. End review remains deferred. Next: P3.10c.
 
