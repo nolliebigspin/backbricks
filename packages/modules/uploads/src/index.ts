@@ -1,4 +1,14 @@
 import { defineModuleDescriptor, type InfraRequirement } from '@backbricks/core';
+export { uploadRecordSchema } from './repository.ts';
+export type {
+  UploadRecord,
+  UploadInsert,
+  UploadChanges,
+  UploadFilters,
+  UploadOwner,
+  UploadReadOptions,
+  UploadsRepository,
+} from './repository.ts';
 
 export {
   uploadsConfigSchema,

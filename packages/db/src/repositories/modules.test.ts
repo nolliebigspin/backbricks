@@ -60,6 +60,6 @@ describe.skipIf(!available)('module repository composition (real Postgres)', () 
 
   test('production factories are listed explicitly', () => {
     // The server's composition typecheck enforces that these match the module interfaces.
-    expect(Object.keys(moduleRepositoryFactories)).toEqual(['forms']);
+    expect(Object.keys(moduleRepositoryFactories)).toEqual(['forms', 'uploads']);
   });
 });

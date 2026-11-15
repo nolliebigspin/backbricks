@@ -1,4 +1,4 @@
-import { FILE_SIZE_LIMITS, fileStatusSchema } from '@backbricks/core';
+import { FILE_SIZE_LIMITS, fileStatusSchema, type JsonValue } from '@backbricks/core';
 import { sql } from 'drizzle-orm';
 import {
   bigint,
@@ -37,7 +37,7 @@ export const files = pgTable(
     detectedMime: text('detected_mime'),
     sizeBytes: bigint('size_bytes', { mode: 'number' }).notNull(),
     sha256: bytea('sha256'),
-    scan: jsonb('scan').$type<unknown>(),
+    scan: jsonb('scan').$type<JsonValue>(),
     scanAttempts: integer('scan_attempts').notNull().default(0),
     uploadTokenHash: bytea('upload_token_hash').notNull(),
     uploadExpiresAt: timestampColumn('upload_expires_at').notNull(),
@@ -47,7 +47,7 @@ export const files = pgTable(
     ownerType: text('owner_type'),
     ownerId: text('owner_id'),
     subjectEmail: text('subject_email'),
-    metadata: jsonb('metadata').$type<Record<string, unknown>>().notNull().default({}),
+    metadata: jsonb('metadata').$type<Record<string, JsonValue>>().notNull().default({}),
     isTest: boolean('is_test').notNull().default(false),
     ...recordTimestamps(),
     expiresAt: timestampColumn('expires_at'),

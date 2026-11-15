@@ -1022,14 +1022,14 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Real Postgres migration, constraint and expiry/index cases; no database mocks.
 - **Risks/notes:** No row may lose the last cleanup identity before its storage objects and outstanding PUT have been handled.
 
-### [ ] P3.2b – Implement the tenant-scoped upload repository (est. 5 h)
+### [x] P3.2b – Implement the tenant-scoped upload repository (est. 5 h)
 - **Description:** Implement scoped reads, locked transitions/claims, pages/filters, aggregates and bounded maintenance selection. Wire the factory with compile-time interface matching.
 - **Files/packages:** uploads repository interface; packages/db repositories; server module-repositories
 - **Depends on:** P3.2a
 - **Reuses:** RepositoryScope, beforeCursor/repositoryPage, module factory/lifetime guards
 - **Acceptance criteria:**
-  - [ ] Foreign zone/file IDs return 404; every query is tenant/project scoped, including worker-only deletion queries.
-  - [ ] Competing claims/transitions serialize; aggregate byte counts retain precision; deletion and cleanup queries are bounded and indexed.
+  - [x] Foreign zone/file IDs return 404; every query is tenant/project scoped, including worker-only deletion queries.
+  - [x] Competing claims/transitions serialize; aggregate byte counts retain precision; deletion and cleanup queries are bounded and indexed.
 - **Tests:** Real Postgres cross-tenant, competing-lock, pagination, expired/marked-deleted visibility and lifetime tests.
 - **Risks/notes:** Keep repository storage operations thin; validation and state decisions belong in uploads.
 
@@ -1281,6 +1281,8 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
 
 ### Planning risks and execution notes
+
+- P3.2b complete: module-owned Zod-derived file model/repository interface, tenant-scoped db factory, state CAS/locks, visibility/paging/search, precision-safe storage aggregates and bounded maintenance. Driver bytea conversion stays in db; modules use Uint8Array. Six real repository tests pass. P3.5a must persist the owner expiry bound and clamp zone-retention recomputation when production claiming is added; there is no production claim path yet. `CI=true bun run check` passed (488 package + 100 script tests); the production-factory inventory now explicitly includes uploads. Next: P3.10a.
 
 - P3.2a complete: db-owned files table with tenant/project/module-bound zone FK, opaque deterministic keys, hash/size/state/expiry constraints and durable cleanup fields/indexes. States/size bounds moved to core because db and uploads now share them. Real Postgres tests exposed SQL NULL semantics in the owner-pair CHECK; corrected via a second generated forward migration, without editing an applied migration. Fresh/no-op migration tests pass. `CI=true bun run check` passed (482 package + 100 script tests); review remains deferred to the end. Next: P3.2b.
 
