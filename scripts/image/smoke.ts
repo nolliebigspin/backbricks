@@ -1,8 +1,7 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
-import { z } from 'zod';
-
+import { readComposeConfig } from '../dev/compose-config.ts';
 import { createTestDatabase } from '../test/database.ts';
 import { eventually } from '../test/eventually.ts';
 
@@ -17,9 +16,7 @@ const database = await createTestDatabase();
 const url = new URL(database.url);
 url.hostname = 'postgres';
 url.port = '';
-const composition = z
-  .object({ name: z.string() })
-  .parse(JSON.parse(await docker('compose', 'config', '--format', 'json')));
+const composition = await readComposeConfig();
 const options = [
   '--read-only',
   '--tmpfs',
