@@ -19,6 +19,7 @@ export type FileChanges = Partial<
     | 'uploadedAt'
     | 'copiedAt'
     | 'stagingCleanedAt'
+    | 'storageCleanedAt'
     | 'ownerType'
     | 'ownerId'
     | 'subjectEmail'

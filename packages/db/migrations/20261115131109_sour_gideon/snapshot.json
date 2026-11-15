@@ -1,0 +1,47 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "2f33d678-c375-45cc-bc0b-93af76d70000",
+  "prevIds": [
+    "e008da5b-5446-4f76-8a55-42d03cb0e469"
+  ],
+  "footprints": [
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "files",
+        "storage_cleaned_at"
+      ],
+      "writes": [
+        "s|col|public.files.storage_cleaned_at",
+        "n|col|public.files.storage_cleaned_at",
+        "e|col|public.files.storage_cleaned_at"
+      ],
+      "reads": [
+        "n|tbl|public.files",
+        "n|sch|public"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "files",
+        "name": "storage_cleaned_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    }
+  ]
+}

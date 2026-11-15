@@ -1090,15 +1090,15 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Real Garage/worker cases for replacement, replay/crash, detection mismatch, size drift and memory bounds.
 - **Risks/notes:** file-type 22.3.0 is server-only (Node >=22 metadata); verify Bun compatibility before pinning it.
 
-### [ ] P3.4c – Finish scan retries, terminal cleanup and notifications (est. 4 h)
+### [x] P3.4c – Finish scan retries, terminal cleanup and notifications (est. 4 h)
 - **Description:** Persist ready/quarantined/rejected outcomes, retry provider failures three times, remove dangerous objects and publish ID-only events; reuse existing notification rules/delivery.
 - **Files/packages:** uploads jobs/events/notification descriptor; server tests
 - **Depends on:** P3.4b
 - **Reuses:** Outbox, notification rules, bounded delivery/throttling and transactional jobs
 - **Acceptance criteria:**
-  - [ ] Real EICAR quarantines, removes both objects and sends a content-free Mailpit notification.
-  - [ ] Failed scans/retries and duplicate delivery cannot create usable or orphaned final objects; failures remain recoverable.
-  - [ ] Events/audits/jobs contain no names, tokens, signed URLs or user content.
+  - [x] Real EICAR quarantines, removes both objects and sends a content-free Mailpit notification.
+  - [x] Failed scans/retries and duplicate delivery cannot create usable or orphaned final objects; failures remain recoverable.
+  - [x] Events/audits/jobs contain no names, tokens, signed URLs or user content.
 - **Tests:** Real ClamAV/Garage/Mailpit acceptance and forced transition/event/audit/provider failures.
 - **Risks/notes:** Quarantine keeps only bounded private metadata; late staging writes still need expiry cleanup.
 
@@ -1269,7 +1269,7 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 
 ### Phase acceptance
 
-- [ ] **EICAR:** real ClamAV/Garage worker tests and Mailpit assertion prove quarantined state, object deletion and content-free notification.
+- [x] **EICAR:** real ClamAV/Garage worker tests and Mailpit assertion prove quarantined state, object deletion and content-free notification.
 - [ ] **Enforced bytes/types:** storage contract rejects oversized/wrong-header PUT; worker test rejects EXE bytes declared as PDF.
 - [ ] **Copy-then-scan:** real second-PUT/browser test proves final hash/content cannot change after complete; late staging object is eventually removed.
 - [ ] **Claim integrity:** real forms+uploads tests prove foreign/wrong-zone/expired/already-owned errors, one concurrent winner and full rollback on form/event/audit failure.
@@ -1281,6 +1281,8 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
 
 ### Planning risks and execution notes
+
+- P3.4c complete: three durable scan attempts with delayed continuations/obsolete-delivery guards; terminal state, ID-only event/audit and cleanup enqueue are atomic. Physical cleanup confirms both keys, tracks final deletion via a generated nullable-column migration, retains late-PUT identity and schedules retries. Workers lock the scoped project parent before zone/file locks (including FK lock ordering), and policy edits serialize with terminal scans. Real EICAR/Garage/queue/Mailpit, provider-failure, event/audit rollback, duplicate and policy-race tests pass. `CI=true bun run check` passed (513 package + 102 script tests); seven targeted protocol/outcome tests also pass after strengthening both public snapshots (no invented host header, quarantined completion shape). Scheduled late-PUT/orphan/stalled-job recovery remains P3.7a. Existing notification links use the generic zone URL with `?entry=fileId`; P3.8 must support that selection. Next: P3.5a.
 
 - P3.4b complete: final-object existence/committed-copy markers prevent recopy after SQL rollback or a later signed PUT. Bounded length/detection/hash/scanning reads target only that immutable key; no tee queues full files. Real Garage/worker tests cover all supported image/Office types, executable PDF rejection, clean/EICAR and explicit not-scanned outcomes. Strict bounded OOXML content-type/main-part parsing rejects directory-only guesses, macro/VBA, XML spoofing and oversized metadata. Exact dependency metadata checked 2026-11-15: file-type 22.3.0 (MIT, Node>=22; Bun proved), @tokenizer/inflate 0.6.0 and strtok3 10.8.0 (MIT), saxes 6.0.0 (ISC); all server-only, SDK floor unchanged. S3 mid-stream failures are sanitized and tested. `CI=true bun run check` passed (509 package + 102 script tests). P3.4c adds durable terminal cleanup/events/retries and holds the owning zone stable before taking the file lock to serialize policy edits with scan completion. Next: P3.4c.
 

@@ -2,6 +2,7 @@ import { defineModule, fileIdSchema } from '@backbricks/core';
 import { z } from 'zod';
 
 import { classifyUploadsChange } from './changes.ts';
+import { cleanupUpload } from './cleanup.ts';
 import { uploadsCodegen } from './codegen.ts';
 import { uploadsConfigSchema, uploadsPublicWritePolicy } from './config.ts';
 import {
@@ -9,8 +10,10 @@ import {
   UPLOADS_MODULE_VERSION,
   UPLOAD_JOBS,
   UPLOAD_METRICS,
+  UPLOAD_EVENTS,
 } from './constants.ts';
 import { uploadsInfrastructure } from './infrastructure.ts';
+import { describeUpload } from './notifications.ts';
 import { uploadsPublicRoutes } from './public.ts';
 import { scanUpload } from './scan.ts';
 import { defaultUploadsConfig, uploadsTemplates } from './templates.ts';
@@ -37,7 +40,7 @@ export const uploadsModule = defineModule({
       description: { en: 'Create uploads from a server', de: 'Dateien vom Server hochladen' },
     },
   ],
-  events: [],
+  events: Object.values(UPLOAD_EVENTS),
   usageMetrics: [
     {
       name: UPLOAD_METRICS.bytes,
@@ -55,11 +58,19 @@ export const uploadsModule = defineModule({
   publicRoutes: uploadsPublicRoutes,
   jobs(registrar) {
     registrar.register(
-      { name: UPLOAD_JOBS.scan, retentionSeconds: 86400, retries: 3 },
-      z.object({ fileId: fileIdSchema }).strict(),
+      { name: UPLOAD_JOBS.scan, retentionSeconds: 86400, retries: 2 },
+      z
+        .object({ fileId: fileIdSchema, attempt: z.number().int().min(0).max(2).default(0) })
+        .strict(),
       scanUpload,
     );
+    registrar.register(
+      { name: UPLOAD_JOBS.cleanup, retentionSeconds: 86400, retries: 2 },
+      z.object({ fileId: fileIdSchema }).strict(),
+      cleanupUpload,
+    );
   },
+  notifications: { describe: describeUpload },
   retention: { purgeExpired: async () => 0, recomputeExpiry: async () => 0 },
   privacy: {
     exportSubject: async () => ({ files: [] }),

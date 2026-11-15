@@ -30,7 +30,6 @@ test.skipIf(!uploadsAvailable)(
             'uploadUrl',
             'headers.content-type',
             'headers.content-length',
-            'headers.host',
             'uploadToken',
             'expiresAt',
           ]);
@@ -40,7 +39,7 @@ test.skipIf(!uploadsAvailable)(
             uploadUrl: '[signed URL]',
             uploadToken: '[token]',
             expiresAt: '[expiry]',
-            headers: { ...file.headers, host: '[storage host]' },
+            headers: file.headers,
           }).toMatchSnapshot();
           const publicRoutes = f
             .manifest()
@@ -58,7 +57,6 @@ test.skipIf(!uploadsAvailable)(
                 'uploadUrl',
                 'headers.content-type',
                 'headers.content-length',
-                'headers.host',
                 'uploadToken',
                 'expiresAt',
               ],

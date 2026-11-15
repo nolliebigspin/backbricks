@@ -7,7 +7,6 @@ exports[`upload intents and repeatable completion bind exact private bytes, scop
   "headers": {
     "content-length": "22",
     "content-type": "application/pdf",
-    "host": "[storage host]",
   },
   "uploadToken": "[token]",
   "uploadUrl": "[signed URL]",

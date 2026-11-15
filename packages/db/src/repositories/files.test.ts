@@ -187,6 +187,8 @@ describe.skipIf(!available)('uploads repository (real Postgres)', () => {
       (await use(a, (repo) => repo.findCleanup(later, 100))).some((row) => row.id === file.id),
     ).toBe(true);
     await use(a, (repo) => repo.patch(file.id, { stagingCleanedAt: later, updatedAt: later }));
+    expect(await use(a, (repo) => repo.removeDeleted(file.id, later))).toBe(false);
+    await use(a, (repo) => repo.patch(file.id, { storageCleanedAt: later, updatedAt: later }));
     expect(await use(a, (repo) => repo.removeDeleted(file.id, later))).toBe(true);
   });
 

@@ -44,6 +44,7 @@ export const files = pgTable(
     uploadedAt: timestampColumn('uploaded_at'),
     copiedAt: timestampColumn('copied_at'),
     stagingCleanedAt: timestampColumn('staging_cleaned_at'),
+    storageCleanedAt: timestampColumn('storage_cleaned_at'),
     ownerType: text('owner_type'),
     ownerId: text('owner_id'),
     subjectEmail: text('subject_email'),

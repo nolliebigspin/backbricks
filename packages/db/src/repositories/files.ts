@@ -4,6 +4,7 @@ import { and, desc, eq, gte, inArray, isNotNull, isNull, lte, sql } from 'drizzl
 import type { DbTransaction } from '../client.ts';
 import { files } from '../schema/files.ts';
 import { moduleInstances } from '../schema/instances.ts';
+import { projects } from '../schema/projects.ts';
 import { fileMaintenance } from './files-maintenance.ts';
 import {
   filesWhere,
@@ -22,6 +23,20 @@ import { beforeCursor, type RepositoryScope } from './scope.ts';
 export function createUploadsRepository(tx: DbTransaction, scope: RepositoryScope) {
   const t = files;
   return {
+    async lockProject() {
+      const project = scope.project();
+      const rows = await tx
+        .select({ id: projects.id })
+        .from(projects)
+        .where(
+          and(
+            eq(projects.organizationId, project.organizationId),
+            eq(projects.id, project.projectId),
+          ),
+        )
+        .for('key share');
+      if (rows.length !== 1) throw new AppError('not_found');
+    },
     async insert(input: FileInsert) {
       const [row] = await tx
         .insert(t)
@@ -49,8 +64,8 @@ export function createUploadsRepository(tx: DbTransaction, scope: RepositoryScop
       if (!row) throw new AppError('not_found');
       return row;
     },
-    async resolveZoneKey(id: string, now: Date) {
-      const [row] = await tx
+    async resolveZoneKey(id: string, now: Date, options: Pick<FileReadOptions, 'lock'> = {}) {
+      const query = tx
         .select({ key: moduleInstances.key })
         .from(t)
         .innerJoin(
@@ -63,6 +78,7 @@ export function createUploadsRepository(tx: DbTransaction, scope: RepositoryScop
           ),
         )
         .where(filesWhere(scope, eq(t.id, id), visibleFiles(now)));
+      const [row] = await (options.lock ? query.for('share', { of: moduleInstances }) : query);
       if (!row) throw new AppError('not_found');
       return row.key;
     },
@@ -165,6 +181,7 @@ export function createUploadsRepository(tx: DbTransaction, scope: RepositoryScop
             lte(t.cleanupAfter, now),
             lte(t.uploadExpiresAt, now),
             gte(t.stagingCleanedAt, t.uploadExpiresAt),
+            isNotNull(t.storageCleanedAt),
           ),
         )
         .returning({ id: t.id });

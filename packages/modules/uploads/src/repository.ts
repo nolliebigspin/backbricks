@@ -26,6 +26,7 @@ export const uploadRecordSchema = z
     uploadedAt: z.date().nullable(),
     copiedAt: z.date().nullable(),
     stagingCleanedAt: z.date().nullable(),
+    storageCleanedAt: z.date().nullable(),
     ownerType: z.string().nullable(),
     ownerId: z.string().nullable(),
     subjectEmail: z.string().nullable(),
@@ -69,6 +70,7 @@ export type UploadChanges = Partial<
     | 'uploadedAt'
     | 'copiedAt'
     | 'stagingCleanedAt'
+    | 'storageCleanedAt'
     | 'ownerType'
     | 'ownerId'
     | 'subjectEmail'
@@ -90,9 +92,12 @@ export type UploadReadOptions = Readonly<{ lock?: boolean; includeInactive?: boo
 
 /** Tenant/project-bound persistence. Inactive reads are for internal cleanup/erasure, never HTTP projections. */
 export interface UploadsRepository {
+  /** Acquire the bound project's key-share lock before worker/capability file locks (FK lock order). */
+  lockProject(): Promise<void>;
   insert(input: UploadInsert): Promise<UploadRecord>;
   get(id: string, now: Date, options?: UploadReadOptions): Promise<UploadRecord>;
-  resolveZoneKey(id: string, now: Date): Promise<string>;
+  /** Optional shared zone lock precedes file locks and serializes policy edits with scans/claims. */
+  resolveZoneKey(id: string, now: Date, options?: Pick<UploadReadOptions, 'lock'>): Promise<string>;
   list(filters: UploadFilters, page: RepositoryPage, now: Date): Promise<UploadRecord[]>;
   lockMany(ids: readonly string[], now: Date, options?: UploadReadOptions): Promise<UploadRecord[]>;
   patch(id: string, changes: UploadChanges): Promise<UploadRecord>;
