@@ -1,3 +1,5 @@
+import { configObject as record } from '../../dashboard/config-values.ts';
+
 export type ConfigField = {
   key: string;
   label: string;
@@ -7,11 +9,6 @@ export type ConfigField = {
   text?: string;
   options?: { value: string; label: string }[];
 };
-
-const record = (value: unknown): Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value)
-    ? Object.fromEntries(Object.entries(value))
-    : {};
 
 function fieldOf(value: unknown): ConfigField | null {
   const field = record(value);

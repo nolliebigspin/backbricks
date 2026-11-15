@@ -478,6 +478,29 @@
       "ready": "Bereit",
       "quarantined": "Gesperrt: unsichere Datei",
       "rejected": "Abgelehnt"
-    }
+    },
+    "zones": "Upload-Bereiche",
+    "allFiles": "Alle Dateien",
+    "noZones": "Noch keine Upload-Bereiche",
+    "zoneIntro": "Erstelle einen Upload-Bereich, um erlaubte Dateien für deine Website festzulegen.",
+    "create": "Upload-Bereich erstellen",
+    "scanHint": "Die Virenprüfung muss für diese Installation eingerichtet sein. Ohne sie können geschützte Bereiche weder gespeichert werden noch Dateien annehmen.",
+    "scanUnavailable": "Die Virenprüfung ist nicht verfügbar. Bitte den Administrator um die Einrichtung oder wähle ausdrücklich einen Bereich ohne Virenprüfung.",
+    "unscannedHint": "Ohne Virenprüfung können schädliche Dateien angenommen werden. Wähle dies nur, wenn du das Risiko verstehst.",
+    "allowedTypes": "Erlaubte Dateien",
+    "presets": {
+      "images": "Bilder",
+      "pdf": "PDF-Dokumente",
+      "modernOffice": "Word-, Excel- und PowerPoint-Dokumente"
+    },
+    "maxSize": "Maximale Dateigröße (MiB)",
+    "retention": "Dateien löschen nach",
+    "retentionHint": "Ein Formularanhang wird gelöscht, sobald der Formulareintrag oder die Aufbewahrungszeit des Upload-Bereichs endet. Nicht zugeordnete Uploads werden nach 24 Stunden gelöscht.",
+    "scanRequired": "Virenprüfung erforderlich",
+    "confirmTitle": "Diese Upload-Regeln speichern?",
+    "confirmHint": "Bestehende Uploads erfüllen diese Regeln möglicherweise nicht mehr. Kürzere Aufbewahrungszeiten können Dateien endgültig entfernen.",
+    "zoneSections": "Abschnitte des Upload-Bereichs",
+    "embedHint": "Verwende den Upload-Bereich „{{key}}“ auf deiner Website. Warte, bis die Datei bereit ist, bevor du ihren Verweis mit einem Formular sendest.",
+    "integration": "Upload einbinden"
   }
 }

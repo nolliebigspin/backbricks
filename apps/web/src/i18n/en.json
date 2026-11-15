@@ -478,6 +478,29 @@
       "ready": "Ready",
       "quarantined": "Blocked: unsafe file",
       "rejected": "Rejected"
-    }
+    },
+    "zones": "Upload areas",
+    "allFiles": "All files",
+    "noZones": "No upload areas yet",
+    "zoneIntro": "Create an upload area to choose which files your website accepts.",
+    "create": "Create upload area",
+    "scanHint": "Virus checking needs to be set up on this installation. If it is unavailable, protected areas cannot be saved or accept files.",
+    "scanUnavailable": "Virus checking is unavailable. Ask the administrator to set it up, or explicitly choose an area without virus checking.",
+    "unscannedHint": "Without virus checking, harmful files may be accepted. Choose this only if you understand the risk.",
+    "allowedTypes": "Allowed files",
+    "presets": {
+      "images": "Images",
+      "pdf": "PDF documents",
+      "modernOffice": "Word, Excel and PowerPoint documents"
+    },
+    "maxSize": "Maximum file size (MiB)",
+    "retention": "Delete files after",
+    "retentionHint": "A form attachment is deleted when either its form entry or its upload-area lifetime ends. Unclaimed uploads are deleted after 24 hours.",
+    "scanRequired": "Require virus checking",
+    "confirmTitle": "Save these upload rules?",
+    "confirmHint": "Existing uploads may stop meeting these rules. Shorter storage lifetimes can permanently remove files.",
+    "zoneSections": "Upload area sections",
+    "embedHint": "Use upload area “{{key}}” in your website. Wait until the file is ready before sending its reference with a form.",
+    "integration": "Upload integration"
   }
 }

@@ -18,6 +18,22 @@ export function useUploadsScope() {
 }
 export function uploadsError(error: unknown): string {
   const code = typeof error === 'object' && error !== null && 'code' in error ? error.code : '';
+  if (code === 'capability_unavailable') return 'uploads.scanUnavailable';
+  if (
+    code === 'validation_failed' &&
+    typeof error === 'object' &&
+    error !== null &&
+    'errors' in error &&
+    Array.isArray(error.errors) &&
+    error.errors.some(
+      (issue: unknown) =>
+        typeof issue === 'object' &&
+        issue !== null &&
+        'code' in issue &&
+        issue.code === 'capability_unavailable',
+    )
+  )
+    return 'uploads.scanUnavailable';
   if (code === 'conflict') return 'uploads.stale';
   if (code === 'module_not_enabled') return 'uploads.unavailable';
   if (code === 'forbidden') return 'forms.errors.forbidden';

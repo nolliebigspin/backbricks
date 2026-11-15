@@ -22,7 +22,10 @@ export function FilesPage() {
     return <p>{t('uploads.unavailable')}</p>;
   return (
     <section className="space-y-5">
-      <h1 className="text-2xl font-semibold">{t('uploads.title')}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold">{t('uploads.title')}</h1>
+        <ZonesLink />
+      </div>
       <FilesView />
     </section>
   );
@@ -111,11 +114,24 @@ function ScopedFiles({ zoneId, initialFile }: { zoneId?: string; initialFile?: s
     {
       id: 'name',
       header: t('common.name'),
-      renderCell: (file) => <span className="break-all font-medium">{file.name}</span>,
+      renderCell: (file) => (
+        <span className="block min-w-36 max-w-xs space-y-2 break-words font-medium">
+          <span>{file.name}</span>
+          <span className="block sm:hidden">
+            <FileStatus file={file} />
+          </span>
+        </span>
+      ),
     },
-    { id: 'size', header: t('uploads.size'), renderCell: (file) => <FileSize bytes={file.size} /> },
+    {
+      id: 'size',
+      header: t('uploads.size'),
+      className: 'whitespace-nowrap',
+      renderCell: (file) => <FileSize bytes={file.size} />,
+    },
     {
       id: 'status',
+      className: 'hidden sm:table-cell',
       header: t('forms.entries.status'),
       renderCell: (file) => <FileStatus file={file} />,
     },
@@ -283,5 +299,15 @@ function ScopedFiles({ zoneId, initialFile }: { zoneId?: string; initialFile?: s
         />
       )}
     </div>
+  );
+}
+
+function ZonesLink() {
+  const { t } = useTranslation();
+  const scope = useUploadsScope();
+  return (
+    <a className="text-sm underline" href={`/projects/${scope.projectId}/upload-zones`}>
+      {t('uploads.zones')}
+    </a>
   );
 }

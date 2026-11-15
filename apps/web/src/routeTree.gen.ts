@@ -27,6 +27,8 @@ import { Route as DashboardProjectsProjectIdFilesRouteImport } from './routes/_d
 import { Route as DashboardProjectsProjectIdSettingsRouteImport } from './routes/_dashboard.projects.$projectId.settings'
 import { Route as DashboardProjectsProjectIdFormsIndexRouteImport } from './routes/_dashboard.projects.$projectId.forms.index'
 import { Route as DashboardProjectsProjectIdFormsFormKeyRouteImport } from './routes/_dashboard.projects.$projectId.forms.$formKey'
+import { Route as DashboardProjectsProjectIdUploadZonesIndexRouteImport } from './routes/_dashboard.projects.$projectId.upload-zones.index'
+import { Route as DashboardProjectsProjectIdUploadZonesZoneKeyRouteImport } from './routes/_dashboard.projects.$projectId.upload-zones.$zoneKey'
 
 const DashboardRoute = DashboardRouteImport.update({
   id: '/_dashboard',
@@ -125,6 +127,18 @@ const DashboardProjectsProjectIdFormsFormKeyRoute =
     path: '/forms/$formKey',
     getParentRoute: () => DashboardProjectsProjectIdRoute,
   } as any)
+const DashboardProjectsProjectIdUploadZonesIndexRoute =
+  DashboardProjectsProjectIdUploadZonesIndexRouteImport.update({
+    id: '/upload-zones/',
+    path: '/upload-zones/',
+    getParentRoute: () => DashboardProjectsProjectIdRoute,
+  } as any)
+const DashboardProjectsProjectIdUploadZonesZoneKeyRoute =
+  DashboardProjectsProjectIdUploadZonesZoneKeyRouteImport.update({
+    id: '/upload-zones/$zoneKey',
+    path: '/upload-zones/$zoneKey',
+    getParentRoute: () => DashboardProjectsProjectIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof DashboardIndexRoute
@@ -143,7 +157,9 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId/settings': typeof DashboardProjectsProjectIdSettingsRoute
   '/projects/$projectId/': typeof DashboardProjectsProjectIdIndexRoute
   '/projects/$projectId/forms/$formKey': typeof DashboardProjectsProjectIdFormsFormKeyRoute
+  '/projects/$projectId/upload-zones/$zoneKey': typeof DashboardProjectsProjectIdUploadZonesZoneKeyRoute
   '/projects/$projectId/forms/': typeof DashboardProjectsProjectIdFormsIndexRoute
+  '/projects/$projectId/upload-zones/': typeof DashboardProjectsProjectIdUploadZonesIndexRoute
 }
 export interface FileRoutesByTo {
   '/accept-invitation': typeof AcceptInvitationRoute
@@ -161,7 +177,9 @@ export interface FileRoutesByTo {
   '/projects/$projectId/settings': typeof DashboardProjectsProjectIdSettingsRoute
   '/projects/$projectId': typeof DashboardProjectsProjectIdIndexRoute
   '/projects/$projectId/forms/$formKey': typeof DashboardProjectsProjectIdFormsFormKeyRoute
+  '/projects/$projectId/upload-zones/$zoneKey': typeof DashboardProjectsProjectIdUploadZonesZoneKeyRoute
   '/projects/$projectId/forms': typeof DashboardProjectsProjectIdFormsIndexRoute
+  '/projects/$projectId/upload-zones': typeof DashboardProjectsProjectIdUploadZonesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -182,7 +200,9 @@ export interface FileRoutesById {
   '/_dashboard/projects/$projectId/settings': typeof DashboardProjectsProjectIdSettingsRoute
   '/_dashboard/projects/$projectId/': typeof DashboardProjectsProjectIdIndexRoute
   '/_dashboard/projects/$projectId/forms/$formKey': typeof DashboardProjectsProjectIdFormsFormKeyRoute
+  '/_dashboard/projects/$projectId/upload-zones/$zoneKey': typeof DashboardProjectsProjectIdUploadZonesZoneKeyRoute
   '/_dashboard/projects/$projectId/forms/': typeof DashboardProjectsProjectIdFormsIndexRoute
+  '/_dashboard/projects/$projectId/upload-zones/': typeof DashboardProjectsProjectIdUploadZonesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -203,7 +223,9 @@ export interface FileRouteTypes {
     | '/projects/$projectId/settings'
     | '/projects/$projectId/'
     | '/projects/$projectId/forms/$formKey'
+    | '/projects/$projectId/upload-zones/$zoneKey'
     | '/projects/$projectId/forms/'
+    | '/projects/$projectId/upload-zones/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/accept-invitation'
@@ -221,7 +243,9 @@ export interface FileRouteTypes {
     | '/projects/$projectId/settings'
     | '/projects/$projectId'
     | '/projects/$projectId/forms/$formKey'
+    | '/projects/$projectId/upload-zones/$zoneKey'
     | '/projects/$projectId/forms'
+    | '/projects/$projectId/upload-zones'
   id:
     | '__root__'
     | '/_dashboard'
@@ -241,7 +265,9 @@ export interface FileRouteTypes {
     | '/_dashboard/projects/$projectId/settings'
     | '/_dashboard/projects/$projectId/'
     | '/_dashboard/projects/$projectId/forms/$formKey'
+    | '/_dashboard/projects/$projectId/upload-zones/$zoneKey'
     | '/_dashboard/projects/$projectId/forms/'
+    | '/_dashboard/projects/$projectId/upload-zones/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -382,6 +408,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProjectsProjectIdFormsFormKeyRouteImport
       parentRoute: typeof DashboardProjectsProjectIdRoute
     }
+    '/_dashboard/projects/$projectId/upload-zones/': {
+      id: '/_dashboard/projects/$projectId/upload-zones/'
+      path: '/upload-zones'
+      fullPath: '/projects/$projectId/upload-zones/'
+      preLoaderRoute: typeof DashboardProjectsProjectIdUploadZonesIndexRouteImport
+      parentRoute: typeof DashboardProjectsProjectIdRoute
+    }
+    '/_dashboard/projects/$projectId/upload-zones/$zoneKey': {
+      id: '/_dashboard/projects/$projectId/upload-zones/$zoneKey'
+      path: '/upload-zones/$zoneKey'
+      fullPath: '/projects/$projectId/upload-zones/$zoneKey'
+      preLoaderRoute: typeof DashboardProjectsProjectIdUploadZonesZoneKeyRouteImport
+      parentRoute: typeof DashboardProjectsProjectIdRoute
+    }
   }
 }
 
@@ -391,7 +431,9 @@ interface DashboardProjectsProjectIdRouteChildren {
   DashboardProjectsProjectIdSettingsRoute: typeof DashboardProjectsProjectIdSettingsRoute
   DashboardProjectsProjectIdIndexRoute: typeof DashboardProjectsProjectIdIndexRoute
   DashboardProjectsProjectIdFormsFormKeyRoute: typeof DashboardProjectsProjectIdFormsFormKeyRoute
+  DashboardProjectsProjectIdUploadZonesZoneKeyRoute: typeof DashboardProjectsProjectIdUploadZonesZoneKeyRoute
   DashboardProjectsProjectIdFormsIndexRoute: typeof DashboardProjectsProjectIdFormsIndexRoute
+  DashboardProjectsProjectIdUploadZonesIndexRoute: typeof DashboardProjectsProjectIdUploadZonesIndexRoute
 }
 
 const DashboardProjectsProjectIdRouteChildren: DashboardProjectsProjectIdRouteChildren =
@@ -403,8 +445,12 @@ const DashboardProjectsProjectIdRouteChildren: DashboardProjectsProjectIdRouteCh
     DashboardProjectsProjectIdIndexRoute: DashboardProjectsProjectIdIndexRoute,
     DashboardProjectsProjectIdFormsFormKeyRoute:
       DashboardProjectsProjectIdFormsFormKeyRoute,
+    DashboardProjectsProjectIdUploadZonesZoneKeyRoute:
+      DashboardProjectsProjectIdUploadZonesZoneKeyRoute,
     DashboardProjectsProjectIdFormsIndexRoute:
       DashboardProjectsProjectIdFormsIndexRoute,
+    DashboardProjectsProjectIdUploadZonesIndexRoute:
+      DashboardProjectsProjectIdUploadZonesIndexRoute,
   }
 
 const DashboardProjectsProjectIdRouteWithChildren =

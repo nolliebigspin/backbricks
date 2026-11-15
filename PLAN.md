@@ -1209,14 +1209,14 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - **Tests:** Component behavior/accessibility and browser cases for filtering, actions, unsafe names and tenant switches.
 - **Risks/notes:** Reuse existing primitives; do not create a second table, error or permission framework.
 
-### [ ] P3.8b – Build zone configuration and integration instructions (est. 5 h)
+### [x] P3.8b – Build zone configuration and integration instructions (est. 5 h)
 - **Description:** Add templates, size/type/retention/scan policy settings and Embed guidance with stale/destructive confirmation.
 - **Files/packages:** apps/web uploads settings/embed; shared i18n/types
 - **Depends on:** P3.1b, P3.8a
 - **Reuses:** Generic instance/config plan pipeline, RetentionPicker, existing settings/Embed patterns
 - **Acceptance criteria:**
-  - [ ] Required/unavailable scanning and explicit unscanned choices are understandable; member settings remain read-only.
-  - [ ] Saves use versions and destructive plans; instructions identify the zone and keep secret keys server-side.
+  - [x] Required/unavailable scanning and explicit unscanned choices are understandable; member settings remain read-only.
+  - [x] Saves use versions and destructive plans; instructions identify the zone and keep secret keys server-side.
 - **Tests:** Component config bodies/stale/destructive/role cases and en/de parity.
 - **Risks/notes:** Expose product choices and consequences, not internal adapter/protocol implementation details.
 
@@ -1293,6 +1293,9 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - [ ] **Report/release readiness:** `docs/progress/phase-3.md`, 0.2.0 changeset, quickstart evidence, human-reviewed signed-off commits; fresh review and any future tag/push remain explicitly separate gates.
 
 ### Planning risks and execution notes
+
+- P3.8b complete: conditional area list/templates, paged zone selection, notification deep links, role-aware settings and integration instructions. Saves preserve hidden limits/honeypot policy, use optimistic versions and the shared server-classified destructive plan; risky changes require typing the area key. Scanning failures explain recovery and unscanned templates require explicit selection. Shared template filtering, config-object reads, code blocks and planning replace duplicate implementations. Mobile Files rows now keep full names and move status below them (Chromium 390px, no overflow). Five new component/snippet cases pass. `CI=true bun run check` passed (570 package + 102 script tests; `/tmp/backbricks-p3-8b-check.log`). Review remains deferred. Next: P3.8c.
+
 
 - P3.8a complete: conditional Files navigation, one paged/filterable table/grid model, bounded selection, role-aware confirmation, safe plain-text details, authoritative preview eligibility and transient audited download URLs. Shared module scopes, calendar filters and BigInt capacity formatting avoid duplicate contracts. Four component cases cover hostile names, member restrictions, filters/selection and project-switch cancellation; en/de parity and large-capacity formatting pass. Chromium layout inspection at 1440px and 390px confirms no page overflow; mobile filename layout receives a further refinement with P3.8b. `CI=true bun run check` passed (565 package + 102 script tests; `/tmp/backbricks-p3-8a-check.log`); dashboard build passed. Actual-service browser journeys follow in P3.9b. Human review remains deferred. Next: P3.8b.
 

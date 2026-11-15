@@ -12,6 +12,7 @@ import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { admin } from '../../auth/client.ts';
+import { instanceConfigIsDestructive } from '../../dashboard/config-plan.ts';
 import { canManage, useTenant } from '../../dashboard/context.tsx';
 import { Feedback, unwrap } from '../../dashboard/feedback.tsx';
 import { formsError, useFormsScope, type FormInstance } from './api.ts';
@@ -32,7 +33,6 @@ import {
 
 const FORMS_RESOURCE = 'forms';
 const text = (value: unknown) => (typeof value === 'string' ? value : '');
-const stale = () => Object.assign(new Error('stale'), { code: 'conflict' });
 
 /** The fields websites send; read-only for members (§E.4). */
 export function FieldsTab({ form }: { form: FormInstance }) {
@@ -92,34 +92,7 @@ function FieldsForm({ form, disabled }: { form: FormInstance; disabled: boolean 
   }
   /** The server's dry run decides whether the change loses data (one classifier, D30). */
   async function destructive(config: Record<string, unknown>) {
-    const document = unwrap(
-      await admin.GET('/v1/projects/{projectId}/config', {
-        params: { path },
-        headers: scope.headers,
-      }),
-    );
-    const forms = document.modules[FORMS_RESOURCE] ?? {};
-    const current = forms[form.key];
-    if (current?.configVersion !== form.configVersion) throw stale();
-    const plan = unwrap(
-      await admin.PUT('/v1/projects/{projectId}/config', {
-        params: { path, query: { dryRun: 'true' } },
-        headers: scope.headers,
-        body: {
-          config: {
-            ...document,
-            modules: { [FORMS_RESOURCE]: { ...forms, [form.key]: { ...current, config } } },
-          },
-        },
-      }),
-    );
-    return (
-      'planHash' in plan &&
-      plan.changes.some(
-        (change) =>
-          change.resource === FORMS_RESOURCE && change.key === form.key && change.destructive,
-      )
-    );
+    return instanceConfigIsDestructive(scope, FORMS_RESOURCE, form.key, form.configVersion, config);
   }
   return (
     <form
