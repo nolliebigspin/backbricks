@@ -1,33 +1,24 @@
-import { Badge, Button } from '@backbricks/ui';
-import { ArrowRightIcon } from 'lucide-react';
+import { Button } from '@backbricks/ui';
 
 import { links, site } from '../content/site.ts';
 import { ExternalLink } from './external-link.tsx';
 import { GitHubIcon } from './github-icon.tsx';
-
-const agentSession = [
-  { prompt: true, text: 'claude mcp add backbricks -- npx backbricks mcp' },
-  { prompt: false, text: '> Add a contact form with a CV upload to the site.' },
-  { prompt: true, text: 'npx backbricks push' },
-  { prompt: true, text: 'npx backbricks test submit forms/contact' },
-  { prompt: false, text: '✓ Test entry is in the dashboard inbox' },
-] as const;
+import { ModuleWall } from './module-wall.tsx';
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden">
-      <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 pt-20 pb-16 sm:pt-28 lg:grid-cols-2">
-        <div>
-          <Badge variant="outline">{site.status} · open source</Badge>
-          <h1 className="mt-6 font-heading text-5xl font-semibold tracking-tight text-balance sm:text-6xl">
-            Backend bricks for <span className="text-brand">any website</span>.
-          </h1>
-          <p className="mt-6 max-w-xl text-lg text-pretty text-muted-foreground">
-            Forms, file uploads, reviews and more. Your AI coding agent builds the frontend.
-            Backbricks handles everything behind it, and site owners manage what comes in from a
-            simple dashboard.
+    <section className="overflow-hidden pt-16 pb-20 sm:pt-24 sm:pb-28">
+      <div className="mx-auto max-w-6xl px-6">
+        <p className="text-sm text-muted-foreground">
+          Open source <span className="text-foreground">{site.status.toLowerCase()}</span>
+        </p>
+        <h1 className="mt-5 max-w-4xl text-display font-bold">Backend bricks for any website.</h1>
+        <div className="mt-8 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <p className="max-w-xl text-lg text-pretty text-muted-foreground">
+            Forms, file uploads and reviews without running a backend. Your AI coding agent wires
+            them into the site; the people who own it read what comes in from a plain dashboard.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3">
             <Button asChild size="lg">
               <ExternalLink href={links.repo}>
                 <GitHubIcon data-icon="inline-start" />
@@ -35,26 +26,13 @@ export function Hero() {
               </ExternalLink>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <ExternalLink href={links.roadmap}>
-                See the roadmap
-                <ArrowRightIcon data-icon="inline-end" />
-              </ExternalLink>
+              <ExternalLink href={links.roadmap}>See the roadmap</ExternalLink>
             </Button>
           </div>
         </div>
-        <figure className="min-w-0">
-          <pre className="code-block" aria-label="Example agent session">
-            {agentSession.map((line) => (
-              <div key={line.text}>
-                {line.prompt ? <span className="text-brand select-none">$ </span> : null}
-                <span className={line.prompt ? undefined : 'text-ring'}>{line.text}</span>
-              </div>
-            ))}
-          </pre>
-          <figcaption className="mt-3 text-sm text-muted-foreground">
-            How integration is planned to work. Backbricks is in pre-alpha.
-          </figcaption>
-        </figure>
+      </div>
+      <div className="mt-16 sm:mt-20">
+        <ModuleWall />
       </div>
     </section>
   );

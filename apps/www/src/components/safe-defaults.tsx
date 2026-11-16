@@ -14,14 +14,13 @@ const defaults = [
 export function SafeDefaults() {
   return (
     <Section
-      eyebrow="EU-first"
       title="Privacy and security by default"
       intro="Public endpoints are built for the open internet: validated, rate limited and designed so that a leaked key can't expose your data."
     >
       <ul className="grid gap-4 sm:grid-cols-2">
         {defaults.map((item) => (
           <li key={item} className="flex gap-3">
-            <CheckIcon className="mt-0.5 size-5 shrink-0 text-brand" />
+            <CheckIcon className="mt-0.5 size-5 shrink-0 text-success" />
             <span>{item}</span>
           </li>
         ))}

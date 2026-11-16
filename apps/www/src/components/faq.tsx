@@ -3,7 +3,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@b
 const questions = [
   {
     q: 'Can I use Backbricks today?',
-    a: 'Not yet. Backbricks is in pre-alpha: the architecture and roadmap are done and implementation has started. The first developer preview ships the forms brick. Star or watch the GitHub repository to follow along.',
+    a: 'As a developer preview. Forms shipped in v0.1; uploads and reviews follow before 1.0, and APIs may still change until then. Star or watch the GitHub repository to follow along.',
   },
   {
     q: 'Do I need an AI coding agent?',
