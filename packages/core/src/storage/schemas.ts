@@ -25,6 +25,8 @@ export const storageGetSchema = z
   .object({
     key: storageKeySchema,
     expiresInSeconds: z.number().int().positive().max(MAX_SIGNED_GET_TTL_SECONDS),
+    /** An absolute privacy deadline; providers must clamp using the same timestamp they sign with. */
+    notAfter: z.date().optional(),
     downloadName: z
       .string()
       .min(1)
@@ -41,3 +43,17 @@ export const storageObjectSchema = z
 export const signedStorageRequestSchema = z
   .object({ url: z.url(), headers: z.record(z.string(), z.string()) })
   .strict();
+
+/** Provider-private identity for a direct upload that only the server may finalize. */
+export const storageUploadControlSchema = z
+  .object({
+    key: storageKeySchema,
+    handle: z.string().min(1).max(2048),
+  })
+  .strict();
+export const storageUploadCompleteSchema = storageUploadControlSchema.extend({
+  size: storagePutSchema.shape.size,
+});
+export const storageUploadSessionSchema = signedStorageRequestSchema.extend({
+  handle: storageUploadControlSchema.shape.handle,
+});

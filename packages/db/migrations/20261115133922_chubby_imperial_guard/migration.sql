@@ -1,0 +1,2 @@
+ALTER TABLE "files" ADD COLUMN "owner_expires_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "files" ADD CONSTRAINT "files_owner_expiry_bound" CHECK ("owner_expires_at" is null or ("owner_id" is not null and "expires_at" is not null and "expires_at" <= "owner_expires_at"));

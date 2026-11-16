@@ -389,3 +389,127 @@ test.skipIf(!available)(
   },
   30_000,
 );
+
+test.skipIf(!available)(
+  'resource-bound public writes retain origins, proofs, tenant lookup and body limits',
+  async () => {
+    let lookups = 0;
+    const resources = defineModuleCatalog([
+      publicModule({
+        resourceLookup: () => {
+          lookups++;
+        },
+      }),
+    ]);
+    await scenario(
+      async (base) => {
+        const f = await prepareIsolationFixture(base);
+        const pk = await issueKey(f, f.a1.id, {
+          kind: 'publishable',
+          name: 'Resource',
+          expiresAt: null,
+        });
+        expect(
+          (
+            await f.request(
+              `/v1/projects/${f.a1.id}/entries`,
+              { key: 'contact', name: 'Contact' },
+              f.owner.cookie,
+            )
+          ).status,
+        ).toBe(201);
+        const path = `/v1/public/resources/own-id/complete?key=${pk.token}`;
+        const headers = { origin: 'https://site.test' };
+        expect(
+          (
+            await f.request(
+              `/v1/projects/${f.a1.id}`,
+              { allowedOrigins: [headers.origin] },
+              f.owner.cookie,
+              undefined,
+              'PATCH',
+            )
+          ).status,
+        ).toBe(200);
+        const denied = await f.request(path, { data: { token: 'own-token' } }, undefined, {
+          origin: 'https://foreign.test',
+        });
+        expect({ status: denied.status, body: await denied.json() }).toMatchObject({ status: 403 });
+        expect(lookups).toBe(0);
+        expect(
+          (
+            await f.request(
+              path,
+              { data: { token: 'own-token', padding: 'x'.repeat(2048) } },
+              undefined,
+              headers,
+            )
+          ).status,
+        ).toBe(413);
+        expect(lookups).toBe(0);
+        expect(
+          (
+            await f.request(
+              path.replace('own-id', 'foreign-id'),
+              { data: { token: 'own-token' } },
+              undefined,
+              headers,
+            )
+          ).status,
+        ).toBe(404);
+        expect(
+          (await f.request(path, { data: { token: 'wrong-token' } }, undefined, headers)).status,
+        ).toBe(404);
+        expect(
+          (await f.request(path, { data: { token: 'own-token' } }, undefined, headers)).status,
+        ).toBe(400);
+        const challenge = altchaChallengeSchema.parse(
+          await (
+            await f.request(`/v1/public/challenge?key=${pk.token}`, undefined, undefined, headers)
+          ).json(),
+        );
+        const solution = await solveChallenge({ challenge, deriveKey, timeout: 10_000 });
+        const body = { data: { token: 'own-token' }, proof: { challenge, solution } };
+        const response = await f.request(path, body, undefined, headers);
+        expect(response.status).toBe(200);
+        expect(await response.json()).toEqual({ accepted: true });
+        expect(response.headers.get('access-control-allow-origin')).toBe(headers.origin);
+        expect((await f.request(path, body, undefined, headers)).status).toBe(400);
+        expect(
+          (
+            await f.request(
+              path,
+              undefined,
+              undefined,
+              {
+                ...headers,
+                'access-control-request-method': 'POST',
+                'access-control-request-headers': 'content-type',
+              },
+              'OPTIONS',
+            )
+          ).status,
+        ).toBe(204);
+        const foreign = await issueKey(f, f.a2.id, {
+          kind: 'publishable',
+          name: 'Other project',
+          expiresAt: null,
+        });
+        expect(
+          (
+            await f.request(
+              path.replace(pk.token, foreign.token),
+              { data: { token: 'own-token' } },
+              undefined,
+              headers,
+            )
+          ).status,
+        ).toBe(404);
+        expect(f.logs.join('')).not.toContain('own-token');
+      },
+      { BACKBRICKS_MODULES: 'publictest' },
+      { catalog: resources },
+    );
+  },
+  30_000,
+);

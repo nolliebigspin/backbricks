@@ -167,12 +167,14 @@ test.skipIf(!available)(
     const f = await createTenantFixture();
     const maintenance = createMaintenanceRepository(f.handle.db);
     const withTenant = createWithTenant(f.handle.db);
-    const now = systemClock.now();
-    const past = new Date(now.getTime() - 86_400_000);
-    const future = new Date(now.getTime() + 86_400_000);
-    const ids = createIds({ now: () => past });
     const pool = databasePool(f.handle.db);
     try {
+      // The append-only trigger uses the database clock; even sub-second VM drift can leave a host timestamp in its future.
+      const now = (await pool.query<{ now: Date }>('select clock_timestamp() as now')).rows[0]?.now;
+      if (!now) throw new Error('Missing fixture database timestamp.');
+      const past = new Date(now.getTime() - 86_400_000);
+      const future = new Date(now.getTime() + 86_400_000);
+      const ids = createIds({ now: () => past });
       for (const [organizationId, projectId] of [
         ['org-a', f.projectIds.a1],
         ['org-b', f.projectIds.b1],

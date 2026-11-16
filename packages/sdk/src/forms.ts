@@ -1,7 +1,7 @@
 import type { operations } from '@backbricks/api-contract';
 
-import { BackbricksError } from './errors.ts';
-import { isChallenge, solveChallenge } from './pow.ts';
+import { unexpectedResponse } from './errors.ts';
+import { publicProof } from './proof.ts';
 import type { Transport } from './transport.ts';
 
 /** `{ id }` for a stored entry; `{ accepted: true }` when the server dropped it as spam. */
@@ -27,12 +27,6 @@ export type FormsClient<Schema> = {
   ): Promise<SubmitResult>;
 };
 
-const unexpected = () =>
-  new BackbricksError({
-    code: 'unexpected_response',
-    status: 200,
-    message: 'Backbricks sent a response this SDK version does not understand.',
-  });
 function isSubmitResult(value: unknown): value is SubmitResult {
   if (typeof value !== 'object' || value === null) return false;
   return 'id' in value
@@ -44,17 +38,7 @@ export function createForms<Schema>(transport: Transport): FormsClient<Schema> {
   return {
     async submit(key, data, options = {}) {
       const { signal } = options;
-      const proof = transport.publishable
-        ? await (async () => {
-            const challenge = await transport.request(
-              '/public/challenge',
-              { method: 'GET' },
-              signal,
-            );
-            if (!isChallenge(challenge)) throw unexpected();
-            return { challenge, solution: await solveChallenge(challenge, { signal }) };
-          })()
-        : undefined;
+      const proof = await publicProof(transport, signal);
       const result = await transport.request(
         `/public/forms/${encodeURIComponent(key)}/submissions`,
         {
@@ -67,7 +51,7 @@ export function createForms<Schema>(transport: Transport): FormsClient<Schema> {
         },
         signal,
       );
-      if (!isSubmitResult(result)) throw unexpected();
+      if (!isSubmitResult(result)) throw unexpectedResponse();
       return result;
     },
   };

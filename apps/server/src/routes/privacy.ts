@@ -53,6 +53,35 @@ export function privacyRoutes(
   api.register(
     createRoute({
       method: 'post',
+      path: '/v1/projects/{projectId}/privacy/subject-export.zip',
+      operationId: 'privacy.subjectExportZip',
+      request: { params, body },
+      responses: {
+        200: {
+          description:
+            'Bounded streaming ZIP with a complete manifest and available private file contents.',
+          content: { 'application/zip': { schema: z.string().openapi({ format: 'binary' }) } },
+        },
+      },
+    }),
+    policy('export_zip'),
+    async (c) => {
+      const stream = await services.privacy.exportArchive(
+        requireTenantContext(c),
+        c.req.valid('json'),
+      );
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'application/zip',
+          'Content-Disposition': 'attachment; filename="subject-export.zip"',
+          'Cache-Control': 'private, no-store',
+        },
+      });
+    },
+  );
+  api.register(
+    createRoute({
+      method: 'post',
       path: '/v1/projects/{projectId}/privacy/subject-delete',
       operationId: 'privacy.subjectDelete',
       request: { params, body },

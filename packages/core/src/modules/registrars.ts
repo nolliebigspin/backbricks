@@ -3,14 +3,20 @@ import { z } from 'zod';
 import { publicAccessSchema, type PublicAccessInput } from '../abuse/policy.ts';
 import { AppError } from '../errors/app-error.ts';
 import { routePolicySchema, type RoutePolicy } from '../http/route-policy.ts';
+import { instanceKeySchema } from '../instances/schemas.ts';
 import { redactSecretText } from '../logging/redact.ts';
 import { activityNameSchema } from '../platform/activity-fields.ts';
 import type { ModuleExecution } from './contract.ts';
 import { MAX_JOB_RETENTION_SECONDS, type ModuleJobRegistrar } from './jobs.ts';
 import type { RegisteredJob, RegisteredRoute } from './registered.ts';
-import type { ModuleInputSchema, ModuleRouteSpec } from './routes.ts';
+import type {
+  ModuleInputSchema,
+  ModuleRouteSpec,
+  ModuleResolverSource,
+  ModuleInstanceResolverContext,
+} from './routes.ts';
 import { freezeDeclaration, schemaDocument } from './validation.ts';
-import { jsonValueSchema } from './values.ts';
+import { moduleNameSchema, jsonValueSchema } from './values.ts';
 
 async function validateResponse(
   response: Response,
@@ -47,15 +53,26 @@ async function validateResponse(
 }
 
 /** Captures each input schema in a closure before erasing heterogeneous registered routes. */
-export function routeRegistrar<Runtime>(
+export function routeRegistrar<Runtime extends ModuleResolverSource>(
   context: (execution: ModuleExecution) => Runtime,
   kind: 'management' | 'public',
+  primaryResource: string,
+  resources: readonly string[],
 ) {
   const routes: RegisteredRoute[] = [];
   function register<I extends ModuleInputSchema>(
-    spec: ModuleRouteSpec<I, RoutePolicy> & { access?: PublicAccessInput },
+    spec: ModuleRouteSpec<I, RoutePolicy> & {
+      access?: PublicAccessInput;
+      resolveInstance?: (
+        context: ModuleInstanceResolverContext<Runtime>,
+        input: z.output<I>,
+      ) => Promise<string>;
+    },
     handler: (runtime: Runtime, input: z.output<I>) => Promise<Response>,
   ) {
+    const resource = moduleNameSchema.parse(spec.resource ?? primaryResource);
+    if (!resources.includes(resource) || /\{(?:projectId|organizationId)\}/.test(spec.path))
+      throw new AppError('invalid_request', { detail: 'Invalid module resource ownership.' });
     const policy = freezeDeclaration(routePolicySchema.parse(spec.policy));
     if (
       policy.kind !== kind ||
@@ -108,9 +125,28 @@ export function routeRegistrar<Runtime>(
       throw new AppError('invalid_request');
     if (kind === 'public' && (spec.method === 'GET') !== (access?.kind === 'read'))
       throw new AppError('invalid_request');
+    const resolveInstance = spec.resolveInstance;
+    if (resolveInstance && (kind !== 'public' || access?.kind !== 'write' || access.form))
+      throw new AppError('invalid_request', {
+        detail: 'Instance resolvers require a public JSON write.',
+      });
     routes.push(
       Object.freeze({
         ...spec,
+        resource,
+        resolveInstance: resolveInstance
+          ? async (execution: ModuleExecution, input: unknown) => {
+              if (!execution.tx.context.readOnly) throw new AppError('internal_error');
+              const runtime = context(execution);
+              const key = await resolveInstance(
+                Object.freeze({ repository: runtime.repository, clock: runtime.services.clock }),
+                inputSchema.parse(input),
+              );
+              const parsed = instanceKeySchema.safeParse(key);
+              if (!parsed.success) throw new AppError('internal_error');
+              return parsed.data;
+            }
+          : undefined,
         responses,
         access,
         policy,

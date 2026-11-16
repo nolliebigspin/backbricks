@@ -172,44 +172,12 @@ Implemented core tables are defined in code (ADR-0023), with no parallel SQL spe
 - [Events, audit, notification rules and usage](../packages/db/src/schema/platform.ts)
 - [Idempotency, rate limiting, replay and system settings](../packages/db/src/schema/technical.ts)
 - [Forms entries](../packages/db/src/schema/forms.ts) (`form_submissions`; repository interface in the [forms module](../packages/modules/forms/src/repository.ts), ADR-0055)
+- [Upload files](../packages/db/src/schema/files.ts) (`files`; shared states/size bounds in [core](../packages/core/src/storage/files.ts), durable cleanup lifecycle in ADR-0064)
 - [Custom audit/membership/UNLOGGED constraints](../packages/db/migrations/20261106024528_audit_immutability/migration.sql)
 
-Live child references include organization/project/instance identity; audit IDs are historical references retained without cascading FKs. Platform timestamps are supplied through the injected clock. Expiry/lifecycle rules follow ADR-0022. The SQL below specifies only the unimplemented domain tables.
+Live child references include organization/project/instance identity; audit IDs are historical references retained without cascading FKs. Files additionally bind the parent module type, so a form cannot be used as a zone. Both deterministic opaque object keys are retained from intent through cleanup; their presence in a row is not evidence that an object exists. A durable deletion marker revokes access while cleanup finishes (ADR-0064). Platform timestamps are supplied through the injected clock. Expiry/lifecycle rules follow ADR-0022. The SQL below specifies only the unimplemented domain tables.
 
 ```sql
--- =========================================================
--- Module: uploads
--- =========================================================
-CREATE TABLE files (
-  id                 text PRIMARY KEY,                     -- file_…
-  organization_id    text NOT NULL,
-  project_id         text NOT NULL,
-  instance_id        text NOT NULL REFERENCES module_instances(id) ON DELETE CASCADE, -- upload zone
-  status             text NOT NULL CHECK (status IN
-                       ('pending','uploaded','scanning','ready','quarantined','rejected')),
-  staging_key        text NOT NULL UNIQUE,                 -- target of the presigned URL
-  storage_key        text UNIQUE,                          -- final copy, never writable via URL
-  original_name      text NOT NULL,
-  declared_mime      text,
-  detected_mime      text,
-  size_bytes         bigint NOT NULL CHECK (size_bytes > 0),
-  sha256             bytea,
-  scan               jsonb,                                -- {engine, result, signature, scanned_at}
-  upload_token_hash  bytea NOT NULL,                       -- authorizes complete + claim
-  owner_type         text,                                 -- 'form_submission' | 'review' | NULL
-  owner_id           text,
-  metadata           jsonb NOT NULL DEFAULT '{}',          -- client-provided, validated and bounded
-  is_test            boolean NOT NULL DEFAULT false,
-  subject_email      text,
-  created_at         timestamptz NOT NULL DEFAULT now(),
-  uploaded_at        timestamptz,
-  expires_at         timestamptz
-);
-CREATE INDEX files_list_idx    ON files (instance_id, created_at DESC);
-CREATE INDEX files_owner_idx   ON files (owner_type, owner_id) WHERE owner_id IS NOT NULL;
-CREATE INDEX files_orphan_idx  ON files (created_at) WHERE owner_id IS NULL;
-CREATE INDEX files_expiry_idx  ON files (expires_at) WHERE expires_at IS NOT NULL;
-
 -- =========================================================
 -- Module: reviews
 -- =========================================================
@@ -507,12 +475,14 @@ sequenceDiagram
 
   B->>API: POST /v1/public/upload-zones/cv/files {name, size, type} + PoW
   API->>API: AbuseGuard, zone rules (type, size), quota
+  API->>S3: Create private single-part upload session
   API->>API: files row status=pending, staging_key=stg/{org}/{prj}/{fileId}
   API-->>B: {fileId, uploadUrl (PUT, 5 min, Content-Length+Type signed), uploadToken}
-  B->>S3: PUT uploadUrl (file)
+  B->>S3: PUT uploadUrl (one part; no object yet)
   S3-->>B: 200
   B->>API: POST /v1/public/files/{fileId}/complete {uploadToken}
-  API->>S3: HEAD staging_key (verify size)
+  API->>S3: Validate part and finalize upload session
+  API->>S3: HEAD staging_key (verify size and type)
   API->>API: status=uploaded, enqueue scan_file
   API-->>B: {fileId, fileRef}
   W->>S3: COPY staging_key → storage_key (fil/{org}/{prj}/{fileId})
@@ -740,7 +710,7 @@ See §B.6 and invariants I1–I3.
 
 Logged: member and role changes, key creation/revocation, config changes (changed field paths and revision numbers; values stay in authorized revision reads), exports, downloads, deletions (single and bulk), GDPR requests, secret-key exposure, retention runs. Committed logins emit a metadata-only operational signal before organization selection; no account-level login history is claimed ([ADR-0027](adr/0027-organization-policy-and-invitations.md)). **Not** logged: submission content or readable actor/key labels. Tenant audit logs are append-only (trigger), kept for 1 year, filterable and exportable in the dashboard.
 
-The [activity services and metadata schemas](../packages/core/src/services/activity.ts) write through the caller's scoped repositories, never a second transaction. Audit retention is one year; outbox metadata expires after 30 days. Payloads are structural metadata/identifiers/counters only; token-bearing email delivery is a separate restricted lifecycle (ADR-0022). The [dispatcher](../packages/core/src/jobs/outbox.ts) and [restricted mail queue](../packages/db/src/queue-mail.ts) provide atomic fan-out and bounded, retryable auth/security delivery ([ADR-0049](adr/0049-outbox-and-restricted-delivery.md)); the [worker maintenance capability](../packages/db/src/repositories/maintenance.ts) and [durable scheduling](../packages/db/src/queue-schedules.ts) provide bounded absolute-expiry cleanup and selected module fan-out ([ADR-0050](adr/0050-bounded-worker-maintenance.md)). [Platform read routes](../apps/server/src/routes/platform-reads.ts) and [query contracts](../packages/core/src/queries/schemas.ts) supply scoped activity, usage and safe integration metadata (ADR-0036); expired audit entries are hidden before pagination.
+The [activity services and metadata schemas](../packages/core/src/services/activity.ts) write through the caller's scoped repositories, never a second transaction. Audit retention is one year; outbox metadata expires after 30 days. Payloads are structural metadata/identifiers/counters only; token-bearing email delivery is a separate restricted lifecycle (ADR-0022). The [dispatcher](../packages/core/src/jobs/outbox.ts) and [restricted mail queue](../packages/db/src/queue-mail.ts) provide atomic fan-out and bounded, retryable auth/security delivery ([ADR-0049](adr/0049-outbox-and-restricted-delivery.md)); the [worker maintenance capability](../packages/db/src/repositories/maintenance.ts) and [durable scheduling](../packages/db/src/queue-schedules.ts) provide bounded absolute-expiry cleanup and selected module fan-out ([ADR-0050](adr/0050-bounded-worker-maintenance.md), [archived maintenance and recovery](adr/0071-archived-project-maintenance.md)). [Platform read routes](../apps/server/src/routes/platform-reads.ts) and [query contracts](../packages/core/src/queries/schemas.ts) supply scoped activity, usage and safe integration metadata (ADR-0036); expired audit entries are hidden before pagination.
 
 ---
 
@@ -880,3 +850,7 @@ Milestones, scope, exit criteria and effort: `docs/MILESTONES.md`. Tasks: `PLAN.
 ---
 
 *Changes to decisions in §0 or §J.2 require an ADR.*
+
+The implemented upload storage session protocol is documented in [ADR-0072](adr/0072-server-finalized-upload-sessions.md) and the [module implementation](modules/uploads.md): one direct part PUT, server completion, then immutable copy/inspection. Signature expiry alone does not settle an in-flight request.
+
+Subject exports and physical-erasure settlement are implemented through [ADR-0065](adr/0065-subject-file-zip-exports.md) and [ADR-0073](adr/0073-subject-export-bounds-and-settlement.md). The [privacy service](../packages/core/src/privacy/subjects.ts), [archive generator](../packages/core/src/privacy/archive.ts) and [settlement worker](../packages/core/src/privacy/erasure.ts) own those contracts and limits.

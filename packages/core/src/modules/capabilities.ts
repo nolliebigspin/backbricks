@@ -1,9 +1,18 @@
 import { AppError } from '../errors/app-error.ts';
+import type {
+  FileAttachment,
+  FileClaim,
+  FileOwner,
+  FileOwnerExpiry,
+} from '../storage/file-metadata.ts';
 import type { TenantHandle } from '../tenancy/tenant-context.ts';
 
-/** The deletion seam is available before uploads; M3 adds claiming and listing. */
+/** Transaction-first attachment ownership; the provider validates and commits the entire claim set atomically. */
 export interface FilesCapability {
-  deleteByOwner(tx: TenantHandle, owner: { type: string; id: string }): Promise<void>;
+  claim(tx: TenantHandle, input: FileClaim): Promise<readonly FileAttachment[]>;
+  listByOwner(tx: TenantHandle, owner: FileOwner): Promise<readonly FileAttachment[]>;
+  syncOwnerExpiry(tx: TenantHandle, input: FileOwnerExpiry): Promise<void>;
+  deleteByOwner(tx: TenantHandle, owner: FileOwner): Promise<void>;
 }
 
 /** Modules augment this public interface with transaction-first capability contracts. */

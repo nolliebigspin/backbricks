@@ -7,3 +7,4 @@ export {
   POW_TTL_SECONDS,
 } from './abuse/altcha.ts';
 export { createMemoryRateLimiter } from './abuse/memory-rate-limiter.ts';
+export { createClamavScanner } from './scanner/clamav.ts';

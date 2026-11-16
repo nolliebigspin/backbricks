@@ -2,7 +2,19 @@
 
 - **Branch:** `feat/p2-forms`; 29 signed-off commits on top of `main` (9332ac7), including this report; nothing pushed.
 - **Date:** 2026-11-12.
-- **Status:** All 25 P2 tasks are implemented and every local acceptance command passes against fresh real services. Still open, all for the maintainer: the pull request with green GitHub CI, the GitHub-hosted manual run of the release workflow, `bun run release:version` on `main`, the signed `v0.1.0` tag (which publishes the image) and the phase review by a fresh session (AGENTS §9).
+- **Status at implementation handoff (2026-11-12):** All 25 P2 tasks implemented and local acceptance passed. The release/CI follow-up is completed below; fresh phase review remains separate.
+
+## Release follow-up · 2026-11-15
+
+The maintainer explicitly reviewed and authorized the generated release diff, DCO sign-off, release PR merge and signed tag push in Codex. Changesets consumed the existing release note, bumped `@backbricks/server` to `0.1.0` and generated [`apps/server/CHANGELOG.md`](../../apps/server/CHANGELOG.md); no application behavior changed.
+
+- [PR #13](https://github.com/nolliebigspin/backbricks/pull/13) merged as `354aa9a7aca72c141957ab90a4b8d79f9a5a6ff0` after all [PR CI checks](https://github.com/nolliebigspin/backbricks/actions/runs/43703887711) passed, including browser tests and image smoke. [Main CI](https://github.com/nolliebigspin/backbricks/actions/runs/43704344506) also passed.
+- `CI=true bun run check` passed locally with real Postgres/Garage/Mailpit: 450 package tests and 100 script tests, zero failures. The enabled pre-push hook passed separately.
+- Signed annotated tag [`v0.1.0`](https://github.com/nolliebigspin/backbricks/tree/v0.1.0) targets the merge commit. `git tag -v` with a temporary allowed-signers file verified the configured ED25519 signature. The remote annotated tag and peeled commit were checked after push.
+- [Release workflow](https://github.com/nolliebigspin/backbricks/actions/runs/43704367449) succeeded: tag/version match, build, real worker/non-root/read-only smoke and GHCR push.
+- `ghcr.io/nolliebigspin/backbricks:0.1.0` is anonymously readable (registry manifest HTTP 200). OCI index digest: `sha256:16daa5c97722c4abed91557ac64c6f7961f8d8fc3f5b8e1479cf9f68b35d5bdb`; executable platform is `linux/amd64`, with a separate attestation manifest. This does not claim a published arm64 image.
+
+The historical resume/release items below describe the original handoff and are superseded by this follow-up. Fresh phase review has not been certified by the release metadata approval. M3 may be planned, but its module/contract plan requires its own approval before application code (`docs/MODULES.md`, rule 4).
 
 ## Delivered
 

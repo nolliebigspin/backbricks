@@ -4,6 +4,7 @@ import { AppError } from '../errors/app-error.ts';
 import { requireSessionRole } from '../identity/permissions.ts';
 import { MAX_MAINTENANCE_BATCH, type QueueJobHandler } from '../jobs/contract.ts';
 import { PLATFORM_JOBS } from '../jobs/platform-names.ts';
+import { requireEnabledProjectModules } from '../modules/availability.ts';
 import type { ModuleRegistry } from '../modules/registry.ts';
 import { principalActor, type AuditService } from '../services/activity.ts';
 import type { Queue } from '../services/providers.ts';
@@ -97,6 +98,8 @@ export function createProjectErasureHandler(deps: {
       if (!tx.context.archivedProject || !projectId) throw new AppError('not_found');
       await tx.repositories.projects.get(projectId, { includeArchived: true, lock: true });
       if (await tx.repositories.projects.erasedAt(projectId)) return;
+      await requireEnabledProjectModules(tx, deps.registry);
+      let pendingUntil: Date | undefined;
       let records = 0;
       let full = false;
       for (const module of deps.registry.modules) {
@@ -105,17 +108,29 @@ export function createProjectErasureHandler(deps: {
           deps.runtime.forTenant(tx).execution(module.type),
           { limit: MAX_MAINTENANCE_BATCH },
         );
-        records += erased;
-        full ||= erased === MAX_MAINTENANCE_BATCH;
+        const result = typeof erased === 'number' ? { count: erased } : erased;
+        records += result.count;
+        full ||= result.count === MAX_MAINTENANCE_BATCH;
+        if (result.pendingUntil && (!pendingUntil || result.pendingUntil < pendingUntil))
+          pendingUntil = result.pendingUntil;
       }
       const round = data.round ?? 1;
-      if (full) {
+      if (full || pendingUntil) {
         if (!deps.queue) throw new AppError('service_unavailable');
         await deps.queue.enqueue(
           tx,
           PLATFORM_JOBS.projectErasure,
           { round: round + 1 },
-          { singletonKey: `erase:${round + 1}` },
+          {
+            singletonKey: `erase:${round + 1}`,
+            ...(pendingUntil
+              ? {
+                  notBefore: new Date(
+                    Math.max(deps.clock.now().getTime() + 1000, pendingUntil.getTime()),
+                  ),
+                }
+              : {}),
+          },
         );
         return;
       }

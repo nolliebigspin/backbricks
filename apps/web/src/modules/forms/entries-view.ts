@@ -1,3 +1,5 @@
+import { configObject as record } from '../../dashboard/config-values.ts';
+
 export type ConfigField = {
   key: string;
   label: string;
@@ -7,11 +9,6 @@ export type ConfigField = {
   text?: string;
   options?: { value: string; label: string }[];
 };
-
-const record = (value: unknown): Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value)
-    ? Object.fromEntries(Object.entries(value))
-    : {};
 
 function fieldOf(value: unknown): ConfigField | null {
   const field = record(value);
@@ -44,11 +41,8 @@ export function configFields(config: unknown): ConfigField[] {
   });
 }
 
-/**
- * The columns the list shows: `listFields`, or the first two visible fields, the same fallback
- * the server uses for the list values (P2.5a).
- */
-export function listColumns(config: unknown): ConfigField[] {
+/** The server chooses default list values; explicit owner column order still comes from config. */
+export function listColumns(config: unknown, returnedKeys: ReadonlySet<string>): ConfigField[] {
   const root = record(config);
   const fields = configFields(config);
   const chosen = Array.isArray(root['listFields'])
@@ -56,7 +50,7 @@ export function listColumns(config: unknown): ConfigField[] {
     : null;
   return chosen
     ? chosen.flatMap((key) => fields.filter((field) => field.key === key))
-    : fields.filter((field) => field.type !== 'hidden').slice(0, 2);
+    : fields.filter((field) => returnedKeys.has(field.key));
 }
 
 const UNITS = [

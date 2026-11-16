@@ -14,13 +14,14 @@ import type { TenantHandle } from '../tenancy/tenant-context.ts';
 import type { CapabilityFactories, CapabilityName, capabilityView } from './capabilities.ts';
 import type { InfraRequirement } from './infrastructure.ts';
 import type { ModuleJobRegistrar } from './jobs.ts';
+import type { ModuleMaintenanceResult } from './maintenance.ts';
+import type { ModulePrivacyHooks } from './privacy.ts';
 import type { ModuleAdminRouter, ModulePublicRouter } from './routes.ts';
 import type { BoundCoreServices, ModuleOptionalServices } from './services.ts';
 import type { ModuleStreamPage } from './streams.ts';
 import type {
   ConfigChangeReport,
   EventDefinition,
-  JsonValue,
   MetricDefinition,
   ScopeDefinition,
 } from './values.ts';
@@ -30,6 +31,8 @@ export type ConfiguredInstance<T> = Omit<ModuleInstance, 'config'> & { config: T
 export type ModuleInstanceReads<T> = Readonly<{
   get(key: string): Promise<ConfiguredInstance<T>>;
   revision(key: string, version: number): Promise<ConfiguredInstance<T>>;
+  /** Own-module historical reads for maintenance, including archived instances. */
+  revisionById(id: string, version: number): Promise<ConfiguredInstance<T>>;
   revisions(
     key: string,
     page: RepositoryPage,
@@ -108,8 +111,12 @@ export type ModuleDefinition<
   moduleVersion: number;
   displayName: { en: string; de: string };
   resourceName: { singular: string; plural: string };
+  /** Additional resource namespaces owned by this module (ADR-0063). */
+  resourceNamespaces?: readonly string[];
   infrastructure: I;
   configSchema: z.ZodType<T>;
+  /** Pure deployment-availability validation for new/changed configurations; stored reads use configSchema. */
+  validateConfigWrite?(config: T): void;
   defaultConfig(): T;
   templates?: Readonly<Record<string, { name: string; config: T }>>;
   migrateConfig?(fromVersion: number, config: unknown): T;
@@ -179,7 +186,7 @@ export type ModuleDefinition<
         MT
       >,
       input: { now: Date; limit: number },
-    ): Promise<number>;
+    ): Promise<ModuleMaintenanceResult>;
     recomputeExpiry(
       runtime: ModuleRuntime<
         T,
@@ -208,43 +215,7 @@ export type ModuleDefinition<
       input: NotificationSubjectInput<ConfiguredInstance<T>>,
     ): Promise<NotificationSubject | null>;
   };
-  privacy: {
-    exportSubject(
-      runtime: ModuleRuntime<
-        T,
-        R,
-        O,
-        SR | RequiredInfrastructure<I>,
-        SO | OptionalInfrastructure<I>,
-        MT
-      >,
-      email: string,
-    ): Promise<JsonValue>;
-    deleteSubject(
-      runtime: ModuleRuntime<
-        T,
-        R,
-        O,
-        SR | RequiredInfrastructure<I>,
-        SO | OptionalInfrastructure<I>,
-        MT
-      >,
-      email: string,
-    ): Promise<number>;
-    /**
-     * Project hard erasure (ADR-0061): delete up to `limit` of the project's records, including
-     * stored objects, and return how many went. The platform calls it until it returns < limit.
-     */
-    eraseScope(
-      runtime: ModuleRuntime<
-        T,
-        R,
-        O,
-        SR | RequiredInfrastructure<I>,
-        SO | OptionalInfrastructure<I>,
-        MT
-      >,
-      input: { limit: number },
-    ): Promise<number>;
-  };
+  privacy: ModulePrivacyHooks<
+    ModuleRuntime<T, R, O, SR | RequiredInfrastructure<I>, SO | OptionalInfrastructure<I>, MT>
+  >;
 };

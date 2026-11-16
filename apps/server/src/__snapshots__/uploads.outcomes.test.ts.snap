@@ -1,0 +1,9 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`EICAR commits one quarantine event, removes both objects and sends content-free Mailpit notification 1`] = `
+{
+  "fileId": "[fileId]",
+  "fileRef": "[fileRef]",
+  "status": "quarantined",
+}
+`;

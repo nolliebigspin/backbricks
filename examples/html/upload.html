@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Application with CV</title>
+<script type="importmap">{ "imports": { "@backbricks/sdk": "./dist/backbricks-sdk.js" } }</script>
+</head>
+<body>
+<h1>Application with CV</h1>
+<form id="backbricks-application">
+  <fieldset>
+    <label>Email
+      <input type="email" name="email" required>
+    </label>
+    <label>CV (PDF)
+      <input type="file" name="cv" required>
+    </label>
+    <div hidden>
+      <input name="_gotcha" tabindex="-1" autocomplete="off">
+    </div>
+    <button type="submit">Send application</button>
+  </fieldset>
+  <progress hidden max="1" value="0" aria-label="Upload progress"></progress>
+  <output></output>
+  <button type="button" data-cancel disabled>Cancel upload</button>
+</form>
+<script type="module" src="upload.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "e008da5b-5446-4f76-8a55-42d03cb0e469",
+  "prevIds": [
+    "f2e7ea04-e6eb-493f-958f-0d3c15a5b283"
+  ],
+  "footprints": [
+    {
+      "statementType": "alter_check",
+      "statementTarget": [
+        "table",
+        "public",
+        "files"
+      ],
+      "writes": [
+        "s|ck|public.files.files_owner_pair"
+      ],
+      "reads": [
+        "n|tbl|public.files",
+        "n|sch|public",
+        "n|col|public.files.owner_type",
+        "n|col|public.files.owner_id",
+        "e|col|public.files.owner_type",
+        "e|col|public.files.owner_id"
+      ],
+      "sqlHash": "babdd8b0cf863ac3"
+    }
+  ],
+  "deltas": [
+    {
+      "op": "alter",
+      "key": "checks\u0000[\"public\",\"files\",\"files_owner_pair\"]",
+      "set": {
+        "value": "(\"owner_type\" is null and \"owner_id\" is null) or (\"owner_type\" is not null and \"owner_id\" is not null and length(\"owner_type\") > 0 and length(\"owner_id\") > 0)"
+      }
+    }
+  ]
+}

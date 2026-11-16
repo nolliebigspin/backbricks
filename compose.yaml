@@ -54,7 +54,9 @@ x-app-env: &app-env
   S3_ACCESS_KEY_ID: GKbac4b41c4500000000000000
   S3_SECRET_ACCESS_KEY: bac4b41c45000000000000000000000000000000000000000000000000000000
   S3_FORCE_PATH_STYLE: 'true'
-  SCANNER: none
+  SCANNER: ${SCANNER:-none}
+  CLAMAV_HOST: clamav
+  CLAMAV_PORT: 3310
 
 # What the app services wait for. Storage only exists with the `storage` profile; `required:
 # false` lets forms/reviews-only setups start without it.
@@ -184,6 +186,10 @@ services:
     # The -debian variant is the one with arm64 images.
     image: clamav/clamav:1.5.4-debian
     profiles: [scan]
+    environment:
+      CLAMD_CONF_StreamMaxLength: 100M
+      CLAMD_CONF_MaxFileSize: 100M
+      CLAMD_CONF_AlertExceedsMax: 'yes'
     ports:
       - '${CLAMAV_PORT:-3310}:3310'
     volumes:

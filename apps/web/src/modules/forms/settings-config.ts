@@ -1,3 +1,5 @@
+import { configObject as record } from '../../dashboard/config-values.ts';
+
 /**
  * The settings tab edits these keys of a form's config and keeps every other key as stored. The
  * server's forms schema stays the authority; this only reads values for display, with its defaults.
@@ -12,8 +14,6 @@ export type FormSettings = {
 };
 type Config = Record<string, unknown>;
 
-const record = (value: unknown): Config =>
-  typeof value === 'object' && value !== null && !Array.isArray(value) ? { ...value } : {};
 const text = (value: unknown) => (typeof value === 'string' ? value : '');
 
 export function readSettings(config: unknown): FormSettings {

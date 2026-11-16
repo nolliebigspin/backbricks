@@ -1,0 +1,4 @@
+DROP INDEX "files_cleanup_idx";--> statement-breakpoint
+CREATE INDEX "files_cleanup_idx" ON "files" ("organization_id","project_id","cleanup_after","id") WHERE "cleanup_after" is not null;--> statement-breakpoint
+CREATE INDEX "files_staging_cleanup_idx" ON "files" ("organization_id","project_id","upload_expires_at","id") WHERE "deleted_at" is null and "copied_at" is not null and ("staging_cleaned_at" is null or "staging_cleaned_at" < "upload_expires_at");--> statement-breakpoint
+CREATE INDEX "files_scan_recovery_idx" ON "files" ("organization_id","project_id","updated_at","id") WHERE "deleted_at" is null and "status" in ('uploaded', 'scanning');

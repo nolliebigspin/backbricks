@@ -67,6 +67,7 @@ function mount(
   role: Tenant['role'],
   ui: 'fields' | 'embed' = 'fields',
   publicKey: string | null = 'bb_pk_live',
+  uploads = false,
 ) {
   const calls: Call[] = [];
   globalThis.fetch = Object.assign(
@@ -75,6 +76,13 @@ function mount(
       const url = new URL(request.url);
       const body: unknown = request.method === 'GET' ? null : await request.clone().json();
       calls.push({ method: request.method, path: url.pathname, search: url.search, body });
+      if (url.pathname.endsWith('/meta'))
+        return Response.json({ modules: uploads ? [{ type: 'uploads', operational: true }] : [] });
+      if (url.pathname.endsWith('/upload-zones'))
+        return Response.json({
+          data: [{ id: 'mod_cv', key: 'cv', name: 'Applications', status: 'active' }],
+          nextCursor: null,
+        });
       if (url.pathname.endsWith('/integration'))
         return Response.json({
           baseUrl: 'https://api.example.com/v1',
@@ -221,4 +229,18 @@ test('the embed tab shows a placeholder and a hint when no publishable key exist
   mount('member', 'embed', null);
   expect(await screen.findByText(/noch keinen öffentlichen Schlüssel/)).toBeDefined();
   expect(screen.getByText(/\?key=YOUR_PUBLISHABLE_KEY/)).toBeDefined();
+});
+
+test('file fields are offered only with uploads and select an existing upload area', async () => {
+  await initI18n('en');
+  mount('admin');
+  expect(screen.queryByRole('option', { name: 'File upload' })).toBeNull();
+  cleanup();
+  mount('admin', 'fields', 'bb_pk_live', true);
+  await screen.findByRole('option', { name: 'File upload' });
+  fireEvent.change(screen.getByLabelText('Add a field'), { target: { value: 'type:file' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Add field' }));
+  await screen.findByRole('option', { name: 'Applications' });
+  fireEvent.change(screen.getByLabelText('Upload area'), { target: { value: 'cv' } });
+  expect(screen.getByLabelText<HTMLSelectElement>('Upload area').value).toBe('cv');
 });

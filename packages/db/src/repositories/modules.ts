@@ -1,6 +1,7 @@
 import type { TenantContext } from '@backbricks/core';
 
 import type { DbTransaction } from '../client.ts';
+import { createUploadsRepository } from './files.ts';
 import { createFormsRepository } from './forms.ts';
 import { createRepositoryScope, type RepositoryScope } from './scope.ts';
 
@@ -11,7 +12,10 @@ export type ModuleRepositoryFactory<R> = (tx: DbTransaction, scope: RepositorySc
  * Production repository factories, keyed by module type. Every module table has one, whether or
  * not the module is enabled (one migration history, §C.7); selection happens at composition.
  */
-export const moduleRepositoryFactories = Object.freeze({ forms: createFormsRepository });
+export const moduleRepositoryFactories = Object.freeze({
+  forms: createFormsRepository,
+  uploads: createUploadsRepository,
+});
 export type ModuleRepositoryFactories = typeof moduleRepositoryFactories;
 
 /**

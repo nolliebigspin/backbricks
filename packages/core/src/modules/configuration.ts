@@ -16,6 +16,7 @@ export function configuration<T>(definition: {
   type: string;
   moduleVersion: number;
   configSchema: z.ZodType<T>;
+  validateConfigWrite?(this: void, config: T): void;
   defaultConfig(this: void): T;
   templates?: Readonly<Record<string, { name: string; config: T }>>;
   migrateConfig?(this: void, fromVersion: number, config: unknown): T;
@@ -33,7 +34,9 @@ export function configuration<T>(definition: {
   } = definition;
   const configJsonSchema = freezeDeclaration(schemaDocument(configSchema));
   function parseConfig(input: unknown) {
-    return jsonValueSchema.parse(configSchema.parse(input));
+    const config = configSchema.parse(input);
+    definition.validateConfigWrite?.(config);
+    return jsonValueSchema.parse(config);
   }
   function instance(input: unknown): ConfiguredInstance<T> {
     const parsed = moduleInstanceSchema.parse(input);
@@ -60,10 +63,10 @@ export function configuration<T>(definition: {
     defaultConfig: () => structuredClone(defaults),
     migrateConfig(fromVersion: number, input: unknown) {
       z.number().int().positive().max(moduleVersion).parse(fromVersion);
-      if (fromVersion === moduleVersion) return parseConfig(input);
+      if (fromVersion === moduleVersion) return jsonValueSchema.parse(configSchema.parse(input));
       if (!migrateConfig)
         throw new AppError('invalid_request', { detail: 'A configuration migration is required.' });
-      return parseConfig(migrateConfig(fromVersion, input));
+      return jsonValueSchema.parse(configSchema.parse(migrateConfig(fromVersion, input)));
     },
     validateConfigChange(previous: unknown, next: unknown) {
       const before = configSchema.parse(previous);

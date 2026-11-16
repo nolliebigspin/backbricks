@@ -6,9 +6,15 @@ import {
   publicWritePolicySchema,
 } from '../abuse/policy.ts';
 import { AppError } from '../errors/app-error.ts';
+import { pageQuerySchema } from '../http/pagination.ts';
 import { notificationSubjectSchema } from '../notifications/schemas.ts';
 import { emailAddressSchema } from '../platform/values.ts';
+import {
+  subjectAttachmentPageSchema,
+  subjectAttachmentSourceSchema,
+} from '../privacy/attachments.ts';
 import type { OptionalServiceName } from '../services/container.ts';
+import { fileIdSchema } from '../storage/file-reference.ts';
 import { capabilityView, type CapabilityName } from './capabilities.ts';
 import { configuration } from './configuration.ts';
 import type {
@@ -18,8 +24,10 @@ import type {
   RequiredInfrastructure,
   OptionalInfrastructure,
 } from './contract.ts';
+import { moduleErasureResultSchema } from './erasure.ts';
 import { infraRequirementSchema, type InfraRequirement } from './infrastructure.ts';
 import { moduleInstanceReads } from './instances.ts';
+import { moduleMaintenanceResultSchema } from './maintenance.ts';
 import type { RegisteredModule } from './registered.ts';
 import { jobRegistrar, routeRegistrar } from './registrars.ts';
 import { moduleServices } from './services.ts';
@@ -53,6 +61,10 @@ export function defineModule<
     metadataSchema.parse({
       ...definition,
       ...services,
+      resourceNamespaces: [
+        definition.resourceName.plural,
+        ...(definition.resourceNamespaces ?? []),
+      ],
       requires: required,
       optional,
       provides: Object.keys(factories),
@@ -61,6 +73,12 @@ export function defineModule<
   const config = configuration(definition);
   const retention = { ...definition.retention };
   const privacy = { ...definition.privacy };
+  const attachmentHooks = privacy.attachments;
+  const pendingErasure = privacy.pendingErasure;
+  if (attachmentHooks && !services.requiredServices.includes('storage'))
+    throw new AppError('invalid_request', {
+      detail: 'Attachment exports require declared storage.',
+    });
   const notifications = definition.notifications ? { ...definition.notifications } : null;
   type Runtime = ModuleRuntime<
     T,
@@ -98,8 +116,18 @@ export function defineModule<
         : undefined,
     });
   }
-  const admin = routeRegistrar(runtime, 'management');
-  const publicRouter = routeRegistrar(runtime, 'public');
+  const admin = routeRegistrar(
+    runtime,
+    'management',
+    metadata.resourceName.plural,
+    metadata.resourceNamespaces,
+  );
+  const publicRouter = routeRegistrar(
+    runtime,
+    'public',
+    metadata.resourceName.plural,
+    metadata.resourceNamespaces,
+  );
   const jobs = jobRegistrar(runtime);
   definition.adminRoutes?.(admin);
   definition.publicRoutes?.(publicRouter);
@@ -125,7 +153,9 @@ export function defineModule<
           .object({ now: z.date(), limit: z.number().int().min(1).max(1000) })
           .strict()
           .parse(input);
-        return checkedCount(await retention.purgeExpired(runtime(execution), validated));
+        return moduleMaintenanceResultSchema.parse(
+          await retention.purgeExpired(runtime(execution), validated),
+        );
       },
       async recomputeExpiry(execution, input, now) {
         return checkedCount(
@@ -151,6 +181,35 @@ export function defineModule<
         }
       : null,
     privacy: {
+      pendingErasure: pendingErasure
+        ? async (execution) =>
+            z
+              .date()
+              .nullable()
+              .parse(await pendingErasure(runtime(execution)))
+        : undefined,
+      attachments: attachmentHooks
+        ? {
+            async list(execution, email, cursor) {
+              return subjectAttachmentPageSchema.parse(
+                await attachmentHooks.list(
+                  runtime(execution),
+                  emailAddressSchema.parse(email),
+                  pageQuerySchema.shape.cursor.parse(cursor),
+                ),
+              );
+            },
+            async open(execution, email, id) {
+              return subjectAttachmentSourceSchema.parse(
+                await attachmentHooks.open(
+                  runtime(execution),
+                  emailAddressSchema.parse(email),
+                  fileIdSchema.parse(id),
+                ),
+              );
+            },
+          }
+        : undefined,
       async exportSubject(execution, email) {
         return jsonValueSchema.parse(
           await privacy.exportSubject(runtime(execution), emailAddressSchema.parse(email)),
@@ -166,7 +225,9 @@ export function defineModule<
           .object({ limit: z.number().int().min(1).max(1000) })
           .strict()
           .parse(input);
-        return checkedCount(await privacy.eraseScope(runtime(execution), validated));
+        return moduleErasureResultSchema.parse(
+          await privacy.eraseScope(runtime(execution), validated),
+        );
       },
     },
   });

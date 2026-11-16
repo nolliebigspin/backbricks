@@ -133,7 +133,12 @@ export {
   type Mailer,
 } from './mail/contract.ts';
 export { escapeHtml, renderAuthMail, type AuthMailInput } from './mail/templates.ts';
-export { expiresAfterDays, MILLISECONDS_PER_DAY } from './time/retention.ts';
+export {
+  expiresAfterDays,
+  MILLISECONDS_PER_DAY,
+  MODULE_RETENTION_DAYS,
+  retentionDaysSchema,
+} from './time/retention.ts';
 export {
   principalActor,
   activityMetadataSchema,
@@ -243,11 +248,22 @@ export {
   MAX_SIGNED_GET_TTL_SECONDS,
   storageKeySchema,
   storagePutSchema,
+  storageUploadSessionSchema,
+  storageUploadControlSchema,
+  storageUploadCompleteSchema,
   storageGetSchema,
   storageObjectSchema,
   inlineImageTypeSchema,
 } from './storage/schemas.ts';
 export { configApplyResponseSchema } from './configuration/schemas.ts';
+export {
+  FILE_SIZE_LIMITS,
+  fileSizeSchema,
+  fileStatusSchema,
+  FILE_INSPECTION_STATES,
+  isAwaitingFileInspection,
+  type FileStatus,
+} from './storage/files.ts';
 export {
   CONFIG_ACCESS,
   CONFIG_DESTRUCTIVE_SCOPE,
@@ -351,6 +367,7 @@ export {
   auditPageSchema,
   usageQuerySchema,
   usageResponseSchema,
+  unsignedIntegerStringSchema,
   integrationResponseSchema,
 } from './queries/schemas.ts';
 export { createPlatformQueries, type PlatformQueries } from './queries/platform.ts';
@@ -396,6 +413,7 @@ export type {
   ModuleRouteSpec,
   ModuleAdminRouter,
   ModulePublicRouter,
+  ModuleInstanceResolverContext,
 } from './modules/routes.ts';
 export {
   MAX_JOB_RETENTION_SECONDS,
@@ -404,6 +422,7 @@ export {
 } from './modules/jobs.ts';
 
 export { defineModule } from './modules/define-module.ts';
+export { sdkSchemaDeclaration } from './modules/codegen.ts';
 export { defineRegistry, type ModuleRegistry } from './modules/registry.ts';
 export type { RegisteredModule, RegisteredRoute, RegisteredJob } from './modules/registered.ts';
 
@@ -490,3 +509,46 @@ export {
   authCapabilitiesSchema,
   authCapabilities,
 } from './identity/auth-settings.ts';
+
+export {
+  UPLOAD_TOKEN_PREFIX,
+  UPLOAD_TOKEN_BYTES,
+  uploadTokenSchema,
+  fileIdSchema,
+  fileReferenceSchema,
+  parseFileReference,
+  type FileReference,
+} from './storage/file-reference.ts';
+
+export {
+  fileScanStatusSchema,
+  fileScanResultSchema,
+  fileAttachmentSchema,
+  fileOwnerSchema,
+  fileClaimSchema,
+  fileOwnerExpirySchema,
+  type FileOwnerExpiry,
+  type FileScanResult,
+  type FileAttachment,
+  type FileOwner,
+  type FileClaim,
+} from './storage/file-metadata.ts';
+export { earliestExpiry } from './time/retention.ts';
+
+export { dateRangeQuerySchema } from './http/filters.ts';
+
+export {
+  SUBJECT_EXPORT_LIMITS,
+  createSubjectCollection,
+  subjectMetadataBytes,
+} from './privacy/limits.ts';
+export {
+  subjectAttachmentSchema,
+  subjectAttachmentPageSchema,
+  subjectAttachmentSourceSchema,
+  type SubjectAttachment,
+  type SubjectAttachmentSource,
+} from './privacy/attachments.ts';
+
+export type { ModulePrivacyHooks } from './modules/privacy.ts';
+export type { SubjectAttachmentPage } from './privacy/attachments.ts';

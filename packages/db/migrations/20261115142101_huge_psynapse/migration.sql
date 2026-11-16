@@ -1,0 +1,1 @@
+ALTER TABLE "files" DROP CONSTRAINT "files_n1PyKkTclozn_fkey", ADD CONSTRAINT "files_n1PyKkTclozn_fkey" FOREIGN KEY ("organization_id","project_id","instance_id","module_type") REFERENCES "module_instances"("organization_id","project_id","id","module_type") ON DELETE RESTRICT;

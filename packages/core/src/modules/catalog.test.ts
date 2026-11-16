@@ -15,6 +15,15 @@ import {
 } from '../index.ts';
 
 const storage: StorageAdapter = {
+  createUploadSession: async () => {
+    throw new Error('Not used by catalog tests.');
+  },
+  completeUpload: async () => {
+    throw new Error('Not used by catalog tests.');
+  },
+  abortUpload: async () => {
+    throw new Error('Not used by catalog tests.');
+  },
   presignPut: async () => ({ url: 'https://storage.invalid/object', headers: {} }),
   presignGet: async () => 'https://storage.invalid/object',
   head: async () => null,
@@ -24,7 +33,7 @@ const storage: StorageAdapter = {
 };
 const label = { en: 'Fixture', de: 'Test' };
 const schema = z.object({ enabled: z.boolean().default(true) }).strict();
-function fixture(type: string, needsStorage = false) {
+function fixture(type: string, needsStorage = false, attachmentExport = false) {
   return defineModule({
     type,
     moduleVersion: 1,
@@ -38,6 +47,12 @@ function fixture(type: string, needsStorage = false) {
     usageMetrics: [],
     retention: { purgeExpired: async () => 0, recomputeExpiry: async () => 0 },
     privacy: {
+      attachments: attachmentExport
+        ? {
+            list: async () => ({ data: [], nextCursor: null }),
+            open: async () => ({ status: 'unavailable', reason: 'missing' }),
+          }
+        : undefined,
       exportSubject: async () => [],
       deleteSubject: async () => 0,
       eraseScope: async () => 0,
@@ -166,4 +181,11 @@ test('planned descriptors are visible but never operational, and catalog snapsho
   expect(() =>
     defineModuleCatalog([defineModuleDescriptor(raw), defineModuleDescriptor(raw)]),
   ).toThrow('type');
+});
+
+test('only modules declaring required storage may expose private attachment streams', () => {
+  expect(() => fixture('without', false, true)).toThrow(
+    'Attachment exports require declared storage.',
+  );
+  expect(fixture('with', true, true).privacy.attachments).toBeDefined();
 });

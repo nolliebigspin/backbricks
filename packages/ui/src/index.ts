@@ -33,3 +33,4 @@ export { FieldValue, type FieldValueLabels } from '#components/field-value';
 export { RecordDrawer } from '#components/record-drawer';
 export { TypedConfirmDialog } from '#components/typed-confirm-dialog';
 export { FieldListEditor, type FieldListEditorLabels } from '#components/field-list-editor';
+export { formatBytes } from '#lib/format-bytes';

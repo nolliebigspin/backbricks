@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import { receivedMail } from '../scripts/test/mailpit.ts';
 import {
-  accountPassword,
+  acceptInvitation,
   createAccount,
   createOrganization,
   createProject,
@@ -94,18 +94,13 @@ for (const language of ['en', 'de'] as const) {
         return link;
       })
       .toContain('/accept-invitation');
-    const invitedContext = await browser.newContext({
-      locale: language === 'de' ? 'de-DE' : 'en-US',
-      extraHTTPHeaders: testHeaders(),
-    });
-    const member = await invitedContext.newPage();
-    await member.goto(link);
-    await member.getByLabel(copy.auth.name).fill('Journey teammate');
-    await member.getByLabel(copy.auth.email).fill(invited);
-    await member.getByLabel(copy.auth.password, { exact: true }).fill(accountPassword);
-    await member.getByRole('button', { name: copy.auth.invitation.submit, exact: true }).click();
-    await expect(member.getByRole('button', { name: copy.common.signOut })).toBeVisible();
-    await member.getByLabel(copy.dashboard.organization, { exact: true }).selectOption(orgId);
+    const { context: invitedContext, page: member } = await acceptInvitation(
+      browser,
+      link,
+      invited,
+      orgId,
+      language,
+    );
     await expect(member.getByRole('link', { name: `Owner website ${language}` })).toBeVisible();
     await page.getByRole('link', { name: copy.dashboard.projects, exact: true }).click();
     await page.getByRole('link', { name: `Owner website ${language}` }).click();

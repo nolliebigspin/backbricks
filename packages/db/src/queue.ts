@@ -57,6 +57,7 @@ export function createPostgresQueue(
   boss.on('error', () => report('core.queue'));
   boss.on('warning', () => report('core.queue_warning'));
   let started = false;
+  const executingJobs = new WeakMap<TenantTransaction, { name: string; id: string }>();
   const mail = createMailQueue(
     boss,
     clock,
@@ -83,6 +84,7 @@ export function createPostgresQueue(
       organizationId: context.organizationId,
       projectId: context.projectId,
       ...(context.archivedProject ? { archivedProject: true } : {}),
+      ...(context.archivedMaintenance ? { archivedMaintenance: true } : {}),
       payload: wire.data,
     });
     return boss.send(name, envelope, {
@@ -109,10 +111,18 @@ export function createPostgresQueue(
   const enqueueProject: ProjectJobEnqueue = async (tx, input) => {
     if (tx.context.projectId && tx.context.projectId !== input.projectId)
       throw new AppError('not_found');
-    await tx.repositories.projects.get(input.projectId);
+    const project = await tx.repositories.projects.get(input.projectId, {
+      includeArchived: input.includeArchived,
+      lock: true,
+    });
+    if (await tx.repositories.projects.erasedAt(project.id)) return null;
     return send(
       transactionFor(tx),
-      { organizationId: tx.context.organizationId, projectId: input.projectId },
+      {
+        organizationId: tx.context.organizationId,
+        projectId: input.projectId,
+        ...(project.deletedAt ? { archivedMaintenance: true as const } : {}),
+      },
       input.name,
       input.payload,
       { singletonKey: input.singletonKey },
@@ -134,10 +144,10 @@ export function createPostgresQueue(
     async purgeJobs(tx) {
       const projectId = tx.context.projectId;
       if (!tx.context.archivedProject || !projectId) throw new AppError('not_found');
-      // Every queued or finished payload of the project, including its notification mail; the
-      // running erasure job completes in this transaction and expires with its retention.
+      // Active child payloads must disappear too. Only this exact running job survives for atomic completion.
+      const current = executingJobs.get(tx);
       const result = await transactionFor(tx).execute<{ id: string }>(
-        sql`delete from ${sql.identifier(QUEUE_SCHEMA)}.job where state <> 'active' and (
+        sql`delete from ${sql.identifier(QUEUE_SCHEMA)}.job where ${current ? sql`not (name = ${current.name} and id = ${current.id}::uuid)` : sql`true`} and (
               (data->>'organizationId' = ${tx.context.organizationId} and data->>'projectId' = ${projectId})
               or (name = ${MAIL_JOB_NAME} and data->>'projectId' = ${projectId})
             ) returning id`,
@@ -221,12 +231,18 @@ export function createPostgresQueue(
                     organizationId: envelope.organizationId,
                     projectId: envelope.projectId,
                     ...(envelope.archivedProject ? { archivedProject: true } : {}),
+                    ...(envelope.archivedMaintenance ? { archivedMaintenance: true } : {}),
                   },
                   async (tx) => {
-                    await handler.runInTransaction(tx, envelope.payload);
-                    await boss.complete(handler.name, job.id, null, {
-                      db: fromDrizzle(transactionFor(tx), sql),
-                    });
+                    executingJobs.set(tx, { name: handler.name, id: job.id });
+                    try {
+                      await handler.runInTransaction(tx, envelope.payload);
+                      await boss.complete(handler.name, job.id, null, {
+                        db: fromDrizzle(transactionFor(tx), sql),
+                      });
+                    } finally {
+                      executingJobs.delete(tx);
+                    }
                   },
                 );
               } catch {

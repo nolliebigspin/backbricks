@@ -62,7 +62,7 @@ Every field has `key` (`[a-z][a-z0-9_]*`, ≤ 64, unique, stable: it is API surf
 | `consent` | `text` (**required**, ≤ 2000), `version` (**required**, ≤ 64); always required | `{ accepted: true, version, acceptedAt }` (clock time) |
 | `file` | `zone` (**required**, upload zone key), `maxFiles` (1–10) | claimed file refs via the `files` capability |
 
-Options are `{ value: [a-z0-9_-]{1,64}, label: 1–200 }` with unique values. A rule that doesn't apply to the type (e.g. `options` on `text`) or `min > max` fails with a field path. `file` fields are rejected with `capability_unavailable` (new catalog code, P2.1a) while the `files` capability is absent, which is always the case in M2. Total config size ≤ 64 KB. All bounds live in `packages/modules/forms/src/constants.ts`.
+Options are `{ value: [a-z0-9_-]{1,64}, label: 1–200 }` with unique values. A rule that doesn't apply to the type (e.g. `options` on `text`) or `min > max` fails with a field path. `file` fields are rejected with `capability_unavailable` (new catalog code, P2.1a) while the `files` capability is absent, while historical configurations remain readable (ADR-0067). Server composition derives availability from the selected provider. Total config size ≤ 64 KB. All bounds live in `packages/modules/forms/src/constants.ts`.
 
 **Subject identification:** only the email field marked `identifiesSubject` fills `subject_email`. Templates mark it. A form with email fields but none marked gets a plan warning ("entries can't be found by email for privacy requests").
 
@@ -132,7 +132,7 @@ Paths are under `/v1/projects/{projectId}/forms`. Every route declares session r
 | `POST /{key}/submissions/delete-all` | owner/admin | – | 1 KB | `{ confirm: "<form key>" }` → `202`; a job deletes in bounded batches (Q15: clear entries before archiving). Open point E |
 | `GET /{key}/export.csv` | owner/admin | – (D46) | – | streamed CSV, same filters as the list, union of fields across all versions; rate limited (1/min per user and form) |
 
-**Audit** (same transaction, structural only, never content, I12; names in the module's action catalog): `forms.submission.updated` (IDs, changed field names), `forms.submission.deleted`, `forms.submissions.bulk_updated` / `bulk_deleted` (count), `forms.submissions.delete_all_requested` and one summarized `forms.submissions.deleted_all` (count) from the job, `forms.submissions.exported` (row count, filter names). Deletes call `files.deleteByOwner` when the capability is present.
+**Audit** (same transaction, structural only, never content, I12; names in the module's action catalog): `forms.submission.updated` (IDs, changed field names), `forms.submission.deleted`, `forms.submissions.bulk_updated` / `bulk_deleted` (count), `forms.submissions.delete_all_requested` and one summarized `forms.submissions.deleted_all` (count) from the job, `forms.submissions.exported` (row count, filter names). All deletion paths call the shared [attachment cleanup helper](../../packages/modules/forms/src/attachments.ts) when the capability is present. Retention and subject deletion return bounded IDs internally; expiry edits synchronize owner bounds through the same transaction (ADR-0068).
 
 Mutation implementation: [entry actions](../../packages/modules/forms/src/mutations.ts), [bulk routes/jobs](../../packages/modules/forms/src/bulk.ts), and [ADR-0057](../adr/0057-forms-data-mutations-and-batched-erasure.md).
 

@@ -3,12 +3,15 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import { uploadIntentResponseSchema } from '@backbricks/module-uploads';
 import { BackbricksError, createClient } from '@backbricks/sdk';
 
+import { attachmentsEnvironment, prepareAttachments } from '../test/attachments-fixture.ts';
 import { available, scenario } from '../test/auth-fixture.ts';
 import { createFormFixture, validAnswers } from '../test/forms-fixture.ts';
 import { prepareIsolationFixture } from '../test/isolation/setup.ts';
 import { issueKey } from '../test/platform-read-fixture.ts';
+import { uploadsAvailable } from '../test/uploads-fixture.ts';
 
 /** The SDK's root entry bundled for Node, as a website build would ship it. */
 async function bundleForNode(directory: string) {
@@ -91,6 +94,103 @@ test.skipIf(!available)(
         await rm(directory, { recursive: true, force: true });
       }
     });
+  },
+  120_000,
+);
+
+test.skipIf(!uploadsAvailable)(
+  'the SDK uploads and claims real private files on Bun and Node without replaying PUTs',
+  async () => {
+    await scenario(
+      async (base) => {
+        const f = await prepareAttachments(base);
+        const directory = await mkdtemp(join(tmpdir(), 'backbricks-upload-sdk-'));
+        const bytes = '%PDF-1.7\nSDK runtime acceptance\n%%EOF';
+        try {
+          const phases: string[] = [];
+          let puts = 0;
+          const client = createClient({
+            baseUrl: f.origin,
+            publishableKey: f.publishable.token,
+            fetch: async (url, init) => {
+              if (init.method === 'PUT') puts += 1;
+              const response = await fetch(url, init);
+              if (new URL(url).pathname.endsWith('/upload-zones/cv/files') && response.ok) {
+                const result = uploadIntentResponseSchema.parse(await response.clone().json());
+                await f.trackIntent(result);
+              }
+              return response;
+            },
+          });
+          const uploaded = await client.uploads.upload(
+            'cv',
+            new File([bytes], 'bun.pdf', { type: 'application/pdf' }),
+            {
+              onProgress: (event) => {
+                phases.push(event.phase);
+                expect(event.loaded).toBeLessThanOrEqual(event.total);
+              },
+            },
+          );
+          expect(uploaded.status).toBe('ready');
+          expect(phases).toContain('processing');
+          expect(phases.at(-1)).toBe('ready');
+          expect(puts).toBe(1);
+          const submission = await client.forms.submit(f.form.key, {
+            email: 'sdk@example.test',
+            cv: [uploaded.fileRef],
+          });
+          if (!('id' in submission)) throw new Error('Expected a stored SDK submission.');
+          const record = await f.use(async (tx) =>
+            tx.modules.uploads?.get(uploaded.fileId, f.now()),
+          );
+          expect(record?.ownerId).toBe(submission.id);
+          if (!record) throw new Error('Expected the owned SDK file.');
+          expect(await new Response(await f.storage.read(record.storageKey)).text()).toBe(bytes);
+          const sdk = await bundleForNode(directory);
+          const child = Bun.spawn(
+            [
+              'node',
+              '--input-type=module',
+              '-e',
+              `
+          const {createClient}=await import(process.argv[1]);
+          let puts=0; const phases=[];
+          const client=createClient({baseUrl:process.argv[2],secretKey:process.argv[3],fetch:async(url,init)=>{
+            if(init.method==='PUT') puts++;
+            const response=await fetch(url,init);
+            if(new URL(url).pathname.endsWith('/upload-zones/cv/files') && response.ok) console.log((await response.clone().json()).fileId);
+            return response;
+          }});
+          const result=await client.uploads.upload('cv',new File([process.argv[4]],'node.pdf',{type:'application/pdf'}),{onProgress:(event)=>phases.push(event.phase)});
+          if(result.status!=='ready'||puts!==1||!phases.includes('processing')||phases.at(-1)!=='ready') process.exit(2);
+        `,
+              sdk,
+              f.origin,
+              f.secret.token,
+              bytes,
+            ],
+            { stdout: 'pipe', stderr: 'pipe' },
+          );
+          const [exited, stdout, stderr] = await Promise.all([
+            child.exited,
+            new Response(child.stdout).text(),
+            new Response(child.stderr).text(),
+          ]);
+          for (const id of stdout.trim().split('\n').filter(Boolean)) {
+            // oxlint-disable-next-line no-await-in-loop -- Track each real session/object even when a child assertion fails.
+            await f.trackIntent({ fileId: id });
+          }
+          expect({ exited, stderr }).toEqual({ exited: 0, stderr: '' });
+          expect(stdout.trim()).toMatch(/^file_/);
+        } finally {
+          await f.cleanup();
+          await rm(directory, { recursive: true, force: true });
+        }
+      },
+      attachmentsEnvironment,
+      { durableDelivery: true },
+    );
   },
   120_000,
 );

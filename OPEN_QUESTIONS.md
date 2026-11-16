@@ -104,6 +104,32 @@ Decisions for the maintainer, started in P0 planning (2026-11-04), extended for 
 - **Needed by:** start of P2 execution.
 - **Answer (2026-11-09):** The maintainer accepted the recommendation (“Do all the recommended ones”). The detailed estimate (124 h + 25 h reserve, 149 h envelope) is the P2 planning envelope; no scope trims.
 
+## P3 planning: approval gates
+
+### Q17 – Approve module-owned file resource routes?
+- **Context:** The existing bridge prefixes every route with `upload-zones` and resolves public instances by a zone-key URL parameter. The planned project-level `files` and public completion routes need another resource namespace and a tenant-scoped file-to-zone resolver.
+- **Recommendation:** Approve [ADR-0063](docs/adr/0063-module-resource-routes.md). Declare/validate resource ownership centrally; invoke a module-owned token-validating resolver only after credential bootstrap inside `withTenant`, then retain the existing guard and locked rechecks. No unscoped file query or new bootstrap exception.
+- **Needed by:** P3.3a; approve as part of the module plan before application code.
+- **Answer (2026-11-15):** Approved by the maintainer ("Approved") in response to the module plan, ADRs 0063–0065 and execution-envelope approval request.
+
+### Q18 – Approve durable object deletion and deferred project erasure?
+- **Context:** SQL rollback cannot restore an S3 object, and a still-valid PUT can recreate staging after deletion. Current `eraseScope` returns a count only; M2 retention/subject deletion also need attachment cleanup before file fields become operational.
+- **Recommendation:** Approve [ADR-0064](docs/adr/0064-upload-ownership-and-durable-erasure.md): one shared reference/claim contract, atomic deletion marker + audit + job, immediately revoked access, idempotent physical cleanup through PUT expiry, and a typed deferred erasure result before final project tombstoning. Retain recoverable cleanup identity on provider failure.
+- **Needed by:** P3.5–P3.7; approve the core/form contract changes before implementation.
+- **Answer (2026-11-15):** Approved by the maintainer ("Approved") in response to the module plan, ADRs 0063–0065 and execution-envelope approval request.
+
+### Q19 – Approve streaming subject ZIP exports?
+- **Context:** ARCHITECTURE §F.4 requires file contents in ZIP exports from M3, while current privacy hooks return JSON and the streaming port is CSV-only.
+- **Recommendation:** Approve [ADR-0065](docs/adr/0065-subject-file-zip-exports.md): preserve JSON, add an explicit authorized ZIP option, optional module-owned attachment readers and bounded binary streaming using the existing audited export pattern. No temporary public archive, silent truncation or forms-only storage dependency.
+- **Needed by:** P3.7b; approve the core export contract first.
+- **Answer (2026-11-15):** Approved by the maintainer ("Approved") in response to the module plan, ADRs 0063–0065 and execution-envelope approval request.
+
+### Q20 – Approve the uploads module plan and revised envelope?
+- **Context:** [The module plan](docs/modules/uploads.md) and 25 tasks in `PLAN.md` include all M3 exit criteria, object-backed project erasure and ZIP exports. Detailed effort is 123 h (~15.4 PD), plus 25 h reserve: 148 h (~18.5 PD), above the original 9–12 PD allowance. No application code has been written.
+- **Recommendation:** Approve the complete module plan, Q17–Q19 contract proposals and this execution envelope. Execute in plan order, with storage contracts before public uploads. Keep proxy/multipart/transforms/cloud billing outside M3 and keep v0.2.0 tagging a separate authorization.
+- **Needed by:** P3.0a, before P3.1a application code (`docs/MODULES.md`, rule 4).
+- **Answer (2026-11-15):** Approved by the maintainer ("Approved") in response to the module plan, ADRs 0063–0065 and execution-envelope approval request.
+
 ## Decided in planning, please confirm
 
 - **D0 – TypeScript:** stay on TypeScript 7 if it works; TypeScript 6.0.3 is an acceptable fallback (maintainer guidance in the planning session). The decision rule in `PLAN.md` applies: tool-local fallback first, repo-wide TS 6 only as a last resort, recorded in ADR-0020.
@@ -215,3 +241,21 @@ Details: `docs/progress/phase-0.md` → "Deviations".
 - **D52 – Public handler context and read limits:** [ADR-0046's P2.4a addendum](docs/adr/0046-public-write-guard-and-cors.md#p24a-addendum-2026-11-09-d52) passes the guard's validated instance config to public handlers and gives writes only minimized source metadata (origin, Referer pathname, browser family, rotating IP hash). Reads use a separate 60/min IP/instance bucket; the executor preserves an explicit route cache policy and otherwise uses `no-store`. No public response fields, invariant or bootstrap exception are added.
 
 - **D53 – Plain HTML transport:** [ADR-0046's P2.4b addendum](docs/adr/0046-public-write-guard-and-cors.md#p24b-addendum-2026-11-09-d53) makes urlencoded posts an explicit per-route opt-in, with shared flat-field/proof decoding and trusted transport context. Configured redirects are checked against current project origins before processing and under the transaction lock; absent/disallowed success targets prevent storage. Errors contain only structural codes/paths, through a validated error redirect or escaped HTML/CSP fallback, including early body/auth failures. `altcha` is reserved for proof; native forms rely on proof replay protection/rate limits rather than an idempotency header.
+
+### Decided during P3 execution, review deferred
+
+- **D61 / P3.3a:** [ADR-0066](docs/adr/0066-read-only-public-resource-lookups.md) enforces pre-proof module resource resolution with a read-only database transaction and a repository/clock-only callback. Chosen during execution; maintainer requested review at M3 completion.
+
+- **D62 / P3.5b:** [ADR-0067](docs/adr/0067-configuration-write-availability.md) separates configuration write availability from historical shape reads; [ADR-0068](docs/adr/0068-attachment-owner-lifetimes.md) synchronizes owner lifetimes through bounded capability batches and uses parent-first mutation locks. Chosen during execution; review deferred to M3 completion as requested.
+
+- **D63 / P3.5b:** [ADR-0069](docs/adr/0069-erasure-requires-enabled-modules.md) blocks project erasure when a persisted module is disabled and protects file identities with a RESTRICT foreign key. The approved ADR-0064 deferred completion seam is implemented early because enabling production file fields requires a safe project deletion path. Full multi-batch/outage acceptance remains P3.7c; end review deferred.
+
+- **D64 / P3.6b:** [ADR-0070](docs/adr/0070-private-download-deadlines.md) adds a provider-neutral absolute signing deadline. A real delayed-storage regression proved that a TTL calculated before HEAD could outlive file expiry; the handler rechecks after I/O and the adapter clamps using its captured signing timestamp. Review deferred to M3 completion.
+
+- **D65 / P3.7a:** [ADR-0071](docs/adr/0071-archived-project-maintenance.md) separates archived maintenance from erasure authority and adds truthful bounded continuation results. A confirmed in-flight raw PUT gap adds P3.7a1 using 6 h of reserve; the 148 h envelope is unchanged. Review deferred.
+
+- **D66 / P3.7a1:** [ADR-0072](docs/adr/0072-server-finalized-upload-sessions.md) closes the confirmed in-flight PUT gap with server-finalized single-part sessions. Public intent/complete JSON and one browser PUT remain unchanged; no new infrastructure/dependency. Real Garage and browser contracts pass. Review deferred to M3 completion.
+
+- **D67 / P3.7b:** [ADR-0073](docs/adr/0073-subject-export-bounds-and-settlement.md) makes subject exports complete or explicitly bounded, requires enabled persisted modules, minimizes deletion metadata immediately, and settles physical erasure with email-free continuations. The optional attachment hooks implement approved ADR-0065. Review deferred to M3 completion.
+
+- **D68 / P3.7c:** [ADR-0074](docs/adr/0074-erasure-worker-serialization.md) purges active child payloads while preserving the exact running erasure job and fences workers after the project lock. Real Postgres regressions and multi-batch real-object acceptance prove the changes. Review deferred to M3 completion.

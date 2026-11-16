@@ -1,10 +1,11 @@
-import { AppError, defineModule, type InfraRequirement, type JsonValue } from '@backbricks/core';
+import { AppError, defineModule, type InfraRequirement } from '@backbricks/core';
 import { z } from 'zod';
 
 import { formsAdminRoutes } from './admin.ts';
+import { claimEntryFiles } from './attachments.ts';
 import { classifyFormsChange } from './changes.ts';
 import { formsCodegen } from './codegen.ts';
-import { formsModuleConfigSchema, formsPublicWritePolicy } from './config.ts';
+import { formsConfigSchema, formsModuleConfigSchema, formsPublicWritePolicy } from './config.ts';
 import {
   FORMS_BODY_LIMIT_BYTES,
   FORMS_MODULE_VERSION,
@@ -15,8 +16,10 @@ export { FORMS_EVENTS, FORMS_METRICS } from './constants.ts';
 import { formsBulkRoutes, formsJobs } from './bulk.ts';
 import { entryExpiry, searchText } from './entries.ts';
 import { formsExportRoutes } from './export.ts';
-import { deleteEntryFiles, formsMutationRoutes } from './mutations.ts';
+import { purgeExpiredEntries, recomputeEntryExpiry } from './lifecycle.ts';
+import { formsMutationRoutes } from './mutations.ts';
 import { describeEntry } from './notifications.ts';
+import { exportEntrySubject, deleteEntrySubject, eraseEntryScope } from './privacy.ts';
 import {
   formKeyParams,
   publicForm,
@@ -30,16 +33,12 @@ import { validateSubmission } from './validator.ts';
 
 /** Forms needs nothing besides Postgres (ARCHITECTURE §C.7). */
 export const formsInfrastructure = [] as const satisfies readonly InfraRequirement[];
-/** Subject erasure deletes in bounded batches inside the one erasure transaction. */
-const SUBJECT_BATCH = 1000;
-const SUBJECT_EXPORT_PAGE = 100;
-const SUBJECT_EXPORT_MAX = 10_000;
 /** Browsers and CDNs may cache a form's public schema briefly (D48). */
 const PUBLIC_SCHEMA_MAX_AGE_SECONDS = 60;
 
 /**
  * The operational forms module (docs/modules/forms.md). `files` tells whether the optional
- * `files` capability (uploads) exists; M2 ships without it, so `file` fields are rejected.
+ * `files` capability exists in the selected deployment; historical configs remain readable.
  */
 export function createFormsModule(options: { files: boolean } = { files: false }) {
   return defineModule({
@@ -48,7 +47,10 @@ export function createFormsModule(options: { files: boolean } = { files: false }
     displayName: { en: 'Forms', de: 'Formulare' },
     resourceName: { singular: 'form', plural: 'forms' },
     infrastructure: formsInfrastructure,
-    configSchema: formsModuleConfigSchema(options),
+    configSchema: formsConfigSchema,
+    validateConfigWrite: (config) => {
+      formsModuleConfigSchema(options).parse(config);
+    },
     defaultConfig: defaultFormsConfig,
     templates: formsTemplates(options),
     validateConfigChange: classifyFormsChange,
@@ -153,11 +155,17 @@ export function createFormsModule(options: { files: boolean } = { files: false }
             formKey: input.params.key,
           });
           const id = runtime.services.ids.generate('sub');
+          const expiresAt = entryExpiry(config, now, context.spam.status);
+          const safeData = await claimEntryFiles(runtime, config, data, {
+            id,
+            subjectEmail,
+            expiresAt,
+          });
           await repositoryOf(runtime).insert({
             id,
             instanceId: context.instanceId,
             configVersion: context.configVersion,
-            data,
+            data: safeData,
             status: 'open',
             readAt: null,
             spamVerdict: context.spam.status,
@@ -172,8 +180,8 @@ export function createFormsModule(options: { files: boolean } = { files: false }
             },
             createdAt: now,
             updatedAt: now,
-            expiresAt: entryExpiry(config, now, context.spam.status),
-            searchText: searchText(config, data),
+            expiresAt,
+            searchText: searchText(config, safeData),
           });
           await runtime.services.events.publish(runtime.tx, {
             type: FORMS_EVENTS.submissionCreated,
@@ -195,55 +203,14 @@ export function createFormsModule(options: { files: boolean } = { files: false }
       );
     },
     retention: {
-      purgeExpired: (runtime, { now, limit }) => repositoryOf(runtime).purgeExpired(now, limit),
-      recomputeExpiry: (runtime, instance) =>
-        repositoryOf(runtime).recomputeExpiry(instance.id, instance.config.retentionDays),
+      purgeExpired: purgeExpiredEntries,
+      recomputeExpiry: recomputeEntryExpiry,
     },
     notifications: { describe: describeEntry },
     privacy: {
-      async exportSubject(runtime, email) {
-        const repository = repositoryOf(runtime);
-        const entries: JsonValue[] = [];
-        let before: { createdAt: Date; id: string } | undefined;
-        while (entries.length < SUBJECT_EXPORT_MAX) {
-          // oxlint-disable-next-line no-await-in-loop -- Keyset pages follow the previous page.
-          const page = await repository.findBySubject(email, {
-            limit: SUBJECT_EXPORT_PAGE,
-            before,
-          });
-          for (const entry of page)
-            entries.push({
-              id: entry.id,
-              formId: entry.instanceId,
-              receivedAt: entry.createdAt.toISOString(),
-              status: entry.status,
-              data: entry.data,
-            });
-          const last = page.at(-1);
-          if (page.length < SUBJECT_EXPORT_PAGE || !last) break;
-          before = last;
-        }
-        return { entries };
-      },
-      async deleteSubject(runtime, email) {
-        const repository = repositoryOf(runtime);
-        let total = 0;
-        for (;;) {
-          // oxlint-disable-next-line no-await-in-loop -- Bounded batches in one erasure transaction.
-          const deleted = await repository.deleteBySubject(email, SUBJECT_BATCH);
-          total += deleted.length;
-          if (deleted.length < SUBJECT_BATCH) return total;
-        }
-      },
-      async eraseScope(runtime, { limit }) {
-        const erased = await repositoryOf(runtime).eraseBatch(limit);
-        // Linked uploads go through the optional files capability, as for every other deletion.
-        for (const id of erased) {
-          // oxlint-disable-next-line no-await-in-loop -- File cleanup shares the erasure transaction.
-          await deleteEntryFiles(runtime, id);
-        }
-        return erased.length;
-      },
+      exportSubject: exportEntrySubject,
+      deleteSubject: deleteEntrySubject,
+      eraseScope: eraseEntryScope,
     },
   });
 }

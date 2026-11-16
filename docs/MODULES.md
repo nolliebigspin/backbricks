@@ -12,7 +12,7 @@ Every module follows the module contract (`docs/ARCHITECTURE.md` §C). If a modu
 | **Uploads** | File upload areas | Direct-to-storage uploads, malware scan, private downloads | UploadThing |
 | **Reviews** | Testimonials, review sections | Reviews, moderation, publishing, stats | ReviewsKits |
 
-Module plans (rule 4): [Forms](modules/forms.md).
+Module plans (rule 4): [Forms](modules/forms.md); [Uploads](modules/uploads.md) (approved 2026-11-15).
 
 ## Candidate modules (after v1)
 

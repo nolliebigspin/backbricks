@@ -4,7 +4,7 @@
 
 Your AI agent builds the frontend. Backbricks handles the functionality behind it: data processing, storage, security and a dashboard where non-technical site owners manage what comes in. No database, backend or storage to configure. Bring your own UI; Backbricks ships no widgets, iframes or CSS.
 
-> **Status: developer preview (v0.1.0).** The platform core and the **Forms** module work end to end (milestone M2). Uploads and reviews follow; expect breaking changes before 1.0. See [`docs/MILESTONES.md`](docs/MILESTONES.md).
+> **Status: M3 developer preview in source; v0.2.0 release preparation.** Forms and private file uploads work end to end, including malware scanning, form attachments and privacy cleanup. The latest published image is **v0.1.0 (Forms/M2)**. Reviews follow in M4. The public `/v1` API changes additively; internal configuration may change before 1.0. See [`docs/MILESTONES.md`](docs/MILESTONES.md).
 
 ## What it does (v1 scope)
 
@@ -44,6 +44,37 @@ Then, in the dashboard:
 4. On the form's **Embed** tab, create a publishable key and copy the code for your page: plain HTML (switch off the browser check and set a page after sending under **Settings**) or the SDK. [`examples/html`](examples/html) has both, ready to serve.
 5. Send the form. The entry appears under **Entries**, and form notifications (Settings) arrive in Mailpit.
 
+### Choose the modules and scanner
+
+The default development stack includes storage. For **Forms only**, start without storage or a scanner:
+
+```bash
+BACKBRICKS_MODULES=forms docker compose up
+```
+
+For **Uploads without malware scanning**, explicitly select the unscanned upload-area template in the dashboard. Files show **Not scanned**; a protected area fails closed if the scanner is unavailable.
+
+```bash
+BACKBRICKS_MODULES=forms,uploads SCANNER=none mise run dev
+```
+
+For **scanned uploads**, start ClamAV first (allow time and memory for signature loading):
+
+```bash
+mise run scan
+BACKBRICKS_MODULES=forms,uploads SCANNER=clamav mise run dev
+```
+
+Create an upload area in **Files**, then add a file field to a form and choose that area. Use its Integration tab or the [application example](examples/html/README.md). The SDK waits for inspection before returning a reference to submit with the form. Downloads go through the authenticated dashboard and short-lived URLs; files and buckets stay private. Inline previews are limited to detected safe image types. Disabling scanning is an explicit policy choice, never a fallback when ClamAV fails.
+
+**Direct storage access:** browsers must reach `S3_PUBLIC_ENDPOINT`; the server uses `S3_ENDPOINT`. Use HTTPS for both on a deployed site. Add the website to both the project's allowed websites and the bucket's CORS policy. The dev initializer allows the dashboard/server origins by default; for a page on port 8080, initialize the development bucket with:
+
+```bash
+S3_CORS_ORIGINS=http://localhost:5173,http://localhost:3000,http://localhost:8080 bun scripts/dev/garage-init.ts
+```
+
+For another provider, configure CORS for PUT/GET/HEAD, the signed request headers, and exposed `ETag`. The storage identity needs private object HEAD/GET/PUT/COPY/DELETE plus multipart initiation, part upload/listing, completion and abort. Never grant public bucket reads. Browser uploads use a single-part multipart session which only the server can finalize; generic presigned PUT compatibility is insufficient. Verify a provider against the [storage contracts](docs/storage-contracts.md), including completion/abort and browser CORS, before using it.
+
 ## Run the image
 
 Every release publishes one image for all roles to `ghcr.io/nolliebigspin/backbricks` (`serve`, `worker`, `all`, `migrate`). With forms only, it needs nothing but Postgres:
@@ -55,7 +86,19 @@ docker run -d --env-file .env -p 3000:3000 ghcr.io/nolliebigspin/backbricks:0.1.
 
 The variables are documented in [`.env.example`](.env.example); set `BACKBRICKS_MODULES=forms`, a real `APP_SECRET` and the HTTPS `PUBLIC_URL`. Production Compose files and first-admin setup arrive with M6; until then the first owner signs up with `SIGNUP_POLICY=open`, after which you switch it back to `invite_only`.
 
-**Migrations:** run the `migrate` role before starting a new version (it applies pending migrations under a lock and exits). v0.1.0 is the first release, so there is nothing to upgrade from. Release notes: [`apps/server/CHANGELOG.md`](apps/server/CHANGELOG.md) (written on release).
+The published 0.1.0 image contains Forms only. To try M3 before its release, build this checkout and supply uploads/scanner settings from [`.env.example`](.env.example):
+
+```bash
+docker build -t backbricks/server:local .
+docker run --rm --env-file .env backbricks/server:local migrate
+docker run -d --env-file .env -p 3000:3000 backbricks/server:local all
+```
+
+Container endpoint addresses must be reachable from inside the container; `localhost` refers to that container. The image acceptance target is currently **linux/amd64**; native arm64 release coverage is not yet claimed. The image runs as a non-root user and supports `--read-only --tmpfs /tmp`.
+
+**Migrations and cleanup:** back up Postgres and private storage, stop the old workers, and run the new `migrate` role before starting the new version. It applies pending forward migrations under a lock and exits. Keep workers and the same storage provider available until deletion finishes: file deletion revokes access immediately, then durable jobs abort upload sessions and delete both objects. Outstanding upload deadlines may defer physical completion. Orphans expire after 24 hours; claimed files also follow owner and area retention. Subject/project erasure reports completion only after physical cleanup settles. Do not remove a provider or disable a module while it still owns retained files. See the implemented [Uploads module](packages/modules/uploads/src/index.ts), [storage contracts](docs/storage-contracts.md), and [M3 evidence](docs/progress/phase-3.md).
+
+The 0.2.0 changeset is prepared; package versioning, a fresh review, PR/CI and an authorized signed release tag remain separate release steps. Release notes: [`apps/server/CHANGELOG.md`](apps/server/CHANGELOG.md) (generated on release).
 
 ## Development
 
@@ -67,6 +110,10 @@ bun run build && bun run test:e2e   # browser journeys (needs `mise run infra`)
 Stack: Bun · TypeScript 7 · Turborepo · Hono · PostgreSQL + Drizzle · pg-boss · Better Auth · React + Vite + TanStack + shadcn/ui · oxlint/oxfmt · Playwright. Details and rationale: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 Development uses the dashboard's Vite URL (`http://localhost:5173`) as `PUBLIC_URL`, with API requests proxied to the server. Update `PUBLIC_URL` when changing the browser-facing address. Production authentication requires HTTPS. Signup defaults to `invite_only`; Compose and `.env.example` explicitly enable `open` for development with Mailpit. Verification is required before login. Runtime policy and the current auth surface are documented in [ADR-0026](docs/adr/0026-dashboard-auth-runtime.md).
+
+Keep the application, Postgres and storage clocks synchronized. Host-based expiry tests need the Docker VM clock aligned after laptop suspension.
+
+Storage compatibility and real-browser CORS checks, including an optional S3-provider run: [storage contracts](docs/storage-contracts.md).
 
 ## Documentation
 

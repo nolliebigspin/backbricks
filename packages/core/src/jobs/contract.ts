@@ -20,6 +20,7 @@ export const queueEnvelopeSchema = z
     projectId: activityIdentifierSchema.optional(),
     /** Only the project erasure job runs inside an archived project (ADR-0061). */
     archivedProject: z.literal(true).optional(),
+    archivedMaintenance: z.literal(true).optional(),
     payload: z.unknown(),
   })
   .strict();
@@ -33,5 +34,11 @@ export type QueueJobHandler = {
 /** Trusted worker fan-out port; modules receive only Queue.enqueue bound to their current project. */
 export type ProjectJobEnqueue = (
   tx: TenantTransaction,
-  input: { projectId: string; name: string; payload: unknown; singletonKey: string },
+  input: {
+    projectId: string;
+    name: string;
+    payload: unknown;
+    singletonKey: string;
+    includeArchived?: boolean;
+  },
 ) => Promise<string | null>;

@@ -1,0 +1,47 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "5eccdc98-8dab-4d19-9aa2-eb00937bd343",
+  "prevIds": [
+    "b2ddd089-60dc-4827-b1b6-0541e1d93bdc"
+  ],
+  "footprints": [
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "files",
+        "upload_handle"
+      ],
+      "writes": [
+        "s|col|public.files.upload_handle",
+        "n|col|public.files.upload_handle",
+        "e|col|public.files.upload_handle"
+      ],
+      "reads": [
+        "n|tbl|public.files",
+        "n|sch|public"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "files",
+        "name": "upload_handle",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    }
+  ]
+}

@@ -54,6 +54,7 @@ export function planConfiguration(
       };
       Object.defineProperty(normalized, key, { value: next, enumerable: true });
       if (!previous) {
+        validatedConfig(module, config, module.moduleVersion, { write: true });
         operations.push({
           moduleType: module.type,
           resource,
@@ -76,6 +77,8 @@ export function planConfiguration(
           : []),
         ...(migrating ? ['moduleVersion'] : []),
       ];
+      if (paths.includes('config') || migrating)
+        validatedConfig(module, config, module.moduleVersion, { write: true });
       if (paths.length)
         operations.push({
           moduleType: module.type,

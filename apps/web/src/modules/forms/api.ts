@@ -3,9 +3,8 @@ import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 
 import { admin } from '../../auth/client.ts';
 import { accountError } from '../../auth/navigation.ts';
-import { tenantHeaders, useTenant } from '../../dashboard/context.tsx';
 import { unwrap } from '../../dashboard/feedback.tsx';
-import { useProject } from '../../dashboard/project-shell.tsx';
+import { useModuleScope } from '../../dashboard/module-scope.ts';
 
 export type FormInstance =
   AdminOperations['forms.instance.read']['responses'][200]['content']['application/json'];
@@ -15,14 +14,7 @@ export const SUBMISSION_EVENT = 'forms.submission.created';
 
 /** All forms queries of a project share one prefix, so a change refreshes every view. */
 export function useFormsScope() {
-  const { organizationId } = useTenant();
-  const project = useProject();
-  return {
-    organizationId,
-    projectId: project.id,
-    prefix: ['tenant', organizationId, project.id, 'forms'] as const,
-    headers: tenantHeaders(organizationId),
-  };
+  return useModuleScope('forms');
 }
 
 export function useForms() {

@@ -1,0 +1,1 @@
+ALTER TABLE "files" ADD COLUMN "storage_cleaned_at" timestamp with time zone;

@@ -6,6 +6,7 @@ export const PLATFORM_JOBS = {
   retentionPurge: 'core.retention.purge',
   projectErasure: 'core.projects.erase',
   subjectErasure: 'core.privacy.erase',
+  subjectErasureSettle: 'core.privacy.settle',
   maintenanceFanout: 'core.maintenance.fanout',
   projectMaintenance: 'core.maintenance.project',
 } as const;

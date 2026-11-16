@@ -72,3 +72,15 @@ Short documents that record significant decisions: deviations from or refinement
 | [0060](0060-notification-delivery-and-throttling.md) | Notification delivery and throttling | accepted during execution; D58 |
 | [0061](0061-project-hard-erasure.md) | Project hard erasure | accepted during execution; D59 |
 | [0062](0062-minimal-sdk-snippets-and-release-version.md) | Minimal SDK transport, integration snippets and the product version | accepted during execution; D60 |
+| [0063](0063-module-resource-routes.md) | Module-owned resource routes and public instance resolution | accepted; Q17–Q20 approved 2026-11-15 |
+| [0064](0064-upload-ownership-and-durable-erasure.md) | Upload ownership and durable object erasure | accepted; Q17–Q20 approved 2026-11-15 |
+| [0065](0065-subject-file-zip-exports.md) | Authorized streaming ZIP exports for subject files | accepted; Q17–Q20 approved 2026-11-15 |
+| [0066](0066-read-only-public-resource-lookups.md) | Read-only public resource lookups | accepted during execution; end review deferred |
+| [0067](0067-configuration-write-availability.md) | Configuration availability applies to writes | accepted during execution; end review deferred |
+| [0068](0068-attachment-owner-lifetimes.md) | Synchronize attachment owner lifetimes | accepted during execution; end review deferred |
+| [0069](0069-erasure-requires-enabled-modules.md) | Erasure requires every persisted module | accepted during execution; end review deferred |
+| [0070](0070-private-download-deadlines.md) | Private download deadlines | accepted during execution; end review deferred |
+| [0071](0071-archived-project-maintenance.md) | Archived project maintenance and bounded recovery | accepted during execution; end review deferred |
+| [0072](0072-server-finalized-upload-sessions.md) | Server-finalized direct upload sessions | accepted during execution; end review deferred |
+| [0073](0073-subject-export-bounds-and-settlement.md) | Complete subject exports and identity-free erasure settlement | accepted during execution; end review deferred |
+| [0074](0074-erasure-worker-serialization.md) | Erasure purges active payloads and fences waiting workers | accepted during execution; end review deferred |

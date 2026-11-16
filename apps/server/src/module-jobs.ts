@@ -12,6 +12,21 @@ export function moduleJobs(
   runtime: ReturnType<SelectedModules['registry']['bind']>,
   withTenant: WithTenant,
 ) {
+  async function run(
+    tx: TenantTransaction,
+    moduleType: string,
+    job: SelectedModules['registry']['modules'][number]['jobs'][number],
+    input: unknown,
+  ) {
+    if (tx.context.projectId) {
+      await tx.repositories.projects.get(tx.context.projectId, {
+        lock: true,
+        includeArchived: tx.context.archivedProject || tx.context.archivedMaintenance,
+      });
+      if (await tx.repositories.projects.erasedAt(tx.context.projectId)) return;
+    }
+    await job.run(runtime.forTenant(tx).execution(moduleType), input);
+  }
   return Object.freeze(
     modules.registry.modules.flatMap((module) =>
       module.jobs.map((job) =>
@@ -24,11 +39,9 @@ export function moduleJobs(
           cron: job.cron,
           consumes: job.consumes,
           runInTransaction: (tx: TenantTransaction, input: unknown) =>
-            job.run(runtime.forTenant(tx).execution(module.type), input),
+            run(tx, module.type, job, input),
           run: (context: TenantContext, input: unknown) =>
-            withTenant(context, (tx) =>
-              job.run(runtime.forTenant(tx).execution(module.type), input),
-            ),
+            withTenant(context, (tx) => run(tx, module.type, job, input)),
         }),
       ),
     ),

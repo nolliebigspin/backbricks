@@ -14,6 +14,10 @@ export type TenantContext = {
    * erasure enqueue sets it; HTTP authorization never does, so requests can't reach archived data.
    */
   readonly archivedProject?: true;
+  /** Trusted retention/cleanup only; does not authorize project hard erasure. */
+  readonly archivedMaintenance?: true;
+  /** Host-only pre-proof module lookup; enforced by the database transaction. */
+  readonly readOnly?: true;
 };
 export type AuthenticatedTenantContext = TenantContext & { readonly principal: Principal };
 

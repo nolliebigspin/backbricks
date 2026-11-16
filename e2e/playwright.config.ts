@@ -1,11 +1,20 @@
 import { defineConfig, devices } from '@playwright/test';
 
+import { clamavTestConfig } from '../scripts/test/clamav.ts';
+import { garageStorageConfig } from '../scripts/test/garage.ts';
+
 // Runs on Node (mise) against the real server role serving the built dashboard
 // (`bun run build` first). Needs the compose Postgres: `mise run infra`.
 const port = Number(process.env['E2E_PORT'] ?? 3300);
 const baseURL = `http://127.0.0.1:${port}`;
 
+const databaseUrl =
+  process.env['TEST_DATABASE_URL'] ?? 'postgres://backbricks:backbricks@localhost:5432/backbricks';
+const scanner = process.env['E2E_SCANNER'] ?? 'clamav';
+if (scanner !== 'none' && scanner !== 'clamav')
+  throw new Error('E2E_SCANNER must be none or clamav.');
 export default defineConfig({
+  metadata: { scanner, databaseName: new URL(databaseUrl).pathname.slice(1) },
   testDir: '.',
   forbidOnly: Boolean(process.env['CI']),
   retries: process.env['CI'] ? 1 : 0,
@@ -23,11 +32,19 @@ export default defineConfig({
       NODE_ENV: 'test',
       PUBLIC_URL: baseURL,
       PORT: String(port),
-      DATABASE_URL:
-        process.env['TEST_DATABASE_URL'] ??
-        'postgres://backbricks:backbricks@localhost:5432/backbricks',
+      DATABASE_URL: databaseUrl,
       APP_SECRET: 'e2e-secret-e2e-secret-e2e-secret-000000',
-      BACKBRICKS_MODULES: 'forms',
+      BACKBRICKS_MODULES: 'forms,uploads',
+      SCANNER: scanner,
+      CLAMAV_HOST: clamavTestConfig.host,
+      CLAMAV_PORT: String(clamavTestConfig.port),
+      S3_ENDPOINT: garageStorageConfig.endpoint,
+      S3_PUBLIC_ENDPOINT: garageStorageConfig.publicEndpoint,
+      S3_REGION: garageStorageConfig.region,
+      S3_BUCKET: garageStorageConfig.bucket,
+      S3_ACCESS_KEY_ID: garageStorageConfig.accessKeyId,
+      S3_SECRET_ACCESS_KEY: garageStorageConfig.secretAccessKey,
+      S3_FORCE_PATH_STYLE: 'true',
       LOG_LEVEL: 'warn',
       SIGNUP_POLICY: 'open',
       TRUSTED_PROXIES: '127.0.0.1,::1',

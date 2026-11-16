@@ -1,3 +1,5 @@
+import { configObject as record } from '../../dashboard/config-values.ts';
+
 /**
  * Editable copies of a form's fields. Each field keeps every stored property, so rules this editor
  * doesn't show survive a save; the server's forms schema stays the authority on validity.
@@ -12,8 +14,6 @@ export type FieldDraft = {
 export type FieldOption = { value: string; label: string };
 type Config = Record<string, unknown>;
 
-const record = (value: unknown): Config =>
-  typeof value === 'object' && value !== null && !Array.isArray(value) ? { ...value } : {};
 const text = (value: unknown) => (typeof value === 'string' ? value : '');
 
 /** Types the picker offers. `file` needs the uploads module (M3); stored ones stay editable. */
@@ -31,6 +31,11 @@ export const FIELD_TYPES = [
   'consent',
   'hidden',
 ] as const;
+
+/** Available choices come from installation metadata; stored historical file fields remain readable. */
+export function fieldTypes(uploads: boolean): readonly string[] {
+  return uploads ? [...FIELD_TYPES, 'file'] : FIELD_TYPES;
+}
 
 /** Rule inputs per type, beyond label, help and required. */
 export const FIELD_RULES: Record<string, readonly string[]> = {

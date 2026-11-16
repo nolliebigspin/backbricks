@@ -5,6 +5,7 @@ import { accountError } from '../../auth/navigation.ts';
 import { Feedback } from '../../dashboard/feedback.tsx';
 import { useIntegration } from '../../dashboard/integration.ts';
 import { useProject } from '../../dashboard/project-shell.tsx';
+import { Code } from '../code.tsx';
 import type { FormInstance } from './api.ts';
 import { configFields } from './entries-view.ts';
 import { readSettings } from './settings-config.ts';
@@ -90,13 +91,5 @@ export function EmbedTab({ form }: { form: FormInstance }) {
         ]}
       />
     </div>
-  );
-}
-
-function Code({ value }: { value: string }) {
-  return (
-    <pre className="overflow-x-auto rounded-lg border bg-muted p-4 text-xs">
-      <code>{value}</code>
-    </pre>
   );
 }

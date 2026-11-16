@@ -70,7 +70,11 @@ const detail = {
 };
 
 type Call = { method: string; path: string; body: unknown; signal: AbortSignal };
-function mount(role: Tenant['role'], respond?: (call: Call) => Promise<Response> | undefined) {
+function mount(
+  role: Tenant['role'],
+  respond?: (call: Call) => Promise<Response> | undefined,
+  activeForm: FormInstance = form,
+) {
   const calls: Call[] = [];
   globalThis.fetch = Object.assign(
     async (input: string | URL | Request, init?: RequestInit) => {
@@ -97,7 +101,7 @@ function mount(role: Tenant['role'], respond?: (call: Call) => Promise<Response>
     <QueryClientProvider client={queries}>
       <TenantContext value={{ organizationId: 'org_test', role }}>
         <ProjectContext value={project}>
-          <EntriesTab form={form} />
+          <EntriesTab form={activeForm} />
         </ProjectContext>
       </TenantContext>
     </QueryClientProvider>,
@@ -169,4 +173,66 @@ test('switching organizations cancels in-flight entry queries', async () => {
   await queries.cancelQueries({ queryKey: ['tenant'] });
   const list = calls.find((call) => call.path.endsWith('/submissions'));
   expect(list?.signal.aborted).toBe(true);
+});
+
+test('historical file fields use owner metadata instead of rendering stored IDs', async () => {
+  await initI18n('en');
+  mount('member', (call) =>
+    call.path.endsWith('/submissions/sub_1') && call.method === 'GET'
+      ? Promise.resolve(
+          Response.json({
+            ...detail,
+            read: true,
+            fields: [
+              ...detail.fields,
+              { key: 'cv', type: 'file', label: 'Original CV', zone: 'cv', maxFiles: 2 },
+            ],
+            additionalData: { cv: ['file_1', 'file_missing'] },
+            attachments: [
+              {
+                id: 'file_1',
+                zoneId: 'mod_cv',
+                name: 'Historical CV.pdf',
+                size: 123,
+                type: 'application/pdf',
+                status: 'ready',
+                scanStatus: 'clean',
+                previewable: false,
+                expiresAt: null,
+              },
+            ],
+          }),
+        )
+      : undefined,
+  );
+  fireEvent.click(await screen.findByRole('button', { name: /Open the entry/ }));
+  const drawer = within(await screen.findByRole('dialog'));
+  expect(await drawer.findByText('Historical CV.pdf')).toBeDefined();
+  expect(drawer.queryByText('file_missing')).toBeNull();
+  expect(drawer.queryByText('file_1')).toBeNull();
+});
+
+test('file list fields show attachment counts rather than opaque stored IDs', async () => {
+  await initI18n('en');
+  mount(
+    'member',
+    (call) =>
+      call.path.endsWith('/submissions')
+        ? Promise.resolve(
+            Response.json({
+              data: [{ ...entry, data: { cv: ['file_one', 'file_two'] } }],
+              nextCursor: null,
+            }),
+          )
+        : undefined,
+    {
+      ...form,
+      config: {
+        fields: [{ key: 'cv', type: 'file', label: 'CV', zone: 'cv' }],
+        listFields: ['cv'],
+      },
+    },
+  );
+  expect(await screen.findByText('2 attachments')).toBeDefined();
+  expect(screen.queryByText('file_one')).toBeNull();
 });

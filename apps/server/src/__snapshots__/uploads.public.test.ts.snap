@@ -1,0 +1,14 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`upload intents and repeatable completion bind exact private bytes, scope and one durable scan job 1`] = `
+{
+  "expiresAt": "[expiry]",
+  "fileId": "[fileId]",
+  "headers": {
+    "content-length": "22",
+    "content-type": "application/pdf",
+  },
+  "uploadToken": "[token]",
+  "uploadUrl": "[signed URL]",
+}
+`;

@@ -52,6 +52,11 @@ export type SubmissionFilters = Readonly<{
 }>;
 export type SubmissionCounts = Readonly<{ total: number; unread: number; spam: number }>;
 
+export type ErasedSubmission = Pick<
+  SubmissionRecord,
+  'id' | 'instanceId' | 'configVersion' | 'data'
+>;
+
 /**
  * Forms' repository, implemented in `packages/db` (ADR-0055). Every method is scoped to the
  * transaction's tenant; a foreign or other-form ID behaves as missing. Bulk methods are
@@ -73,21 +78,31 @@ export interface FormsRepository {
     changes: SubmissionChanges,
   ): Promise<number>;
   bulkDelete(instanceId: string, ids: readonly string[]): Promise<number>;
-  /** Deletes up to `limit` entries of one form; returns their IDs (delete-all job). */
-  deleteBatch(instanceId: string, limit: number): Promise<string[]>;
+  /** Deletes up to `limit` entries of one form; returns bounded owner context (delete-all job). */
+  deleteBatch(instanceId: string, limit: number): Promise<ErasedSubmission[]>;
   counts(instanceId: string): Promise<SubmissionCounts>;
   /** Deletes up to `limit` entries of the project that expired at `now`. */
-  purgeExpired(now: Date, limit: number): Promise<number>;
+  purgeExpired(now: Date, limit: number): Promise<ErasedSubmission[]>;
+  /** Bounded owner lifetime and historical-answer page for attachment synchronization. */
+  ownerExpiryPage(
+    instanceId: string,
+    page: RepositoryPage,
+  ): Promise<
+    Pick<
+      SubmissionRecord,
+      'id' | 'createdAt' | 'expiresAt' | 'instanceId' | 'configVersion' | 'data'
+    >[]
+  >;
   /**
    * Sets `expires_at` from a new retention: `created_at + days`, or none when unlimited;
    * spam keeps its earlier 30-day cap (§F.4). Returns the number of updated entries.
    */
   recomputeExpiry(instanceId: string, retentionDays: number | null): Promise<number>;
   findBySubject(email: string, page: RepositoryPage): Promise<SubmissionRecord[]>;
-  /** Deletes up to `limit` entries of the subject in the project; returns their IDs. */
-  deleteBySubject(email: string, limit: number): Promise<string[]>;
-  /** Deletes up to `limit` entries of the whole project (project erasure); returns their IDs. */
-  eraseBatch(limit: number): Promise<string[]>;
+  /** Deletes up to `limit` entries of the subject in the project; returns bounded owner context. */
+  deleteBySubject(email: string, limit: number): Promise<ErasedSubmission[]>;
+  /** Deletes up to `limit` entries of the whole project (project erasure); returns bounded owner context. */
+  eraseBatch(limit: number): Promise<ErasedSubmission[]>;
 }
 
 declare module '@backbricks/core' {

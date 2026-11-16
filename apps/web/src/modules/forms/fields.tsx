@@ -12,15 +12,17 @@ import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { admin } from '../../auth/client.ts';
+import { instanceConfigIsDestructive } from '../../dashboard/config-plan.ts';
 import { canManage, useTenant } from '../../dashboard/context.tsx';
 import { Feedback, unwrap } from '../../dashboard/feedback.tsx';
+import { useOperationalModules } from '../../dashboard/shell.tsx';
 import { formsError, useFormsScope, type FormInstance } from './api.ts';
 import { FieldEditor } from './field-editor.tsx';
 import {
   describeChanges,
   firstOption,
   FIELD_PRESETS,
-  FIELD_TYPES,
+  fieldTypes,
   hasOptions,
   newDraft,
   readDrafts,
@@ -32,7 +34,6 @@ import {
 
 const FORMS_RESOURCE = 'forms';
 const text = (value: unknown) => (typeof value === 'string' ? value : '');
-const stale = () => Object.assign(new Error('stale'), { code: 'conflict' });
 
 /** The fields websites send; read-only for members (§E.4). */
 export function FieldsTab({ form }: { form: FormInstance }) {
@@ -52,6 +53,8 @@ function FieldsForm({ form, disabled }: { form: FormInstance; disabled: boolean 
   const { t } = useTranslation();
   const scope = useFormsScope();
   const client = useQueryClient();
+  const modules = useOperationalModules();
+  const uploads = modules.data?.some((module) => module.type === 'uploads') ?? false;
   const [drafts, setDrafts] = useState(() => readDrafts(form.config));
   const [pending, setPending] = useState<{
     config: Record<string, unknown>;
@@ -92,34 +95,7 @@ function FieldsForm({ form, disabled }: { form: FormInstance; disabled: boolean 
   }
   /** The server's dry run decides whether the change loses data (one classifier, D30). */
   async function destructive(config: Record<string, unknown>) {
-    const document = unwrap(
-      await admin.GET('/v1/projects/{projectId}/config', {
-        params: { path },
-        headers: scope.headers,
-      }),
-    );
-    const forms = document.modules[FORMS_RESOURCE] ?? {};
-    const current = forms[form.key];
-    if (current?.configVersion !== form.configVersion) throw stale();
-    const plan = unwrap(
-      await admin.PUT('/v1/projects/{projectId}/config', {
-        params: { path, query: { dryRun: 'true' } },
-        headers: scope.headers,
-        body: {
-          config: {
-            ...document,
-            modules: { [FORMS_RESOURCE]: { ...forms, [form.key]: { ...current, config } } },
-          },
-        },
-      }),
-    );
-    return (
-      'planHash' in plan &&
-      plan.changes.some(
-        (change) =>
-          change.resource === FORMS_RESOURCE && change.key === form.key && change.destructive,
-      )
-    );
+    return instanceConfigIsDestructive(scope, FORMS_RESOURCE, form.key, form.configVersion, config);
   }
   return (
     <form
@@ -150,6 +126,7 @@ function FieldsForm({ form, disabled }: { form: FormInstance; disabled: boolean 
           }
           renderEditor={(draft, index) => (
             <FieldEditor
+              uploads={uploads}
               draft={draft}
               typeName={typeName}
               onChange={(next) => update(drafts.map((item, at) => (at === index ? next : item)))}
@@ -169,6 +146,7 @@ function FieldsForm({ form, disabled }: { form: FormInstance; disabled: boolean 
               ? undefined
               : (add) => (
                   <AddField
+                    uploads={uploads}
                     typeName={typeName}
                     onAdd={(start) =>
                       add(
@@ -258,9 +236,11 @@ type Start = { type: string } | { preset: FieldPreset };
 
 /** Common fields first, then every type; `file` arrives with uploads (M3). */
 function AddField({
+  uploads,
   typeName,
   onAdd,
 }: {
+  uploads: boolean;
   typeName: (type: string) => string;
   onAdd: (start: Start) => void;
 }) {
@@ -280,7 +260,7 @@ function AddField({
             ))}
           </NativeSelectOptGroup>
           <NativeSelectOptGroup label={t('forms.fields.allTypes')}>
-            {FIELD_TYPES.map((type) => (
+            {fieldTypes(uploads).map((type) => (
               <NativeSelectOption key={type} value={`type:${type}`}>
                 {typeName(type)}
               </NativeSelectOption>

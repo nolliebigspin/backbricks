@@ -1,3 +1,5 @@
+import { MAX_PUBLIC_REDIRECT_URL_LENGTH, MODULE_RETENTION_DAYS } from '@backbricks/core';
+
 /**
  * Config format version. Version 1 needs no `migrateConfig`: the core parses configs stored at the
  * current version directly; a later format change adds the hook (ADR-0041).
@@ -46,12 +48,15 @@ export const FORMS_DEFAULTS = {
   textMaxLength: 500,
   textareaMaxLength: 5000,
   hiddenMaxLength: 500,
-  retentionDays: 180,
+  retentionDays: MODULE_RETENTION_DAYS.default,
   /** Forms that switch proof-of-work off get a lower per-IP default (Q13). */
   perMinuteWithoutProofOfWork: 5,
 } as const;
 
-export const FORMS_RETENTION_DAYS = { min: 7, max: 3650 } as const;
+export const FORMS_RETENTION_DAYS = {
+  min: MODULE_RETENTION_DAYS.min,
+  max: MODULE_RETENTION_DAYS.max,
+} as const;
 
 /** Public submission body limit (ARCHITECTURE §D.5). */
 export const FORMS_BODY_LIMIT_BYTES = 64 * 1024;
@@ -71,4 +76,3 @@ export const FORM_FIELD_TYPES = [
   'consent',
   'file',
 ] as const;
-import { MAX_PUBLIC_REDIRECT_URL_LENGTH } from '@backbricks/core';

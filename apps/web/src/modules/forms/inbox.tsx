@@ -8,6 +8,7 @@ import { ChoiceField, Field, formText } from '../../auth/fields.tsx';
 import { canManage, useTenant } from '../../dashboard/context.tsx';
 import { Feedback, unwrap } from '../../dashboard/feedback.tsx';
 import { useOperationalModules } from '../../dashboard/shell.tsx';
+import { templatesFor } from '../templates.ts';
 import { formsError, useFormSummary, useForms, useFormsScope, type FormInstance } from './api.ts';
 
 export function formPath(projectId: string, key: string) {
@@ -72,15 +73,6 @@ function FormRow({ form }: { form: FormInstance }) {
       </StatusBadge>
     </li>
   );
-}
-
-/** Template keys follow `<template>-<language>` (P2.1b); show the current language's set. */
-export function templatesFor(
-  templates: readonly { key: string; name: string }[],
-  language: string,
-) {
-  const local = templates.filter((template) => template.key.endsWith(`-${language}`));
-  return local.length > 0 ? local : templates;
 }
 
 function CreateForm() {

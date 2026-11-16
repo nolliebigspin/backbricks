@@ -13,6 +13,7 @@ import {
   submissionsQuerySchema,
   submissionSummarySchema,
 } from './admin-schemas.ts';
+import { listEntryFiles } from './attachments.ts';
 import type { FormsConfig } from './config.ts';
 import { formKeyParams, publicForm } from './public.ts';
 import { submissionFilters } from './queries.ts';
@@ -136,6 +137,7 @@ export function formsAdminRoutes(router: ModuleAdminRouter<FormsRuntime>) {
         additionalData: Object.fromEntries(
           Object.entries(row.data).filter(([key]) => !keys.includes(key)),
         ),
+        attachments: await listEntryFiles(runtime, row.id),
         source: row.source,
         spamReasons: row.spamReasons,
         expiresAt: row.expiresAt?.toISOString() ?? null,

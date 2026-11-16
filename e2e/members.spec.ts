@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto';
 
 import { receivedMail } from '../scripts/test/mailpit.ts';
-import { accountPassword, createAccount, createOrganization, createProject } from './accounts.ts';
-import { expect, test, testHeaders } from './fixtures.ts';
+import { acceptInvitation, createAccount, createOrganization, createProject } from './accounts.ts';
+import { expect, test } from './fixtures.ts';
 
 test('invitations, membership permissions, last owner and safe activity', async ({
   page,
@@ -31,15 +31,7 @@ test('invitations, membership permissions, last owner and safe activity', async 
       return link;
     })
     .toContain('/accept-invitation');
-  const context = await browser.newContext({ extraHTTPHeaders: testHeaders() });
-  const member = await context.newPage();
-  await member.goto(link);
-  await member.getByLabel('Your name').fill('Invited teammate');
-  await member.getByLabel('Email address').fill(invitedEmail);
-  await member.getByLabel('Password', { exact: true }).fill(accountPassword);
-  await member.getByRole('button', { name: 'Join team' }).click();
-  await expect(member.getByRole('button', { name: 'Sign out' })).toBeVisible();
-  await member.getByLabel('Organization', { exact: true }).selectOption(orgId);
+  const { context, page: member } = await acceptInvitation(browser, link, invitedEmail, orgId);
   await member.getByRole('link', { name: 'Team website' }).click();
   await member.getByRole('link', { name: 'Embed', exact: true }).click();
   await expect(

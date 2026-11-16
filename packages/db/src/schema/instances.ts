@@ -36,6 +36,8 @@ export const moduleInstances = pgTable(
   (table) => [
     projectForeignKey(table),
     unique().on(table.organizationId, table.projectId, table.id),
+    // Files additionally bind the parent's module type, so a form cannot be used as an upload zone.
+    unique().on(table.organizationId, table.projectId, table.id, table.moduleType),
     unique().on(table.projectId, table.moduleType, table.key),
     check('module_instances_key_format', sql`${table.key} ~ '^[a-z0-9][a-z0-9-]{0,62}$'`),
     check(

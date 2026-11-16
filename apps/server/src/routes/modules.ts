@@ -76,13 +76,15 @@ export function moduleRoutes(
 ) {
   for (const module of services.modules.registry.modules) {
     if (resolvePublic) {
-      const paths = new Set(module.publicRoutes.map((route) => route.path));
-      for (const [index, path] of [...paths].entries())
+      const paths = new Map(
+        module.publicRoutes.map((route) => [`${route.resource}${route.path}`, route]),
+      );
+      for (const [index, { resource, path }] of [...paths.values()].entries())
         publicPreflight(api, {
-          path: `/v1/public/${module.resourceName.plural}${path === '/' ? '' : path}`,
+          path: `/v1/public/${resource}${path === '/' ? '' : path}`,
           operationId: `${module.type}.preflight.${index}`,
           methods: module.publicRoutes
-            .filter((route) => route.path === path)
+            .filter((route) => route.resource === resource && route.path === path)
             .map((route) => route.method),
           resolve: resolvePublic,
           withTenant: services.withTenant,
@@ -95,8 +97,8 @@ export function moduleRoutes(
         });
       const management = route.policy.kind === 'management';
       const prefix = management
-        ? `/v1/projects/{projectId}/${module.resourceName.plural}`
-        : `/v1/public/${module.resourceName.plural}`;
+        ? `/v1/projects/{projectId}/${route.resource}`
+        : `/v1/public/${route.resource}`;
       const path = `${prefix}${route.path === '/' ? '' : route.path}`;
       const hasBody =
         route.method !== 'GET' &&
@@ -182,7 +184,12 @@ export function moduleRoutes(
           };
           const tenant = requireTenantContext(c);
           if (!Object.values(route.responses).some((response) => response.kind === 'csv'))
-            return services.withTenant(tenant, (tx) => run(tx, input));
+            return services.withTenant(tenant, async (tx) => {
+              // Parent-first locks serialize cross-module mutations with configuration and erasure.
+              if (route.method !== 'GET' && tx.context.projectId)
+                await tx.repositories.projects.get(tx.context.projectId, { lock: true });
+              return run(tx, input);
+            });
           let release: (() => void) | undefined;
           let committed = false;
           const ready = new Promise<void>((resolve) => {

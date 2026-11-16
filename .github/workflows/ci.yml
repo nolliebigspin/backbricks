@@ -58,11 +58,13 @@ jobs:
       - run: bun install --frozen-lockfile
       # The dev environment is defined once in compose.yaml and reused here (same as `mise run infra`).
       - name: Start services
-        run: mise run infra
+        run: |
+          mise run infra
+          mise run scan
       - run: bun run test
       - name: Service logs
         if: failure()
-        run: docker compose --profile storage logs --no-color
+        run: docker compose --profile storage --profile scan logs --no-color
 
   e2e:
     name: End-to-end (Playwright)
@@ -72,9 +74,12 @@ jobs:
       - uses: jdx/mise-action@v5
       - run: bun install --frozen-lockfile
       - name: Start services
-        run: mise run infra
+        run: |
+          mise run infra
+          mise run scan
       - run: bunx turbo run build --filter @backbricks/web --filter @backbricks/example-html
       - run: bunx playwright install --with-deps chromium
+      - run: bun run test:sdk-browser
       - run: bun run test:e2e
       - name: Playwright report
         if: failure()
@@ -101,7 +106,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Start services
-        run: mise run infra
+        run: |
+          mise run infra
+          mise run scan
       - name: Smoke test (real worker consumption, non-root/read-only roles)
         run: bun scripts/image/smoke.ts backbricks/server:ci
 

@@ -8,6 +8,8 @@ import type { Capability, CapabilityName } from './capabilities.ts';
 import type { ModuleExecution } from './contract.ts';
 import type { InfraRequirement } from './infrastructure.ts';
 import type { ModuleJobSpec } from './jobs.ts';
+import type { ModuleMaintenanceResult } from './maintenance.ts';
+import type { ModulePrivacyHooks } from './privacy.ts';
 import type { ModuleInputSchema, ModuleResponseDefinition } from './routes.ts';
 import type {
   ConfigChangeReport,
@@ -20,11 +22,13 @@ import type {
 export type RegisteredRoute = {
   method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
   path: string;
+  resource: string;
   operationId: string;
   input: ModuleInputSchema;
   responses: Readonly<Record<number, ModuleResponseDefinition>>;
   policy: RoutePolicy;
   access?: PublicAccess;
+  resolveInstance?(this: void, execution: ModuleExecution, input: unknown): Promise<string>;
   run(execution: ModuleExecution, input: unknown): Promise<Response>;
 };
 export type RegisteredJob = ModuleJobSpec & {
@@ -36,6 +40,7 @@ export type RegisteredModule = Readonly<{
   moduleVersion: number;
   displayName: { en: string; de: string };
   resourceName: { singular: string; plural: string };
+  resourceNamespaces: readonly string[];
   infrastructure: readonly InfraRequirement[];
   scopes: readonly ScopeDefinition[];
   events: readonly EventDefinition[];
@@ -59,7 +64,10 @@ export type RegisteredModule = Readonly<{
   publicRoutes: readonly RegisteredRoute[];
   jobs: readonly RegisteredJob[];
   retention: {
-    purgeExpired(execution: ModuleExecution, input: { now: Date; limit: number }): Promise<number>;
+    purgeExpired(
+      execution: ModuleExecution,
+      input: { now: Date; limit: number },
+    ): Promise<ModuleMaintenanceResult>;
     recomputeExpiry(execution: ModuleExecution, instance: unknown, now: Date): Promise<number>;
   };
   notifications: {
@@ -68,9 +76,5 @@ export type RegisteredModule = Readonly<{
       input: NotificationSubjectInput<unknown>,
     ): Promise<NotificationSubject | null>;
   } | null;
-  privacy: {
-    exportSubject(execution: ModuleExecution, email: string): Promise<JsonValue>;
-    deleteSubject(execution: ModuleExecution, email: string): Promise<number>;
-    eraseScope(execution: ModuleExecution, input: { limit: number }): Promise<number>;
-  };
+  privacy: ModulePrivacyHooks<ModuleExecution>;
 }>;

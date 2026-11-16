@@ -26,9 +26,11 @@ export function validatedConfig(
   module: RegisteredModule,
   input: unknown,
   fromVersion = module.moduleVersion,
+  options: { write?: boolean } = {},
 ) {
   try {
-    return module.migrateConfig(fromVersion, input);
+    const config = module.migrateConfig(fromVersion, input);
+    return options.write ? module.parseConfig(config) : config;
   } catch (error) {
     if (error instanceof ZodError) throw configProblem(error);
     if (error instanceof AppError)
@@ -160,6 +162,8 @@ export function instancePersistence(
         ...(migrating ? ['moduleVersion'] : []),
       ];
       if (!force && !changedFields.length) return previous;
+      if (changedConfig || force)
+        validatedConfig(module, next.config, module.moduleVersion, { write: true });
       checkInstanceVersion(previous, previous.configVersion);
       const instance = await tx.repositories.instances.update(previous.id, previous.configVersion, {
         ...next,

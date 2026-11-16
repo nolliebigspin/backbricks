@@ -46,7 +46,7 @@ flowchart LR
   - Secret key with foreign origin → `403` + audit entry
   - OpenAPI drift check enforced in CI
 
-### M2 · Forms → `v0.1.0` (developer preview) · implemented, awaiting review and tag
+### M2 · Forms → `v0.1.0` (developer preview) · released 2026-11-15
 - **Phase:** P2 · **Effort:** 9–11 PD original allowance; [detailed plan and accepted revised estimate](../PLAN.md#phase-p2--forms-m2--v010--planned-2026-11-09) · **Report:** [`progress/phase-2.md`](progress/phase-2.md)
 - **Goal:** The first module, complete: a headless form backend plus a dashboard inbox.
 - **Scope:** form config + templates, runtime validation, public submit (JSON + plain HTML), idempotency, spam handling, admin API (list, search, status, bulk, CSV), notifications, retention + GDPR handlers, dashboard inbox, minimal SDK `forms.submit`, HTML example.
@@ -56,12 +56,14 @@ flowchart LR
   - Spam/honeypot handled; notification arrives in Mailpit without content
   - CSV export is injection-safe (a field `=SUM(1)` is exported defused); expired entries are purged
   - Isolation suite covers the new routes
-- **Release:** `v0.1.0` image + dev-setup quickstart in README
+- **Release:** [signed `v0.1.0` tag](https://github.com/nolliebigspin/backbricks/tree/v0.1.0), `ghcr.io/nolliebigspin/backbricks:0.1.0` + dev-setup quickstart in README. [Release PR #13](https://github.com/nolliebigspin/backbricks/pull/13), PR/main CI and [publishing workflow](https://github.com/nolliebigspin/backbricks/actions/runs/43704367449) passed. Fresh phase review remains separate from release metadata approval.
 
 ### M3 · Uploads → `v0.2.0`
 - **Phase:** P3 · **Effort:** 9–12 PD
+- **Planning:** [executable plan](../PLAN.md#phase-p3--uploads-m3--v020--approved-2026-11-15) and [module plan](modules/uploads.md) prepared 2026-11-15; 148 h envelope approved on 2026-11-15 (Q17–Q20); current plan is 129 h plus 19 h reserve after the in-flight PUT correction.
+- **Implementation:** completed locally 2026-11-16; [acceptance report](progress/phase-3.md). End review, fresh phase review and release authorization remain separate gates.
 - **Goal:** Safe direct-to-storage uploads, linked to forms.
-- **Scope:** upload zones, presigned PUT with signed size/type, copy-then-scan with ClamAV, magic-byte checks, `files` capability + form file fields, admin API + downloads, cleanup jobs, dashboard files view, SDK `uploads.upload`, storage contract suite.
+- **Scope:** upload zones, server-finalized direct upload sessions with signed size/type, copy-then-scan with ClamAV, magic-byte checks, `files` capability + form file fields, admin API + downloads, cleanup jobs, dashboard files view, SDK `uploads.upload`, storage contract suite.
 - **Exit criteria:**
   - EICAR → `quarantined`, object deleted, notification sent
   - An upload larger than declared is rejected by storage; PDF extension with EXE content → `rejected`

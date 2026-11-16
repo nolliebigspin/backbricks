@@ -1,4 +1,9 @@
-import { createSmtpMailer, createS3Storage, createAltchaProvider } from '@backbricks/adapters';
+import {
+  createSmtpMailer,
+  createS3Storage,
+  createAltchaProvider,
+  createClamavScanner,
+} from '@backbricks/adapters';
 import {
   authCapabilities,
   createAuditService,
@@ -63,6 +68,7 @@ export function createServerServices(
   const activity = { clock, ids };
   const mailer = config.mailer ? createSmtpMailer(config.mailer) : null;
   const storage = config.storage ? createS3Storage(config.storage, clock) : null;
+  const scanner = config.scanner?.kind === 'clamav' ? createClamavScanner(config.scanner) : null;
   const captcha = createAltchaProvider({
     appSecret: config.appSecret,
     clock,
@@ -77,7 +83,7 @@ export function createServerServices(
       entitlements: options.entitlements ?? createUnlimitedEntitlements(),
       rateLimiter: createRateLimiter(createPostgresRateLimitStore(db), clock),
     },
-    { mailer, storage, captcha, queue: options.queue },
+    { mailer, storage, scanner, captcha, queue: options.queue },
   );
   const withTenant = createWithTenant(
     db,
@@ -93,7 +99,10 @@ export function createServerServices(
     container,
     authCapabilities: authCapabilities(config),
     captcha,
-    readinessChecks: storage ? [{ name: 'storage', check: () => storage.check() }] : [],
+    readinessChecks: [
+      ...(storage ? [{ name: 'storage', check: () => storage.check() }] : []),
+      ...(scanner ? [{ name: 'scanner', check: () => scanner.check() }] : []),
+    ],
     modules,
     scopeCatalog,
     moduleRuntime,
@@ -131,6 +140,7 @@ export function createServerServices(
     }),
     privacy: createSubjectPrivacyService({
       ...container.core,
+      withTenant,
       registry: modules.registry,
       runtime: moduleRuntime,
       queue: options.queue,
