@@ -1,9 +1,9 @@
 import { Button } from '@backbricks/ui';
+import { Logo } from '@backbricks/ui';
 
 import { links, nav } from '../content/site.ts';
 import { ExternalLink } from './external-link.tsx';
 import { GitHubIcon } from './github-icon.tsx';
-import { Logo } from './logo.tsx';
 
 export function SiteHeader() {
   return (

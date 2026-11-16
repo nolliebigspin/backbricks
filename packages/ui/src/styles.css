@@ -1,25 +1,30 @@
 /*
  * Shared theme for every Backbricks UI (marketing site, dashboard).
  * Apps import only this file: `@import "@backbricks/ui/styles.css";`.
- * Based on the shadcn "radix-nova" preset (neutral), plus a brick-colored brand accent.
+ * Design language "Running bond": docs/DESIGN.md. Values here are the source of truth;
+ * components consume the shadcn token names, so swapping a value restyles every screen.
  */
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
-@import '@fontsource-variable/geist';
+@import '@fontsource-variable/bricolage-grotesque/opsz.css';
+@import '@fontsource-variable/hanken-grotesk';
 @import '@fontsource-variable/geist-mono';
 
 /* Apps scan their own files automatically; shared components live here. */
 @source "./";
 
-@custom-variant dark (&:is(.dark *));
+/* Dark mode follows the operating system; there is no in-app toggle. */
+@custom-variant dark (@media (prefers-color-scheme: dark));
 
 @theme inline {
-  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Hanken Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
-  --font-heading: var(--font-sans);
+  --font-heading: 'Bricolage Grotesque Variable', var(--font-sans);
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -58,89 +63,93 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  /* Fluid hero size for the website (DESIGN.md "Type"). */
+  --text-display: clamp(3rem, 7vw, 5.75rem);
+  --text-display--line-height: 0.95;
+  --text-display--letter-spacing: -0.025em;
 }
 
+/* Running bond palette. Names in comments match docs/DESIGN.md. */
 :root {
-  --brand: oklch(0.58 0.17 38);
-  --brand-foreground: oklch(0.985 0 0);
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --mortar: oklch(0.947 0.005 135); /* #ECEEEB */
+  --brand: oklch(0.525 0.163 32.5); /* brick #B53A24 */
+  --brand-foreground: oklch(1 0 0);
+  --success: oklch(0.49 0.1 154); /* moss #2A7146 */
+  --warning: oklch(0.5 0.11 68); /* ochre #965D0E */
+  --background: oklch(1 0 0); /* paper */
+  --foreground: oklch(0.251 0.01 229.4); /* graphite #1D2326 */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: var(--foreground);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --popover-foreground: var(--foreground);
+  --primary: var(--foreground);
+  --primary-foreground: oklch(0.985 0.002 135);
+  --secondary: var(--mortar);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--mortar);
+  --muted-foreground: oklch(0.497 0.016 234); /* slate #5A646A */
+  --accent: oklch(0.925 0.006 140);
+  --accent-foreground: var(--foreground);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --border: oklch(0.891 0.006 153.8); /* joint #D8DCD9 */
+  --input: oklch(0.86 0.007 150);
+  --ring: var(--brand);
+  --chart-1: var(--brand);
+  --chart-2: var(--success);
+  --chart-3: var(--warning);
+  --chart-4: var(--muted-foreground);
+  --chart-5: oklch(0.82 0.06 33);
+  --radius: 0.5rem;
+  --sidebar: var(--mortar);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--foreground);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: oklch(0.91 0.007 140);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
 }
 
-.dark {
-  --brand: oklch(0.7 0.16 42);
-  --brand-foreground: oklch(0.145 0 0);
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+@media (prefers-color-scheme: dark) {
+  :root {
+    --mortar: oklch(0.211 0.006 237); /* #16191B */
+    --brand: oklch(0.659 0.159 32.7); /* #E2674F */
+    --brand-foreground: oklch(0.18 0.01 235);
+    --success: oklch(0.71 0.11 155);
+    --warning: oklch(0.76 0.12 75);
+    --background: oklch(0.257 0.009 234); /* #1F2427 */
+    --foreground: oklch(0.937 0.004 150);
+    --card: var(--background);
+    --popover: oklch(0.29 0.01 234);
+    --primary: oklch(0.937 0.004 150);
+    --primary-foreground: oklch(0.211 0.006 237);
+    --muted-foreground: oklch(0.712 0.014 229); /* #9AA4A9 */
+    --accent: oklch(0.31 0.01 234);
+    --destructive: oklch(0.704 0.191 22.216);
+    --border: oklch(0.332 0.012 233); /* #30373B */
+    --input: oklch(0.38 0.012 233);
+    --chart-5: oklch(0.45 0.08 33);
+    --sidebar-accent: oklch(0.27 0.009 235);
+  }
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    @apply font-sans;
+    color-scheme: light dark;
+  }
   body {
     @apply bg-background text-foreground;
   }
-  html {
-    @apply font-sans;
+  h1,
+  h2,
+  h3 {
+    @apply font-heading text-balance;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
   }
 }
