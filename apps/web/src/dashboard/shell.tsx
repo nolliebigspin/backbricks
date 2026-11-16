@@ -173,7 +173,9 @@ export function DashboardShell() {
       </main>
     </div>
   );
-  return tenant ? <TenantContext value={tenant}>{frame}</TenantContext> : frame;
+  // Always mounted, null until membership loads: swapping the root element would remount the
+  // whole frame and wipe anything typed meanwhile (e.g. the new-organization form).
+  return <TenantContext value={tenant}>{frame}</TenantContext>;
 }
 
 function CreateOrganization() {

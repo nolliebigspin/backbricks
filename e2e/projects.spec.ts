@@ -40,6 +40,9 @@ test('organization and project isolation, origin settings and mobile navigation'
   await expect(page.getByRole('link', { name: 'First website' })).toHaveCount(0);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole('link', { name: 'Second website' }).click();
+  // Phones reach the sidebar navigation through the menu button (docs/DESIGN.md).
+  await expect(page.getByLabel('Project', { exact: true })).toBeHidden();
+  await page.getByRole('button', { name: 'Menu' }).click();
   await expect(page.getByLabel('Project', { exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Settings', exact: true })).toBeVisible();
   expect(await page.evaluate('document.documentElement.scrollWidth <= window.innerWidth')).toBe(
@@ -63,6 +66,8 @@ test('organization and project isolation, origin settings and mobile navigation'
   });
   await page.getByLabel('Organization', { exact: true }).selectOption(firstOrg);
   await expect.poll(() => captured).toBe(true);
+  // Switching reloads the dashboard, which closes the menu again.
+  await page.getByRole('button', { name: 'Menu' }).click();
   await page.getByLabel('Organization', { exact: true }).selectOption(secondOrg);
   release?.();
   await expect(page.getByRole('link', { name: 'Second website' })).toBeVisible();
