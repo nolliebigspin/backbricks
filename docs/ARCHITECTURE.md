@@ -628,6 +628,8 @@ The [Embed screen](../apps/web/src/dashboard/embed.tsx) submits generated key co
 
 ### E.3 Reusable UI components (`packages/ui`, shadcn-based)
 
+Visual language, tokens and the dashboard frame: [DESIGN.md](DESIGN.md) ([ADR-0075](adr/0075-running-bond-visual-identity.md)). Shared frame pieces: `Logo`, `BrickMarker`, `PageHeader`.
+
 `DataTable` (TanStack Table, server pagination, filter bar, multi-select), `RecordDrawer`, `FieldValue` (renders every field type safely), `StatusBadge`, `EmptyState` (with embed hint and snippet), `ConfirmDialog` (type-to-confirm for bulk deletes), `RetentionPicker` ("6 months" instead of "180 days"), `FieldListEditor` (list with up/down, field-type picker, templates, **no** drag-and-drop designer), `SnippetTabs` (HTML/JS/React/Next/Astro), `StarRating`, `FileThumb`, `UsageMeter`, `KeyRevealDialog`.
 
 ### E.4 Roles and permissions (MVP)
