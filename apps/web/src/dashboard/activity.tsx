@@ -1,4 +1,4 @@
-import { Button } from '@backbricks/ui';
+import { Button, PageHeader } from '@backbricks/ui';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
@@ -59,8 +59,7 @@ function OrganizationActivity() {
   });
   return (
     <section className="space-y-5">
-      <h1 className="text-2xl font-semibold">{t('dashboard.activity')}</h1>
-      <p className="text-sm text-muted-foreground">{t('activity.description')}</p>
+      <PageHeader title={t('dashboard.activity')} description={t('activity.description')} />
       {activity.isPending ? (
         <output>{t('common.loading')}</output>
       ) : activity.isError ? (

@@ -93,7 +93,14 @@
     "activity": "Aktivität",
     "overview": "Übersicht",
     "settings": "Einstellungen",
-    "embed": "Einbinden"
+    "embed": "Einbinden",
+    "menu": "Menü",
+    "closeMenu": "Menü schließen",
+    "account": "Angemeldet als {{email}}",
+    "projectsDescription": "Jedes Projekt ist eine Website mit eigenen Formularen, Dateien und Schlüsseln.",
+    "membersDescription": "Personen, die die Projekte dieser Organisation öffnen können.",
+    "settingsDescription": "Name, Kurzname und die Websites, die Daten senden dürfen.",
+    "embedDescription": "Verbinde deine Website oder deinen Coding-Agenten mit diesem Projekt."
   },
   "projects": {
     "create": "Projekt erstellen",
@@ -442,7 +449,8 @@
       "sdkForm": "Formular",
       "sdkScript": "Skript",
       "serverHint": "Für deinen eigenen Server-Code. Nutze einen geheimen Schlüssel mit der Vorlage „Servereinbindung“ in der Umgebungsvariable {{env}}. Ein geheimer Schlüssel gehört nie in Website-Code."
-    }
+    },
+    "summary": "Nachrichten, die über die Formulare deiner Website kamen."
   },
   "uploads": {
     "title": "Dateien",
@@ -519,6 +527,7 @@
       "sent": "Vielen Dank! Deine Bewerbung wurde gesendet.",
       "canceled": "Upload abgebrochen. Du kannst es erneut versuchen.",
       "failed": "Die Bewerbung konnte nicht gesendet werden. Bitte versuche es erneut."
-    }
+    },
+    "summary": "Hochgeladene Dateien, geprüft und privat gespeichert."
   }
 }

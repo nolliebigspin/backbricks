@@ -15,7 +15,7 @@ import { admin } from '../../auth/client.ts';
 import { instanceConfigIsDestructive } from '../../dashboard/config-plan.ts';
 import { canManage, useTenant } from '../../dashboard/context.tsx';
 import { Feedback, unwrap } from '../../dashboard/feedback.tsx';
-import { useOperationalModules } from '../../dashboard/shell.tsx';
+import { useOperationalModules } from '../../dashboard/operational-modules.ts';
 import { formsError, useFormsScope, type FormInstance } from './api.ts';
 import { FieldEditor } from './field-editor.tsx';
 import {

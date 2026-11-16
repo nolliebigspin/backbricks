@@ -1,4 +1,4 @@
-import { Button, EmptyState, StatusBadge } from '@backbricks/ui';
+import { Button, EmptyState, PageHeader, StatusBadge } from '@backbricks/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
@@ -6,7 +6,7 @@ import { admin } from '../../auth/client.ts';
 import { ChoiceField, Field, formText } from '../../auth/fields.tsx';
 import { canManage, useTenant } from '../../dashboard/context.tsx';
 import { Feedback, unwrap, useAction } from '../../dashboard/feedback.tsx';
-import { useOperationalModules } from '../../dashboard/shell.tsx';
+import { useOperationalModules } from '../../dashboard/operational-modules.ts';
 import { templatesFor } from '../templates.ts';
 import { uploadsError, useUploadsScope, useUploadZones } from './api.ts';
 
@@ -31,10 +31,11 @@ function Zones() {
   const rows = zones.data?.pages.flatMap((page) => page.data) ?? [];
   return (
     <section className="space-y-6">
-      <h1 className="text-2xl font-semibold">{t('uploads.zones')}</h1>
-      <a className="text-sm underline" href={`/projects/${scope.projectId}/files`}>
-        {t('uploads.allFiles')}
-      </a>
+      <PageHeader title={t('uploads.zones')}>
+        <a className="text-sm underline" href={`/projects/${scope.projectId}/files`}>
+          {t('uploads.allFiles')}
+        </a>
+      </PageHeader>
       {zones.isPending ? (
         <output>{t('common.loading')}</output>
       ) : zones.isError ? (

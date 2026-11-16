@@ -1,6 +1,7 @@
+import { Logo } from '@backbricks/ui';
+
 import { footerLinks, site } from '../content/site.ts';
 import { ExternalLink } from './external-link.tsx';
-import { Logo } from './logo.tsx';
 
 type SiteFooterProps = { year: number };
 

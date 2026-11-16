@@ -1,4 +1,4 @@
-import { Button } from '@backbricks/ui';
+import { Button, PageHeader } from '@backbricks/ui';
 import { useTranslation } from 'react-i18next';
 
 import { admin } from '../auth/client.ts';
@@ -14,7 +14,10 @@ export function ProjectList() {
   const projects = useProjects();
   return (
     <section className="space-y-6">
-      <h1 className="text-2xl font-semibold">{t('dashboard.projects')}</h1>
+      <PageHeader
+        title={t('dashboard.projects')}
+        description={t('dashboard.projectsDescription')}
+      />
       {projects.isPending ? (
         <output>{t('common.loading')}</output>
       ) : projects.isError ? (

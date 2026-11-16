@@ -1,4 +1,4 @@
-import { Button, ConfirmDialog, KeyRevealDialog } from '@backbricks/ui';
+import { Button, ConfirmDialog, KeyRevealDialog, PageHeader } from '@backbricks/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -69,7 +69,7 @@ function ManageMembers() {
   }
   return (
     <section className="space-y-7">
-      <h1 className="text-2xl font-semibold">{t('dashboard.members')}</h1>
+      <PageHeader title={t('dashboard.members')} description={t('dashboard.membersDescription')} />
       <Feedback error={action.error} done={action.done} />
       {members.isPending ? (
         <output>{t('common.loading')}</output>

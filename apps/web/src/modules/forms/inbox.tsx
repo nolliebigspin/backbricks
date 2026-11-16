@@ -1,4 +1,4 @@
-import { Button, EmptyState, StatusBadge } from '@backbricks/ui';
+import { Button, EmptyState, PageHeader, StatusBadge } from '@backbricks/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -7,7 +7,7 @@ import { admin } from '../../auth/client.ts';
 import { ChoiceField, Field, formText } from '../../auth/fields.tsx';
 import { canManage, useTenant } from '../../dashboard/context.tsx';
 import { Feedback, unwrap } from '../../dashboard/feedback.tsx';
-import { useOperationalModules } from '../../dashboard/shell.tsx';
+import { useOperationalModules } from '../../dashboard/operational-modules.ts';
 import { templatesFor } from '../templates.ts';
 import { formsError, useFormSummary, useForms, useFormsScope, type FormInstance } from './api.ts';
 
@@ -24,7 +24,7 @@ export function FormsInbox() {
   const rows = forms.data?.pages.flatMap((page) => page.data) ?? [];
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">{t('forms.inbox')}</h1>
+      <PageHeader title={t('forms.inbox')} />
       {forms.isPending ? (
         <output>{t('common.loading')}</output>
       ) : forms.isError ? (

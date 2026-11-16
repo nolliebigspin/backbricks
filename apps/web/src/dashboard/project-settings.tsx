@@ -1,3 +1,4 @@
+import { PageHeader } from '@backbricks/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
@@ -14,7 +15,10 @@ export function ProjectSettings() {
   const client = useQueryClient();
   return (
     <div className="space-y-5">
-      <h1 className="text-2xl font-semibold">{t('dashboard.settings')}</h1>
+      <PageHeader
+        title={t('dashboard.settings')}
+        description={t('dashboard.settingsDescription')}
+      />
       {canManage(role) ? (
         <ProjectForm
           project={project}

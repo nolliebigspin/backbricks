@@ -18,7 +18,7 @@ export const site = {
   description:
     'Open-source backend for websites: forms, file uploads, reviews and more. Built for AI coding agents, managed by site owners in a simple dashboard. Self-hosted or EU cloud.',
   tagline: 'Backend bricks for any website.',
-  status: 'Pre-alpha',
+  status: 'Developer preview',
 } as const;
 
 export const nav = [
@@ -28,8 +28,14 @@ export const nav = [
   { label: 'FAQ', href: '/#faq' },
 ] as const;
 
+/** `available`: released and usable. `roadmap`: scheduled for a pre-1.0 release. */
+export type BrickStatus = 'available' | 'roadmap';
+
 export type Brick = {
   name: string;
+  status: BrickStatus;
+  /** The release that ships (or shipped) the brick, from docs/MILESTONES.md. */
+  release: string;
   forWebsite: string;
   forOwner: string;
 };
@@ -38,17 +44,23 @@ export type Brick = {
 export const bricks: readonly Brick[] = [
   {
     name: 'Forms',
+    status: 'available',
+    release: 'v0.1',
     forWebsite:
       'Headless form API with server-side validation, spam protection and plain-HTML support.',
     forOwner: 'An inbox with search, status, CSV export, notifications and retention rules.',
   },
   {
     name: 'Uploads',
+    status: 'roadmap',
+    release: 'v0.2',
     forWebsite: 'Direct-to-storage uploads with type and size limits and malware scanning.',
     forOwner: 'Browse, download and delete files, and keep an eye on storage usage.',
   },
   {
     name: 'Reviews',
+    status: 'roadmap',
+    release: 'v0.3',
     forWebsite: 'Collect reviews and show the published ones through a public read API.',
     forOwner: 'A moderation queue, publishing controls and rating stats.',
   },
