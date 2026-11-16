@@ -4,8 +4,8 @@
  * contribute no navigation.
  */
 export const dashboardModules = [
-  { type: 'forms', labelKey: 'forms.inbox', resource: 'forms' },
-  { type: 'uploads', labelKey: 'uploads.title', resource: 'files' },
+  { type: 'forms', labelKey: 'forms.inbox', summaryKey: 'forms.summary', resource: 'forms' },
+  { type: 'uploads', labelKey: 'uploads.title', summaryKey: 'uploads.summary', resource: 'files' },
 ] as const;
 
 export type ModuleAvailability = { type: string; resourceName: { plural: string } };
@@ -19,6 +19,7 @@ export function moduleNavigation(projectId: string, operational: readonly Module
           {
             type: entry.type,
             labelKey: entry.labelKey,
+            summaryKey: entry.summaryKey,
             href: `/projects/${encodeURIComponent(projectId)}/${entry.resource}`,
           },
         ]

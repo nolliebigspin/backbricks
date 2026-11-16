@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { AccountFrame } from './account-frame.tsx';
 import { admin, auth } from './client.ts';
 import { Field, formText } from './fields.tsx';
 import { accountError, safeRedirect } from './navigation.ts';
@@ -85,124 +86,126 @@ export function AuthPage({ screen }: { screen: AuthScreen }) {
   const emailForm = ['login', 'signup', 'forgot', 'checkEmail'].includes(screen) || signingUp;
   const passwordForm = ['login', 'signup', 'reset'].includes(screen) || signingUp;
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>
-          <h1>{t(`auth.${screen}.title`)}</h1>
-        </CardTitle>
-        <CardDescription>{t(`auth.${screen}.description`)}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-5">
-          {capabilities.isPending || (screen === 'invitation' && session.isPending) ? (
-            <output>{t('common.loading')}</output>
-          ) : capabilities.isError ? (
-            <p role="alert">{t('auth.errors.generic')}</p>
-          ) : done ? (
-            <output>{t(`auth.${screen}.success`)}</output>
-          ) : unavailable ? (
-            <p role="alert">
-              {t(
-                invalidToken || screen === 'invitation'
-                  ? 'auth.errors.expired'
-                  : 'auth.errors.inviteOnly',
-              )}
-            </p>
-          ) : (
-            <form
-              onSubmit={(event) => {
-                void submit(event);
-              }}
-              className="space-y-4"
+    <AccountFrame>
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <h1 className="text-2xl font-semibold tracking-tight">{t(`auth.${screen}.title`)}</h1>
+          </CardTitle>
+          <CardDescription>{t(`auth.${screen}.description`)}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-5">
+            {capabilities.isPending || (screen === 'invitation' && session.isPending) ? (
+              <output>{t('common.loading')}</output>
+            ) : capabilities.isError ? (
+              <p role="alert">{t('auth.errors.generic')}</p>
+            ) : done ? (
+              <output>{t(`auth.${screen}.success`)}</output>
+            ) : unavailable ? (
+              <p role="alert">
+                {t(
+                  invalidToken || screen === 'invitation'
+                    ? 'auth.errors.expired'
+                    : 'auth.errors.inviteOnly',
+                )}
+              </p>
+            ) : (
+              <form
+                onSubmit={(event) => {
+                  void submit(event);
+                }}
+                className="space-y-4"
+              >
+                {signingUp && (
+                  <Field
+                    name="name"
+                    label={t('auth.name')}
+                    autoComplete="name"
+                    required
+                    maxLength={120}
+                  />
+                )}
+                {emailForm && (
+                  <Field
+                    name="email"
+                    label={t('auth.email')}
+                    type="email"
+                    autoComplete="email"
+                    required
+                  />
+                )}
+                {passwordForm && (
+                  <Field
+                    name="password"
+                    label={t('auth.password')}
+                    type="password"
+                    autoComplete={screen === 'login' ? 'current-password' : 'new-password'}
+                    minLength={capabilities.data?.passwordMinLength}
+                    maxLength={128}
+                    required
+                  />
+                )}
+                {passwordForm && screen !== 'login' && (
+                  <p className="text-sm text-muted-foreground">
+                    {t('auth.passwordHint', { count: capabilities.data?.passwordMinLength })}
+                  </p>
+                )}
+                {screen === 'invitation' && session.data && (
+                  <p>{t('auth.invitation.account', { email: session.data.user.email })}</p>
+                )}
+                {error && <p role="alert">{t(error)}</p>}
+                <Button
+                  type="submit"
+                  disabled={
+                    busy ||
+                    (['forgot', 'checkEmail'].includes(screen) &&
+                      !capabilities.data?.emailAvailable)
+                  }
+                  className="w-full"
+                >
+                  {t(busy ? 'common.working' : `auth.${screen}.submit`)}
+                </Button>
+                {!capabilities.data?.emailAvailable &&
+                  ['forgot', 'checkEmail'].includes(screen) && <p>{t('auth.errors.noEmail')}</p>}
+              </form>
+            )}
+            <nav
+              className="flex flex-wrap gap-x-4 gap-y-2 border-t pt-5 text-sm underline underline-offset-4"
+              aria-label={t('auth.navigation')}
             >
-              {signingUp && (
-                <Field
-                  name="name"
-                  label={t('auth.name')}
-                  autoComplete="name"
-                  required
-                  maxLength={120}
-                />
+              {screen !== 'login' && (
+                <a
+                  href={
+                    invitationId
+                      ? `/login?redirect=${encodeURIComponent(`/accept-invitation?invitationId=${invitationId}`)}`
+                      : '/login'
+                  }
+                >
+                  {t('auth.login.title')}
+                </a>
               )}
-              {emailForm && (
-                <Field
-                  name="email"
-                  label={t('auth.email')}
-                  type="email"
-                  autoComplete="email"
-                  required
-                />
+              {screen === 'login' && (
+                <>
+                  <a href="/forgot-password">{t('auth.forgot.title')}</a>
+                  <a href="/check-email">{t('auth.checkEmail.title')}</a>
+                </>
               )}
-              {passwordForm && (
-                <Field
-                  name="password"
-                  label={t('auth.password')}
-                  type="password"
-                  autoComplete={screen === 'login' ? 'current-password' : 'new-password'}
-                  minLength={capabilities.data?.passwordMinLength}
-                  maxLength={128}
-                  required
-                />
+              {screen !== 'signup' && canSignup && (
+                <a
+                  href={
+                    invitationId
+                      ? `/signup?invitationId=${encodeURIComponent(invitationId)}`
+                      : '/signup'
+                  }
+                >
+                  {t('auth.signup.title')}
+                </a>
               )}
-              {passwordForm && screen !== 'login' && (
-                <p className="text-sm text-muted-foreground">
-                  {t('auth.passwordHint', { count: capabilities.data?.passwordMinLength })}
-                </p>
-              )}
-              {screen === 'invitation' && session.data && (
-                <p>{t('auth.invitation.account', { email: session.data.user.email })}</p>
-              )}
-              {error && <p role="alert">{t(error)}</p>}
-              <Button
-                type="submit"
-                disabled={
-                  busy ||
-                  (['forgot', 'checkEmail'].includes(screen) && !capabilities.data?.emailAvailable)
-                }
-                className="w-full"
-              >
-                {t(busy ? 'common.working' : `auth.${screen}.submit`)}
-              </Button>
-              {!capabilities.data?.emailAvailable && ['forgot', 'checkEmail'].includes(screen) && (
-                <p>{t('auth.errors.noEmail')}</p>
-              )}
-            </form>
-          )}
-          <nav
-            className="flex flex-wrap gap-x-4 gap-y-2 text-sm underline"
-            aria-label={t('auth.navigation')}
-          >
-            {screen !== 'login' && (
-              <a
-                href={
-                  invitationId
-                    ? `/login?redirect=${encodeURIComponent(`/accept-invitation?invitationId=${invitationId}`)}`
-                    : '/login'
-                }
-              >
-                {t('auth.login.title')}
-              </a>
-            )}
-            {screen === 'login' && (
-              <>
-                <a href="/forgot-password">{t('auth.forgot.title')}</a>
-                <a href="/check-email">{t('auth.checkEmail.title')}</a>
-              </>
-            )}
-            {screen !== 'signup' && canSignup && (
-              <a
-                href={
-                  invitationId
-                    ? `/signup?invitationId=${encodeURIComponent(invitationId)}`
-                    : '/signup'
-                }
-              >
-                {t('auth.signup.title')}
-              </a>
-            )}
-          </nav>
-        </div>
-      </CardContent>
-    </Card>
+            </nav>
+          </div>
+        </CardContent>
+      </Card>
+    </AccountFrame>
   );
 }

@@ -1,4 +1,11 @@
-import { Button, ConfirmDialog, DataTable, EmptyState, type DataTableColumn } from '@backbricks/ui';
+import {
+  Button,
+  ConfirmDialog,
+  DataTable,
+  EmptyState,
+  PageHeader,
+  type DataTableColumn,
+} from '@backbricks/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -7,7 +14,7 @@ import { admin } from '../../auth/client.ts';
 import { canManage, useTenant } from '../../dashboard/context.tsx';
 import { dateFilter } from '../../dashboard/date-filter.ts';
 import { Feedback, unwrap, useAction } from '../../dashboard/feedback.tsx';
-import { useOperationalModules } from '../../dashboard/shell.tsx';
+import { useOperationalModules } from '../../dashboard/operational-modules.ts';
 import { isProcessingFile, uploadsError, useUploadsScope, type FileItem } from './api.ts';
 import { FileSize, FileStatus } from './file-access.tsx';
 import { FileDrawer } from './file-drawer.tsx';
@@ -22,10 +29,9 @@ export function FilesPage() {
     return <p>{t('uploads.unavailable')}</p>;
   return (
     <section className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">{t('uploads.title')}</h1>
+      <PageHeader title={t('uploads.title')}>
         <ZonesLink />
-      </div>
+      </PageHeader>
       <FilesView />
     </section>
   );

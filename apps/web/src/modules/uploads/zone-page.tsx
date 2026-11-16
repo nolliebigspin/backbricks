@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { admin } from '../../auth/client.ts';
 import { Feedback, unwrap } from '../../dashboard/feedback.tsx';
-import { useOperationalModules } from '../../dashboard/shell.tsx';
+import { useOperationalModules } from '../../dashboard/operational-modules.ts';
 import { uploadsError, useUploadsScope } from './api.ts';
 import { FilesView } from './files.tsx';
 import { ZoneEmbed } from './zone-embed.tsx';

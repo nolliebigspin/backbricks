@@ -1,4 +1,4 @@
-import { Button, ConfirmDialog, KeyRevealDialog } from '@backbricks/ui';
+import { Button, ConfirmDialog, KeyRevealDialog, PageHeader } from '@backbricks/ui';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -19,7 +19,7 @@ export function EmbedPage() {
   const integration = useIntegration();
   return (
     <div className="space-y-7">
-      <h1 className="text-2xl font-semibold">{t('dashboard.embed')}</h1>
+      <PageHeader title={t('dashboard.embed')} description={t('dashboard.embedDescription')} />
       <p>{t('keys.guidance')}</p>
       <p>
         {project.allowedOrigins.length

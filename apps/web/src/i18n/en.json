@@ -93,7 +93,14 @@
     "activity": "Activity",
     "overview": "Overview",
     "settings": "Settings",
-    "embed": "Embed"
+    "embed": "Embed",
+    "menu": "Menu",
+    "closeMenu": "Close menu",
+    "account": "Signed in as {{email}}",
+    "projectsDescription": "Each project is one website, with its own forms, files and keys.",
+    "membersDescription": "People who can open this organization’s projects.",
+    "settingsDescription": "Name, short name and the websites allowed to send data.",
+    "embedDescription": "Connect your website or coding agent to this project."
   },
   "projects": {
     "create": "Create project",
@@ -442,7 +449,8 @@
       "sdkForm": "Form",
       "sdkScript": "Script",
       "serverHint": "For your own server code. Use a secret key with the \"Server integration\" preset in the {{env}} environment variable. Never put a secret key in website code."
-    }
+    },
+    "summary": "Messages people sent through your website’s forms."
   },
   "uploads": {
     "title": "Files",
@@ -519,6 +527,7 @@
       "sent": "Thank you! Your application was sent.",
       "canceled": "Upload canceled. You can try again.",
       "failed": "The application could not be sent. Please try again."
-    }
+    },
+    "summary": "Files people uploaded, scanned and stored privately."
   }
 }

@@ -134,5 +134,12 @@ test('the Inbox appears only when forms is operational', () => {
   expect(moduleNavigation('prj_test', [])).toEqual([]);
   expect(
     moduleNavigation('prj_test', [{ type: 'forms', resourceName: { plural: 'forms' } }]),
-  ).toEqual([{ type: 'forms', labelKey: 'forms.inbox', href: '/projects/prj_test/forms' }]);
+  ).toEqual([
+    {
+      type: 'forms',
+      labelKey: 'forms.inbox',
+      summaryKey: 'forms.summary',
+      href: '/projects/prj_test/forms',
+    },
+  ]);
 });
