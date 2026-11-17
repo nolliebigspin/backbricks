@@ -3,20 +3,26 @@ import '../styles/global.css';
 
 import { SiteFooter } from '../components/site-footer.tsx';
 import { SiteHeader } from '../components/site-header.tsx';
-import { site } from '../content/site.ts';
+import { ogImage, site } from '../content/site.ts';
+import { type JsonLdNode, siteNodes, toJsonLd } from '../lib/structured-data.ts';
 
 type Props = {
   title?: string;
   description?: string;
   /** Keep a page out of search results (e.g. the 404 page). */
   noindex?: boolean;
+  /** Page-specific schema.org nodes, added to the site-wide ones. */
+  structuredData?: JsonLdNode[];
 };
 
-const { title, description = site.description, noindex = false } = Astro.props;
+const { title, description = site.description, noindex = false, structuredData = [] } = Astro.props;
 const pageTitle = title ? `${title} · ${site.name}` : site.title;
 // Built pages are files (`build.format: 'file'`); public URLs are clean (`/privacy`, not `/privacy.html`).
 const canonical = new URL(Astro.url.pathname.replace(/(index)?\.html$/, ''), Astro.site);
-const ogImage = new URL('/og.png', Astro.site);
+const ogImageUrl = new URL(ogImage.path, Astro.site);
+// Allow large image previews and full-length snippets (search and AI overviews quote from them).
+const robots = noindex ? 'noindex' : 'index, follow, max-image-preview:large, max-snippet:-1';
+const jsonLd = noindex ? null : toJsonLd([...siteNodes(), ...structuredData]);
 ---
 
 <!doctype html>
@@ -27,16 +33,24 @@ const ogImage = new URL('/og.png', Astro.site);
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    <meta name="robots" content={robots} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="sitemap" href="/sitemap-index.xml" />
-    {noindex && <meta name="robots" content="noindex" />}
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content={site.locale} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={ogImage} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content={String(ogImage.width)} />
+    <meta property="og:image:height" content={String(ogImage.height)} />
+    <meta property="og:image:alt" content={ogImage.alt} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image:alt" content={ogImage.alt} />
+    {jsonLd && <script type="application/ld+json" is:inline set:html={jsonLd} />}
   </head>
   <body class="min-h-dvh antialiased">
     <SiteHeader />

@@ -11,11 +11,12 @@ import { SafeDefaults } from '../components/safe-defaults.tsx';
 import { Section } from '../components/section.tsx';
 import { integrationSamples } from '../content/snippets.ts';
 import BaseLayout from '../layouts/base-layout.astro';
+import { landingNodes } from '../lib/structured-data.ts';
 
 const tabs = integrationSamples.map(({ id, label }) => ({ id, label }));
 ---
 
-<BaseLayout>
+<BaseLayout structuredData={landingNodes()}>
   <Hero />
   <Bricks />
   <HowItWorks />
@@ -33,9 +34,9 @@ const tabs = integrationSamples.map(({ id, label }) => ({ id, label }));
   </Section>
   <SafeDefaults />
   <OpenSource />
-  <Section id="faq" title="Questions">
+  <Section id="faq" title="Frequently asked questions">
     <div class="max-w-3xl">
-      <Faq client:visible />
+      <Faq />
     </div>
   </Section>
 </BaseLayout>

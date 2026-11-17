@@ -26,15 +26,14 @@ export default defineConfig({
         "base-uri 'self'",
         "form-action 'self'",
       ],
-      // Radix renders a few style attributes on the server (accordion height variables, tab
-      // animation reset). Allow exactly those values instead of 'unsafe-inline'. If a Radix
-      // update changes them, the browser console prints the new hash to put here.
+      // Radix Tabs renders two style attributes on the server. Allow exactly those values
+      // instead of 'unsafe-inline'. If a Radix update changes them, the browser console prints
+      // the new hash to put here.
       styleDirective: {
         resources: ["'self'", "'unsafe-hashes'"],
         hashes: [
-          'sha256-MtxTLcyxVEJFNLEIqbVTaqR4WWr0+lYSZ78AzGmNsuA=',
-          'sha256-PhrR5O1xWiklTp5YfH8xWeig83Y/rhbrdb5whLn1pSg=',
-          'sha256-8ilcya6PJ2mDcuNFfcZaaOL85o/T7b8cPlsalzaJVOs=',
+          'sha256-MtxTLcyxVEJFNLEIqbVTaqR4WWr0+lYSZ78AzGmNsuA=', // outline:none
+          'sha256-PhrR5O1xWiklTp5YfH8xWeig83Y/rhbrdb5whLn1pSg=', // animation-duration:0s
         ],
       },
     },
