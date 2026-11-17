@@ -1,6 +1,6 @@
 import { cn } from '@backbricks/ui';
 
-import { bricks } from '../content/site.ts';
+import { brickStatusLabel, bricks } from '../content/site.ts';
 import { Section } from './section.tsx';
 
 /** One row per brick, like a spec sheet: the same two questions answered for each. */
@@ -32,11 +32,7 @@ export function Bricks() {
               />
               <div>
                 <h3 className="text-2xl font-semibold tracking-tight">{brick.name}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {brick.status === 'available'
-                    ? `Available in ${brick.release}`
-                    : `Coming in ${brick.release}`}
-                </p>
+                <p className="mt-1 text-sm text-muted-foreground">{brickStatusLabel(brick)}</p>
               </div>
             </div>
             <p className="text-pretty md:col-span-4 md:col-start-5">

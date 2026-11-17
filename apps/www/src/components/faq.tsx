@@ -1,44 +1,25 @@
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@backbricks/ui';
+import { ChevronDownIcon } from 'lucide-react';
 
-const questions = [
-  {
-    q: 'Can I use Backbricks today?',
-    a: 'As a developer preview. Forms shipped in v0.1; uploads and reviews follow before 1.0, and APIs may still change until then. Star or watch the GitHub repository to follow along.',
-  },
-  {
-    q: 'Do I need an AI coding agent?',
-    a: 'No. The REST API, TypeScript SDK and CLI work just as well by hand. Agents get first-class support on top: an MCP server, config-as-code and an integration guide written for them.',
-  },
-  {
-    q: 'Which frameworks does it work with?',
-    a: 'Any. Plain HTML forms work without JavaScript, and the SDK runs in browsers, Node, Bun and Deno. Next.js, Astro, Vue, SvelteKit or a static site all integrate the same way.',
-  },
-  {
-    q: 'Will it change how my website looks?',
-    a: 'No. Backbricks is headless and ships no widgets, iframes or CSS. Your website keeps its own design.',
-  },
-  {
-    q: 'What does it cost?',
-    a: 'Self-hosting is free and complete, with no feature lock. Pricing for the managed EU cloud will be announced closer to its launch after 1.0.',
-  },
-  {
-    q: 'Why AGPL?',
-    a: 'It keeps Backbricks open: anyone who offers a modified version as a service has to share their changes. Your website is not affected, because the SDK and CLI you integrate are MIT-licensed.',
-  },
-] as const;
+import { faq } from '../content/site.ts';
 
-/** Island: FAQ accordion on the landing page. */
+/**
+ * FAQ as native `<details>` elements instead of the Radix accordion: Radix renders closed answers
+ * as nothing, so search and answer engines never saw them. `<details>` keeps every answer in the
+ * static HTML, works without JavaScript and finds answers with the browser's in-page search.
+ * The shared `name` lets only one answer open at a time, like the accordion did.
+ */
 export function Faq() {
   return (
-    <Accordion type="single" collapsible>
-      {questions.map((item) => (
-        <AccordionItem key={item.q} value={item.q}>
-          <AccordionTrigger>{item.q}</AccordionTrigger>
-          <AccordionContent>
-            <p className="text-muted-foreground">{item.a}</p>
-          </AccordionContent>
-        </AccordionItem>
+    <div className="flex w-full flex-col">
+      {faq.map((item) => (
+        <details key={item.question} name="faq" className="group not-last:border-b">
+          <summary className="flex cursor-pointer list-none items-start justify-between gap-4 rounded-lg py-2.5 hover:underline [&::-webkit-details-marker]:hidden">
+            <h3 className="font-sans text-sm font-medium">{item.question}</h3>
+            <ChevronDownIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
+          </summary>
+          <p className="pb-2.5 text-sm text-pretty text-muted-foreground">{item.answer}</p>
+        </details>
       ))}
-    </Accordion>
+    </div>
   );
 }

@@ -8,7 +8,8 @@
     "dev": "bun --bun astro dev",
     "build": "bun --bun astro build",
     "preview": "bun --bun astro preview",
-    "typecheck": "bun --bun astro sync && tsc -p tsconfig.json"
+    "typecheck": "bun --bun astro sync && tsc -p tsconfig.json",
+    "test": "bun test"
   },
   "dependencies": {
     "@astrojs/prism": "4.1.2",
