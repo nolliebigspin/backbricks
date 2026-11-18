@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@backbricks/core": "workspace:*",
-    "@tokenizer/inflate": "0.6.0",
+    "@tokenizer/inflate": "0.6.1",
     "file-type": "22.3.0",
     "saxes": "6.0.0",
     "strtok3": "10.8.0",
