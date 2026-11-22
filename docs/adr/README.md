@@ -85,3 +85,5 @@ Short documents that record significant decisions: deviations from or refinement
 | [0073](0073-subject-export-bounds-and-settlement.md) | Complete subject exports and identity-free erasure settlement | accepted during execution; end review deferred |
 | [0074](0074-erasure-worker-serialization.md) | Erasure purges active payloads and fences waiting workers | accepted during execution; end review deferred |
 | [0075](0075-running-bond-visual-identity.md) | "Running bond" visual identity and dashboard frame | proposed |
+| [0076](0076-typed-page-cursors.md) | Typed page cursors | accepted (P4, Q21) |
+| [0077](0077-conditional-public-review-reads.md) | Conditional public review reads | accepted (P4, Q22) |

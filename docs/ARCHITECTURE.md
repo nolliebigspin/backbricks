@@ -161,7 +161,7 @@ Hierarchy: **Organization → Project (= website) → Module instance (form `con
 
 ### B.3 PostgreSQL schema (first version)
 
-> **Code is authoritative for implemented tables.** Uploads and reviews SQL remains a spec until P3/P4 replaces it with schema links.
+> **Code is authoritative for implemented tables.** Module tables link to their Drizzle schema.
 
 Better Auth tables (`user`, `session`, `account`, `verification`, `organization`, `member`, `invitation`) are implemented in the [generated auth schema](../packages/db/src/schema/auth.generated.ts) and the [central migration history](../packages/db/migrations/). Regenerate with `bun run auth:generate`, then `bun run db:generate` and review the resulting SQL. The [schema-only config](../packages/auth/auth.config.ts) has no database connection or import of its own generated output (ADR-0021). All tables specified below belong to the platform.
 
@@ -175,40 +175,9 @@ Implemented core tables are defined in code (ADR-0023), with no parallel SQL spe
 - [Upload files](../packages/db/src/schema/files.ts) (`files`; shared states/size bounds in [core](../packages/core/src/storage/files.ts), durable cleanup lifecycle in ADR-0064)
 - [Custom audit/membership/UNLOGGED constraints](../packages/db/migrations/20261106024528_audit_immutability/migration.sql)
 
-Live child references include organization/project/instance identity; audit IDs are historical references retained without cascading FKs. Files additionally bind the parent module type, so a form cannot be used as a zone. Both deterministic opaque object keys are retained from intent through cleanup; their presence in a row is not evidence that an object exists. A durable deletion marker revokes access while cleanup finishes (ADR-0064). Platform timestamps are supplied through the injected clock. Expiry/lifecycle rules follow ADR-0022. The SQL below specifies only the unimplemented domain tables.
+Live child references include organization/project/instance identity; audit IDs are historical references retained without cascading FKs. Files additionally bind the parent module type, so a form cannot be used as a zone. Both deterministic opaque object keys are retained from intent through cleanup; their presence in a row is not evidence that an object exists. A durable deletion marker revokes access while cleanup finishes (ADR-0064). Platform timestamps are supplied through the injected clock. Expiry/lifecycle rules follow ADR-0022.
 
-```sql
--- =========================================================
--- Module: reviews
--- =========================================================
-CREATE TABLE reviews (
-  id                 text PRIMARY KEY,                     -- rev_…
-  organization_id    text NOT NULL,
-  project_id         text NOT NULL,
-  instance_id        text NOT NULL REFERENCES module_instances(id) ON DELETE CASCADE, -- collection
-  rating             smallint NOT NULL CHECK (rating BETWEEN 1 AND 10),
-  title              text,
-  body               text,
-  author_name        text NOT NULL,
-  author_email       text,                                 -- never public
-  public_fields      jsonb NOT NULL DEFAULT '{}',          -- e.g. company, role (public per config)
-  private_fields     jsonb NOT NULL DEFAULT '{}',
-  moderation_status  text NOT NULL DEFAULT 'pending' CHECK (moderation_status IN ('pending','approved','rejected')),
-  published_at       timestamptz,
-  moderated_by       text,
-  moderated_at       timestamptz,
-  spam_verdict       text NOT NULL DEFAULT 'ok' CHECK (spam_verdict IN ('ok','suspect','spam')),
-  is_test            boolean NOT NULL DEFAULT false,
-  source             jsonb NOT NULL DEFAULT '{}',
-  created_at         timestamptz NOT NULL DEFAULT now(),
-  updated_at         timestamptz NOT NULL DEFAULT now(),
-  expires_at         timestamptz,
-  CHECK (published_at IS NULL OR moderation_status = 'approved')
-);
-CREATE INDEX reviews_public_idx ON reviews (instance_id, published_at DESC)
-  WHERE moderation_status = 'approved' AND published_at IS NOT NULL AND is_test = false;
-CREATE INDEX reviews_queue_idx  ON reviews (instance_id, moderation_status, created_at DESC);
-```
+Reviews use the [review table schema](../packages/db/src/schema/reviews.ts), including tenant-bound collection identity, publication constraints and indexes for public reads, moderation and expiry.
 
 
 

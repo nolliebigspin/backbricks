@@ -1,10 +1,14 @@
-import { expiresAfterDays, earliestExpiry, type JsonValue } from '@backbricks/core';
+import {
+  expiresAfterDays,
+  earliestExpiry,
+  SPAM_RETENTION_DAYS,
+  type JsonValue,
+} from '@backbricks/core';
 
 import type { FormsConfig } from './config.ts';
 import type { SpamStatus } from './repository.ts';
 
-/** Spam is auto-deleted after 30 days, even with unlimited retention (§F.4). */
-export const SPAM_RETENTION_DAYS = 30;
+export { SPAM_RETENTION_DAYS };
 
 /** Expiry of an entry received at `createdAt`: retention, capped for spam. */
 export function entryExpiry(

@@ -73,6 +73,8 @@ flowchart LR
 
 ### M4 · Reviews → `v0.3.0`
 - **Phase:** P4 · **Effort:** 5–7 PD
+- **Planning:** [Module proposal](modules/reviews.md) and [detailed tasks](../PLAN.md#phase-p4--reviews-m4--v030--approved-2026-11-22) approved 2026-11-22 (Q21–Q23). The estimate is 66 h plus a 12 h reserve.
+- **Implementation:** Locally verified on 2026-11-22. The formal phase review and preview release remain pending. [P4 acceptance report](progress/phase-4.md).
 - **Goal:** Collect, moderate and publish reviews; the first module that serves data publicly.
 - **Scope:** collection config, submit, public list + stats with caching, moderation API, dashboard moderation queue, SDK methods.
 - **Exit criteria:**

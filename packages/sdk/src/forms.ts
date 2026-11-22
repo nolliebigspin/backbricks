@@ -1,19 +1,12 @@
 import type { operations } from '@backbricks/api-contract';
 
-import { unexpectedResponse } from './errors.ts';
-import { publicProof } from './proof.ts';
+import { submitPublicData, type SubmitOptions } from './public-submit.ts';
 import type { Transport } from './transport.ts';
 
 /** `{ id }` for a stored entry; `{ accepted: true }` when the server dropped it as spam. */
 export type SubmitResult =
   operations['forms.public.submit']['responses'][200]['content']['application/json'];
-export type SubmitOptions = {
-  /** Retries with the same key return the first result instead of storing the entry twice. */
-  idempotencyKey?: string;
-  /** Value of your hidden honeypot input, if you render one; bots fill it, people don't. */
-  honeypot?: string;
-  signal?: AbortSignal;
-};
+export type { SubmitOptions } from './public-submit.ts';
 
 /** Generated form types (`backbricks codegen`) when present, otherwise any field values. */
 export type FormValues<Schema, Key extends string> = `forms/${Key}` extends keyof Schema
@@ -27,32 +20,14 @@ export type FormsClient<Schema> = {
   ): Promise<SubmitResult>;
 };
 
-function isSubmitResult(value: unknown): value is SubmitResult {
-  if (typeof value !== 'object' || value === null) return false;
-  return 'id' in value
-    ? typeof value.id === 'string'
-    : 'accepted' in value && value.accepted === true;
-}
-
 export function createForms<Schema>(transport: Transport): FormsClient<Schema> {
   return {
-    async submit(key, data, options = {}) {
-      const { signal } = options;
-      const proof = await publicProof(transport, signal);
-      const result = await transport.request(
+    submit: (key, data, options) =>
+      submitPublicData(
+        transport,
         `/public/forms/${encodeURIComponent(key)}/submissions`,
-        {
-          method: 'POST',
-          body: { data, proof, honeypot: options.honeypot },
-          headers:
-            options.idempotencyKey === undefined
-              ? {}
-              : { 'Idempotency-Key': options.idempotencyKey },
-        },
-        signal,
-      );
-      if (!isSubmitResult(result)) throw unexpectedResponse();
-      return result;
-    },
+        data,
+        options,
+      ),
   };
 }

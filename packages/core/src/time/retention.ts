@@ -1,6 +1,8 @@
 import { z } from 'zod';
 
 /** Domain-record retention; audit and transient security records have their own fixed lifecycles. */
+/** Shared cap for personal records identified as spam (ARCHITECTURE §F.4). */
+export const SPAM_RETENTION_DAYS = 30;
 export const MODULE_RETENTION_DAYS = { min: 7, max: 3650, default: 180 } as const;
 /** Omission selects the default; only an explicit null opts out of record expiry. */
 export const retentionDaysSchema = z

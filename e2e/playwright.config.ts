@@ -34,7 +34,7 @@ export default defineConfig({
       PORT: String(port),
       DATABASE_URL: databaseUrl,
       APP_SECRET: 'e2e-secret-e2e-secret-e2e-secret-000000',
-      BACKBRICKS_MODULES: 'forms,uploads',
+      BACKBRICKS_MODULES: 'forms,uploads,reviews',
       SCANNER: scanner,
       CLAMAV_HOST: clamavTestConfig.host,
       CLAMAV_PORT: String(clamavTestConfig.port),

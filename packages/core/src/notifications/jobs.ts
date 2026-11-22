@@ -8,6 +8,7 @@ import { PLATFORM_JOBS } from '../jobs/platform-names.ts';
 import type { ModuleRegistry } from '../modules/registry.ts';
 import { activityIdentifierSchema } from '../platform/activity-fields.ts';
 import type { Queue } from '../services/providers.ts';
+import { notificationEvents } from './events.ts';
 
 /** Shared structural outbox envelope plus the opaque continuation position for bounded rule pages. */
 export const notificationDispatchPayloadSchema = outboxJobPayloadSchema.extend({
@@ -54,9 +55,7 @@ export function createNotificationDispatchHandler(
   queue?: Queue,
 ): QueueJobHandler {
   const eventModules = new Map(
-    registry.modules.flatMap((module) =>
-      module.events.map((event) => [event.name, module.type] as const),
-    ),
+    notificationEvents(registry).map(({ event, module }) => [event.name, module.type] as const),
   );
   return {
     name: PLATFORM_JOBS.notificationDispatch,

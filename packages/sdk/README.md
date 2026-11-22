@@ -52,3 +52,22 @@ Native browsers report byte progress through XMLHttpRequest. Node, Bun and a cus
 Keep `fileRef` in memory until claiming it with a form. It is a temporary bearer credential: never put it in URLs, logs or persistent browser storage. Form entries store file IDs. Downloads use the audited management endpoint; files remain private.
 
 Real-service/browser acceptance: `CI=true bun run test:sdk-browser` (Postgres, Garage, Mailpit and Chromium). It uses the last configured Garage loopback CORS origin for a temporary site, proves native progress and aborts a throttled PUT. Normal quality checks exercise real Bun and Node upload/claim flows; selecting Node 20 on PATH repeats the same runtime test at the supported minimum.
+
+## Reviews
+
+```ts
+await backbricks.reviews.submit('testimonials', {
+  rating: 5,
+  authorName: 'Ada Lovelace',
+  title: 'Helpful service',
+  email: 'ada@example.com',
+}, { idempotencyKey: 'review-order-123' });
+
+const { data, nextCursor } = await backbricks.reviews.list('testimonials', {
+  sort: 'rating_desc',
+  limit: 10,
+});
+const { count, average, distribution } = await backbricks.reviews.stats('testimonials');
+```
+
+Browser submissions use the same proof of work as Forms. Use a secret key with `reviews:submit` for server-side submissions. An administrator approves and publishes the review in separate steps. The public methods return published reviews and aggregate ratings. Pass `nextCursor` to `reviews.list` with the same sort to read the next page.

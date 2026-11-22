@@ -15,6 +15,7 @@ import { notificationIsolationCases } from '../test/isolation/notification-cases
 import { platformReadIsolationCases } from '../test/isolation/platform-read-cases.ts';
 import { privacyIsolationCases } from '../test/isolation/privacy-cases.ts';
 import { projectIsolationCases } from '../test/isolation/project-cases.ts';
+import { reviewsIsolationCases } from '../test/isolation/reviews-cases.ts';
 import { prepareIsolationFixture } from '../test/isolation/setup.ts';
 import {
   assertIsolationCoverage,
@@ -186,4 +187,44 @@ test.skipIf(!available)(
     );
   },
   20_000,
+);
+
+test.skipIf(!available)(
+  'every Reviews management and collection route isolates sessions and secret keys',
+  async () => {
+    await scenario(
+      async (base) => {
+        const f = await prepareIsolationFixture(base);
+        const operations = managementOperations(base.manifest()).filter(({ isolationCase }) =>
+          isolationCase.startsWith('reviews.'),
+        );
+        const cases = {
+          ...(await instanceIsolationCases(f, { type: 'reviews', plural: 'review-collections' })),
+          ...(await reviewsIsolationCases(f)),
+        };
+        expect(operations).toHaveLength(15);
+        assertIsolationCoverage(operations, cases);
+        const keys = createKeyProbes(f);
+        const snapshot = async () => ({
+          platform: await f.snapshot(),
+          reviews: (
+            await f.db.execute<Record<string, unknown>>(
+              'select id, moderation_status, published_at from reviews order by id',
+            )
+          ).rows,
+        });
+        for (const operation of operations) {
+          const entry = cases[operation.isolationCase];
+          if (!entry) throw new Error('Expected covered Reviews operation.');
+          if (operation.secretKeyScope)
+            // oxlint-disable-next-line no-await-in-loop -- Each operation asserts its own project snapshot.
+            await exerciseKeyIsolation(base, entry, snapshot, operation, keys);
+          // oxlint-disable-next-line no-await-in-loop -- Collection archive follows instance updates.
+          await exerciseIsolation(base, entry, snapshot, operation);
+        }
+      },
+      { BACKBRICKS_MODULES: 'reviews' },
+    );
+  },
+  45_000,
 );

@@ -3,6 +3,7 @@ import type { TenantContext } from '@backbricks/core';
 import type { DbTransaction } from '../client.ts';
 import { createUploadsRepository } from './files.ts';
 import { createFormsRepository } from './forms.ts';
+import { createReviewsRepository } from './reviews.ts';
 import { createRepositoryScope, type RepositoryScope } from './scope.ts';
 
 /** A module table's repository factory: db owns the table, the module owns the interface (ADR-0055). */
@@ -15,6 +16,7 @@ export type ModuleRepositoryFactory<R> = (tx: DbTransaction, scope: RepositorySc
 export const moduleRepositoryFactories = Object.freeze({
   forms: createFormsRepository,
   uploads: createUploadsRepository,
+  reviews: createReviewsRepository,
 });
 export type ModuleRepositoryFactories = typeof moduleRepositoryFactories;
 

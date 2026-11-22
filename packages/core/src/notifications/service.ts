@@ -8,6 +8,7 @@ import { CORE_EVENTS } from '../services/event-types.ts';
 import type { RepositoryPage } from '../tenancy/repositories.ts';
 import type { TenantTransaction } from '../tenancy/tenant-context.ts';
 import type { Clock } from '../time/clock.ts';
+import { notificationEvents } from './events.ts';
 import {
   notificationRuleCreateSchema,
   notificationRulePatchSchema,
@@ -25,12 +26,9 @@ export function createNotificationRuleService(deps: {
   events: EventService;
   emailAvailable: boolean;
 }) {
-  const events = deps.registry.modules.flatMap((module) => module.events);
-  const eventModules = new Map(
-    deps.registry.modules.flatMap((module) =>
-      module.events.map((event) => [event.name, module] as const),
-    ),
-  );
+  const subscriptions = notificationEvents(deps.registry);
+  const events = subscriptions.map(({ event }) => event);
+  const eventModules = new Map(subscriptions.map(({ event, module }) => [event.name, module]));
   async function validate(
     tx: TenantTransaction,
     input: Pick<NotificationRule, 'instanceId' | 'eventType' | 'recipientUserIds' | 'enabled'>,
@@ -38,7 +36,7 @@ export function createNotificationRuleService(deps: {
     const module = eventModules.get(input.eventType);
     if (!module)
       throw new AppError('validation_failed', {
-        detail: 'Choose an event from an enabled module.',
+        detail: 'Choose an event that supports email notifications.',
       });
     if (input.enabled && input.recipientUserIds.length === 0)
       throw new AppError('validation_failed', { detail: 'Choose at least one verified member.' });

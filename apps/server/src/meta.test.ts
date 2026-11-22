@@ -3,11 +3,11 @@ import { expect, test } from 'bun:test';
 import {
   createIds,
   defineModuleCatalog,
+  defineModuleDescriptor,
   platformMetaSchema,
   systemClock,
   authCapabilities,
 } from '@backbricks/core';
-import { reviewsDescriptor } from '@backbricks/module-reviews';
 
 import { createApp } from './app.ts';
 import { createLogger } from './logger.ts';
@@ -29,7 +29,14 @@ function application(modules = moduleCatalog.select(['forms'])) {
 }
 
 test('public metadata names selected descriptors without claiming operational domain APIs', async () => {
-  const modules = defineModuleCatalog([reviewsDescriptor]).select(['reviews']);
+  const modules = defineModuleCatalog([
+    defineModuleDescriptor({
+      type: 'reviews',
+      displayName: { en: 'Reviews', de: 'Bewertungen' },
+      resourceName: { singular: 'review-collection', plural: 'review-collections' },
+      infrastructure: [],
+    }),
+  ]).select(['reviews']);
   const app = application(modules);
   const response = await app.request('/v1/meta');
   expect(response.status).toBe(200);

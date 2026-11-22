@@ -19,6 +19,7 @@ const storage = Object.fromEntries(
 );
 const selections = [
   { name: 'forms-only', modules: 'forms', scanner: 'none' },
+  { name: 'reviews-only', modules: 'reviews', scanner: 'none' },
   { name: 'uploads-unscanned', modules: 'uploads', scanner: 'none' },
   { name: 'forms-uploads-scanned', modules: 'forms,uploads', scanner: 'clamav' },
 ];

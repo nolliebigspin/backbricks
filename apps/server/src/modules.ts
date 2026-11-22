@@ -1,10 +1,10 @@
 import { defineModuleCatalog } from '@backbricks/core';
 import { createFormsModule } from '@backbricks/module-forms';
-import { reviewsDescriptor } from '@backbricks/module-reviews';
+import { reviewsModule } from '@backbricks/module-reviews';
 import { uploadsModule } from '@backbricks/module-uploads';
 
 function catalog(files: boolean) {
-  return defineModuleCatalog([uploadsModule, createFormsModule({ files }), reviewsDescriptor]);
+  return defineModuleCatalog([uploadsModule, createFormsModule({ files }), reviewsModule]);
 }
 const base = catalog(false);
 const withFiles = catalog(true);

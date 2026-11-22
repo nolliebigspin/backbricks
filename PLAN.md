@@ -1,7 +1,7 @@
 # PLAN – Backbricks
 
 > The only task list. Milestones, scope and exit criteria: [`docs/MILESTONES.md`](docs/MILESTONES.md). Decisions for the maintainer: [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md). Key decisions: [`docs/adr/`](docs/adr/). How phases are planned and executed: `AGENTS.md` §9.
-> **State:** P0 done (report: [`docs/progress/phase-0.md`](docs/progress/phase-0.md)). P1 implemented and merged ([report](docs/progress/phase-1.md), [review](docs/progress/review-phase-1.md)). P2 implemented, merged and released as v0.1.0 on 2026-11-15; P3 is approved and executing (Q17–Q20, 2026-11-15). P4–P6 and C1–C3 remain stubs.
+> **State:** P0 done (report: [`docs/progress/phase-0.md`](docs/progress/phase-0.md)). P1 implemented and merged ([report](docs/progress/phase-1.md), [review](docs/progress/review-phase-1.md)). P2 implemented, merged and released as v0.1.0 on 2026-11-15. P3 implemented and merged ([report](docs/progress/phase-3.md)). P4 implemented and locally verified ([report](docs/progress/phase-4.md)). P5–P6 and C1–C3 remain stubs.
 
 ## Task format
 
@@ -1359,16 +1359,174 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 - P3.0a approved on 2026-11-15 (module plan, ADRs 0063–0065 and 148 h envelope). The maintainer also authorized sign-off of the reviewed planning documents. Next: P3.1a.
 - P3.1a complete: strict zone config, MIME/extension pairs, declaration validation, filename/state values and scanner-availability warnings are implemented. Shared retention validation moved to core and forms reuses it without behavior changes. New runtime dependency is the already-pinned Zod 4.6.7 for schemas; fast-check 4.10.2 is test-only. Nine upload tests, uploads typecheck and all 107 forms tests pass. `CI=true bun run check` passed (459 package tests + 100 script tests, zero failures; OpenAPI drift/additive check and isolation suite included). The maintainer reviewed this change and authorized its signed-off commit on 2026-11-15. Uploads remains a descriptor until P3.3b; no public endpoint has been enabled.
 
-## Phase P4 – Reviews (M4 · v0.3.0) · stub
+## Phase P4 – Reviews (M4 · v0.3.0) · approved 2026-11-22
 
-**Goal:** Collect, moderate, publish. **Estimate:** 5–7 PD.
+**Goal:** Collect, moderate and publish reviews. **Estimate:** 15 tasks, 66 h (8.25 PD), plus a 12 h reserve. Original allowance: 5–7 PD. See [module plan](docs/modules/reviews.md) and Q21–Q23.
 
-- [ ] P4.1 – Collection config: scale (default 5, max 10), required title/body/email, public extra fields, length limits, `moderation: manual` (default), author name display format, optional "verification method" text
-- [ ] P4.2 – Table `reviews` + migration; replace its SQL in §B.3 with a link
-- [ ] P4.3 – Public: submit (AbuseGuard), list of published reviews (cursor, sort, `limit ≤ 50`), stats (count, average, distribution); `Cache-Control` + `ETag`/`304`; response serializer with an allowlist of fields
-- [ ] P4.4 – Admin: list/filter by moderation status, approve/reject, publish/unpublish, delete, stats; no content editing
-- [ ] P4.5 – Dashboard "Reviews": queue with keyboard shortcuts, tabs published/rejected, stat cards, embed; hint box about legal transparency duties (marked "please verify legally")
-- [ ] P4.6 – SDK `reviews.list`, `reviews.stats`, `reviews.submit`; example extended
+**Entry state:** M3 implementation is merged, and the local tag history ends at `v0.1.0`. Use the merged Uploads code for M4 work. Verify the preview releases separately because Changesets combines pending minor bumps to the same package. No new dependency candidate is needed.
+
+**Execution:** Work in the order below. Read architecture §B.3, §C, §D.2, §D.6, §E.2–E.4 and §F.3–F.4, the P3 report, and ADRs 0022, 0037, 0039, 0046, 0047, 0050, 0055, 0061, 0063, 0069 and 0073. Approve the proposed ADRs before changing shared code.
+
+### [x] P4.0a – Approve the module plan and shared seams (est. 3 h)
+
+- **Description:** Review the module plan, typed pagination and conditional HTTP decisions, and answer Q21–Q23.
+- **Files/packages:** `PLAN.md`, `OPEN_QUESTIONS.md`, `docs/modules/reviews.md`, `docs/adr/`.
+- **Depends on:** M3 implementation.
+- **Reuses:** The module planning workflow and existing runtime dependencies.
+- **Acceptance criteria:** Maintainer approves the proposed scope and seams before application code is written.
+- **Tests:** Documentation links, task order and estimate.
+- **Risks/notes:** Rule 4 in `docs/MODULES.md` requires explicit module plan approval.
+
+### [x] P4.1a – Define collection configuration and validation (est. 4 h)
+
+- **Description:** Add derived schemas for collection defaults, rating scale, author display, text bounds, extra fields, verification-method wording, moderation and retention. Validate submissions against the active configuration.
+- **Files/packages:** `packages/modules/reviews`.
+- **Depends on:** P4.0a.
+- **Reuses:** Core retention, abuse, email normalization and error schemas.
+- **Acceptance criteria:** Strict, JSON-representable config and normalized input. Reject unknown fields, out-of-scale ratings and incompatible lengths.
+- **Tests:** Boundary and property cases for ratings, required fields, Unicode, extra-field keys and email normalization.
+- **Risks/notes:** Keep public field declarations and author formatting explicit.
+
+### [x] P4.1b – Add templates, config planning and codegen (est. 4 h)
+
+- **Description:** Add bilingual testimonials defaults, config change handling and generated review integration types.
+- **Files/packages:** `packages/modules/reviews`.
+- **Depends on:** P4.1a.
+- **Reuses:** Module templates, schema export, canonical JSON and config change planning.
+- **Acceptance criteria:** Generated schema and codegen agree with accepted inputs. Collection changes cannot alter the scale. Privacy-affecting changes receive the expected config-plan classification.
+- **Tests:** Template/schema examples, revision and config-plan cases.
+- **Risks/notes:** Config changes must not expose historical private field values.
+
+### [x] P4.2a – Add the tenant-bound review schema (est. 4 h)
+
+- **Description:** Implement Drizzle schema, checks, identities, public/queue/lifecycle indexes and the generated central migration.
+- **Files/packages:** `packages/db`, `docs/ARCHITECTURE.md`.
+- **Depends on:** P4.1a.
+- **Reuses:** Composite live-parent FK, persistent module erasure guard and migration tooling.
+- **Acceptance criteria:** A fresh and an upgraded database migrate; constraints reject invalid scope, parents, ratings and publication state. Replace the SQL sketch with a schema link.
+- **Tests:** Real PostgreSQL constraints and migration checks.
+- **Risks/notes:** Review identity remains present until the module erases its child rows.
+
+### [x] P4.2b – Implement the scoped repository (est. 5 h)
+
+- **Description:** Add thin tenant-bound inserts, reads, moderation writes, stats and bounded deletion/expiry operations. Give list and stats one public eligibility predicate.
+- **Files/packages:** `packages/modules/reviews`, `packages/db`, `apps/server` repository composition.
+- **Depends on:** P4.2a.
+- **Reuses:** Module repository factories, scoped transaction handles, pagination and aggregate patterns.
+- **Acceptance criteria:** Foreign resources return `404`. Public predicates exclude every ineligible fixture. Disabled modules omit repository handles.
+- **Tests:** Real PostgreSQL scope, expiry, aggregates, rollback and transaction lifetime.
+- **Risks/notes:** Keep query predicates aligned with partial index ordering and the injected clock.
+
+### [x] P4.2c – Prove retention and data erasure (est. 5 h)
+
+- **Description:** Complete and verify expiry recomputation, bounded purge, subject access/deletion and project erasure for review content.
+- **Files/packages:** `packages/modules/reviews`, `packages/db`, `apps/server`.
+- **Depends on:** P4.2b.
+- **Reuses:** Platform privacy fan-out, retention jobs, project erasure and completeness limits.
+- **Acceptance criteria:** Expired rows cannot be listed, counted or republished. Privacy erasure removes matching content and leaves neighbors intact. Disabled-module behavior follows ADR-0069.
+- **Tests:** Real database expiry, subject and project erasure, multiple batches and fixture-based module composition. Add HTTP assertions as the operational routes land.
+- **Risks/notes:** Retention work must preserve existing moderation and data lifecycle guarantees under concurrent changes.
+
+### [x] P4.3a – Accept guarded review submissions (est. 5 h)
+
+- **Description:** Wire the operational module, initially with JSON submission, usage and safe outbox events. Regenerate the API contract.
+- **Files/packages:** `packages/modules/reviews`, `apps/server`, `packages/api-contract`.
+- **Depends on:** P4.1b, P4.2c.
+- **Reuses:** AbuseGuard, publishable and secret key handling, idempotency, module catalog and atomic usage/outbox services.
+- **Acceptance criteria:** Real submissions persist pending, the caller sees only the new ID, and honeypots persist nothing. The operational definition includes the retention and privacy hooks.
+- **Tests:** HTTP proof, quota, body cap, idempotency, snapshot and rollback.
+- **Risks/notes:** Update every test and contract inventory that expects Reviews to be a descriptor.
+
+### [x] P4.3b – Serve published reviews and statistics (est. 5 h)
+
+- **Description:** Apply ADR-0076, implement three stable cursor sorts and stats, and add public serializers and I5 fixtures.
+- **Files/packages:** `packages/core`, `packages/modules/reviews`, `packages/db`, `apps/server`, `packages/api-contract`.
+- **Depends on:** P4.3a.
+- **Reuses:** Read guard, page helpers, review visibility predicate and route manifest.
+- **Acceptance criteria:** Public projection contains only allowed fields; ordered pages work after anchor removal. Stats agree with the visible population. Limit is at most 50.
+- **Tests:** Snapshots, empty/mixed histograms, privacy canaries, multiple pages with ties and invalid cursors.
+- **Risks/notes:** Take care with null publication dates and exact timestamp precision at page boundaries.
+
+### [x] P4.3c – Add conditional public reads (est. 4 h)
+
+- **Description:** Apply ADR-0077 to public list and stats and declare the conditional header and response in the contract.
+- **Files/packages:** `apps/server`, `packages/modules/reviews`, `packages/api-contract`.
+- **Depends on:** P4.3b.
+- **Reuses:** Public executor, OpenAPI registrar, CORS and host cache headers.
+- **Acceptance criteria:** Matching `If-None-Match` gives bodyless `304`; changes in the representation produce a new ETag. Revalidation still requires current access.
+- **Tests:** Real HTTP response headers, weak/list/wildcard cases, moderation, expiry, revoked key and foreign origin.
+- **Risks/notes:** Verify the same cache-key partition and CORS headers for `200` and `304`.
+
+### [x] P4.4a – Add scoped moderation, deletion and stats (est. 5 h)
+
+- **Description:** Add the management list/detail, moderation actions, delete and collection stats, with declared policies and atomic audits.
+- **Files/packages:** `packages/modules/reviews`, `packages/db`, `apps/server`, `packages/api-contract`.
+- **Depends on:** P4.3a and P4.3b.
+- **Reuses:** Module resource routes, shared permission scopes, audit service and isolation fixtures.
+- **Acceptance criteria:** Approve, reject, publish, unpublish and deletion follow declared rules. No content-editing endpoint. Every management route appears in the tenant matrix.
+- **Tests:** HTTP role/scope and cross-tenant tests, illegal transitions, test-record exclusion, concurrency and audit rollback.
+- **Risks/notes:** Approval and publication are independent state transitions.
+
+### [x] P4.5a – Build the localized moderation dashboard (est. 5 h)
+
+- **Description:** Add conditional navigation, collection selection, queue tabs, detail, keyboard actions and deletion confirmation.
+- **Files/packages:** `apps/web`, shared components in `packages/ui` as needed.
+- **Depends on:** P4.4a.
+- **Reuses:** Running-bond shell, shared query/client, role guards, cards, dialogs and layout.
+- **Acceptance criteria:** Members can moderate with keyboard and pointer, see approved drafts, and operate on mobile. Hostile content displays as text.
+- **Tests:** Dashboard component tests for focus/shortcuts, role/selection and destructive confirmation, English and German copy.
+- **Risks/notes:** Suppress shortcuts during text entry and avoid repeat submission while a mutation is pending.
+
+### [x] P4.5b – Add collection settings, stats and embed (est. 5 h)
+
+- **Description:** Add localized creation/settings, stats cards and distribution, integration snippets and the transparency verification note.
+- **Files/packages:** `apps/web`, snippet source and `packages/ui` only for shared components.
+- **Depends on:** P4.5a.
+- **Reuses:** Module scope, config plan flow, retention controls and integration view/snippet patterns.
+- **Acceptance criteria:** Owner/admin can configure the collection, members can read stats and embed instructions, shown snippets use publishable credentials only.
+- **Tests:** Generated-client interaction, configuration changes, localization and responsive UI tests.
+- **Risks/notes:** Describe verification wording as an operator disclosure.
+
+### [x] P4.6a – Ship SDK methods and the example (est. 4 h)
+
+- **Description:** Add `reviews.list`, `reviews.stats` and `reviews.submit`; extend the static example and SDK docs.
+- **Files/packages:** `packages/sdk`, `examples/html`, snippet generator.
+- **Depends on:** P4.3c, P4.5b.
+- **Reuses:** Generated typings, SDK request/proof/idempotency transport and shared snippets.
+- **Acceptance criteria:** Example submits, renders only public reviews and displays statistics with safe DOM APIs. SDK stays dependency-free at runtime.
+- **Tests:** Bun, Node and SDK browser integration tests, generated example output checks.
+- **Risks/notes:** Preserve existing Forms and Uploads client entry points.
+
+### [x] P4.6b – Exercise the browser and optional-module journeys (est. 4 h)
+
+- **Description:** Test visitor submission through dashboard publication/unpublication and public rendering. Exercise a storage-free Reviews-only runtime.
+- **Files/packages:** `e2e`, image smoke and existing module boot tests.
+- **Depends on:** P4.2c, P4.5b, P4.6a.
+- **Reuses:** Existing Playwright journeys, real Compose infrastructure and image matrix.
+- **Acceptance criteria:** Playwright proves moderation, publication and dashboard controls. Reviews-only image metadata, API and worker function without upload configuration.
+- **Tests:** `bun run test:e2e`, `bun run test:sdk-browser` and the local image smoke command.
+- **Risks/notes:** Verify existing module subsets continue to boot and expose the same routes.
+
+### [x] P4.6c – Demonstrate M4 and prepare preview release metadata (est. 4 h)
+
+- **Description:** Run the final gates, update the README and release metadata, and record the handoff with observed evidence.
+- **Files/packages:** `README.md`, `.changeset`, `docs/MILESTONES.md`, `docs/progress/phase-4.md`.
+- **Depends on:** P4.6b.
+- **Reuses:** Existing check/build/contract and preview versioning tooling.
+- **Acceptance criteria:** Every exit below is measured. Release metadata accounts for pending M3 versioning. Document the state of human review and any versioning work.
+- **Tests:** `CI=true bun run check`, `bun run build`, contract generation/drift/additive checks and a local release-version dry run.
+- **Risks/notes:** Publication and the fresh phase review run separately.
+
+### Phase acceptance
+
+- [x] **Public visibility and data minimization:** Real HTTP eligibility tests and the public-response snapshot gate in `CI=true bun run check` prove eligibility and the response allowlist, with explicit private canaries.
+- [x] **Conditional reads and aggregates:** HTTP tests prove `304` and access rechecks. PostgreSQL fixtures prove counts, averages, distributions and stable page ordering.
+- [x] **Isolation and lifecycle:** `CI=true bun run check` includes route inventories, real tenant isolation, moderation audits and privacy/retention/erasure tests.
+- [x] **Contract and build:** `bun run api:generate`, `bun run api:check`, `bun run api:breaking --base v0.1.0` and `bun run build` pass.
+- [x] **Browser, SDK and image:** Run Playwright and SDK browser journeys, Node/Bun probes and the real Reviews-only production image smoke.
+- [x] **Handoff:** Record commands, observed results, review status and release sequencing in `docs/progress/phase-4.md`.
+
+Local implementation and acceptance are complete. The [phase report](docs/progress/phase-4.md) records the verification evidence, maintainer approval to open the pull request and preview version sequencing.
 
 ## Phase P5 – Agent-ready (M5 · v0.4.0) · stub
 
