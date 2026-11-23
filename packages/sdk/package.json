@@ -36,7 +36,7 @@
     "openapi-fetch": "0.17.0"
   },
   "devDependencies": {
-    "altcha-lib": "2.8.0"
+    "altcha-lib": "2.9.0"
   },
   "engines": {
     "node": ">=20"
