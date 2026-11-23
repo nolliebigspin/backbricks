@@ -1,61 +1,26 @@
 # Module catalog
 
-Backbricks aims to be **one headless backend and one dashboard for every interactive feature a website needs**, instead of a separate tool, account and admin UI per feature. Version 1 ships three modules. The rest of this catalog shows the direction: candidates, not commitments. After `v1.0.0` they are prioritized by demand.
+Version 1 includes [Forms](modules/forms.md), [Uploads](modules/uploads.md) and [Reviews](modules/reviews.md). Each reference links to implementation, tests and its approved plan. See [module architecture](ARCHITECTURE.md#c-module-architecture) for shared contracts and registry behavior.
 
-Every module follows the module contract (`docs/ARCHITECTURE.md` §C). If a module needs something the platform doesn't have yet, that **platform capability** is designed once in the core (with an ADR) and shared by every module that needs it. Modules don't each build their own version.
+## Candidates after v1
 
-## Available in v1
+These are candidates to prioritize by user demand after 1.0.
 
-| Module | Website element | Backend function | Comparable standalone tool |
-|---|---|---|---|
-| **Forms** | Contact, quote, application, sign-up forms | Submissions, validation, spam protection, inbox, export, notifications | Formspree, Basin |
-| **Uploads** | File upload areas | Direct-to-storage uploads, malware scan, private downloads | UploadThing |
-| **Reviews** | Testimonials, review sections | Reviews, moderation, publishing, stats | ReviewsKits |
-
-Module plans (rule 4): [Forms](modules/forms.md), [Uploads](modules/uploads.md) (approved 2026-11-15), and [Reviews](modules/reviews.md) (approved 2026-11-22).
-
-## Candidate modules (after v1)
-
-| Module | Website element | Backend function | Comparable standalone tool | Builds on |
-|---|---|---|---|---|
-| **Waitlist & newsletter sign-up** | Sign-up field | Entries, double opt-in, export | – | Forms patterns, mailer |
-| **Event registration** | Registration form | Registrations, capacity limits, waiting list, reminders | – | Forms |
-| **Surveys** | Multi-step survey | Responses, branching, statistics | Formbricks | Extends **Forms** (not a separate submission store) |
-| **Polls** | Poll / vote block | Votes, results, duplicate-vote protection | Rallly | Visitor sessions |
-| **Feature voting** | Idea board, public roadmap | Ideas, upvotes, statuses, roadmap | Fider | Visitor sessions, moderation from Reviews |
-| **Comments** | Comment threads | Threads, moderation, publishing | – | Visitor sessions, moderation from Reviews |
-| **Live chat** | Chat widget (own UI) | Conversations, team inbox, assignment, canned replies | Chatwoot | Realtime, visitor sessions |
-| **Appointment booking** | Booking flow | Availability rules, bookings, reminders, calendar sync | Cal.com | Scheduling |
-| **Analytics** | Tracking call via SDK | Page views, events, conversions, cookieless | Umami | Event ingest |
-| **Cookie consent** | Consent banner (own UI) | Consent configuration, preferences, consent records as proof | CookieConsent | Cached public config |
-| **Job postings** | Careers page | Job listings, applications | Payload (self-configured) | Content collections + Forms + Uploads |
-| **Gallery** | Image galleries | Images, albums, sharing | Payload (self-configured) | Content collections, image variants, Uploads |
-| **Product catalog** | Product pages | Products, variants, orders | Payload Ecommerce | Content collections, payments |
-| **Protected content** | Members area, gated downloads | Access rules, protected files | Payload (self-configured) | Visitor identity, Uploads |
-
-## Platform capabilities these modules need
-
-| Capability | What it is | Unlocks | Architecture notes |
-|---|---|---|---|
-| **Visitor sessions** | Anonymous, project-scoped visitor token (signed, cookieless by default) | Polls, feature voting, comments, live chat | Not user accounts. Combined with PoW and hashed IPs for duplicate protection; needs a privacy review |
-| **Realtime** | Push channel to browsers and the dashboard (SSE/WebSocket) | Live chat, live poll results, dashboard live updates | Bun native WebSockets + Postgres `LISTEN/NOTIFY` on one node; a broker only once there are several nodes (ADR) |
-| **Content collections** | Owner-managed, typed content with a public, cacheable read API | Job postings, gallery, product catalog | Typed per module, **not** a generic CMS; reuses the public read pattern from Reviews (ETag, allowlisted fields) |
-| **Scheduling** | Availability rules, time zones, iCal/CalDAV sync | Appointment booking, event reminders | Calendar providers behind an adapter interface |
-| **Event ingest** | High-volume append-only events with rollups | Analytics | Partitioned Postgres tables + rollup jobs first; a dedicated store only with measured need (ADR, would change key decision 6) |
-| **Visitor identity** | Login for website visitors (magic link, access codes) | Protected content, customer portals | Explicitly out of v1. Strictly separate from dashboard auth (own tables, keys, cookies) |
-| **Payments** | Checkout through a payment provider | Product orders, paid bookings | Out of v1; provider adapter like the cloud billing interface |
-| **Image variants** | Thumbnails, resizing, format conversion | Gallery, product catalog, upload previews | Extends Uploads (worker job) |
+| Candidate | Reuse or capability |
+| --- | --- |
+| Waitlists, newsletter signup and event registration | Forms, mail and double opt-in |
+| Multi-step surveys | Forms with branching and response statistics |
+| Cookie consent | Versioned consent records and cached public config |
+| Polls, feature voting and comments | Anonymous, project-scoped visitor sessions and shared moderation patterns |
+| Live chat | Visitor sessions and realtime delivery |
+| Appointment booking | Scheduling and calendar adapters |
+| Analytics | Event ingest and rollups |
+| Job posts, galleries and product catalogs | Typed content collections with allowlisted reads. Reuse Forms and Uploads for applications and media, add image variants or payments where needed. |
+| Protected content | Visitor identity separate from dashboard accounts and private Uploads |
 
 ## Rules for new modules
 
-1. **Reuse before adding.** Surveys extend Forms; job applications are Forms + Uploads; comments reuse the review moderation flow. A new module must not duplicate an existing module's storage or workflow (see `AGENTS.md` §2).
-2. **Capabilities are built once.** If a module needs a missing capability, propose it in an ADR, implement it in the core, and design it so the other modules in the "Unlocks" column can use it too.
-3. **Same guarantees as v1.** Tenant isolation, abuse protection on public endpoints, retention and GDPR export/erasure handlers, audit logging, config-as-code, CLI/MCP support.
-4. **Start with the plan.** Write `docs/modules/<name>.md` and get it approved before any code is written. It covers: config schema, tables + migration, public and admin routes, jobs, `retention` and `privacy` handlers, usage metrics, dashboard pages, SDK method, tests (incl. the isolation suite) and docs, reusing the core helpers (pagination, CSV, audit, events, retention). Changes to `packages/core` or existing modules need an approved ADR first. The hypothetical "Waitlist" in `docs/ARCHITECTURE.md` §C.5 shows the shape.
-
-## Suggested order (to be validated with users)
-
-- **Low effort, mostly existing capabilities:** waitlist & newsletter, event registration, surveys, cookie consent
-- **Needs visitor sessions:** polls, feature voting, comments
-- **Needs a larger capability:** live chat (realtime), appointment booking (scheduling), analytics (event ingest), job postings and gallery (content collections)
-- **Needs capabilities that are out of v1 on purpose:** protected content (visitor identity), product catalog (payments)
+1. Start with an approved `docs/modules/<name>.md` covering config, data and migrations, routes and policies, jobs, privacy and retention, metrics, dashboard, SDK/CLI/MCP and tests.
+2. Reuse existing storage, workflows and shared helpers. Propose new shared capabilities or changes to core or other modules through an ADR.
+3. Exercise tenant isolation, public abuse protection, retention, privacy and transactional audit. Validate both standalone and optional-capability deployments.
+4. Register the module in the server and dashboard. Integrate with the existing config/revision/codegen flow and document the supported client paths. [Example module shape](ARCHITECTURE.md#c5-example-a-hypothetical-fourth-module-waitlist)

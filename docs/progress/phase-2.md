@@ -1,8 +1,6 @@
 # Phase P2 – Forms (M2 · v0.1.0): report
 
-- **Branch:** `feat/p2-forms`; 29 signed-off commits on top of `main` (9332ac7), including this report; nothing pushed.
-- **Date:** 2026-11-12.
-- **Status at implementation handoff (2026-11-12):** All 25 P2 tasks implemented and local acceptance passed. The release/CI follow-up is completed below; fresh phase review remains separate.
+Merged in [PR #10](https://github.com/nolliebigspin/backbricks/pull/10) and published as the Forms 0.1.0 preview.
 
 ## Release follow-up · 2026-11-15
 
@@ -13,8 +11,6 @@ The maintainer explicitly reviewed and authorized the generated release diff, DC
 - Signed annotated tag [`v0.1.0`](https://github.com/nolliebigspin/backbricks/tree/v0.1.0) targets the merge commit. `git tag -v` with a temporary allowed-signers file verified the configured ED25519 signature. The remote annotated tag and peeled commit were checked after push.
 - [Release workflow](https://github.com/nolliebigspin/backbricks/actions/runs/43704367449) succeeded: tag/version match, build, real worker/non-root/read-only smoke and GHCR push.
 - `ghcr.io/nolliebigspin/backbricks:0.1.0` is anonymously readable (registry manifest HTTP 200). OCI index digest: `sha256:16daa5c97722c4abed91557ac64c6f7961f8d8fc3f5b8e1479cf9f68b35d5bdb`; executable platform is `linux/amd64`, with a separate attestation manifest. This does not claim a published arm64 image.
-
-The historical resume/release items below describe the original handoff and are superseded by this follow-up. Fresh phase review has not been certified by the release metadata approval. M3 may be planned, but its module/contract plan requires its own approval before application code (`docs/MODULES.md`, rule 4).
 
 ## Delivered
 
@@ -78,9 +74,3 @@ All are recorded in `PLAN.md` execution notes, ADRs 0055–0062 and `OPEN_QUESTI
 
 - **Snippets are product text.** Any change to `snippets.ts` changes `examples/html` and what owners paste into live sites. The comparison test keeps them in sync, but not backwards compatible: published snippets should change additively.
 - **One version for everything.** The release workflow trusts `apps/server/package.json`. A release made without `release:version` is refused by the tag check, which is intended but easy to trip over.
-
-## Resume
-
-1. Open the PR for `feat/p2-forms` → `main` and get CI green (quality, tests, E2E, image, DCO).
-2. Have a fresh session review the phase (AGENTS §9), and confirm or redirect D51–D60.
-3. After merging: `GITHUB_TOKEN=… bun run release:version` on `main`, commit the changelog through a PR, then `git tag -s v0.1.0 -m v0.1.0 && git push origin v0.1.0`. Optionally first run the Release workflow manually with "Push the image" off.

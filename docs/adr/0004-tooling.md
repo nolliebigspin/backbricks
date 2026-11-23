@@ -10,7 +10,7 @@ Contributors (human and agent) need a reproducible setup with one command, fast 
 
 ## Decision
 
-- **mise** pins tool versions (Bun, Node, lefthook, gh, CodeGraph) and orchestrates the environment (`setup`, `dev`, `infra`).
+- **mise** pins tool versions (Bun, Node, lefthook and validation tools) and orchestrates the environment (`setup`, `dev`, `infra`).
 - **Bun workspaces + Turborepo** run code-level pipelines (`build`, `typecheck`, `test`) with caching and `--affected`.
 - **oxlint** in type-aware mode (`oxlint-tsgolint`) and **oxfmt** for linting and formatting.
 - **dependency-cruiser** enforces the module and package boundaries (`bun run lint:arch`).
@@ -20,7 +20,7 @@ A command lives either in `package.json`/`turbo.json` (code pipelines) or in `mi
 
 ## Consequences
 
-- `mise install && mise run setup` is the whole setup.
+- `mise install && mise run setup` installs dependencies and hooks. CodeGraph indexing is opt-in through [the optional navigation task](../../CONTRIBUTING.md#optional-code-navigation).
 - oxfmt is 0.x and type-aware oxlint is young; breaking updates are possible (risk J.1 #10).
 - dependency-cruiser needs a TS parser that works with TypeScript 7 (ADR-0003).
 

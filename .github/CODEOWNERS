@@ -6,9 +6,11 @@
 # locally or inject instructions, so it never merges without a maintainer.
 
 # Agent instructions and maintainer workflows
-/AGENTS.md                  @nolliebigspin
+AGENTS.md                   @nolliebigspin
 /CLAUDE.md                  @nolliebigspin
 /.claude/                   @nolliebigspin
+/.codex/                    @nolliebigspin
+/.agents/                   @nolliebigspin
 /.mcp.json                  @nolliebigspin
 /PLAN.md                    @nolliebigspin
 

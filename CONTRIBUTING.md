@@ -1,67 +1,41 @@
 # Contributing to Backbricks
 
-Thanks for your interest! This project follows the rules in [AGENTS.md](AGENTS.md). They apply to human contributors and AI agents alike. The most important ones: think in the whole system, reuse before you write, one source of truth per concept, respect module boundaries.
+Use the [setup commands](README.md#try-from-source) and [repository instructions](AGENTS.md). For milestone work, start with [PLAN.md](PLAN.md). For an issue, use its scope and acceptance criteria.
 
-## Setup
+## Verification
 
-Requirements: [mise](https://mise.jdx.dev) and Docker (Docker Desktop or OrbStack).
+Run the focused tests while editing. Before opening a PR, start the real dependencies and run the local CI gate.
 
-```bash
-mise install
-mise run setup   # bun install, git hooks (lefthook), local code graph
-mise run dev     # dev environment in Docker Compose
+```sh
+mise run infra
+mise run scan
+CI=true bun run check
 ```
 
-## Workflow
+For browser tests, run `bun run build` and install Chromium with `bunx playwright install chromium`. The full suite includes Scenario A, which needs `bun scripts/release/package-clients.ts 0.4.0` before `bun run test:e2e`. Use `bun run test:e2e <spec>` for focused runs. [CI commands](.github/workflows/ci.yml)
 
-1. Open or pick an issue; for larger changes, discuss the approach first (an ADR in `docs/adr/` may be needed).
-2. Branch from `main`: `feat/…`, `fix/…`, `docs/…`, `chore/…`.
-3. Make small, focused commits using [Conventional Commits](https://www.conventionalcommits.org/): `feat(forms): add honeypot field option`.
-4. Run `bun run check` (the `pre-push` hook runs the affected subset automatically).
-5. Open a pull request against `main` and fill in the template. CI must be green.
+Run `bun run api:generate` after changing route contracts. Review the generated patch and run `bun run api:check`. Keep test databases and storage isolated from deployment data. If expiry tests fail after laptop suspension, check the Docker VM clock against the host.
+
+### Optional code navigation
+
+Run `mise run codegraph -- init` to create a local index. With an existing index, use the CodeGraph MCP tool if your editor provides it, or run `mise run codegraph -- explore "<query>"`. Without an index, use `rg`. The index is local and ignored by Git.
+
+## Pull requests
+
+Branch from `main` and keep each PR focused. Use [Conventional Commits](https://www.conventionalcommits.org/) with the task or issue ID. Sign off every commit with `git commit -s` under your own identity to certify the [Developer Certificate of Origin](https://developercertificate.org/). The commit hook and CI check the sign-off. The pre-push hook runs affected checks. Fill in the PR template and wait for green CI before merge.
+
+If you use a coding agent, review and understand every line before sign-off, and disclose the tool in the PR. Review changes to agent instructions, tool configs, setup scripts, Git hooks and workflows before loading or executing them. [.github/CODEOWNERS](.github/CODEOWNERS)
 
 ## Releasing (maintainers)
 
-User-visible changes come with a changeset (`bun run changeset`, see [`.changeset/README.md`](.changeset/README.md)). The product version is the version of `@backbricks/server`.
+The product version is `@backbricks/server`. Add a [changeset](.changeset/README.md) for a user-visible change. Once a release is authorized:
 
-1. On an up-to-date `main`, run `GITHUB_TOKEN=<token with read:user and repo:status> bun run release:version`. It bumps `@backbricks/server` and writes `apps/server/CHANGELOG.md` with links to the pull requests. Commit the result (`chore(release): vX.Y.Z`) through a pull request.
-2. After it is merged, create and push the signed tag: `git tag -s vX.Y.Z -m vX.Y.Z && git push origin vX.Y.Z`. Agents never tag or push.
-3. The **Release** workflow checks that the tag matches the server version, builds the image exactly like CI, smoke-tests it and pushes `ghcr.io/nolliebigspin/backbricks:X.Y.Z` (plus `X.Y` and `sha-…`) with the workflow's own token. A manual run (Actions → Release → Run workflow) builds and smoke-tests without pushing unless "Push the image" is ticked.
+1. Use the source revision for that release. Run `bun run release:version` with a GitHub token that can read the repository and user metadata. Review the generated version and changelog in a signed-off PR.
+2. Create and push a signed tag matching the server version on the approved release commit. The [Release workflow](.github/workflows/release.yml) builds, smoke-tests and publishes `ghcr.io/nolliebigspin/backbricks:<version>`. A manual run can rehearse the build without publication.
+3. For M5 and later, package clients with `bun scripts/release/package-clients.ts <version>`. Verify clean installs and publish through the approved npm identity with provenance. Track registry access in [Q2](OPEN_QUESTIONS.md#q2).
 
-## Developer Certificate of Origin (DCO)
+The remaining previews follow **Uploads 0.2.0 → Reviews 0.3.0 → Agent-ready 0.4.0**. Version Uploads from its [merge revision](https://github.com/nolliebigspin/backbricks/pull/14) with the active Uploads changeset. Carry forward the prior version/changelog and consumed changeset state, then activate the [Reviews](docs/releases/reviews-developer-preview.changeset.md) and [Agent-ready](docs/releases/agent-ready-developer-preview.changeset.md) changesets one at a time against their respective source. Changesets combines pending bumps for a package, so verify each bump and source boundary before its tag.
 
-We use the [Developer Certificate of Origin 1.1](https://developercertificate.org/) instead of a CLA. By adding a `Signed-off-by` line to a commit, you certify that you wrote the contribution or otherwise have the right to submit it under the project's licenses (see [LICENSING.md](LICENSING.md)).
+## Policies
 
-Sign off every commit with:
-
-```bash
-git commit -s -m "feat(forms): add honeypot field option"
-```
-
-This adds `Signed-off-by: Your Name <you@example.com>` using your Git identity. The `commit-msg` hook (installed by `mise run setup`) rejects unsigned commits locally, and CI rejects pull requests with unsigned commits. To fix the last commit: `git commit --amend -s --no-edit`. For several commits: `git rebase --signoff main`.
-
-## AI-assisted contributions
-
-AI coding agents are welcome. [AGENTS.md](AGENTS.md) is written for them, and most tools read it automatically (Claude Code via `CLAUDE.md`). The rules:
-
-- **You are the author.** Your `Signed-off-by` certifies the whole change, including what an agent wrote. Review and understand every line before you sign off, and be ready to explain it in review.
-- **Disclose it.** Tick the AI box in the pull request template and name the tool.
-- **No unattended agent PRs.** Pull requests that were clearly not reviewed by a human (wrong scope, invented APIs, ignored review comments) get closed.
-- **Keep the scope small.** One issue per PR, as AGENTS.md §1 says. Agents tend to "improve" nearby code; leave it out of the PR.
-- The roadmap workflow (AGENTS.md §9, `PLAN.md`) is for maintainers working through the milestones. For an issue you don't need it.
-
-## Reviewing pull requests locally
-
-Some files run code on your machine or steer your agent: `.mcp.json`, `.claude/`, `AGENTS.md`, `CLAUDE.md`, `mise.toml`, `lefthook.yml`, `package.json` scripts, `scripts/` and `.github/workflows/`. Before you check out someone else's branch, read the diff to these files on GitHub. If the branch changes them, start your agent only after you've read the change. These paths are listed in [`.github/CODEOWNERS`](.github/CODEOWNERS) and need a maintainer's review.
-
-## Licensing of contributions
-
-Contributions to `packages/sdk`, `packages/cli`, `examples/` and `skills/` are licensed under MIT; everything else under AGPL-3.0-only. See [LICENSING.md](LICENSING.md).
-
-## Security
-
-Never report vulnerabilities in public issues. See [SECURITY.md](SECURITY.md).
-
-## Code of Conduct
-
-This project follows the [Contributor Covenant](CODE_OF_CONDUCT.md).
+[Code of conduct](CODE_OF_CONDUCT.md) · [Security reporting](SECURITY.md) · [Contribution licensing](LICENSING.md)

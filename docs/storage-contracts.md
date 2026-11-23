@@ -24,3 +24,19 @@ Optional settings: `TEST_S3_PUBLIC_ENDPOINT`, `TEST_S3_FORCE_PATH_STYLE=true|fal
 The assertions cover exact signed length/type, rejected smaller/larger/mismatched PUTs leaving no object, CORS preflight, HEAD, private COPY/read/delete, expired signatures and forced attachment/explicit safe-image response overrides. Content inspection and authorization of preview requests remain the uploads module's responsibility; the low-level storage adapter never establishes that arbitrary bytes are a safe image.
 
 The [upload-session contract](../packages/adapters/test/storage-session-contract.ts) additionally proves server-only completion, rejection of mismatched part declarations, consumed-session replay rejection and abort of a PUT body that spans signature expiry. Run both adapter suites for provider acceptance: raw presigned PUT behavior alone cannot establish the uploads safety contract (see [ADR-0072](adr/0072-server-finalized-upload-sessions.md)). The same `TEST_S3_*` opt-in applies to both suites; external-provider evidence is recorded only when actually exercised.
+
+## Development storage
+
+The server uses `S3_ENDPOINT`. Browsers use `S3_PUBLIC_ENDPOINT`, which must be reachable from the website. Register the site's origin both on the Backbricks project and in bucket CORS. Outside local development use HTTPS. A container's `localhost` belongs to that container.
+
+The dev initializer includes dashboard and server origins. To add a local integration on port 8080:
+
+```sh
+S3_CORS_ORIGINS=http://localhost:5173,http://localhost:3000,http://localhost:8080 bun scripts/dev/garage-init.ts
+```
+
+Allow PUT/GET/HEAD, signed request headers and exposed `ETag` on the bucket. Keep object access private. Use the contract suites above to verify the provider supports the permissions, signed requests and server-finalized upload sessions.
+
+## Operations
+
+Back up Postgres and private storage before an upgrade. Stop old workers and run the new image's `migrate` role before starting the app and worker. Keep the owning modules and original storage backend available while cleanup settles. File deletion revokes access immediately. Durable jobs abort upload sessions and remove objects, and upload deadlines may defer physical settlement. The project and subject erasure workflows account for that lifecycle. [Upload implementation](modules/uploads.md) · [ADR-0064](adr/0064-upload-ownership-and-durable-erasure.md)
