@@ -28,7 +28,7 @@ The hidden `_gotcha` input is the honeypot: people never see it, bots fill it, a
 
 [`upload.html`](upload.html) and [`upload.js`](upload.js) add a CV upload, readiness/progress and cancellation. Their code is also shown on an upload area's **Embed → Form attachment example** tab; a test keeps the files synchronized.
 
-1. Enable `forms,uploads` and configure storage as described in the [uploads quickstart](../../README.md#quickstart). For virus checking, start `mise run scan` and choose `SCANNER=clamav`. A protected area refuses files when scanning is unavailable. Choosing `SCANNER=none` requires an explicitly unscanned area and accepts files without virus checking.
+1. Enable `forms,uploads` and configure storage as described in the [uploads quickstart](../../README.md#modules-and-storage). For virus checking, start `mise run scan` and choose `SCANNER=clamav`. A protected area refuses files when scanning is unavailable. Choosing `SCANNER=none` requires an explicitly unscanned area and accepts files without virus checking.
 2. Create a **CV (PDF)** upload area with short name `cv` (the settings in [`upload-zone.json`](upload-zone.json)). Its default requires virus checking. If you deliberately use no scanner, choose the named unscanned template and understand its warning.
 3. Create a form named `application` with the fields in [`application.json`](application.json): an identifying email and one required `cv` file field linked to that area.
 4. Put your publishable key and API address in `upload.js`, then build/serve this folder as above. Storage must allow your site's origin too. For the development Garage bucket and the example on port 8080, configure its CORS through the existing initializer:

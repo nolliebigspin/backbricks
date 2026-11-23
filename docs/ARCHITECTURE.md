@@ -1,14 +1,8 @@
 # Backbricks – Architecture
 
-> **Backbricks** is an open-source, self-hostable headless platform that gives any website managed backend features (forms, file uploads, reviews), integrated by AI coding agents via API, SDK, CLI and MCP, and managed by non-technical site owners in a dashboard. A managed EU cloud follows after the open-source 1.0.
->
-> *Backbricks are the backend bricks of a website: pick the ones you need and build any frontend on top. Backbricks carries the functionality; the website keeps its own look.*
->
-> **Naming:** packages `@backbricks/*`, CLI `backbricks`, key prefixes `bb_pk_` / `bb_sk_`, config file `backbricks.config.json`. Project domain: `backbricks.app`.
-> **Authority:** This document says *what* we build and how the parts fit. The *why* of each key decision lives in its ADR (`docs/adr/`); deviations are recorded there too. Engineering rules and invariants: `/AGENTS.md`. Roadmap: `docs/MILESTONES.md`. Cloud-only topics: `docs/CLOUD.md`.
-> **Once built, code wins.** Sections that specify something not yet implemented (e.g. the SQL in §B.3) are replaced by a link to the code when it lands.
+Backbricks is a self-hostable headless platform with Forms, Uploads and Reviews. The API, SDK, CLI and MCP support site integration. Owners manage data in the dashboard.
 
----
+This document explains system boundaries. Follow [ADRs](adr/) for decisions, the implementing code for runtime behavior, [AGENTS.md](../AGENTS.md) for invariants, and [milestones](MILESTONES.md) for delivery status.
 
 ## 0. Key decisions at a glance
 
@@ -25,7 +19,7 @@
 | 9 | Dashboard auth | **Better Auth** (email/password, organizations; later OAuth provider for remote MCP) | [0010](adr/0010-better-auth.md) |
 | 10 | Multi-tenancy | Shared schema, `organization_id` + `project_id` on every row, `withTenant()`; Postgres RLS as second line (cloud) | [0011](adr/0011-multi-tenancy.md) |
 | 11 | Public abuse protection | Publishable key + rate limits + honeypot + self-hosted **proof-of-work (ALTCHA)** + quotas | [0012](adr/0012-public-abuse-protection.md) |
-| 12 | Uploads | Presigned **PUT** to object storage, signed size/type, **copy-then-scan**, private by default | [0013](adr/0013-presigned-uploads-copy-then-scan.md) |
+| 12 | Uploads | Server-finalized presigned part PUT, signed size/type, **copy-then-scan**, private by default | [0013](adr/0013-presigned-uploads-copy-then-scan.md), [0072](adr/0072-server-finalized-upload-sessions.md) |
 | 13 | Agent integration | REST + OpenAPI, SDK, CLI with **config-as-code**, **stdio MCP inside the CLI**; remote MCP later | [0014](adr/0014-agent-integration.md) |
 | 14 | Local development | **Docker Compose** for the whole dev environment; the same file in CI | [0015](adr/0015-docker-compose-dev-environment.md) |
 | 15 | License | **AGPL-3.0-only** platform, **MIT** SDK/CLI/examples/skills, **DCO**, trademark policy | [0016](adr/0016-licensing.md) |
@@ -41,7 +35,7 @@
 
 - A1: Small initial load (< 100 organizations, < 1M submissions/month). One app instance plus one worker is enough.
 - A2: One project equals one website. Test/live environments per project are out of MVP scope; test data is flagged with `is_test`.
-- A3: Max file size in the MVP: 100 MB per file (single PUT). Multipart uploads come later.
+- A3: The direct-upload protocol uses one browser part PUT with server-side completion. Client-side multipart and resumable uploads are deferred.
 - A4: Dashboard languages: English and German from day one (i18n keys); more later.
 - A5: Review ratings use a 1–5 scale by default, configurable up to 10.
 - A6: The website operator is the GDPR controller; the managed cloud acts as processor. Self-hosters are their own controllers and processors.
@@ -132,7 +126,7 @@ Dashboard authentication runtime: [ADR-0026](adr/0026-dashboard-auth-runtime.md)
 1. **Every tenant table** has `organization_id` and, if project-scoped, `project_id`. Exceptions: Better Auth tables and global system tables.
 2. **IDs** are TypeIDs stored as `text` (prefix + UUIDv7 in base32, e.g. `sub_01jc9…`): sortable by time, self-describing in logs, and agents notice immediately when they pass the wrong kind of ID. Generated in the application.
 3. **Module-specific tables** instead of a universal `records` table. User-defined fields live as `jsonb` inside module tables; fixed semantics (rating, moderation status, file status) are real columns with indexes.
-4. **Personal data is hard-deleted** (no soft delete). Configuration objects may be archived. M1 project removal archives configuration and disables access; personal-data erasure is a separate workflow required before M2 release (ADR-0030).
+4. **Personal data is hard-deleted** (no soft delete). Configuration objects may be archived. Project archive disables access. A separate worker-driven workflow hard-erases personal records (ADR-0030/0061).
 5. **`expires_at`** on personal records and audit, derived from retention; transient auth/delivery records use bounded expiry (the library's equivalent field where applicable). Active identities/memberships and notification recipients follow their removal/erasure lifecycle rather than arbitrary account expiry. Daily maintenance hard-deletes expired records; lifecycle categories are defined in [ADR-0022](adr/0022-personal-data-lifecycles.md).
 6. **IP addresses are never stored in clear text**, only as `HMAC-SHA256(ip, daily rotating key)` for rate limiting and abuse detection. Implementation and trusted-proxy rules: [ADR-0025](adr/0025-abuse-identity-and-rate-limits.md); `TRUSTED_PROXIES` is empty by default.
 7. **Configuration is versioned** (`config_version`); every change creates a revision. Submissions record the version they were validated against.
@@ -206,7 +200,7 @@ Reviews use the [review table schema](../packages/db/src/schema/reviews.ts), inc
   1. opens a transaction,
   2. sets `app.org_id` / `app.project_id` as transaction-local settings (prepares RLS),
   3. returns repositories whose queries are always scoped by `organization_id`/`project_id`.
-- Implemented boundary: [`createWithTenant`](../packages/db/src/with-tenant.ts), [core repository contracts](../packages/core/src/tenancy/repositories.ts) and [db repositories](../packages/db/src/repositories/). Contexts are trusted snapshots, handles expire with the transaction, and domain callbacks receive no raw driver (ADR-0024). Auth principal/scope middleware is added in P1.3b/P1.4c; the repository boundary itself does not authorize callers.
+- Implemented boundary: [`createWithTenant`](../packages/db/src/with-tenant.ts), [core repository contracts](../packages/core/src/tenancy/repositories.ts) and [db repositories](../packages/db/src/repositories/). Contexts are trusted snapshots, handles expire with the transaction, and domain callbacks receive no raw driver (ADR-0024). The management authorization layer checks request principals and scopes before repository access (ADR-0028/0034).
 - **Resources of other tenants return `404`**, never `403` (no existence leaks).
 - **Enforced by:** an architecture rule against direct table access outside repositories, and the isolation suite: fixtures with 2 organizations × 2 projects; for **every** registered management route, credentials of B on resources of A must return `404`. Object keys are prefixed with org/project; download URLs are only issued after DB authorization.
 - **Cloud phase:** Postgres RLS as second line of defense (`docs/CLOUD.md`).
@@ -219,7 +213,7 @@ Reviews use the [review table schema](../packages/db/src/schema/reviews.ts), inc
 
 The implemented contract is [`ModuleDefinition`](../packages/core/src/modules/contract.ts), normalized by [`defineModule`](../packages/core/src/modules/define-module.ts); see [ADR-0037](adr/0037-static-module-contracts.md) for the refinements to the initial sketch. It owns typed configuration/defaults/templates/migrations/change classification, localized metadata, resource names, scopes/events/metrics, declared infrastructure/services/capabilities, route/job registration, retention/privacy, notification and codegen hooks. Schemas must have representable JSON output. Changed configurations without a classifier are conservatively destructive.
 
-Routes use the framework-neutral [router contract](../packages/core/src/modules/routes.ts), with Zod inputs, response allowlists, explicit policies/body limits and public read/write classification. [Jobs](../packages/core/src/modules/jobs.ts) declare a typed payload, retries and bounded retention. [ADR-0039](adr/0039-module-http-and-worker-wiring.md) defines the implemented [HTTP bridge](../apps/server/src/routes/modules.ts), [worker hand-off](../apps/server/src/module-jobs.ts) and merged scope catalog. Public authorization uses the shared guard (ADR-0046). Durable job delivery uses the [PostgreSQL queue adapter](../packages/db/src/queue.ts) with atomic enqueue/completion and shared process lifetimes ([ADR-0048](adr/0048-transactional-postgres-jobs.md)). The server owns HTTP/auth/OpenAPI/worker wiring; module code imports only the public core contract and its own files. M1 proves complete definitions with [test-only modules](../packages/db/test/module-fixtures.ts); forms/uploads/reviews become operational in M2–M4.
+Routes use the framework-neutral [router contract](../packages/core/src/modules/routes.ts), with Zod inputs, response allowlists, explicit policies/body limits and public read/write classification. [Jobs](../packages/core/src/modules/jobs.ts) declare a typed payload, retries and bounded retention. [ADR-0039](adr/0039-module-http-and-worker-wiring.md) defines the implemented [HTTP bridge](../apps/server/src/routes/modules.ts), [worker hand-off](../apps/server/src/module-jobs.ts) and merged scope catalog. Public authorization uses the shared guard (ADR-0046). Durable job delivery uses the [PostgreSQL queue adapter](../packages/db/src/queue.ts) with atomic enqueue/completion and shared process lifetimes ([ADR-0048](adr/0048-transactional-postgres-jobs.md)). The server owns HTTP/auth/OpenAPI/worker wiring; module code imports only the public core contract and its own files. The real module definitions and [test-only definitions](../packages/db/test/module-fixtures.ts) exercise the same contract.
 
 ### C.2 Registration
 
@@ -237,17 +231,9 @@ Static, no runtime plugins. `apps/server/src/modules.ts` lists the modules. [`de
 
 ### C.3 Module boundaries and data isolation
 
-- A module imports **only** `@backbricks/core` and its own files (enforced by dependency-cruiser).
-- A module receives only its own scoped repository (interface declared by the module, implemented in `packages/db`, ADR-0055) and an opaque `TenantHandle`. It reads/writes **only its own tables**, plus generic core tables through bound core services; it never receives platform repositories or the full transaction.
-- **Cross-module collaboration happens via capabilities.** Example: `forms` needs files; `uploads` provides the `files` capability:
-  ```ts
-  interface FilesCapability {
-    claim(tx: TenantHandle, input: { refs: FileRef[]; zoneKey: string; owner: { type: string; id: string }; maxFiles: number }): Promise<ClaimedFile[]>;
-    listByOwner(tx: TenantHandle, owner: { type: string; id: string }): Promise<FileSummary[]>;
-    deleteByOwner(tx: TenantHandle, owner: { type: string; id: string }): Promise<void>;
-  }
-  ```
-  `forms` calls `ctx.capabilities.optional('files')?.claim(ctx.tx, …)` in **the same transaction** that stores the submission.
+Modules import core and their own files. Each receives its scoped repository contract (implemented in `packages/db`, ADR-0055) and an opaque tenant handle. The server binds providers and the caller transaction.
+
+Use [declared capabilities](../packages/core/src/modules/contract.ts) for cross-module work. Forms claims attachments through the [files capability](../packages/modules/uploads/src/capability.ts) in the same transaction as the submission.
 
 ### C.4 Shared services (injected by the core)
 
@@ -270,23 +256,7 @@ Implemented [service container](../packages/core/src/services/container.ts), [us
 
 ### C.5 Example: a hypothetical fourth module "Waitlist"
 
-Goal: visitors join a waitlist with email (and an optional referral code) with double opt-in.
-
-```
-packages/modules/waitlist/
-  src/config.ts        # zod: { doubleOptIn, confirmRedirectUrl, fields, retentionDays }
-  src/repository.ts    # repository interface (augments ModuleRepositories); table + implementation in packages/db (ADR-0055)
-  src/public.ts        # POST /v1/public/waitlists/{key}/entries, GET …/confirm?token=
-  src/admin.ts         # list, export, delete (uses core helpers for pagination/CSV)
-  src/jobs.ts          # send confirmation mail
-  src/privacy.ts       # exportSubject/deleteSubject by email
-  src/index.ts         # export const waitlistModule: ModuleDefinition<WaitlistConfig>
-apps/web/src/modules/waitlist/   # list + settings pages, registry entry
-packages/db/src/schema/waitlist.ts, repositories/waitlist.ts, migrations/…  # table, repository, generated migration
-apps/server/src/modules.ts       # one line: add waitlistModule
-```
-
-**What does not change:** core tables, auth, keys, audit, notifications (rule on `waitlist.entry.confirmed`), CLI (config-as-code learns `waitlists` from the registry), MCP (generic `config_*` tools), SDK (the generic `client.request('waitlists', key, 'entries', body)` works immediately; a typed `waitlists.join()` is optional sugar).
+A waitlist would add a typed module definition with public, management, notification, retention and privacy hooks. Its schema and scoped repository implementation live in `packages/db`. The server and dashboard register it. The existing instance configuration, revision, audit and configuration-plan paths apply to its definition. Use the [module checklist](MODULES.md#rules-for-new-modules).
 
 ### C.6 Deliberately not built
 
@@ -298,7 +268,7 @@ apps/server/src/modules.ts       # one line: add waitlistModule
 
 Every module can be switched on or off per installation. A self-hoster who only needs uploads runs only what uploads needs.
 
-- **Implemented M1 availability:** [ADR-0038](adr/0038-module-catalog-and-availability.md) and the [catalog](../packages/core/src/modules/catalog.ts) distinguish selected descriptors from operational definitions. `/v1/meta` and project integration metadata expose only this safe availability projection. Domain descriptors become operational in M2–M4.
+- **Module availability:** [ADR-0038](adr/0038-module-catalog-and-availability.md) and the [catalog](../packages/core/src/modules/catalog.ts) distinguish selected descriptors from operational definitions. `/v1/meta` and project integration metadata expose only this safe availability projection.
 - **One image, runtime selection.** All modules ship in the same image; `BACKBRICKS_MODULES=uploads` (comma-separated, default: all) decides which are active. Enabling a module later is an env change plus a restart, no rebuild.
 - **Filtered registry.** `defineRegistry` registers only enabled modules: their routes, jobs, scopes, events, MCP tools and dashboard navigation. Disabled modules are inert.
 - **Dependencies are validated at startup.** Unsatisfied hard `requires` fail startup with a clear message (nothing in v1 hard-requires another module). `optional` capabilities degrade gracefully: without Uploads, the forms field type `file` is unavailable and configs using it are rejected with `capability_unavailable`.
@@ -342,37 +312,9 @@ Keys are created exclusively through owner/admin dashboard sessions. [Key manage
 
 ### D.2 Resource structure and URL conventions
 
-**Base:** `https://api.<domain>/v1` (cloud: dedicated subdomain for the public API; self-host: same host, path `/v1`).
+Use the [generated OpenAPI contract](../packages/api-contract/openapi.json) and [API reference](https://backbricks.app/docs/api) for request/response schemas, query parameters and operations. Public routes live under `/v1/public`. Management routes are scoped to their organization/project and declare access through the [route policy](../packages/core/src/http/route-policy.ts).
 
-**Public API** (publishable key):
-
-| Method | Path | Purpose |
-|---|---|---|
-| `GET` | `/v1/public/challenge` | Proof-of-work challenge (ALTCHA format) |
-| `GET` | `/v1/public/forms/{formKey}` | Public schema (fields, required, limits, PoW needed?) |
-| `POST` | `/v1/public/forms/{formKey}/submissions` | Submit (JSON, or urlencoded with 303 redirect) |
-| `POST` | `/v1/public/upload-zones/{zoneKey}/files` | Upload intent → `{fileId, uploadUrl, headers, uploadToken, expiresAt}` |
-| `POST` | `/v1/public/files/{fileId}/complete` | Complete upload (with `uploadToken`) |
-| `GET` | `/v1/public/review-collections/{key}/reviews` | Published reviews (cursor, `sort=newest\|rating_desc\|rating_asc`, `limit≤50`) |
-| `GET` | `/v1/public/review-collections/{key}/stats` | Count, average, distribution |
-| `POST` | `/v1/public/review-collections/{key}/reviews` | Submit a review |
-
-**Management API** (session, secret key):
-
-| Area | Paths |
-|---|---|
-| Projects | `GET/POST /v1/projects`, `GET/PATCH/DELETE /v1/projects/{projectId}` |
-| Keys (session only) | `GET/POST /v1/projects/{id}/keys`, `DELETE …/keys/{keyId}` |
-| Config-as-code | `GET /v1/projects/{id}/config`, `PUT …/config?dryRun=true\|false` (response: plan/diff, warnings, `planHash`) |
-| Types | `GET /v1/projects/{id}/types?lang=ts` |
-| Integration | `GET /v1/projects/{id}/integration` (base URL, publishable key, origins, snippets) |
-| Forms | `…/forms`, `…/forms/{key}`, `…/forms/{key}/revisions`, `…/forms/{key}/submissions`, `…/submissions/{id}`, `POST …/submissions/bulk`, `GET …/forms/{key}/export.csv` |
-| Uploads | `…/upload-zones`, `…/upload-zones/{key}`, `…/files`, `…/files/{id}`, `POST …/files/{id}/download-url`, `POST …/files/bulk-delete`, `GET …/storage-usage` |
-| Reviews | `…/review-collections`, `…/review-collections/{key}`, `…/reviews`, `PATCH …/reviews/{id}` (approve/reject/publish/unpublish), `DELETE …/reviews/{id}` |
-| Platform | `…/notification-rules`, `…/audit-logs`, `…/usage`, `POST …/privacy/subject-export`, `POST …/privacy/subject-delete` |
-| Organization (session only) | `/v1/organizations/{orgId}/…` for members, audit, billing |
-
-**Conventions:** plural, kebab-case path segments; module instances addressed by `key`, records by TypeID; cursor pagination (`?cursor=&limit=`, response `{ data, nextCursor }`); `PATCH` uses JSON Merge Patch; public `POST`s accept `Idempotency-Key`.
+Use kebab-case resource paths, module keys for configuration instances, and TypeIDs for records. Collection APIs use cursor pagination. Check each operation for its idempotency, version precondition and mutation semantics.
 
 ### D.3 Error format
 
@@ -398,7 +340,7 @@ Stable `code` values are part of the API contract (catalog in `packages/core/src
 
 ### D.4 API versioning
 
-- Route policy and HTTP registration are implemented in [`route-policy.ts`](../packages/core/src/http/route-policy.ts) and [`ApiRoutes`](../apps/server/src/http/api-routes.ts). Every `/v1/*` operation declares access, body size and (for management) an isolation case; the runtime guard detects handlers bypassing registration. Health/static routes are outside `/v1`; Better Auth uses its separate inventoried surface and transaction boundary (ADR-0021). The generated document is served at `/v1/openapi.json`; committed type generation/drift checks arrive in P1.11b/c.
+- Route policy and HTTP registration are implemented in [`route-policy.ts`](../packages/core/src/http/route-policy.ts) and [`ApiRoutes`](../apps/server/src/http/api-routes.ts). Every `/v1/*` operation declares access, body size and (for management) an isolation case; the runtime guard detects handlers bypassing registration. Health/static routes are outside `/v1`; Better Auth uses its separate inventoried surface and transaction boundary (ADR-0021). The generated document is served at `/v1/openapi.json`.
 - Major version in the path (`/v1`); within v1 additive changes only (I17).
 - The [OpenAPI artifact](../packages/api-contract/openapi.json) is generated from the Zod routes and committed. [Drift checks](../scripts/api/check.ts) compare without overwriting edits; [compatibility checks](../scripts/api/breaking.ts) compare the actual PR base (local merge-base otherwise), allowing bootstrap only for a real base with no contract. Both gates run in check/pre-push/CI. [ADR-0052](adr/0052-contract-gates-and-method-handling.md) defines authorization-safe 405 handling and extensible RFC 9457 code/status documentation.
 - Deprecations get `Deprecation`/`Sunset` headers and a changelog entry; minimum 6 months.
@@ -468,13 +410,13 @@ sequenceDiagram
 - Object keys **never** contain the original file name.
 - Dashboard downloads: presigned GET, 60 s, `response-content-disposition=attachment`, `response-content-type=application/octet-stream`. Inline preview only for detected `image/png|jpeg|webp|gif`, **never SVG/HTML**. Every download is audited (`files.downloaded`).
 - `pending` and unclaimed files are deleted automatically after 24 h.
-- **Self-host without publicly reachable storage:** `UPLOAD_MODE=proxy` streams uploads through the app with a hard size limit. Default is `presigned`.
+- **Planned for M6:** `UPLOAD_MODE=proxy` will support bounded streaming when object storage has no public endpoint.
 
 ### D.7 TypeScript SDK
 
 | Package | License | Contents |
 |---|---|---|
-| `@backbricks/sdk` | MIT | Browser/server, dependency-free, ESM, < 8 KB gz (without PoW solver); `forms`, `uploads`, `reviews`, generic `request()`. Runs on browsers, Node ≥ 20, Bun, Deno |
+| `@backbricks/sdk` | MIT | Browser/server, dependency-free, ESM, < 8 KB gz (without PoW solver); `forms`, `uploads`, `reviews`, generic `request()`. Runs on browsers, Node ≥ 20 and Bun |
 | `@backbricks/sdk/pow` | MIT | PoW solver (web worker), lazy-loaded |
 | `@backbricks/sdk/admin` | MIT | Typed management client generated from OpenAPI (`openapi-fetch`); also used by the dashboard |
 | `@backbricks/react` (later) | MIT | Unstyled hooks `useForm`, `useUpload`, `useReviews` |
@@ -492,30 +434,15 @@ Implementation: the public root entry in [`packages/sdk/src`](../packages/sdk/sr
 
 ### D.8 CLI
 
-`npx backbricks <command>` (package `backbricks`, MIT, bundled with `bun build --target=node` so it runs on Node ≥ 20 and Bun). Every command supports `--json`, runs non-interactively with `--yes`, and has documented exit codes.
+[`packages/cli`](../packages/cli/README.md) provides integration setup, config validation and plan/apply, type generation, key metadata, synthetic form tests, diagnostics and stdio MCP on Node 20+ and Bun. Build the checkout and use `backbricks --help` for the current commands. Public npm availability is tracked in the [milestone](MILESTONES.md#m5--agent-ready--v040).
 
-| Command | Purpose |
-|---|---|
-| `backbricks login [--key bb_sk_…]` | Store a secret key (`~/.config/backbricks/credentials`, mode 0600, or env `BACKBRICKS_SECRET_KEY`); later: browser device flow |
-| `backbricks init [--project prj_…]` | Link a local project: writes `backbricks.config.json`, adds the publishable key to `.env.local` under a framework-appropriate name, updates `.gitignore`, optionally appends an `AGENTS.md` section |
-| `backbricks pull` | Write the remote config to `backbricks.config.json` |
-| `backbricks diff` | Show the plan (local vs. remote), destructive changes highlighted |
-| `backbricks push [--allow-destructive]` | Apply the plan (two-step: dry run → `planHash` → apply) |
-| `backbricks validate` | Validate the config file locally against its JSON Schema |
-| `backbricks codegen [--out src/backbricks.gen.ts]` | Generate TypeScript types |
-| `backbricks test submit forms/contact --data '{…}'` | Flagged forms test entry, reporting skipped file checks (ADR-0079) |
-| `backbricks doctor` | Checks connectivity, origins, keys; scans for `bb_sk_` in public env prefixes (`NEXT_PUBLIC_`, `VITE_`, `PUBLIC_`, `NUXT_PUBLIC_`) and build output |
-| `backbricks docs [--agent]` | Print the integration guide as Markdown |
-| `backbricks mcp` | Start the MCP server over stdio |
-| `backbricks keys list` | List project key metadata with the explicit `keys:read` grant (ADR-0078) |
+The [config document schema](../packages/core/src/configuration/schemas.ts) and [planner](../packages/core/src/configuration/planner.ts) implement ADR-0042. Each existing instance requires its current config-version precondition. Omitted module sections preserve remote state, while empty sections request archival. Config documents exclude credentials, notification recipients and personal records.
 
-**Config-as-code** (`backbricks.config.json`) uses the implemented [document schema](../packages/core/src/configuration/schemas.ts) and [pure planner](../packages/core/src/configuration/planner.ts), following ADR-0042. Root fields are `$schema`, `project` and `modules`; sections use each module's declared plural resource name. Every instance has an explicit name/status/module-version/config-version envelope around its module-owned `config`. Existing instances require the current config-version precondition. Notification recipients, credentials and personal records are excluded. Omitted sections preserve state; explicit empty sections request destructive configuration archival. No production domain configuration is implemented in M1.
-
-**Field types in the MVP:** `text`, `textarea`, `email`, `phone`, `number`, `url`, `select`, `multiselect`, `checkbox`, `date`, `hidden`, `file`, `consent`. Validations: `required`, `minLength`/`maxLength`, `min`/`max`, `options`. **No custom regex** (ReDoS risk, I10).
+The current CLI focuses on integration. Read access to real entries and private downloads requires an explicit server-side grant. [M6 CLI parity](../PLAN.md#p6--open-source-10) adds dashboard administrative workflows under the same policies.
 
 ### D.9 MCP server
 
-**MVP:** `backbricks mcp` starts a stdio MCP server (official TypeScript MCP SDK) inside the CLI, authenticated with the secret key from env/credentials. Setup in Claude Code: `claude mcp add backbricks -- npx backbricks mcp`. Remote MCP with OAuth is a later option (`docs/CLOUD.md`).
+**MVP:** `backbricks mcp` starts a stdio MCP server (official TypeScript MCP SDK) inside the CLI, authenticated with the secret key from env/credentials. Use the [CLI integration guide](integration/pages/cli.md) for registration. Remote MCP with OAuth is a later option (`docs/CLOUD.md`).
 
 | Tool | Scope | Behavior |
 |---|---|---|
@@ -542,7 +469,7 @@ Implementation: the public root entry in [`packages/sdk/src`](../packages/sdk/sr
 6. `backbricks test submit forms/contact` creates a test entry (secret key, `is_test`); `backbricks doctor` confirms no secret key in public variables.
 7. The owner sees the test entry in the dashboard, adds a notification email and confirms the origin.
 
-The P5 end-to-end test automates this scenario.
+The [Scenario A test](../e2e/scenario-a.spec.ts) automates this scenario with packaged clients.
 
 ### D.11 Documentation for humans and agents
 
@@ -579,7 +506,7 @@ Account screens use the [public Better Auth client](../apps/web/src/auth/client.
    └─ Settings
 ```
 
-The [authenticated shell](../apps/web/src/dashboard/shell.tsx) uses the live session’s organization, cancels/removes tenant queries before switching, and keys project queries by organization/project with an explicit organization header. Project forms use the generated admin client; empty allowed-origin lists require an explicit warning acknowledgement. M1 renders only operational module availability and mounts no domain pages.
+The [authenticated shell](../apps/web/src/dashboard/shell.tsx) uses the live session’s organization, cancels/removes tenant queries before switching, and keys project queries by organization/project with an explicit organization header. Project forms use the generated admin client; empty allowed-origin lists require an explicit warning acknowledgement. The shell mounts navigation for operational modules.
 
 Modules add themselves to the navigation through the web registry. Wording is deliberately non-technical ("Inbox"/"Entries" instead of "Submissions", "Embed" instead of "API").
 
@@ -673,9 +600,7 @@ See §B.6 and invariants I1–I3.
 
 ### F.5 Backup and restore (self-host)
 
-- Bundled backup container (`pg_dump` + `restic` to any target) and a documented restore guide
-- CI job: dump → restore → smoke test
-- Cloud backups (PITR, offsite, drills): `docs/CLOUD.md`
+M6 adds `pg_dump` and restic backup/restore, a written operator procedure and a CI restore smoke test. See [P6](../PLAN.md#p6--open-source-10) and the separate [cloud recovery design](CLOUD.md).
 
 ### F.6 Audit logging
 
@@ -698,16 +623,18 @@ cloud/                               # cloud only: plans, billing adapter (C1)
 examples/{nextjs,astro,html}/  skills/backbricks/   # MIT
 compose.yaml                         # dev environment, also used by CI
 deploy/compose/                      # production self-host compose, Caddyfile, .env.example (P6)
-docs/{adr,progress,guides,security}/
+docs/{adr,integration,modules,progress,releases}/
 ```
 
 Dependency directions between these: AGENTS.md §2.1.
 
 ### G.3 License
 
-AGPL-3.0-only for `apps/*`, `packages/{core,db,auth,adapters,modules,ui,api-contract}`, `cloud/`; **MIT** for `packages/sdk`, `packages/cli`, `examples/*`, `skills/*` (customer websites never embed AGPL code). Contributions under **DCO**; if dual licensing is ever wanted, switch to a CLA before the first external contribution. The registered **trademark** protects the cloud. Details: `LICENSING.md`, `TRADEMARKS.md`, ADR-0016. Legal review before 1.0.
+AGPL-3.0-only for `apps/*`, `packages/{core,db,auth,adapters,modules,ui,api-contract}`, `cloud/`; **MIT** for `packages/sdk`, `packages/cli`, `examples/*`, `skills/*` (customer websites never embed AGPL code). Contributions under **DCO**; if dual licensing is ever wanted, switch to a CLA before the first external contribution. See the project trademark policy for use of the Backbricks name. Details: `LICENSING.md`, `TRADEMARKS.md`, ADR-0016. Legal review before 1.0.
 
 ### G.4 Self-hosting (Docker Compose)
+
+Use the [preview image instructions](../README.md#run-the-preview-image) today. The [M6 plan](../PLAN.md#p6--open-source-10) covers the production Compose design below.
 
 Services: `caddy` (TLS, routes the app and, if needed, the storage domain), `app` (`serve`), `worker`, `migrate` (one-shot), `postgres:18`, `garage` (profile `storage`), `clamav` (profile `scan`), `backup` (profile `backup`, `pg_dump` + `restic`).
 
@@ -742,7 +669,7 @@ The difference is wired at startup via `DEPLOYMENT_MODE` and dependency injectio
 
 ## H. Technology choices
 
-Rationale and alternatives: the ADRs in §0. Pinned versions: `PLAN.md` → version list. Version rule: AGENTS.md §10 (check current versions, pin exactly, read the docs instead of guessing).
+Read the ADRs in §0 for rationale. Source the tool and image versions from [mise.toml](../mise.toml), [Compose](../compose.yaml), the [Dockerfile](../Dockerfile) and the manifests with [bun.lock](../bun.lock).
 
 | Area | Choice |
 |---|---|

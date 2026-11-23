@@ -1,8 +1,6 @@
 # Phase P1 – Platform Core (M1): report
 
-- **Branch:** `feat/p1-platform-core`; signed-off commits; PR-based review against `main`.
-- **Date:** 2026-11-06.
-- **Status:** All 39 M1 tasks are implemented. The maintainer explicitly approved Q11; production publishable authentication is wired and the local owner/image/security evidence is complete. Merge acceptance still requires green PR CI and maintainer/fresh-session review.
+Merged in [PR #6](https://github.com/nolliebigspin/backbricks/pull/6). All 39 tasks shipped, including the approved publishable key bootstrap. [Independent phase review](review-phase-1.md)
 
 ## Delivered
 
@@ -46,15 +44,3 @@ Browser acceptance covers signup/verification/reset through local Mailpit, a sec
 - Explicit language selection persists only the language code across navigation. No authentication/reset/key material is persisted.
 - Isolation snapshot revision reads now run sequentially on their single physical transaction connection instead of issuing concurrent driver calls.
 - E2E uses explicit open signup/local SMTP and synthetic per-test proxy addresses, trusted only by the local E2E server, so parallel workflows exercise independent rate-limit identities. Production trust/default signup policy is unchanged.
-
-## Remaining gates and risks
-
-1. Q11 was explicitly approved on 2026-11-06 and implemented in [ADR-0054](../adr/0054-publishable-key-authentication-bootstrap.md). Real database tests cover exact matching, fixed kind, IDs-only output, expiry/revocation/archive and scoped stale-candidate rejection; en/de browser journeys exercise production publishable challenge access and revocation.
-2. All implementation tasks are complete; there is no pending public-auth implementation gate. The approved exception remains limited to exact hash/active kind/project/IDs-only discovery.
-3. Green remote CI and review are required before merge and tracked on the feature-branch PR; local arm64 image evidence alone does not claim an amd64 GitHub runner result.
-4. A different fresh session must perform the phase review under AGENTS §9. This implementing chat has not issued a phase-review report.
-5. M2 still owns forms/personal-data erasure orchestration; M3 owns file scanning/upload workflows. No incomplete domain feature or personal erasure endpoint is claimed as M1 functionality.
-
-## Resume
-
-Review the feature-branch PR and obtain green CI before merging. A fresh session can perform the phase review under AGENTS §9. All implementation tasks are complete; proceed to M2 planning only after milestone acceptance. No merge or main-branch push is authorized.

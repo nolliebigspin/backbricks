@@ -1,6 +1,6 @@
 # Backbricks CLI
 
-The CLI runs on Node ≥ 20 and Bun. Create a project and a scoped secret in the dashboard, then provide `BACKBRICKS_SECRET_KEY` in your local environment.
+The CLI runs on Node ≥ 20 and Bun. The `npx` examples assume the npm preview is published. For the source build, use the local binary below. Create a project and a scoped secret in the dashboard, then provide `BACKBRICKS_SECRET_KEY` in your local environment.
 
 ```sh
 npx backbricks init --base-url https://backbricks.example.com --project "$BACKBRICKS_PROJECT_ID"

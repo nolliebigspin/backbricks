@@ -3,7 +3,7 @@
 - **Branch** · `feat/p4-reviews`, based on `76d3229`.
 - **Date** · 2026-11-22 (Asia/Ho_Chi_Minh).
 - **Approval** · Q21–Q23 and ADRs 0076–0077 approved before implementation.
-- **Review** · Separate standards and spec reviews of the implementation identified issues with write-scope responses, data-bearing database errors, read consistency, settings revisions, notification availability and snippets. Regressions cover the scope, privacy and consistency fixes. Human DCO review and the formal fresh-session phase review remain pending.
+- **Review** · Separate standards and spec reviews of the implementation identified issues with write-scope responses, data-bearing database errors, read consistency, settings revisions, notification availability and snippets. Regressions cover the scope, privacy and consistency fixes. Merged in [PR #19](https://github.com/nolliebigspin/backbricks/pull/19).
 
 ## Delivered
 
@@ -40,4 +40,4 @@
 
 The [Reviews changeset](../releases/reviews-developer-preview.changeset.md) is staged under `docs/releases/` until the Uploads preview has consumed its pending changeset. Cut the Uploads preview from a revision without Reviews, then activate the Reviews changeset. Changesets applied the two bumps in order in a temporary worktree, yielding `0.2.0` followed by `0.3.0`. The dry run disabled GitHub changelog generation in that worktree because the release token was unavailable. Release configuration in this branch retains GitHub changelog generation.
 
-The maintainer confirmed the local preview worked and authorized the signed-off commit, branch push and pull request on 2026-11-22. The formal phase review and release publication follow separately.
+See [milestones](../MILESTONES.md#m4--reviews--v030) for publication status.

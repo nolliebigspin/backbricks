@@ -4,18 +4,7 @@ Topics that only matter for the managed EU cloud (milestones C1–C3 in `docs/MI
 
 ## 1. Row-level security (C1.4)
 
-Postgres RLS is the second line of defense behind `withTenant` (ARCHITECTURE §B.6, ADR-0011). `withTenant` already sets `app.org_id` / `app.project_id` per transaction, so enabling RLS needs no data migration:
-
-```sql
-ALTER TABLE form_submissions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY tenant_isolation ON form_submissions
-  USING (organization_id = current_setting('app.org_id', true)
-         AND (current_setting('app.project_id', true) IS NULL
-              OR current_setting('app.project_id', true) = ''
-              OR project_id = current_setting('app.project_id', true)));
-```
-
-The app role has no `BYPASSRLS`; cross-tenant jobs (retention) use a dedicated role. Same policy on every tenant table, with tests.
+Postgres RLS adds a second layer behind the [tenant repositories](ARCHITECTURE.md#b6-tenant-isolation-in-the-data-layer). Build policies around the transaction-local organization and project settings. Test the app role without bypass privileges, pooled connections and separate authorization for global maintenance.
 
 ## 2. Usage metering and billing (C1.2, C1.3, C2.1)
 
@@ -32,17 +21,7 @@ The app role has no `BYPASSRLS`; cross-tenant jobs (retention) use a dedicated r
 
 ## 4. Hosting (C1.5)
 
-Verify before deciding; prices and availability change.
-
-| Provider | HQ | Compute in DE | Managed Postgres | Object storage | Assessment |
-|---|---|---|---|---|---|
-| **Hetzner** | DE | ✔ (Nuremberg, Falkenstein) | ✘ | ✔ (Nuremberg, Falkenstein, Helsinki) | Cheapest start; run the DB yourself. Price increases and object storage load issues in 2026 |
-| **IONOS Cloud** | DE | ✔ | ✔ | ✔ | Full managed stack in DE, pricier, weaker DX |
-| **STACKIT** | DE | ✔ | ✔ | ✔ | Sovereign, enterprise-oriented |
-| **Scaleway** | FR | ✘ (FR/NL/PL) | ✔ | ✔ | Best EU DX and managed services, but no DE region |
-| **OVHcloud** | FR | ✔ | ✔ | ✔ | Broad offering, mixed DX |
-
-**Recommendation for the start:** Hetzner Cloud (DE). VM 1 runs app + worker + ClamAV, VM 2 runs Postgres (dedicated vCPU, local NVMe), with pgBackRest/WAL-G backups to object storage at **another provider or location**. If running the DB yourself becomes too much, switch to managed Postgres at IONOS or STACKIT (DE). Files go to Hetzner Object Storage (DE); because storage is abstracted, switching providers is configuration plus a data copy. Use an EU-based SMTP provider with a DPA, self-hosted GlitchTip or Sentry's EU region for error tracking, and uptime checks plus logs (self-hosted Grafana/Loki or an EU provider) for monitoring.
+Select EU compute, Postgres, object storage and SMTP during C1. Compare current regional availability, total cost, recovery targets, data processing terms and operator effort. Keep backups at a separate provider or location and test recovery before onboarding. Provider choice stays behind the existing interfaces.
 
 ## 5. Technically buildable vs. legally to be reviewed (C2.4, C3.1)
 

@@ -13,4 +13,4 @@ Use the [integration guide](https://backbricks.app/docs/cli) or run `backbricks 
 6. Run `backbricks test submit forms/contact --data` with synthetic field values and `backbricks doctor`. The test entry checks non-file inputs. Verify a required upload through the public browser flow.
 7. Check that review submission begins in moderation and that only published reviews are rendered.
 
-For attachments, pass the ready upload.s `fileRef` in the form file field. Treat file references and presigned URLs as temporary credentials. The project owner performs privileged operations such as creating keys and approving access changes.
+For attachments, pass the ready upload's `fileRef` in the form file field. Treat file references and presigned URLs as temporary credentials. The project owner performs privileged operations such as creating keys and approving access changes.

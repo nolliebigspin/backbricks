@@ -2,7 +2,7 @@
 
 - **Branch** · `feat/p5-agent-ready` from `7aadc46`.
 - **Scope approval** · Q24–Q27 approved for implementation on 2026-11-23.
-- **Implementation review** · The standards and spec reviews identified credential target binding, parse-error redaction, private database errors, file-write races, instance-key parity, destructive plan visibility, generated type checks, MCP acceptance and docs gaps. The implementation addresses those findings. The maintainer approved opening the milestone PR. The formal phase review follows separately.
+- **Implementation review** · The standards and spec reviews identified credential target binding, parse-error redaction, private database errors, file-write races, instance-key parity, destructive plan visibility, generated type checks, MCP acceptance and docs gaps. The implementation addresses those findings. Merged in [PR #20](https://github.com/nolliebigspin/backbricks/pull/20) with green CI, including Scenario A, image smoke and DCO.
 
 ## Delivered
 
@@ -39,6 +39,6 @@
 
 The [M5 changeset](../releases/agent-ready-developer-preview.changeset.md) stays staged until the separate 0.2.0 Uploads and 0.3.0 Reviews previews have been versioned. M5 release candidates can be generated with `bun scripts/release/package-clients.ts 0.4.0`. The script produces tarballs and does not publish them.
 
-Npm names and publisher permissions still need the maintainer's confirmation under Q2. For the public release, verify the authenticated publisher and provenance through the approved npm publishing environment, then verify both packages from a clean registry install. A local tarball check cannot establish registry ownership or GitHub OIDC provenance.
+Registry ownership is tracked in [Q2](../../OPEN_QUESTIONS.md#q2). For the public release, verify the authenticated publisher and provenance through the approved npm publishing environment, then verify both packages from a clean registry install. A local tarball check cannot establish registry ownership or GitHub OIDC provenance.
 
 Both local npm publish dry runs succeeded. The registry reported that authentication is required for an actual publish.

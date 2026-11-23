@@ -3,6 +3,8 @@ title: CLI and MCP
 description: Configure a Backbricks integration from your editor or terminal.
 ---
 
+The `npx` commands require a published npm package. To build the local preview, follow the [CLI source instructions](https://github.com/nolliebigspin/backbricks/tree/main/packages/cli).
+
 Set `BACKBRICKS_SECRET_KEY` through your local environment. The dashboard shows a new secret key once.
 
 ```sh

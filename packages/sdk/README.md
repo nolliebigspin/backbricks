@@ -1,6 +1,6 @@
 # @backbricks/sdk
 
-TypeScript SDK for websites and servers (MIT). Dependency-free ESM; runs in browsers, Node ≥ 20 and Bun. Not published to npm before v0.4.
+TypeScript SDK for websites and servers (MIT). Dependency-free ESM; runs in browsers, Node ≥ 20 and Bun. See the [release status](../../docs/MILESTONES.md#m5--agent-ready--v040) for npm availability. To build both client tarballs from source, run `bun scripts/release/package-clients.ts 0.4.0` at the repository root.
 
 ```ts
 import { BackbricksError, createClient } from '@backbricks/sdk';
