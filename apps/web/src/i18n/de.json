@@ -114,6 +114,13 @@
     "invalid": "Prüfe die Felder. Verwende eine vollständige Website-Adresse wie https://example.com ohne Pfad."
   },
   "keys": {
+    "agentConnection": {
+      "title": "KI-Agent verbinden",
+      "description": "Erstelle einen Schlüssel mit begrenztem Zugriff für deinen Agenten. Stelle ihn lokal als BACKBRICKS_SECRET_KEY bereit.",
+      "origin": "Trage vor dem Test die genaue Adresse deiner Website in den Projekteinstellungen ein.",
+      "copy": "Prompt für den Agenten kopieren",
+      "prompt": "Integriere Backbricks für das Projekt {{project}} unter {{api}}. Lies BACKBRICKS_SECRET_KEY aus der lokalen Umgebung. Führe npx backbricks init --base-url {{api}} --project {{project}} und danach npx backbricks docs --agent aus. Der geheime Schlüssel gehört weder in den Browsercode noch ins Repository."
+    },
     "title": "Zugriffsschlüssel",
     "kind": "Schlüsseltyp",
     "publishable": "Öffentlicher Schlüssel",

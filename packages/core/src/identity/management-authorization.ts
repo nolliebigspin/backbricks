@@ -64,7 +64,12 @@ export function createManagementAuthorizer(deps: Dependencies) {
       const context: AuthenticatedTenantContext = Object.freeze({
         organizationId: key.organizationId,
         projectId: key.projectId,
-        principal: principalSchema.parse({ kind: 'secret_key', id: key.id, scopes: key.scopes }),
+        principal: principalSchema.parse({
+          kind: 'secret_key',
+          id: key.id,
+          scopes: key.scopes,
+          ...(policy.secretKey?.channel ? { channel: policy.secretKey.channel } : {}),
+        }),
       });
       await deps.withTenant(context, async () => {});
       if (!policy.secretKey || !key.scopes.includes(policy.secretKey.scope))

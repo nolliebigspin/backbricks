@@ -18,7 +18,7 @@ AI coding agents (Claude Code, Codex, Cursor) should integrate Backbricks withou
 ## Consequences
 
 - Agents work with files and commands they already understand; changes are reviewable diffs and can be rolled back via revisions.
-- Secret keys with scopes and presets limit what an agent can do; key management stays in the dashboard (I7).
+- Secret keys with scopes and presets limit what an agent can do; key creation and revocation stay in the dashboard (I7). An explicit key inventory grant is described in [ADR-0078](0078-scoped-key-inventory.md).
 - The SDK and CLI must stay free of AGPL code and run on Node ≥ 20 and Bun (I18).
 - `backbricks doctor` catches secret keys in public env variables.
 

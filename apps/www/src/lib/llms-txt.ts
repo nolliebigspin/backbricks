@@ -1,9 +1,16 @@
-import { brickStatusLabel, bricks, faq, links, site, upcomingBricks } from '../content/site.ts';
+import {
+  brickStatusLabel,
+  bricks,
+  faq,
+  links,
+  site,
+  siteUrl,
+  upcomingBricks,
+} from '../content/site.ts';
 
 /**
  * `/llms.txt` (llmstxt.org): a Markdown summary for language models and answer engines, built
- * from the same data as the landing page so the two can't drift apart. M5 (P5.7) adds the docs
- * links and `llms-full.txt`.
+ * from the same data as the landing page so the two can't drift apart.
  */
 export function llmsTxt(): string {
   const status = bricks
@@ -32,6 +39,9 @@ export function llmsTxt(): string {
     ...faq.flatMap((item) => [`### ${item.question}`, '', item.answer, '']),
     '## Project',
     '',
+    `- [Documentation](${siteUrl}/docs): quickstarts and CLI setup`,
+    `- [API reference](${siteUrl}/docs/api): OpenAPI operations and schema`,
+    `- [Full documentation for agents](${siteUrl}/llms-full.txt): expanded Markdown guides`,
     `- [Source code](${links.repo}): repository, README and issues`,
     `- [Architecture](${links.architecture}): decisions, data model, API, SDK and CLI`,
     `- [Roadmap](${links.roadmap}): milestones up to the open-source 1.0`,

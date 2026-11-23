@@ -33,6 +33,7 @@ const keyPrincipalSchema = secretKeyIdentitySchema
   .extend({
     kind: z.literal('secret_key'),
     scopes: secretKeyIdentitySchema.shape.scopes.readonly(),
+    channel: z.literal('mcp').optional(),
   })
   .strict()
   .readonly();

@@ -8,6 +8,7 @@ import type { ServerServices } from '../services.ts';
 import { challengeRoutes } from './challenge.ts';
 import { configurationRoutes } from './configuration.ts';
 import { instanceRoutes } from './instances.ts';
+import { mcpRoutes } from './mcp.ts';
 import { metaRoutes } from './meta.ts';
 import { moduleRoutes, type ModulePublicExecutor } from './modules.ts';
 import { notificationRuleRoutes } from './notification-rules.ts';
@@ -36,6 +37,7 @@ export function platformRoutes(
   metaRoutes(api, services.modules, services.authCapabilities);
   instanceRoutes(api, services);
   configurationRoutes(api, services);
+  mcpRoutes(api, services);
   challengeRoutes(api, {
     captcha: services.captcha,
     issue: createChallengeService({

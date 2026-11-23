@@ -4,7 +4,6 @@ import {
   asc,
   count,
   desc,
-  DrizzleQueryError,
   eq,
   gt,
   inArray,
@@ -19,7 +18,7 @@ import {
 
 import type { DbTransaction } from '../client.ts';
 import { reviewPublication, reviews as t } from '../schema/reviews.ts';
-import { beforeCursor, type RepositoryScope } from './scope.ts';
+import { beforeCursor, withoutBoundValues, type RepositoryScope } from './scope.ts';
 
 type Insert = Omit<typeof t.$inferInsert, 'organizationId' | 'projectId' | 'moduleType'>;
 type Changes = Pick<
@@ -62,16 +61,6 @@ function publishedBefore(sort: Sort, before: Position | undefined) {
   return or(rating, and(eq(t.rating, before.rating), time));
 }
 
-async function protectReviewValues<T>(query: PromiseLike<T>): Promise<T> {
-  try {
-    return await query;
-  } catch (error) {
-    // Drizzle includes bound values in errors. Keep review content and subject email out of logs.
-    if (error instanceof DrizzleQueryError) throw new AppError('internal_error');
-    throw error;
-  }
-}
-
 export function createReviewsRepository(tx: DbTransaction, scope: RepositoryScope) {
   const where = (...conditions: (SQL | undefined)[]) => {
     scope.project();
@@ -96,7 +85,7 @@ export function createReviewsRepository(tx: DbTransaction, scope: RepositoryScop
 
   return {
     async insert(input: Insert) {
-      await protectReviewValues(tx.insert(t).values({ ...input, ...scope.project() }));
+      await withoutBoundValues(tx.insert(t).values({ ...input, ...scope.project() }));
     },
     async get(id: string, now: Date, lock = false) {
       const query = tx
@@ -209,7 +198,7 @@ export function createReviewsRepository(tx: DbTransaction, scope: RepositoryScop
       return result.rowCount ?? 0;
     },
     findBySubject(email: string, page: RepositoryPage) {
-      return protectReviewValues(
+      return withoutBoundValues(
         tx
           .select()
           .from(t)
@@ -219,7 +208,7 @@ export function createReviewsRepository(tx: DbTransaction, scope: RepositoryScop
       );
     },
     deleteBySubject(email: string, limit: number) {
-      return protectReviewValues(deleteBatch(where(eq(t.subjectEmail, email)), limit));
+      return withoutBoundValues(deleteBatch(where(eq(t.subjectEmail, email)), limit));
     },
     eraseBatch(limit: number) {
       return deleteBatch(where(), limit);

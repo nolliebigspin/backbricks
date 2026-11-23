@@ -154,5 +154,8 @@ export function createEventService({ clock, ids }: Dependencies): EventService {
 
 /** Minimal attributable actor projection; never copies session/key credential material. */
 export function principalActor(principal: Principal): Pick<AuditMutation, 'actorType' | 'actorId'> {
-  return { actorType: principal.kind === 'session' ? 'user' : 'api_key', actorId: principal.id };
+  return {
+    actorType: principal.kind === 'session' ? 'user' : (principal.channel ?? 'api_key'),
+    actorId: principal.id,
+  };
 }

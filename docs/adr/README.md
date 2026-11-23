@@ -87,3 +87,7 @@ Short documents that record significant decisions: deviations from or refinement
 | [0075](0075-running-bond-visual-identity.md) | "Running bond" visual identity and dashboard frame | proposed |
 | [0076](0076-typed-page-cursors.md) | Typed page cursors | accepted (P4, Q21) |
 | [0077](0077-conditional-public-review-reads.md) | Conditional public review reads | accepted (P4, Q22) |
+
+- [ADR-0078](0078-scoped-key-inventory.md) · Scoped key inventory
+- [ADR-0079](0079-test-form-submissions.md) · Scoped test form submissions
+- [ADR-0080](0080-mcp-audit-channel.md) · MCP audit channel

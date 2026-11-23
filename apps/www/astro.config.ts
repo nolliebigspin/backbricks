@@ -1,5 +1,6 @@
 import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
+import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
 
@@ -10,7 +11,31 @@ export default defineConfig({
   // Matches Vercel's `cleanUrls` + `trailingSlash: false` (vercel.json): /privacy, not /privacy/.
   trailingSlash: 'never',
   build: { format: 'file' },
-  integrations: [react(), sitemap()],
+  integrations: [
+    react(),
+    sitemap(),
+    starlight({
+      title: 'Backbricks Docs',
+      disable404Route: true,
+      expressiveCode: false,
+      components: { Head: './src/components/docs-head.astro' },
+      sidebar: [
+        { label: 'Start here', link: '/docs' },
+        { label: 'CLI and MCP', link: '/docs/cli' },
+        {
+          label: 'Quickstarts',
+          items: [
+            { label: 'Next.js', link: '/docs/nextjs' },
+            { label: 'Astro', link: '/docs/astro' },
+            { label: 'Vue', link: '/docs/vue' },
+            { label: 'HTML', link: '/docs/html' },
+          ],
+        },
+        { label: 'API reference', link: '/docs/api' },
+        { label: 'Errors', link: '/errors' },
+      ],
+    }),
+  ],
   // Prism highlights with classes; Shiki's inline styles would break the strict CSP below.
   markdown: { syntaxHighlight: 'prism' },
   security: {

@@ -38,7 +38,8 @@ const characters = (value: string) => [...value].length;
 
 /** Strings are trimmed, line endings unified and empty answers collapse to absent. */
 function text(raw: unknown): string | undefined | null {
-  if (typeof raw !== 'string') return null;
+  if (typeof raw !== 'string' || !raw.isWellFormed() || raw.includes(String.fromCharCode(0)))
+    return null;
   const value = raw.replaceAll('\r\n', '\n').replaceAll('\r', '\n').trim();
   return value === '' ? undefined : value;
 }

@@ -5,17 +5,20 @@
   "license": "AGPL-3.0-only",
   "type": "module",
   "scripts": {
-    "dev": "bun --bun astro dev",
-    "build": "bun --bun astro build",
+    "dev": "bun ../../scripts/api/site-assets.ts && bun --bun astro dev",
+    "build": "bun ../../scripts/api/site-assets.ts && bun --bun astro build",
     "preview": "bun --bun astro preview",
-    "typecheck": "bun --bun astro sync && tsc -p tsconfig.json",
+    "typecheck": "bun ../../scripts/api/site-assets.ts && bun --bun astro sync && tsc -p tsconfig.json",
     "test": "bun test"
   },
   "dependencies": {
+    "@astrojs/markdown-remark": "7.3.10",
     "@astrojs/prism": "4.1.2",
     "@astrojs/react": "7.1.2",
     "@astrojs/sitemap": "3.7.4",
+    "@astrojs/starlight": "0.43.1",
     "@backbricks/ui": "workspace:*",
+    "@scalar/api-reference": "1.83.0",
     "@tailwindcss/vite": "4.3.4",
     "@vercel/analytics": "2.0.1",
     "astro": "7.4.5",

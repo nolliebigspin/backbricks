@@ -84,6 +84,7 @@ flowchart LR
 
 ### M5 · Agent-ready → `v0.4.0`
 - **Phase:** P5 · **Effort:** 12–15 PD
+- **Planning:** [Approved P5 tasks](../PLAN.md#phase-p5--agent-ready-m5--v040--approved-2026-11-23) and [decisions](../OPEN_QUESTIONS.md#p5-planning-decisions-for-execution). The plan estimates 131 h plus a 26 h reserve. [Local implementation evidence](progress/phase-5.md).
 - **Goal:** An AI coding agent can integrate all three modules without human help (scenario A).
 - **Scope:** full SDK (+ admin client), CLI (`init`, `pull`, `diff`, `push`, `validate`, `codegen`, `test`, `doctor`, `docs`), stdio MCP server, agent skill, `llms.txt`, docs site (Starlight at `backbricks.app/docs` inside `apps/www`, plus `/errors/*` and `/schema/*`), examples (Next.js, Astro, HTML), "Connect an AI agent" wizard.
 - **Exit criteria:**

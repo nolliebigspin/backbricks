@@ -7,8 +7,8 @@ import { CONFIG_SCHEMA_ID, configDocumentSchema, configEntrySchema } from './sch
 
 /** Offline editor schema, derived from the same envelope and selected module schemas as validation. */
 export function configurationJsonSchema(registry: ModuleRegistry): Record<string, unknown> {
-  const root = z.toJSONSchema(configDocumentSchema);
-  const entry = z.toJSONSchema(configEntrySchema);
+  const root = z.toJSONSchema(configDocumentSchema, { io: 'input' });
+  const entry = z.toJSONSchema(configEntrySchema, { io: 'input' });
   const schema = {
     ...root,
     $id: CONFIG_SCHEMA_ID,
@@ -22,7 +22,7 @@ export function configurationJsonSchema(registry: ModuleRegistry): Record<string
             module.resourceName.plural,
             {
               type: 'object',
-              propertyNames: z.toJSONSchema(instanceKeySchema),
+              propertyNames: z.toJSONSchema(instanceKeySchema, { io: 'input' }),
               additionalProperties: {
                 ...entry,
                 properties: {

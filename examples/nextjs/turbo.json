@@ -1,0 +1,10 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "env": ["NEXT_PUBLIC_BACKBRICKS_*", "NEXT_TELEMETRY_DISABLED"],
+      "outputs": [".next/**", "!.next/cache/**"]
+    }
+  }
+}

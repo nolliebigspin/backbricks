@@ -12,6 +12,7 @@ export const KEY_SCOPES = [
   { name: 'config:destructive', module: null },
   { name: 'project:write', module: null },
   { name: 'test:write', module: null },
+  { name: 'keys:read', module: null },
   { name: 'stats:read', module: null },
   { name: 'forms:submit', module: 'forms' },
   { name: 'uploads:create', module: 'uploads' },

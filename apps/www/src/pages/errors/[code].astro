@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../../layouts/base-layout.astro';
+import catalog from '../../generated/errors.json';
+
+export function getStaticPaths() {
+  return Object.entries(catalog).map(([code, error]) => ({ params: { code }, props: { error } }));
+}
+
+const { code } = Astro.params;
+const { error } = Astro.props;
+---
+<BaseLayout title={`${error.title} | Backbricks API`} description={`HTTP ${error.status} · ${code}`}>
+  <section class="mx-auto max-w-3xl px-4 py-12">
+    <a href="/errors">All API errors</a>
+    <h1 class="text-3xl font-semibold">{error.title}</h1>
+    <p class="mt-4">HTTP {error.status} · <code>{code}</code></p>
+    <p>Use the response's request ID when reporting the issue.</p>
+    <a href="/docs/api">Open the API reference</a>
+  </section>
+</BaseLayout>

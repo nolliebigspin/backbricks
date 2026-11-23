@@ -3,7 +3,14 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "env": ["PUBLIC_VERCEL_OBSERVABILITY_*"]
+      "env": ["PUBLIC_VERCEL_OBSERVABILITY_*"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/packages/api-contract/openapi.json",
+        "$TURBO_ROOT$/packages/cli/src/generated/config-schema.json",
+        "$TURBO_ROOT$/packages/core/src/errors/codes.ts",
+        "$TURBO_ROOT$/docs/integration/**"
+      ]
     }
   }
 }

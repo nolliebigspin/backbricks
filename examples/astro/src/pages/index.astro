@@ -1,0 +1,37 @@
+---
+const baseUrl = import.meta.env.PUBLIC_BACKBRICKS_URL;
+const publishableKey = import.meta.env.PUBLIC_BACKBRICKS_KEY;
+---
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><title>Backbricks and Astro</title></head>
+  <body>
+    <main id="integration" data-url={baseUrl} data-key={publishableKey}>
+      <h1>Backbricks integration example</h1>
+      {(!baseUrl || !publishableKey) && <p>Link this site with the Backbricks CLI to enable submissions.</p>}
+      <h2>Contact</h2>
+      <form id="contact-form">
+        <label>Name <input name="name" required /></label>
+        <label>Email <input name="email" type="email" required /></label>
+        <label>Message <textarea name="message" required></textarea></label>
+        <label>CV (PDF) <input name="cv" type="file" accept="application/pdf" required /></label>
+        <label><input name="privacy" type="checkbox" required /> I agree to the privacy notice.</label>
+        <button type="submit">Send contact form</button>
+        <output aria-live="polite"></output>
+      </form>
+      <h2>Testimonials</h2>
+      <ul id="published-reviews"></ul>
+      <form id="review-form">
+        <label>Reviewer name <input name="author" required /></label>
+        <label>Rating <input name="rating" type="number" min="1" max="5" required /></label>
+        <label>Review <textarea name="review" required></textarea></label>
+        <button type="submit">Send review</button>
+        <output aria-live="polite"></output>
+      </form>
+    </main>
+    <script>
+      import { mountIntegration } from '../integrate.ts';
+      mountIntegration();
+    </script>
+  </body>
+</html>

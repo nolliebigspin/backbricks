@@ -153,6 +153,36 @@ Decisions for the maintainer, started in P0 planning (2026-11-04), extended for 
 - **Needed by:** P4.0a, before application code under `docs/MODULES.md` rule 4.
 - **Answer (2026-11-22):** Approved by the maintainer (“Okay accept and implement”).
 
+## P5 planning: decisions for execution
+
+### Q24 – Permit scoped key metadata reads for `backbricks keys list`?
+
+- **Context:** Q9 and ADR-0014 leave key management in the dashboard. The existing list API is session-only. The M5 CLI promises a metadata-only listing even though it uses a project-bound bearer key.
+- **Recommendation:** Add optional `keys:read` for the existing project key metadata endpoint only. Leave the default agent preset, MCP surface and dashboard session requirements for key creation and revocation intact. If inventory must stay session-only, defer this CLI command and update the M5 contract.
+- **Needed by:** P5.4e.
+- **Answer (2026-11-23):** Approved in the M5 plan.
+
+### Q25 – What should a CLI test submission do with a required attachment?
+
+- **Context:** Scenario A expects a flagged test entry on the contact form after adding a required CV field. A synthetic check should avoid consuming live upload references or triggering customer notifications and live metrics.
+- **Recommendation:** Use the existing `test:write` grant for a forms-only test operation. Validate normal non-file inputs, report skipped file checks and persist a flagged test entry with no attachment. Keep real upload and claim validation in the browser acceptance path. A future test with actual file content would need an explicitly scoped test-upload lifecycle.
+- **Needed by:** P5.4d and P5.6c.
+- **Answer (2026-11-23):** Approved in the M5 plan.
+
+### Q26 – How should the server attribute MCP mutations?
+
+- **Context:** The audit enum already declares `mcp`, while all current bearer mutations derive `api_key` from the authenticated principal. The stdio MCP client uses the same HTTP credentials as the CLI.
+- **Recommendation:** Use a small set of server-owned MCP mutation routes for bound config apply, test submission and atomic origin addition. Reuse the same services and scope checks and record the authenticated key ID with audit channel `mcp`. The label identifies the server route used. Origin changes need the existing explicit `project:write` grant. Keep the default agent preset unchanged.
+- **Needed by:** P5.6b–c.
+- **Answer (2026-11-23):** Approved in the M5 plan.
+
+### Q27 – Approve the M5 estimate and npm preview sequencing?
+
+- **Context:** The [P5 task plan](PLAN.md#phase-p5--agent-ready-m5--v040--approved-2026-11-23) estimates 131 h plus a 26 h reserve against the original 12–15 PD allowance. Remote tags end at `v0.1.0`. On 2026-11-23 the public npm registry returned 404 for both intended package names. Q2 still needs the maintainer to verify ownership and publish access. M5 calls for the first npm preview, while P6 covers the stable release pipeline.
+- **Recommendation:** Approve the revised estimate. Assign the maintainer to verify Q2 early and to queue separate Uploads and Reviews versioning before M5. Prepare provenance and first-install checks for both M5 packages. Publish the M5 preview only after separate authorization. Keep stable 1.0 and production deployment scope in M6.
+- **Needed by:** P5.0a for scope and ownership, P5.10b for release verification.
+- **Answer (2026-11-23):** The maintainer approved the plan and requested implementation. The maintainer still owns npm name/access verification under Q2 before release preparation, and authorization to publish remains separate.
+
 ## Decided during P4 execution, please confirm
 
 - **D69 / P4.3c:** Public list reads confirm the collection revision after fetching rows. A concurrent settings change returns a retryable `409` before serializing data under an obsolete field policy. [ADR-0077](docs/adr/0077-conditional-public-review-reads.md)

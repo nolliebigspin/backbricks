@@ -480,15 +480,15 @@ sequenceDiagram
 | `@backbricks/react` (later) | MIT | Unstyled hooks `useForm`, `useUpload`, `useReviews` |
 
 ```ts
-const backbricks = createClient({ publishableKey: import.meta.env.PUBLIC_BACKBRICKS_KEY });
-const cv = await backbricks.uploads.upload(file, { zone: 'cv', onProgress: (p) => setProgress(p.percent) });
-await backbricks.forms.submit('contact', { name, email, message, cv: [cv.ref], privacy: true }); // throws BackbricksError
+const backbricks = createClient({ baseUrl: import.meta.env.PUBLIC_BACKBRICKS_URL, publishableKey: import.meta.env.PUBLIC_BACKBRICKS_KEY });
+const cv = await backbricks.uploads.upload('cv', file, { onProgress: ({ loaded, total }) => setProgress(loaded / total) });
+await backbricks.forms.submit('contact', { name, email, message, cv: [cv.fileRef], privacy: true }); // throws BackbricksError
 const { data, nextCursor } = await backbricks.reviews.list('testimonials', { sort: 'newest', limit: 10 });
 ```
 
 `backbricks codegen` generates form types so `forms.submit('contact', …)` is typed (module augmentation of a `BackbricksSchema` interface).
 
-Implemented so far (M2): the minimal root entry in [`packages/sdk/src`](../packages/sdk/src) (`createClient` needs `baseUrl` until a hosted default exists; publishable keys travel as `?key=`), see [ADR-0062](adr/0062-minimal-sdk-snippets-and-release-version.md).
+Implementation: the public root entry in [`packages/sdk/src`](../packages/sdk/src) (`createClient` needs `baseUrl` until a hosted default exists; publishable keys travel as `?key=`), see [ADR-0062](adr/0062-minimal-sdk-snippets-and-release-version.md).
 
 ### D.8 CLI
 
@@ -503,11 +503,11 @@ Implemented so far (M2): the minimal root entry in [`packages/sdk/src`](../packa
 | `backbricks push [--allow-destructive]` | Apply the plan (two-step: dry run → `planHash` → apply) |
 | `backbricks validate` | Validate the config file locally against its JSON Schema |
 | `backbricks codegen [--out src/backbricks.gen.ts]` | Generate TypeScript types |
-| `backbricks test submit forms/contact --data '{…}'` | Test submission (`is_test`) |
+| `backbricks test submit forms/contact --data '{…}'` | Flagged forms test entry, reporting skipped file checks (ADR-0079) |
 | `backbricks doctor` | Checks connectivity, origins, keys; scans for `bb_sk_` in public env prefixes (`NEXT_PUBLIC_`, `VITE_`, `PUBLIC_`, `NUXT_PUBLIC_`) and build output |
 | `backbricks docs [--agent]` | Print the integration guide as Markdown |
 | `backbricks mcp` | Start the MCP server over stdio |
-| `backbricks keys list` | List keys (metadata only) |
+| `backbricks keys list` | List project key metadata with the explicit `keys:read` grant (ADR-0078) |
 
 **Config-as-code** (`backbricks.config.json`) uses the implemented [document schema](../packages/core/src/configuration/schemas.ts) and [pure planner](../packages/core/src/configuration/planner.ts), following ADR-0042. Root fields are `$schema`, `project` and `modules`; sections use each module's declared plural resource name. Every instance has an explicit name/status/module-version/config-version envelope around its module-owned `config`. Existing instances require the current config-version precondition. Notification recipients, credentials and personal records are excluded. Omitted sections preserve state; explicit empty sections request destructive configuration archival. No production domain configuration is implemented in M1.
 
@@ -530,14 +530,14 @@ Implemented so far (M2): the minimal root entry in [`packages/sdk/src`](../packa
 | `test_submit` | `test:write` | Test submission incl. response |
 | `stats_get` | `stats:read` | Counts without personal data |
 
-**Security boundaries:** no delete tools, no reading of personal data in the default preset, no key management. Every change is audited with `actor_type='mcp'` and can be rolled back via revisions. Tool descriptions contain no secrets.
+**Security boundaries:** no delete tools, no reading of personal data in the default preset, no key management. Successful mutations are audited with `actor_type='mcp'` and the authenticated key ID via server-owned routes (ADR-0080). Tool descriptions contain no secrets.
 
 ### D.10 Scenario A: an agent integrates a contact form, upload and reviews
 
 1. The site owner signs up, creates project "example.com" and a key with preset "AI agent / CLI" (shown once).
 2. The owner asks the coding agent for "a contact form with CV upload and testimonials" and provides `BACKBRICKS_SECRET_KEY` locally.
 3. `backbricks init --project prj_…` reads `/integration` and writes `backbricks.config.json` and `.env.local` (`PUBLIC_BACKBRICKS_KEY=bb_pk_…`).
-4. The agent extends the config (`forms.contact`, `uploadZones.cv`, `reviewCollections.testimonials`) and runs `backbricks push --yes` (dry run → plan → apply with `planHash`).
+4. The agent extends the config (`modules.forms.contact`, `modules['upload-zones'].cv`, `modules['review-collections'].testimonials`) and runs `backbricks push --yes` (dry run → plan → apply with `planHash`).
 5. `backbricks codegen`, then the agent builds its own UI components with `@backbricks/sdk`.
 6. `backbricks test submit forms/contact` creates a test entry (secret key, `is_test`); `backbricks doctor` confirms no secret key in public variables.
 7. The owner sees the test entry in the dashboard, adds a notification email and confirms the origin.

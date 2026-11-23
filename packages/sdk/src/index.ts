@@ -20,7 +20,7 @@ export function createClient(options: ClientOptions): BackbricksClient {
   return createClientFor<BackbricksSchema>(options);
 }
 
-export type { ClientOptions } from './transport.ts';
+export type { ClientOptions, RequestOptions } from './transport.ts';
 export type { FormValues, FormsClient, SubmitOptions, SubmitResult } from './forms.ts';
 export { BackbricksError, type FieldError } from './errors.ts';
 

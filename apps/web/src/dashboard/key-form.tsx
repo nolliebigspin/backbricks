@@ -17,7 +17,13 @@ function isPreset(value: string): value is Preset {
   return Object.hasOwn(presetCopy, value);
 }
 
-export function KeyForm({ create }: { create: (body: Creation) => Promise<void> }) {
+export function KeyForm({
+  create,
+  agent = false,
+}: {
+  create: (body: Creation) => Promise<void>;
+  agent?: boolean;
+}) {
   const { t } = useTranslation();
   const [kind, setKind] = useState<Creation['kind']>('publishable');
   const [preset, setPreset] = useState<Preset>('agent');
@@ -34,23 +40,31 @@ export function KeyForm({ create }: { create: (body: Creation) => Promise<void> 
             name: formText(values, 'name'),
             expiresAt: nonExpiring ? null : new Date(formText(values, 'expiry')).toISOString(),
           };
-          await create(kind === 'publishable' ? { ...fields, kind } : { ...fields, kind, preset });
+          await create(
+            agent
+              ? { ...fields, kind: 'secret', preset: 'agent' }
+              : kind === 'publishable'
+                ? { ...fields, kind }
+                : { ...fields, kind, preset },
+          );
         });
       }}
     >
       <Field name="name" label={t('common.name')} required maxLength={120} />
-      <ChoiceField
-        label={t('keys.kind')}
-        value={kind}
-        onChange={(e) => setKind(e.target.value === 'secret' ? 'secret' : 'publishable')}
-      >
-        <option value="publishable">{t('keys.publishable')}</option>
-        <option value="secret">{t('keys.secret')}</option>
-      </ChoiceField>
+      {!agent && (
+        <ChoiceField
+          label={t('keys.kind')}
+          value={kind}
+          onChange={(e) => setKind(e.target.value === 'secret' ? 'secret' : 'publishable')}
+        >
+          <option value="publishable">{t('keys.publishable')}</option>
+          <option value="secret">{t('keys.secret')}</option>
+        </ChoiceField>
+      )}
       <p className="text-sm text-muted-foreground">
-        {t(kind === 'secret' ? 'keys.secretHint' : 'keys.publicHint')}
+        {t(agent || kind === 'secret' ? 'keys.secretHint' : 'keys.publicHint')}
       </p>
-      {kind === 'secret' && (
+      {!agent && kind === 'secret' && (
         <>
           <ChoiceField
             label={t('keys.access')}
