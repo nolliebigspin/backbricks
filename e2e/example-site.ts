@@ -56,6 +56,18 @@ export async function setUpExample(
   language: TestLanguage,
   siteOrigin?: string,
 ) {
+  const project = await provisionExample(page, baseURL, language);
+  const site = await serveExample(project.publishableKey, `${baseURL}/v1`, siteOrigin);
+  try {
+    await allowExampleOrigin(project, site.url);
+  } catch (error) {
+    await site.close();
+    throw error;
+  }
+  return { ...project, site };
+}
+
+export async function provisionExample(page: Page, baseURL: string, language: TestLanguage) {
   const email = await createAccount(page, language);
   const organizationId = await createOrganization(
     page,
@@ -76,25 +88,22 @@ export async function setUpExample(
   });
   expect(response.status()).toBe(201);
   const { token } = z.object({ token: z.string() }).parse(await response.json());
-  const site = await serveExample(token, `${baseURL}/v1`, siteOrigin);
-  try {
-    expect(
-      (
-        await page.request.patch(project, { headers, data: { allowedOrigins: [site.url] } })
-      ).status(),
-    ).toBe(200);
-  } catch (error) {
-    await site.close();
-    throw error;
-  }
   return {
     email,
     organizationId,
     projectId,
     project,
     headers,
-    site,
     publishableKey: token,
     request: page.request,
   };
+}
+
+export async function allowExampleOrigin(
+  { project, headers, request }: Awaited<ReturnType<typeof provisionExample>>,
+  origin: string,
+) {
+  expect(
+    (await request.patch(project, { headers, data: { allowedOrigins: [origin] } })).status(),
+  ).toBe(200);
 }

@@ -1,5 +1,7 @@
-import { createAccount, createOrganization, createProject } from './accounts.ts';
-import { expect, test } from './fixtures.ts';
+import { createAccount, createOrganization, createProject, messages } from './accounts.ts';
+import { expect, test, testHeaders } from './fixtures.ts';
+
+test.use({ trace: 'off' });
 
 test('secret reveal is ephemeral, clipboard denial is safe and revocation is enforced', async ({
   page,
@@ -70,4 +72,53 @@ test('secret reveal is ephemeral, clipboard denial is safe and revocation is enf
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.reload();
   await expect(page).toHaveURL(/\/login\?/);
+});
+
+test.describe('agent key connection', () => {
+  for (const language of ['en', 'de'] as const) {
+    test(`connects an agent with a credential-free prompt (${language})`, async ({ browser }) => {
+      const copy = messages(language);
+      const context = await browser.newContext({
+        locale: language === 'de' ? 'de-DE' : 'en-US',
+        viewport: { width: 1360, height: 900 },
+        extraHTTPHeaders: testHeaders(),
+      });
+      try {
+        const page = await context.newPage();
+        await createAccount(page, language);
+        await createOrganization(page, 'Agent organization', undefined, language);
+        const projectId = await createProject(page, 'Agent website', language);
+        await page.setViewportSize({ width: 390, height: 844 });
+        await page.goto(`/projects/${projectId}/embed`);
+        const wizard = page.locator('details').filter({ hasText: copy.keys.agentConnection.title });
+        await wizard.locator('summary').click();
+        await expect(wizard).toContainText(copy.keys.noPublicKey);
+        await wizard.getByLabel(copy.common.name, { exact: true }).fill('Agent connection');
+        await wizard.getByLabel(copy.keys.noExpiry).check();
+        const request = page.waitForRequest(
+          (outgoing) =>
+            outgoing.method() === 'POST' && new URL(outgoing.url()).pathname.endsWith('/keys'),
+        );
+        await wizard.getByRole('button', { name: copy.keys.create, exact: true }).click();
+        expect((await request).postDataJSON()).toMatchObject({ kind: 'secret', preset: 'agent' });
+        const dialog = page.getByRole('dialog');
+        const token = await dialog.getByLabel(copy.keys.revealTitle).inputValue();
+        await dialog.getByRole('button', { name: copy.common.close, exact: true }).click();
+        await page.evaluate(
+          'Object.defineProperty(navigator, "clipboard", { value: {writeText: async (text) => { globalThis.copiedPrompt = text; }}, configurable: true })',
+        );
+        await wizard.getByRole('button', { name: copy.keys.agentConnection.copy }).click();
+        await expect(wizard.getByRole('status')).toContainText(copy.common.copied);
+        const prompt: string = await page.evaluate('globalThis.copiedPrompt');
+        expect(prompt).toContain('BACKBRICKS_SECRET_KEY');
+        expect(prompt).toContain(projectId);
+        expect(prompt.includes(token)).toBe(false);
+        await wizard.locator('summary').click();
+        await wizard.locator('summary').click();
+        await expect(page.getByRole('dialog')).toHaveCount(0);
+      } finally {
+        await context.close();
+      }
+    });
+  }
 });

@@ -1,4 +1,5 @@
 import { AppError } from '../errors/app-error.ts';
+import { allowedOriginsSchema } from '../http/origins.ts';
 import type { Ids } from '../ids/type-id.ts';
 import type { Project } from '../platform/models.ts';
 import { principalActor, type AuditService, type EventService } from '../services/activity.ts';
@@ -43,6 +44,27 @@ export function createProjectService(deps: {
       payload: { changedFields },
     });
   }
+  async function update(
+    tx: TenantTransaction,
+    previous: Project,
+    input: ProjectPatch,
+    requestId?: string,
+  ): Promise<Project> {
+    const data = projectPatchSchema.parse(input);
+    const changedFields = projectCreateSchema
+      .keyof()
+      .options.filter(
+        (key) =>
+          data[key] !== undefined && JSON.stringify(previous[key]) !== JSON.stringify(data[key]),
+      );
+    if (changedFields.length === 0) return previous;
+    const project = await tx.repositories.projects.update(previous.id, {
+      ...data,
+      updatedAt: deps.clock.now(),
+    });
+    await record(tx, CORE_EVENTS.projectUpdated, project, changedFields, requestId);
+    return project;
+  }
   return {
     async create(
       tx: TenantTransaction,
@@ -68,21 +90,18 @@ export function createProjectService(deps: {
       input: ProjectPatch,
       requestId?: string,
     ): Promise<Project> {
-      const data = projectPatchSchema.parse(input);
       const previous = await tx.repositories.projects.get(id, { lock: true });
-      const changedFields = projectCreateSchema
-        .keyof()
-        .options.filter(
-          (key) =>
-            data[key] !== undefined && JSON.stringify(previous[key]) !== JSON.stringify(data[key]),
-        );
-      if (changedFields.length === 0) return previous;
-      const project = await tx.repositories.projects.update(id, {
-        ...data,
-        updatedAt: deps.clock.now(),
-      });
-      await record(tx, CORE_EVENTS.projectUpdated, project, changedFields, requestId);
-      return project;
+      return update(tx, previous, input, requestId);
+    },
+    async addOrigin(tx: TenantTransaction, id: string, origin: string, requestId?: string) {
+      const principal = tx.context.principal;
+      if (principal?.kind !== 'secret_key' || !principal.scopes.includes('project:write'))
+        throw new AppError('forbidden');
+      const previous = await tx.repositories.projects.get(id, { lock: true });
+      const allowedOrigins = allowedOriginsSchema.parse([
+        ...new Set([...previous.allowedOrigins, origin]),
+      ]);
+      return update(tx, previous, { allowedOrigins }, requestId);
     },
     async archive(tx: TenantTransaction, id: string, requestId?: string): Promise<void> {
       await tx.repositories.projects.get(id, { lock: true });

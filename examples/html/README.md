@@ -44,3 +44,7 @@ Correcting a form validation error reuses the ready upload in memory; the form's
 ## Testimonials and ratings
 
 Create a review collection with short name `testimonials`. Put your publishable key and API address in [`reviews.js`](reviews.js), add the example site's origin to the project, then build and serve this folder as above. Open [`reviews.html`](reviews.html) and submit a review. In the dashboard, approve it and then publish it. Reload the example to see the review and updated rating. Deleting or unpublishing it removes it from the next public read.
+
+## Configure the M5 examples with the CLI
+
+Run `backbricks init --framework html` with the deployment URL, project ID and an agent key supplied in the environment. Retain the linked project ID and copy the module sections from [the Scenario A example](backbricks.config.example.json). Run `backbricks diff` before `backbricks push --yes`. The sample requires a scanner for CVs. Its contact form with a required PDF is intended for the [Next.js](../nextjs/) and [Astro](../astro/) examples. This directory also includes the standalone forms and upload fixtures documented above.

@@ -17,11 +17,18 @@
       "browser": "./admin/index.ts",
       "bun": "./admin/index.ts",
       "default": "./dist/admin/index.js"
+    },
+    "./pow": {
+      "types": "./pow/index.ts",
+      "browser": "./pow/index.ts",
+      "bun": "./pow/index.ts",
+      "default": "./dist/pow/index.js"
     }
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
     "build": "bun tools/build.ts",
+    "size": "bun tools/size.ts",
     "test": "bun run build && bun test"
   },
   "dependencies": {

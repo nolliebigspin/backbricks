@@ -48,6 +48,7 @@ export function keyRoutes(
       kind: 'management',
       bodyLimitBytes: DEFAULT_BODY_LIMIT_BYTES,
       session: { role: 'admin' },
+      secretKey: { scope: 'keys:read' },
       isolationCase: 'key.list',
     },
     async (c) => {

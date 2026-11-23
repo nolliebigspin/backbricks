@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../../layouts/base-layout.astro';
+import catalog from '../../generated/errors.json';
+---
+<BaseLayout title="Backbricks API errors" description="Error codes returned by the Backbricks API.">
+  <section class="mx-auto max-w-3xl px-4 py-12">
+    <a href="/docs">Back to documentation</a>
+    <h1 class="text-3xl font-semibold">API errors</h1>
+    <ul class="mt-6 space-y-3">
+      {Object.entries(catalog).map(([code, { status, title }]) => (
+        <li><a href={`/errors/${code}`}><code>{code}</code> · {status} · {title}</a></li>
+      ))}
+    </ul>
+  </section>
+</BaseLayout>

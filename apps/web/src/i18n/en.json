@@ -114,6 +114,13 @@
     "invalid": "Check the fields and use a full website origin such as https://example.com, without a path."
   },
   "keys": {
+    "agentConnection": {
+      "title": "Connect an AI agent",
+      "description": "Create a scoped key for your agent. Give it to the agent through its local environment as BACKBRICKS_SECRET_KEY.",
+      "origin": "Add your site’s exact origin in Project Settings before testing your integration.",
+      "copy": "Copy agent prompt",
+      "prompt": "Integrate Backbricks for project {{project}} at {{api}}. Read BACKBRICKS_SECRET_KEY from the local environment. Run npx backbricks init --base-url {{api}} --project {{project}}, then npx backbricks docs --agent. Keep the secret out of browser code and repository files."
+    },
     "title": "Access keys",
     "kind": "Key type",
     "publishable": "Publishable key",

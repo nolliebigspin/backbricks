@@ -4547,6 +4547,146 @@
         }
       }
     },
+    "/v1/projects/{projectId}/forms/{key}/mcp-test-submissions": {
+      "post": {
+        "operationId": "forms.test.submit.mcp",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": {},
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "skippedFileFields": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": ["id", "skippedFileFields"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Test entry acknowledgement and skipped file validation."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      }
+    },
     "/v1/projects/{projectId}/forms/{key}/migrate": {
       "post": {
         "operationId": "forms.instance.migrate",
@@ -6798,6 +6938,146 @@
         }
       }
     },
+    "/v1/projects/{projectId}/forms/{key}/test-submissions": {
+      "post": {
+        "operationId": "forms.test.submit.cli",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": {},
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "skippedFileFields": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": ["id", "skippedFileFields"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Test entry acknowledgement and skipped file validation."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      }
+    },
     "/v1/projects/{projectId}/integration": {
       "get": {
         "operationId": "getProjectIntegration",
@@ -7303,6 +7583,7 @@
                             "config:destructive",
                             "project:write",
                             "test:write",
+                            "keys:read",
                             "stats:read",
                             "forms:submit",
                             "uploads:create",
@@ -7313,7 +7594,7 @@
                           ],
                           "type": "string"
                         },
-                        "maxItems": 13,
+                        "maxItems": 14,
                         "type": "array"
                       }
                     },
@@ -7503,6 +7784,375 @@
         "responses": {
           "204": {
             "description": "Key revoked. Repeated revocation is a no-op."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      }
+    },
+    "/v1/projects/{projectId}/mcp/config": {
+      "put": {
+        "operationId": "mcpApplyConfig",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "config": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "$schema": {
+                        "default": "https://backbricks.app/schema/config.v1.json",
+                        "enum": ["https://backbricks.app/schema/config.v1.json"],
+                        "type": "string"
+                      },
+                      "modules": {
+                        "additionalProperties": {
+                          "additionalProperties": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "config": {},
+                              "configVersion": {
+                                "exclusiveMinimum": 0,
+                                "maximum": 2147483647,
+                                "type": "integer"
+                              },
+                              "moduleVersion": {
+                                "exclusiveMinimum": 0,
+                                "maximum": 2147483647,
+                                "type": "integer"
+                              },
+                              "name": {
+                                "maxLength": 120,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "status": {
+                                "default": "active",
+                                "enum": ["active", "paused"],
+                                "type": "string"
+                              }
+                            },
+                            "required": ["name", "config", "moduleVersion"],
+                            "type": "object"
+                          },
+                          "type": "object"
+                        },
+                        "type": "object"
+                      },
+                      "project": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["project", "modules"],
+                    "type": "object"
+                  },
+                  "planHash": {
+                    "maxLength": 1024,
+                    "type": "string"
+                  }
+                },
+                "required": ["config", "planHash"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "applied": {
+                      "enum": [true],
+                      "type": "boolean"
+                    },
+                    "changes": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "changedPaths": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "destructive": {
+                            "type": "boolean"
+                          },
+                          "key": {
+                            "maxLength": 63,
+                            "minLength": 1,
+                            "pattern": "^[a-z0-9][a-z0-9-]*$",
+                            "type": "string"
+                          },
+                          "kind": {
+                            "enum": ["create", "update", "archive"],
+                            "type": "string"
+                          },
+                          "moduleType": {
+                            "maxLength": 64,
+                            "minLength": 1,
+                            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+                            "type": "string"
+                          },
+                          "resource": {
+                            "maxLength": 64,
+                            "minLength": 1,
+                            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "moduleType",
+                          "resource",
+                          "key",
+                          "kind",
+                          "destructive",
+                          "changedPaths"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "warnings": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": ["applied", "changes", "warnings"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Applied the previously planned configuration."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      }
+    },
+    "/v1/projects/{projectId}/mcp/origins": {
+      "post": {
+        "operationId": "mcpAddOrigin",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "origin": {
+                    "maxLength": 2048,
+                    "pattern": "^https?:\\/\\/[^/?#\\\\\\s@]+\\/?$/i",
+                    "type": "string"
+                  }
+                },
+                "required": ["origin"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "allowedOrigins": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": ["allowedOrigins"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "The updated project origin allowlist."
           },
           "default": {
             "content": {

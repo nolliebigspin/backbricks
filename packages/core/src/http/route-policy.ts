@@ -27,7 +27,10 @@ export const managementRoutePolicySchema = z
     kind: z.literal('management'),
     bodyLimitBytes,
     session: z.object({ role: organizationRoleSchema }).strict().optional(),
-    secretKey: z.object({ scope: scopeNameSchema }).strict().optional(),
+    secretKey: z
+      .object({ scope: scopeNameSchema, channel: z.literal('mcp').optional() })
+      .strict()
+      .optional(),
     isolationCase: z.string().min(1),
     rateLimit: z
       .object({

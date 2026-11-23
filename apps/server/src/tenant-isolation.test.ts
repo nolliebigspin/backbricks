@@ -85,7 +85,7 @@ test.skipIf(!available)(
           ...apiIsolationCases(f),
           ...authIsolationCases(f),
           ...projectIsolationCases(f),
-          ...configurationIsolationCases(f),
+          ...(await configurationIsolationCases(f)),
           ...(await keyIsolationCases(f)),
           ...(await platformReadIsolationCases(f)),
           ...(await instanceIsolationCases(f, { type: 'forms', plural: 'forms' })),

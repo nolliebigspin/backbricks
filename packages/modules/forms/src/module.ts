@@ -29,6 +29,7 @@ import {
 } from './public.ts';
 import { formsRepository as repositoryOf } from './runtime.ts';
 import { defaultFormsConfig, formsTemplates } from './templates.ts';
+import { formsTestRoutes } from './test-submissions.ts';
 import { validateSubmission } from './validator.ts';
 
 /** Forms needs nothing besides Postgres (ARCHITECTURE §C.7). */
@@ -83,6 +84,7 @@ export function createFormsModule(options: { files: boolean } = { files: false }
     services: { optional: ['queue'] },
     adminRoutes(router) {
       formsAdminRoutes(router);
+      formsTestRoutes(router);
       formsMutationRoutes(router);
       formsBulkRoutes(router);
       formsExportRoutes(router);

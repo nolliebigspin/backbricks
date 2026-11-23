@@ -1,0 +1,61 @@
+{
+  "$schema": "https://backbricks.app/schema/config.v1.json",
+  "project": "prj_00000000000000000000000001",
+  "modules": {
+    "upload-zones": {
+      "cv": {
+        "name": "CV uploads",
+        "moduleVersion": 1,
+        "status": "active",
+        "config": { "presets": ["pdf"], "scanRequired": true, "maxSizeMb": 10 }
+      }
+    },
+    "forms": {
+      "contact": {
+        "name": "Contact",
+        "moduleVersion": 1,
+        "status": "active",
+        "config": {
+          "fields": [
+            { "key": "name", "type": "text", "label": "Name", "required": true },
+            {
+              "key": "email",
+              "type": "email",
+              "label": "Email",
+              "required": true,
+              "identifiesSubject": true
+            },
+            { "key": "message", "type": "textarea", "label": "Message", "required": true },
+            { "key": "cv", "type": "file", "label": "CV", "required": true, "zone": "cv" },
+            {
+              "key": "privacy",
+              "type": "consent",
+              "label": "Privacy",
+              "text": "I agree to the privacy notice.",
+              "version": "1"
+            }
+          ]
+        }
+      },
+      "contact-server": {
+        "name": "Server contact",
+        "moduleVersion": 1,
+        "status": "active",
+        "config": {
+          "fields": [
+            { "key": "email", "type": "email", "label": "Email", "required": true },
+            { "key": "message", "type": "textarea", "label": "Message", "required": true }
+          ]
+        }
+      }
+    },
+    "review-collections": {
+      "testimonials": {
+        "name": "Testimonials",
+        "moduleVersion": 1,
+        "status": "active",
+        "config": { "ratingScale": 5 }
+      }
+    }
+  }
+}

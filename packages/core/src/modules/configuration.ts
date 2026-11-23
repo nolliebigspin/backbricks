@@ -32,7 +32,7 @@ export function configuration<T>(definition: {
     validateConfigChange,
     codegen,
   } = definition;
-  const configJsonSchema = freezeDeclaration(schemaDocument(configSchema));
+  const configJsonSchema = freezeDeclaration(schemaDocument(configSchema, 'input'));
   function parseConfig(input: unknown) {
     const config = configSchema.parse(input);
     definition.validateConfigWrite?.(config);

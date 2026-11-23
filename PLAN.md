@@ -1,7 +1,7 @@
 # PLAN – Backbricks
 
 > The only task list. Milestones, scope and exit criteria: [`docs/MILESTONES.md`](docs/MILESTONES.md). Decisions for the maintainer: [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md). Key decisions: [`docs/adr/`](docs/adr/). How phases are planned and executed: `AGENTS.md` §9.
-> **State:** P0 done (report: [`docs/progress/phase-0.md`](docs/progress/phase-0.md)). P1 implemented and merged ([report](docs/progress/phase-1.md), [review](docs/progress/review-phase-1.md)). P2 implemented, merged and released as v0.1.0 on 2026-11-15. P3 implemented and merged ([report](docs/progress/phase-3.md)). P4 implemented and locally verified ([report](docs/progress/phase-4.md)). P5–P6 and C1–C3 remain stubs.
+> **State:** P0 done (report: [`docs/progress/phase-0.md`](docs/progress/phase-0.md)). P1 implemented and merged ([report](docs/progress/phase-1.md), [review](docs/progress/review-phase-1.md)). P2 implemented, merged and released as v0.1.0 on 2026-11-15. P3 implemented and merged ([report](docs/progress/phase-3.md)). P4 implemented and merged ([report](docs/progress/phase-4.md)). P5 approved for implementation on 2026-11-23. P6 and C1–C3 remain stubs.
 
 ## Task format
 
@@ -84,6 +84,12 @@ P0 versions checked 2026-11-04. New P1 dependencies rechecked 2026-11-06 with `n
 | | @hono/zod-openapi | 1.6.3 | yes | peer zod ^4, hono ≥4.10 |
 | | openapi-typescript | 7.13.0 | yes, with fallback (ADR-0020) | fails on TS 7; works with `typescript@5.9.3` local to `api-contract` |
 | | openapi-fetch | 0.17.0 | to verify in P1.11b | Separate admin export keeps this dependency out of the browser SDK entry point |
+| P5 candidates (checked 2026-11-23) | commander | 14.0.3 | P5.3a | Latest 15.1.0 requires Node ≥ 22.12. Pin the latest Node 20-compatible 14.x patch. |
+| | ajv / ajv-formats | 8.20.0 / 3.0.1 | P5.3c | MIT. Compile the exported schema's actual dialect and validate offline. |
+| | @modelcontextprotocol/sdk / zod | 1.32.2 / 4.6.7 | P5.6a | MCP SDK stable version matches ADR-0020. Zod is already pinned in the workspace. Check the bundled stdio transport on Node 20 and Bun. |
+| | @astrojs/starlight / @astrojs/markdown-remark | 0.43.1 / 7.3.10 | P5.7a | Starlight's declared peers include the pinned Astro 7.4.5 and markdown-remark 7.3.x. Verify CSP and the Bun build. |
+| | @scalar/api-reference | 1.83.0 | P5.7b | Node ≥ 22 for the build, compatible with the site's Node 24 target. Keep it in the static site's client bundle. |
+| | next | 16.4.6 | P5.8a | Next.js example only, Node ≥ 20.9. Reuse the workspace React and Playwright versions. The example build uses local TypeScript 5.9.3 and @types/node 24.19.2. |
 | API comparison | oasdiff | 1.35.0 | native binary | Latest GitHub release checked 2026-11-06; add exact tool pin only in `mise.toml` in P1.11c, use local CLI in CI; no hosted spec upload |
 | Images | postgres | 18.6-alpine | – | |
 | | dxflrs/garage | v2.5.0 | – | `FROM scratch`, no shell → init via Bun script |
@@ -106,6 +112,9 @@ P0 versions checked 2026-11-04. New P1 dependencies rechecked 2026-11-06 with `n
 - [x] **DEV-10: Make the auth/schema/transaction boundary explicit.** P1.1a proved the request-scoped outer transaction in [ADR-0021](docs/adr/0021-auth-transactions-and-schema-ownership.md), including negative control showing the stock adapter option alone is insufficient. Generated tables belong to db; auth receives schema/connection/services via injection. No I12 waiver; durable production integration remains P1.1c.
 - [ ] **DEV-11: Resolve privacy and deletion gaps before schema/API implementation.** §B.3's audit labels, recipients and cached idempotency responses do not all have explicit expiry; the idempotency table lacks `organization_id` despite I1. §F.4's hard deletion differs from P1.5's soft project deletion. Propose tenant/expiry constraints, minimized audit labels, and separate archive vs. erasure semantics; do not copy the SQL spec literally. *Impact:* §B.3, §F.4, I1/I11; **Q7/Q8**. Architecture text changes only with the accepted decision/ADR during execution.
 - [x] **DEV-12: Module tables live in `packages/db`, repository contracts in the module.** §B.5 and the §C.5 example place Drizzle tables in module packages, but a module may import only core (I13), so it can't reference `module_instances` for the composite live-parent FKs (ADR-0023) or reuse db's tenant columns and scope helper. Proposal: the module declares its repository interface (augmenting `ModuleRepositories`); db owns the table, migration and implementation; the server's composition typecheck proves they match. *Impact:* §B.5, §C.3, §C.5 wording; P2.3a, later P3.2/P4.2; **Q12**. *Accepted 2026-11-09;* P2.3a writes the ADR and updates the wording.
+- [x] **DEV-13: Allow an explicit, read-only key inventory scope.** P1 kept key routes session-only. Give project-bound CLI credentials an opt-in `keys:read` grant for existing safe key metadata, without changing the default agent preset, MCP surface, creation or revocation policy. *Impact:* ADR-0014 wording, Q9, §D.8; P5.4e; **Q24**.
+- [x] **DEV-14: Make the test submission contract explicit.** §D.10 expects a CLI test entry for a form with a required CV. Propose a scoped forms-only test operation that validates normal non-file inputs and reports skipped file checks. Real upload and claim validation remain part of the browser journey. *Impact:* §D.8–D.10, P5.4d; **Q25**.
+- [x] **DEV-15: Attribute MCP mutations by server route.** The current principal maps all bearer mutations to `api_key`. Use server-owned scoped MCP mutation routes that call the same application services and set the audit channel to `mcp` after bearer authentication. A caller's HTTP headers grant no attribution or permissions. *Impact:* §D.9, P5.6b–c; **Q26**.
 
 ## Phase P0 – Foundation (M0) · done
 
@@ -1528,20 +1537,294 @@ P2.10b complete: every phase-acceptance command passed on 2026-11-12 against fre
 
 Local implementation and acceptance are complete. The [phase report](docs/progress/phase-4.md) records the verification evidence, maintainer approval to open the pull request and preview version sequencing.
 
-## Phase P5 – Agent-ready (M5 · v0.4.0) · stub
+## Phase P5 – Agent-ready (M5 · v0.4.0) · approved 2026-11-23
 
-**Goal:** Scenario A (ARCHITECTURE §D.10) without human help. **Estimate:** 12–15 PD.
+**Goal:** After a site owner provisions the project, credentials and allowed origin, an agent integrates a contact form, CV upload and testimonials with the CLI or MCP. **Estimate:** 27 tasks, 131 h (16.4 PD), plus a 26 h reserve. Original allowance: 12–15 PD.
 
-- [ ] P5.1 – SDK complete: `createClient`, `BackbricksError` (`code`, `fieldErrors`, `requestId`), retries for idempotent calls only, lazy PoW web worker (`@backbricks/sdk/pow`), generic `request()`, module augmentation for codegen types, size budget (< 8 KB gz) in CI; tests on Node and Bun
-- [ ] P5.2 – `@backbricks/sdk/admin`: generated management client (`openapi-fetch`), adopted by the dashboard (see DEV-8)
-- [ ] P5.3 – CLI foundation (`packages/cli`): command framework, `--json`, `--yes`, documented exit codes, credentials (file 0600 or `BACKBRICKS_SECRET_KEY`), JSON Schema for `backbricks.config.json`; bundled with `bun build --target=node`
-- [ ] P5.4 – CLI commands `login`, `init` (framework detection for env var names, `.gitignore`, optional `AGENTS.md` section), `pull`, `diff`, `push` (two-step with `planHash`, `--allow-destructive`), `validate`, `codegen`, `test submit`, `keys list`, `docs`
-- [ ] P5.5 – `backbricks doctor`: connectivity, origins, key validity, scan for `bb_sk_` in public env prefixes and build output
-- [ ] P5.6 – `backbricks mcp`: stdio MCP server with the tools from §D.9, per-tool scope checks, no delete tools, plan/apply enforced, audit `actor_type='mcp'`
-- [ ] P5.7 – Agent docs: `skills/backbricks/SKILL.md`, `llms.txt`/`llms-full.txt`, quickstarts (Next.js, Astro, Vue, HTML), generated error-code reference, Scalar API reference; docs site with Astro Starlight at `/docs` inside `apps/www` (ADR-0001), plus `/errors/*` and `/schema/*` pages
-- [ ] P5.8 – Examples: `examples/nextjs` (App Router, custom UI, contact + CV upload + reviews, variant with server action and secret key on the server), `examples/astro`, complete `examples/html`
-- [ ] P5.9 – Dashboard wizard "Connect an AI agent": preset key + copyable prompt block for Claude Code/Codex
-- [ ] P5.10 – Scenario A E2E: script `init → extend config → push → codegen → build example → Playwright submits form/upload/review → admin API verifies`
+**Entry state:** M4 is merged at `7aadc46`. The SDK already provides forms, uploads, reviews, typed errors, initial schema augmentation and a WebCrypto solver. P1 shipped the generated admin entry, dashboard client, project integration metadata, schema export, type generation and bound config plans. The CLI entry is a stub. Only `v0.1.0` is tagged. The active Uploads changeset and staged Reviews changeset still need separate preview releases.
+
+**Execution:** Follow task order and the individual dependencies. Read ARCHITECTURE §D.7–D.11, §E.1/§E.4 and §G.1, the M4 acceptance report, and ADRs 0001, 0014, 0020, 0034, 0036, 0040, 0042, 0043, 0051, 0062, 0069 and 0077. Record accepted deviations when implementing the affected contracts. Recheck registry versions and runtime compatibility at installation. The first usable slice is CLI login, init, validate, diff and push using the existing admin client. SDK release hardening follows that slice. MCP reuses the CLI operations. Treat npm publication as a separate maintainer action.
+
+### [ ] P5.0a – Confirm the execution envelope and release prerequisites (est. 3 h)
+
+- **Description:** Resolve the remaining access and milestone decisions in Q24–Q27. Check Q2 package ownership and record who can complete prior preview releases and npm publishing.
+- **Files/packages:** `PLAN.md`, `OPEN_QUESTIONS.md`, `docs/MILESTONES.md`, release notes.
+- **Depends on:** M4 merged.
+- **Reuses:** Milestone workflow, M4 report and Changesets.
+- **Acceptance criteria:** The affected tasks have explicit decisions, and missing registry access has an owner and due date.
+- **Tests:** Verify remote tags, npm visibility, task dependencies and estimates.
+- **Risks/notes:** A registry 404 establishes public visibility only. Package ownership and publish rights require maintainer verification.
+
+### [x] P5.0b – Prove build compatibility at the high-risk seams (est. 3 h)
+
+- **Description:** Run disposable Node 20/Bun probes for Commander, the MCP SDK's stdio transport and the chosen schema validator. Probe Vite worker bundling and the Starlight/Scalar CSP integration in the Astro build. Measure the existing SDK browser bundle.
+- **Files/packages:** Temporary fixtures, `PLAN.md` version list and phase notes.
+- **Depends on:** P5.0a.
+- **Reuses:** ADR-0020 runtime checks, SDK build and browser harness, Astro CSP configuration.
+- **Acceptance criteria:** Exact dependency candidates, runtime outcomes and CSP constraints are recorded with a measured bundle baseline.
+- **Tests:** Run the probes on the minimum supported Node and pinned Bun, and inspect the generated docs-page CSP in Chromium.
+- **Risks/notes:** Worker asset handling and CSP integrations have bundler-specific behavior. Time-box unsuccessful probes and bring contract changes to the maintainer.
+
+### [x] P5.3a – Establish the CLI command and output contract (est. 4 h)
+
+- **Description:** Add the binary, command parsing, shared JSON/result output, interactive confirmation boundary and stable exit codes. Bundle the CLI with the Node target.
+- **Files/packages:** `packages/cli` and reusable package smoke fixtures.
+- **Depends on:** P5.0b.
+- **Reuses:** Commander candidate, SDK error shape and generated admin entry.
+- **Acceptance criteria:** The tarball runs via `npx` and `bunx`. Machine output is deterministic, errors map to documented exits, and noninteractive runs cannot prompt or implicitly authorize destructive work.
+- **Tests:** Subprocess usage/help/error tests through the shipped binary on Node 20 and Bun.
+- **Risks/notes:** Keep prompts and diagnostics outside JSON stdout. MCP reserves stdout for JSON-RPC.
+
+### [x] P5.3b – Resolve credentials and authenticate `login` safely (est. 5 h)
+
+- **Description:** Resolve credentials from `BACKBRICKS_SECRET_KEY` or a per-target file. Implement `login` with explicit API and project selection or an existing link, credential validation, a hidden input and the documented `--key` flag for automation.
+- **Files/packages:** CLI credentials, typed client wiring, `login` and tests.
+- **Depends on:** P5.3a.
+- **Reuses:** Project integration route and scoped bearer authorization.
+- **Acceptance criteria:** Credentials match the intended API and project, writes are atomic and mode 0600 on POSIX, and login/status/diagnostics never echo a secret. Existing credentials survive validation or write failures.
+- **Tests:** Temporary home, file permissions, env precedence, unsafe destination/redirect, foreign project and redaction cases.
+- **Risks/notes:** Document platform file-permission semantics and prefer environment or hidden input in examples. Reserve browser device flow for later.
+
+### [x] P5.3c – Package the offline configuration schema (est. 4 h)
+
+- **Description:** Export the all-modules v1 schema from the server's offline build seam and package it with the CLI. Add `validate` with structured field paths.
+- **Files/packages:** Schema generation script, `packages/cli`, generated static artifacts and CI drift checks.
+- **Depends on:** P5.3a.
+- **Reuses:** `/v1/schema/config`, the configuration envelope and registered module schemas, offline OpenAPI tooling pattern.
+- **Acceptance criteria:** Local validation runs without credentials, services or network. The installed deployment's plan still determines enabled modules, persisted revisions and write policy.
+- **Tests:** Generate twice, compare the full-module export, validate representative configs for all modules and reject malformed envelopes.
+- **Risks/notes:** Keep schema ownership on the server. The MIT CLI consumes JSON artifacts without AGPL runtime imports.
+
+### [x] P5.4a – Link an existing site with `init` and `pull` (est. 5 h)
+
+- **Description:** Implement framework detection, project config and publishable-key env setup. Update ignore rules and the optional `AGENTS.md` block idempotently. Protect existing edits during config pull.
+- **Files/packages:** CLI project operations, framework detection and filesystem tests.
+- **Depends on:** P5.3b–c.
+- **Reuses:** Project integration and configuration read endpoints, framework conventions from the examples.
+- **Acceptance criteria:** Init sets only public integration settings in the target project, repeats without duplicates, reports missing publishable credentials clearly and preserves user-owned file content.
+- **Tests:** Next.js, Astro, Vue/Vite, Nuxt and plain HTML fixtures, conflicting existing state and read/download failures.
+- **Risks/notes:** Multiple package manifests can make detection ambiguous. Support explicit selection and constrain writes to the target project.
+
+### [x] P5.4b – Wire `diff` and plan-bound `push` (est. 6 h)
+
+- **Description:** Call the existing API to plan, inspect and apply the same desired document/hash. Implement confirmation and `--allow-destructive` handling.
+- **Files/packages:** CLI config operations and real-service fixtures.
+- **Depends on:** P5.4a.
+- **Reuses:** ADR-0042/0043, server plan tokens and configured permissions.
+- **Acceptance criteria:** Diff performs zero writes. Push displays destructive changes, requires explicit destructive approval and effective scope, and stops on stale or changed plans. Omitted sections preserve remote state.
+- **Tests:** Real tenant fixtures for no-op, partial config, archive warnings, stale/replayed plan, insufficient scope and concurrent config changes.
+- **Risks/notes:** Keep the server authoritative for destructive classification. A stale apply must never auto-approve a refreshed plan.
+
+### [x] P5.1a – Complete the SDK transport contract (est. 4 h)
+
+- **Description:** Expose the typed generic `request()` on the existing client. Document `BackbricksError` status, `code`, `fieldErrors` and `requestId` for problem, network and abort outcomes.
+- **Files/packages:** `packages/sdk/src/client.ts`, transport and errors, SDK README.
+- **Depends on:** P5.0b.
+- **Reuses:** Existing URL, auth, error and parsing paths and generated contract types where applicable.
+- **Acceptance criteria:** Existing module calls retain behavior. Generic requests handle JSON, empty and typed failures. Credential-bearing requests are restricted to the configured API origin.
+- **Tests:** Runtime request/response, invalid path, error redaction, and type-level input/output cases.
+- **Risks/notes:** Review 304 and other bodyless responses, existing relative URLs, and external redirects.
+
+### [x] P5.1b – Bound SDK retries to idempotent requests (est. 5 h)
+
+- **Description:** Add bounded, abortable retries for operations explicitly safe to repeat. Use Retry-After where supported and preserve existing idempotency keys on any approved replay.
+- **Files/packages:** SDK transport, module clients and tests.
+- **Depends on:** P5.1a.
+- **Reuses:** Existing public submission and upload transports, ADR-0047 replay contract.
+- **Acceptance criteria:** Safe reads recover from transient failures, abort stops retries, and unsupported writes, PoW and direct-storage transfers retain their current attempt semantics.
+- **Tests:** Fetch attempt counts, Retry-After, cancellation, proof/replay edge cases and native browser upload.
+- **Risks/notes:** A POST with a proof or one-time upload token is unsafe to retry without a demonstrated server replay contract.
+
+### [x] P5.1c – Ship lazy PoW worker and enforce the SDK size budget (est. 5 h)
+
+- **Description:** Add the public `@backbricks/sdk/pow` entry and a lazily loaded browser worker using the existing solver. Preserve the Bun/Node fallback and share one `BackbricksSchema` augmentation point across public modules.
+- **Files/packages:** `packages/sdk`, SDK browser tests and CI.
+- **Depends on:** P5.1b.
+- **Reuses:** ALTCHA WebCrypto solver, public-submit wrapper, SDK build and native upload browser harness.
+- **Acceptance criteria:** Default browser root bundles to under 8,000 gzip bytes excluding separately loaded PoW assets. Worker startup is deferred, cancellation stops work, and generated types infer valid input without runtime imports.
+- **Tests:** Chromium request and worker assertions, Node 20/Bun imports, generated type fixtures and a deterministic gzip-size gate.
+- **Risks/notes:** Preserve public import paths and check that management dependencies stay outside the root bundle.
+
+### [x] P5.2a – Verify the generated management client as a distributable package (est. 5 h)
+
+- **Description:** Close the published SDK declaration dependency graph and prove the root, PoW and admin exports work from a packed artifact. Verify dashboard calls continue to use the existing admin entry.
+- **Files/packages:** `packages/sdk`, `packages/api-contract`, dashboard admin wiring, package checks.
+- **Depends on:** P5.1c.
+- **Reuses:** ADR-0051, offline OpenAPI generation, `openapi-fetch`, existing dashboard adoption.
+- **Acceptance criteria:** An external TypeScript consumer gets generated types without an unpublished workspace dependency or AGPL runtime import. Node 20 and Bun load the public SDK entries, and dashboard auth behavior is preserved.
+- **Tests:** Clean tarball installation and typecheck, existing dashboard integration tests and API drift check.
+- **Risks/notes:** Current source-based exports and `workspace:*` work in the monorepo. Verify the packed artifact's files and resolved dependencies explicitly.
+
+### [x] P5.4c – Write project types and serve offline integration guides (est. 5 h)
+
+- **Description:** Implement `codegen` using the typed API endpoint and `docs [--agent]` using a packaged canonical guide. Exercise an example's typecheck using the CLI-generated file.
+- **Files/packages:** CLI commands, SDK type fixture and integration guide sources.
+- **Depends on:** P5.2a, P5.4a.
+- **Reuses:** `GET /v1/projects/{id}/types`, module codegen hooks, SDK augmentation.
+- **Acceptance criteria:** Codegen creates deterministic declarations for the linked project at the chosen path, and offline docs are available in the packed CLI. A generated project file is enough for typed calls in an external consumer.
+- **Tests:** Real generation for all enabled modules, missing-project errors, repeat writes, filesystem failure and compile fixtures.
+- **Risks/notes:** Link guide outputs to the same authored source used for P5.7c.
+
+### [x] P5.4d – Create and verify scoped test form entries (est. 6 h)
+
+- **Description:** Add the test operation authorized by Q25 and implement `test submit forms/<key> --data`. Clearly report any file validation skipped under the approved contract.
+- **Files/packages:** Forms module, server route inventory, CLI test command and integration tests.
+- **Depends on:** Q25, P5.4b.
+- **Reuses:** Forms validators, test flag and dashboard filtering, existing `test:write` scope and tenant runtime.
+- **Acceptance criteria:** The route creates an `is_test` entry with bounded validation and returns safe acknowledgement metadata. Test traffic generates no customer notification or live metric and consumes no real attachment. Public submissions cannot set test mode.
+- **Tests:** Real HTTP/Postgres tests for scope, tenant isolation, invalid data, required CV test behavior, live activity separation and dashboard visibility.
+- **Risks/notes:** Scenario A separately proves real required-file handling. The CLI reports the test's coverage explicitly.
+
+### [x] P5.4e – Add safe key metadata listing to the CLI (est. 4 h)
+
+- **Description:** Implement the decision in Q24 and connect `keys list` to project-scoped safe metadata with pagination.
+- **Files/packages:** Key scope catalog and list policy, generated API contract, CLI keys command.
+- **Depends on:** Q24, P5.3b.
+- **Reuses:** Existing key list endpoint, key metadata schema and cursor paging.
+- **Acceptance criteria:** The permitted caller sees only the bound project's key metadata. The default agent preset retains its existing permissions. Creation and revocation remain dashboard-session operations.
+- **Tests:** Isolation cases for own/foreign project, missing scope, response projection and forbidden mutations.
+- **Risks/notes:** Keep credential values and hashes outside the result. A privileged read gets its own explicit grant.
+
+### [x] P5.5a – Diagnose credentials, origins and public secret exposure (est. 5 h)
+
+- **Description:** Add `doctor` for service reachability, key/project validity and configured origins. Scan supported public env prefixes and bounded static build trees for secret-key markers.
+- **Files/packages:** CLI doctor command, framework detection and fixture tests.
+- **Depends on:** P5.3b, P5.4a.
+- **Reuses:** Integration metadata, shared CLI diagnostics and framework detection.
+- **Acceptance criteria:** A deliberately set `NEXT_PUBLIC_BACKBRICKS_SECRET` fails clearly, as do supported build-output findings, without emitting matching credential text. Check output gives an actionable origin diagnosis.
+- **Tests:** All documented public prefixes, synthetic leaked build values, safe publishable keys, redaction, missing/unreadable artifacts and disabled network.
+- **Risks/notes:** Bound depth and size, skip binary files, and constrain symlink traversal to the project.
+
+### [x] P5.6a – Start a scoped MCP subprocess and register read tools (est. 5 h)
+
+- **Description:** Start `backbricks mcp` over stdio and implement `project_info`, `config_get`, `config_plan`, `types_generate`, `integration_guide` and `stats_get`.
+- **Files/packages:** CLI MCP entry and tool registration, subprocess fixtures.
+- **Depends on:** P5.3a–b, P5.4c.
+- **Reuses:** Official MCP SDK, existing typed CLI operations and generated management client.
+- **Acceptance criteria:** Read tools enforce their scopes at the API, return bounded structured results, and exclude secret and personal data. The process preserves valid JSON-RPC stdout.
+- **Tests:** Official MCP client's initialize/list/call subprocess tests on Node 20 and Bun, including malformed input and under-scoped keys.
+- **Risks/notes:** Tool listing and descriptions confer no permissions. Avoid putting MCP dependencies in the browser SDK.
+
+### [x] P5.6b – Attribute scoped MCP writes and support `origins_add` (est. 5 h)
+
+- **Description:** Implement Q26's MCP audit channel for mutations and an atomic add-origin operation gated by `project:write`.
+- **Files/packages:** Authenticated server routing, project service, audit actor mapping, CLI MCP origins tool and OpenAPI.
+- **Depends on:** Q26, P5.6a.
+- **Reuses:** Auth policy inventory, normalized origins, tenant transactions and existing audit service/enum.
+- **Acceptance criteria:** Successful calls log the same verified key ID with MCP attribution in the mutation transaction. Missing project scope blocks the write, concurrent additions preserve existing origins, and arbitrary client headers cannot change attribution.
+- **Tests:** Policy/inventory, tenant isolation, concurrent changes, no-op repeat, rollback and attribution through real HTTP.
+- **Risks/notes:** Avoid API key scope expansion. The default agent preset uses the owner's existing origin configuration.
+
+### [x] P5.6c – Add plan-bound mutation tools and Claude Code registration proof (est. 6 h)
+
+- **Description:** Implement `config_apply`, the form/upload-zone/review-collection upserts and `test_submit` with server-side scope checks and audit attribution.
+- **Files/packages:** CLI MCP tools, shared CLI config/test operations, scoped server endpoints and acceptance fixture.
+- **Depends on:** P5.4d, P5.6b.
+- **Reuses:** Bound plans, config read/merge/apply, test form operation and the authenticated MCP audit channel.
+- **Acceptance criteria:** Upserts preserve sibling config and apply the same plan. A stale hash or unapproved destructive change fails. The MCP tool list has no delete or key-management tools. Claude Code registers the server and creates a form with `form_upsert`.
+- **Tests:** Real subprocess invocation, scope and stale-hash negatives, project/audit verification and credential-safe Claude Code smoke.
+- **Risks/notes:** Keep CI protocol coverage independent of a paid client session. Capture the actual Claude Code proof at release acceptance.
+
+### [x] P5.7a – Mount docs in the existing Astro app (est. 5 h)
+
+- **Description:** Integrate Starlight at `/docs` in `apps/www`, preserving existing marketing routes, sitemap, deployment and CSP.
+- **Files/packages:** `apps/www`, docs content collection and layout checks.
+- **Depends on:** P5.0b.
+- **Reuses:** ADR-0001, the shared UI theme, existing Vercel build and Astro tests.
+- **Acceptance criteria:** Docs navigation, search and shared branding work at `/docs` with the existing production CSP. Marketing and `/llms.txt` retain their current URLs.
+- **Tests:** Astro build, prerendered URL inventory and Chromium CSP/route smoke.
+- **Risks/notes:** Starlight's default rendering and search assets may require CSP-compatible component overrides.
+
+### [x] P5.7b – Generate the API reference, error pages and schema publication (est. 6 h)
+
+- **Description:** Serve Scalar at `/docs/api`, generate `/errors/<code>` and publish `/schema/config.v1.json` from the same contracts used by the API and CLI.
+- **Files/packages:** `apps/www`, offline artifact exporters, drift and link checks.
+- **Depends on:** P5.3c, P5.7a.
+- **Reuses:** Committed OpenAPI, the error catalog, exported config schema and deployment's offline build pipeline.
+- **Acceptance criteria:** Public references render from deterministic artifacts, cover the catalog and canonical URLs, and load without credentials or remote assets required for the reference. Site runtime dependencies preserve their existing layer boundary.
+- **Tests:** Export drift, schema/media types and links, representative error pages, reference rendering and Chromium CSP.
+- **Risks/notes:** Generate at the tooling boundary; keep server runtime code out of the static site. Keep interactive API requests explicit.
+
+### [x] P5.8a – Build the Next.js App Router example (est. 6 h)
+
+- **Description:** Add site-owned contact, PDF upload and testimonial UI, plus a server-action example with server-side credential handling.
+- **Files/packages:** `examples/nextjs` and framework smoke fixtures.
+- **Depends on:** P5.2a, P5.4a–c.
+- **Reuses:** SDK upload/proof flows, generated declarations, existing HTML examples and framework env conventions.
+- **Acceptance criteria:** The example builds and runs with public integration settings, submits real form/upload/review traffic and keeps any server-side key out of client artifacts.
+- **Tests:** Example build, browser and server-action probes, and public build secret scan.
+- **Risks/notes:** Use isolated demo data and narrow scopes for the server-action variant. Pin Next only in the example.
+
+### [x] P5.8b – Build the Astro example (est. 5 h)
+
+- **Description:** Add a custom static Astro example using the same form/upload/review contracts and public environment naming.
+- **Files/packages:** `examples/astro`, example test/build configuration.
+- **Depends on:** P5.2a, P5.4a–c.
+- **Reuses:** Pinned Astro, SDK and HTML example's upload/read behavior.
+- **Acceptance criteria:** The example builds, accepts a real required attachment and renders published reviews from the project.
+- **Tests:** Production build and representative real-service browser smoke.
+- **Risks/notes:** Check bundler-worker asset paths and allowed-origin setup on the built example.
+
+### [x] P5.8c – Finish and verify the framework-free HTML examples (est. 4 h)
+
+- **Description:** Complete the checked-in contact, private CV and testimonials examples, plus setup instructions and working sample config.
+- **Files/packages:** `examples/html`, existing browser fixtures and linked docs.
+- **Depends on:** P5.2a, P5.4a–c.
+- **Reuses:** Existing no-JS contact, upload and reviews examples, SDK import paths and codegen.
+- **Acceptance criteria:** Fresh local use follows documented setup with publishable credentials. The non-JS form and browser SDK examples retain their respective supported behavior.
+- **Tests:** Build or serve each example, submit through the real service, and verify browser import and error cases.
+- **Risks/notes:** Plain no-JS and PoW-enabled SDK examples have different form policies under ADR-0055. Document both configurations accurately.
+
+### [x] P5.7c – Publish fast paths for humans and coding agents (est. 4 h)
+
+- **Description:** Write the framework quickstarts, canonical offline agent guide and `skills/backbricks/SKILL.md`. Extend existing `llms.txt` and generate `llms-full.txt` from published docs.
+- **Files/packages:** Docs content, `skills/backbricks`, Astro crawler endpoints and CLI guide packaging.
+- **Depends on:** P5.4c, P5.5a, P5.6c, P5.7b, P5.8a–c.
+- **Reuses:** Existing llms route/tests, code-generated snippets and example files.
+- **Acceptance criteria:** Next.js, Astro, Vue and HTML guides agree with current exports, commands and key placement. The skill, CLI guide and crawler outputs have working links and no sample secrets.
+- **Tests:** Docs links, referenced paths, packed guide parity and quickstart command smoke.
+- **Risks/notes:** Link to canonical commands or generated snippets to avoid drift.
+
+### [x] P5.9a – Add the dashboard's agent connection wizard (est. 5 h)
+
+- **Description:** Add a guided session-only flow in Project Embed for the existing AI agent preset and a copyable prompt for Claude Code/Codex.
+- **Files/packages:** Dashboard Embed, en/de strings and component/E2E tests.
+- **Depends on:** P5.4a, P5.5a, P5.6c, P5.7c.
+- **Reuses:** Existing key creation dialog, agent preset, integration metadata and clipboard components.
+- **Acceptance criteria:** Authorized owners/admins see the one-time key and instructions for supplying it locally. Prompt and MCP configuration snippets use placeholders or local references. The wizard identifies missing publishable keys and origins.
+- **Tests:** Roles, en/de and mobile, prompt copy without secrets, dismiss/reopen and unavailable prerequisite states.
+- **Risks/notes:** Maintain the owner-to-agent credential handoff boundary and existing session permissions.
+
+### [x] P5.10a – Run Scenario A end-to-end in CI (est. 6 h)
+
+- **Description:** Start from a fresh project and run the packed CLI through init, config extension, plan/apply, codegen, test submit and doctor. Build the example and exercise browser submissions and publication/readback.
+- **Files/packages:** `e2e`, CI, workspace build and existing test fixtures.
+- **Depends on:** P5.4a–e, P5.5a, P5.6c, P5.8a–c, P5.9a.
+- **Reuses:** Compose services, existing Playwright fixtures and generated admin client.
+- **Acceptance criteria:** An owner fixture issues only the initial credentials and setup. The agent path configures all three modules, and the browser completes a real PDF upload/claim and submits form/review data. An isolated admin fixture verifies typed entries, the test flag, moderation/publication, published results and audit attribution.
+- **Tests:** CI real-services journey with distinct tenant fixtures and no manual changes after setup, plus MCP subprocess assertions.
+- **Risks/notes:** Keep test and live submissions separate and avoid dumping credentials on CI failures.
+
+### [x] P5.10b – Verify release artifacts and write the phase report (est. 5 h)
+
+- **Description:** Check the phase exits, prepare separate version metadata and publication instructions, and verify installable tarballs and the self-hosted docs/client journey.
+- **Files/packages:** `docs/progress/phase-5.md`, release staging notes, SDK/CLI packaging and release workflow if approved.
+- **Depends on:** P5.10a, Q2 and the release decision in Q27.
+- **Reuses:** Changesets, P4 sequencing and release workflows.
+- **Acceptance criteria:** A clean repeatable package dry run proves first-install and license/runtime constraints. Report exact commands, prior-preview requirements, release authorization status and remaining actions.
+- **Tests:** `bun run check`, `bun run build`, tarball consumers on Node/Bun, dry-run provenance configuration and the M5 acceptance checklist.
+- **Risks/notes:** Changesets combines pending bumps for the same package. Use an Uploads-only revision for 0.2.0, then a Reviews revision for 0.3.0, before M5 release versioning.
+
+### Phase acceptance
+
+- [ ] **Scenario A:** Dedicated CI/Playwright job runs P5.10a from the packaged CLI through a real form, claimed PDF and review, then verifies dashboard/admin and public behavior.
+- [x] **Claude Code:** Register the packed stdio server with `claude mcp add backbricks -- npx backbricks mcp` after publication, or use the candidate tarball before publication. Invoke `form_upsert` through Claude Code and verify the resulting form and MCP audit actor through the admin API.
+- [x] **Doctor:** The packed `backbricks doctor --json` exits nonzero for a synthetic `NEXT_PUBLIC_BACKBRICKS_SECRET` and omits its value from stdout and stderr.
+- [x] **Client artifacts:** SDK gzip budget check under 8 KB for the root, built SDK probes on Node 20 and Bun, and installed CLI checks with `npx` and `bunx`. Compile generated types in a fresh consumer.
+- [x] **Repo and deployment:** `bun run check`, `bun run api:check`, `bun run api:breaking` and `bun run build` pass. Verify affected management isolation, the docs route/CSP build and a forms-only deployment without storage or scanner.
+- [ ] **Release:** After 0.2.0 and 0.3.0 sequencing and explicit release authorization, verify published `backbricks` and `@backbricks/sdk` with `npm view` and clean public installs. Record dry-run results and any separately pending publication in the phase report.
+
+The [P5 implementation report](docs/progress/phase-5.md) records the local verification and release handoff. The milestone PR runs the hosted Scenario A check. Registry ownership and publication remain separate.
 
 ## Phase P6 – Open Source 1.0 (M6 · v1.0.0) · stub
 

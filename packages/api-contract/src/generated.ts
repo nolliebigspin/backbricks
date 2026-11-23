@@ -256,6 +256,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/projects/{projectId}/forms/{key}/mcp-test-submissions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['forms.test.submit.mcp'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/projects/{projectId}/forms/{key}/migrate': {
     parameters: {
       query?: never;
@@ -416,6 +432,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/projects/{projectId}/forms/{key}/test-submissions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['forms.test.submit.cli'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/projects/{projectId}/integration': {
     parameters: {
       query?: never;
@@ -459,6 +491,38 @@ export interface paths {
     put?: never;
     post?: never;
     delete: operations['revokeKey'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/mcp/config': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['mcpApplyConfig'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/mcp/origins': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['mcpAddOrigin'];
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -2646,6 +2710,63 @@ export interface operations {
       };
     };
   };
+  'forms.test.submit.mcp': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          [key: string]: unknown;
+        };
+      };
+    };
+    responses: {
+      /** @description Test entry acknowledgement and skipped file validation. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            id: string;
+            skippedFileFields: string[];
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
   'forms.instance.migrate': {
     parameters: {
       query?: never;
@@ -3436,6 +3557,63 @@ export interface operations {
       };
     };
   };
+  'forms.test.submit.cli': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          [key: string]: unknown;
+        };
+      };
+    };
+    responses: {
+      /** @description Test entry acknowledgement and skipped file validation. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            id: string;
+            skippedFileFields: string[];
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
   getProjectIntegration: {
     parameters: {
       query?: never;
@@ -3623,6 +3801,7 @@ export interface operations {
                 | 'config:destructive'
                 | 'project:write'
                 | 'test:write'
+                | 'keys:read'
                 | 'stats:read'
                 | 'forms:submit'
                 | 'uploads:create'
@@ -3706,6 +3885,150 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  mcpApplyConfig: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          config: {
+            /**
+             * @default https://backbricks.app/schema/config.v1.json
+             * @enum {string}
+             */
+            $schema?: 'https://backbricks.app/schema/config.v1.json';
+            modules: {
+              [key: string]: {
+                [key: string]: {
+                  config: unknown;
+                  configVersion?: number;
+                  moduleVersion: number;
+                  name: string;
+                  /**
+                   * @default active
+                   * @enum {string}
+                   */
+                  status?: 'active' | 'paused';
+                };
+              };
+            };
+            project: string;
+          };
+          planHash: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Applied the previously planned configuration. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {boolean} */
+            applied: true;
+            changes: {
+              changedPaths: string[];
+              destructive: boolean;
+              key: string;
+              /** @enum {string} */
+              kind: 'create' | 'update' | 'archive';
+              moduleType: string;
+              resource: string;
+            }[];
+            warnings: string[];
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  mcpAddOrigin: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          origin: string;
+        };
+      };
+    };
+    responses: {
+      /** @description The updated project origin allowlist. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            allowedOrigins: string[];
+          };
+        };
       };
       /** @description A structured API error. */
       default: {

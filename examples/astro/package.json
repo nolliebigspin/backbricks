@@ -1,0 +1,19 @@
+{
+  "name": "@backbricks/example-astro",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --bun astro dev",
+    "build": "bun --bun astro build",
+    "typecheck": "bun --bun astro sync && tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@backbricks/sdk": "workspace:*",
+    "astro": "7.4.5"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

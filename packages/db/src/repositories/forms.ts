@@ -20,7 +20,7 @@ import {
 
 import type { DbTransaction } from '../client.ts';
 import { formSubmissions } from '../schema/forms.ts';
-import { beforeCursor, type RepositoryScope } from './scope.ts';
+import { beforeCursor, withoutBoundValues, type RepositoryScope } from './scope.ts';
 
 type Row = typeof formSubmissions.$inferSelect;
 type Status = Row['status'];
@@ -133,15 +133,17 @@ export function createFormsRepository(tx: DbTransaction, scope: RepositoryScope)
       input: Omit<FormSubmissionRow, 'organizationId' | 'projectId'> & { searchText: string },
     ) {
       const { searchText, ...values } = input;
-      const [row] = await tx
-        .insert(t)
-        .values({
-          ...values,
-          ...scope.project(),
-          spamReasons: [...values.spamReasons],
-          searchVector: sql`to_tsvector('simple', ${searchText})`,
-        })
-        .returning();
+      const [row] = await withoutBoundValues(
+        tx
+          .insert(t)
+          .values({
+            ...values,
+            ...scope.project(),
+            spamReasons: [...values.spamReasons],
+            searchVector: sql`to_tsvector('simple', ${searchText})`,
+          })
+          .returning(),
+      );
       if (!row) throw new Error('Insert returned no row.');
       return record(row);
     },
@@ -261,11 +263,11 @@ export function createFormsRepository(tx: DbTransaction, scope: RepositoryScope)
         retentionDays === null
           ? sql`null::timestamptz`
           : sql`${t.createdAt} + make_interval(days => ${retentionDays})`;
-      // Spam keeps its earlier cap: least() ignores nulls, so unlimited retention leaves it as is.
+      // Spam and test entries keep their earlier cap even if retention becomes unlimited.
       const rows = await tx
         .update(t)
         .set({
-          expiresAt: sql`case when ${t.spamVerdict} = 'spam' then least(${t.expiresAt}, ${retention}) else ${retention} end`,
+          expiresAt: sql`case when ${t.spamVerdict} = 'spam' or ${t.isTest} then least(${t.expiresAt}, ${retention}) else ${retention} end`,
         })
         .where(inForm(instanceId));
       return rows.rowCount ?? 0;

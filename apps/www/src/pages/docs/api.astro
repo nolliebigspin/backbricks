@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../../layouts/base-layout.astro';
+---
+<BaseLayout title="Backbricks API reference" description="OpenAPI reference for the Backbricks v1 API.">
+  <section class="mx-auto max-w-7xl px-4 py-8">
+    <a href="/docs">Back to documentation</a>
+    <h1 class="text-3xl font-semibold">API reference</h1>
+    <a href="/schema/openapi.json">Download OpenAPI JSON</a>
+    <div id="api-reference"></div>
+  </section>
+</BaseLayout>
+
+<script>
+  import { createApiReference } from '@scalar/api-reference';
+  import '@scalar/api-reference/style.css';
+
+  createApiReference('#api-reference', {
+    url: '/schema/openapi.json',
+    telemetry: false,
+    hideTestRequestButton: true,
+    showDeveloperTools: 'never',
+    persistAuth: false,
+    defaultOpenAllTags: false,
+  });
+</script>

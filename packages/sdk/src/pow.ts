@@ -18,20 +18,6 @@ export type Challenge = {
 };
 export type Solution = { counter: number; derivedKey: string; time: number };
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
-/** Shape check for challenges from the network; the solver validates the values. */
-export function isChallenge(value: unknown): value is Challenge {
-  if (!isRecord(value) || !isRecord(value['parameters'])) return false;
-  const parameters = value['parameters'];
-  return (
-    ['algorithm', 'nonce', 'salt', 'keyPrefix'].every(
-      (name) => typeof parameters[name] === 'string',
-    ) && typeof parameters['cost'] === 'number'
-  );
-}
-
 const ALGORITHMS = new Set(['SHA-256', 'SHA-384', 'SHA-512']);
 const HEX = /^(?:[0-9a-f]{2})+$/i;
 const MAX_COUNTER = 0xffffffff;

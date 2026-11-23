@@ -1,3 +1,4 @@
+import type { AdminOperations } from '@backbricks/sdk/admin';
 import { Button, ConfirmDialog, KeyRevealDialog, PageHeader } from '@backbricks/ui';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -40,12 +41,20 @@ export function EmbedPage() {
           </dd>
         </dl>
       )}
-      {canManage(role) ? <KeyManagement /> : <p>{t('keys.noPermission')}</p>}
+      {canManage(role) ? (
+        <KeyManagement integration={integration.data} />
+      ) : (
+        <p>{t('keys.noPermission')}</p>
+      )}
     </div>
   );
 }
 
-function KeyManagement() {
+type Integration =
+  AdminOperations['getProjectIntegration']['responses'][200]['content']['application/json'];
+type KeyCreation = AdminOperations['createKey']['requestBody']['content']['application/json'];
+
+function KeyManagement({ integration }: { integration?: Integration }) {
   const now = useBrowserTime();
   const { t, i18n } = useTranslation();
   const { organizationId } = useTenant();
@@ -76,6 +85,18 @@ function KeyManagement() {
       client.invalidateQueries({ queryKey: keyPrefix }),
       client.invalidateQueries({ queryKey: ['tenant', organizationId, projectId, 'integration'] }),
     ]);
+  }
+  async function create(body: KeyCreation) {
+    setToken(null);
+    const created = unwrap(
+      await admin.POST('/v1/projects/{projectId}/keys', {
+        params: { path: { projectId } },
+        headers: tenantHeaders(organizationId),
+        body,
+      }),
+    );
+    setToken(created.token);
+    await refresh();
   }
   return (
     <section className="space-y-5">
@@ -140,22 +161,10 @@ function KeyManagement() {
       <details className="rounded-lg border bg-background p-5">
         <summary className="cursor-pointer font-medium">{t('keys.create')}</summary>
         <div className="mt-5">
-          <KeyForm
-            create={async (body) => {
-              setToken(null);
-              const created = unwrap(
-                await admin.POST('/v1/projects/{projectId}/keys', {
-                  params: { path: { projectId } },
-                  headers: tenantHeaders(organizationId),
-                  body,
-                }),
-              );
-              setToken(created.token);
-              await refresh();
-            }}
-          />
+          <KeyForm create={create} />
         </div>
       </details>
+      {integration && <AgentConnection integration={integration} create={create} />}
       {token && (
         <KeyRevealDialog
           token={token}
@@ -190,5 +199,59 @@ function KeyManagement() {
         />
       )}
     </section>
+  );
+}
+
+function AgentConnection({
+  integration,
+  create,
+}: {
+  integration: Integration;
+  create: (body: KeyCreation) => Promise<void>;
+}) {
+  const { t } = useTranslation();
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const [open, setOpen] = useState(false);
+  const prompt = t('keys.agentConnection.prompt', {
+    api: integration.baseUrl,
+    project: integration.project.id,
+  });
+  async function copyPrompt() {
+    try {
+      await navigator.clipboard.writeText(prompt);
+      setCopyState('copied');
+    } catch {
+      setCopyState('failed');
+    }
+  }
+
+  return (
+    <details
+      className="rounded-lg border bg-background p-5"
+      onToggle={(event) => setOpen(event.currentTarget.open)}
+    >
+      <summary className="cursor-pointer font-medium">{t('keys.agentConnection.title')}</summary>
+      <div className="mt-5 space-y-4">
+        <p>{t('keys.agentConnection.description')}</p>
+        {!integration.publicKey && <p>{t('keys.noPublicKey')}</p>}
+        {integration.project.allowedOrigins.length === 0 && (
+          <p>{t('keys.agentConnection.origin')}</p>
+        )}
+        {open && <KeyForm create={create} agent />}
+        <pre className="whitespace-pre-wrap break-words rounded-lg border p-3 text-sm">
+          {prompt}
+        </pre>
+        <Button variant="outline" onClick={() => void copyPrompt()}>
+          {t('keys.agentConnection.copy')}
+        </Button>
+        <output aria-live="polite">
+          {copyState === 'copied'
+            ? t('common.copied')
+            : copyState === 'failed'
+              ? t('common.copyError')
+              : ''}
+        </output>
+      </div>
+    </details>
   );
 }

@@ -48,6 +48,16 @@ export function requiredRow<T>(rows: unknown[], schema: { parse(value: unknown):
   return schema.parse(rows[0]);
 }
 
+/** Driver errors embed bound values, which may include submitted content. */
+export async function withoutBoundValues<T>(query: PromiseLike<T>): Promise<T> {
+  try {
+    return await query;
+  } catch (error) {
+    if (error instanceof DrizzleQueryError) throw new AppError('internal_error');
+    throw error;
+  }
+}
+
 /** Translate only the owning resource's unique constraint; unrelated database failures stay failures. */
 export function uniqueConflict(constraint: string, detail: string) {
   const duplicate = z.object({ code: z.literal('23505'), constraint: z.literal(constraint) });

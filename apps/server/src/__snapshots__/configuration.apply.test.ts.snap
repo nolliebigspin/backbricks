@@ -55,11 +55,6 @@ exports[`config apply rejects invalid bindings and atomically serializes revisio
                     "type": "string",
                   },
                 },
-                "required": [
-                  "title",
-                  "fields",
-                  "options",
-                ],
                 "type": "object",
               },
               "configVersion": {
@@ -86,7 +81,6 @@ exports[`config apply rejects invalid bindings and atomically serializes revisio
             },
             "required": [
               "name",
-              "status",
               "config",
               "moduleVersion",
             ],
@@ -109,7 +103,6 @@ exports[`config apply rejects invalid bindings and atomically serializes revisio
     },
   },
   "required": [
-    "$schema",
     "project",
     "modules",
   ],

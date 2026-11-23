@@ -34,3 +34,8 @@ CLAUDE.local.md
 # Astro and Vercel local state
 .astro/
 .vercel/
+
+# Static site reference artifacts are generated from the API contracts.
+/apps/www/public/schema/
+/apps/www/src/generated/
+/apps/www/src/content/docs/docs/

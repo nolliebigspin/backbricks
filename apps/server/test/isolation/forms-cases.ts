@@ -1,4 +1,9 @@
-import { createFormFixture, createSubmissionFixture } from '../forms-fixture.ts';
+import { expect } from 'bun:test';
+
+import { submissionAcceptedSchema } from '@backbricks/module-forms';
+
+import { createFormFixture, createSubmissionFixture, validAnswers } from '../forms-fixture.ts';
+import { createKeyProbes } from './keys.ts';
 import type { IsolationFixture } from './setup.ts';
 import type { Cases } from './suite.ts';
 
@@ -22,7 +27,43 @@ export async function formsIsolationCases(f: IsolationFixture): Promise<Cases> {
     await createSubmissionFixture(f, 'inbox'),
     await createSubmissionFixture(f, 'inbox'),
   ];
+  const keys = createKeyProbes(f);
+  const token = await keys.token(f.a1.id, 'test:write');
+  const deniedToken = await keys.token(f.a1.id, 'integration:read');
+  const testCases = Object.fromEntries(
+    ['cli', 'mcp'].map((channel) => {
+      const segment = channel === 'mcp' ? 'mcp-test-submissions' : 'test-submissions';
+      const headers = { authorization: `Bearer ${token}` };
+      const body = { ...validAnswers, email: 'synthetic@example.invalid' };
+      const path = `${own.root}/${segment}`;
+      const testCase: Cases[string] = {
+        kind: 'creation',
+        successStatus: 201,
+        denied: [
+          { request: { path: `${foreign.root}/${segment}`, headers, body }, status: 404 },
+          {
+            request: { path, headers: { authorization: `Bearer ${deniedToken}` }, body },
+            status: 403,
+          },
+        ],
+        allowed: { path, headers, body },
+        verify: async (response) => {
+          const output = await response.json();
+          const receipt = submissionAcceptedSchema.strip().parse(output);
+          expect(output).toMatchObject({ id: expect.any(String), skippedFileFields: [] });
+          const read = await f.request(
+            `${own.root}/submissions/${receipt.id}`,
+            undefined,
+            f.member.cookie,
+          );
+          expect(await read.json()).toMatchObject({ isTest: true });
+        },
+      };
+      return [`forms.test.submit.${channel}`, testCase];
+    }),
+  );
   return {
+    ...testCases,
     'forms.submissions.export': {
       kind: 'collection',
       read: { path: `${own.root}/export.csv`, cookie: f.admin.cookie },

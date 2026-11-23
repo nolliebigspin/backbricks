@@ -16,7 +16,7 @@ function managementSession(tx: TenantTransaction) {
   return requireSessionRole(tx, 'admin');
 }
 
-/** Session-only key lifecycle; plaintext leaves only a committed creation call. */
+/** Key mutations are session-only; plaintext leaves only a committed creation call. */
 export function createKeyService(deps: {
   clock: Clock;
   ids: Ids;
@@ -29,9 +29,20 @@ export function createKeyService(deps: {
   const schema = apiKeyCreateSchema(enabled, deps.scopeCatalog);
   return {
     async list(tx: TenantTransaction, page: RepositoryPage) {
-      managementSession(tx);
+      const principal = tx.context.principal;
+      if (principal?.kind === 'secret_key') {
+        tx.assertActive();
+        if (!tx.context.projectId || !principal.scopes.includes('keys:read'))
+          throw new AppError('forbidden');
+      } else {
+        managementSession(tx);
+      }
       const result = pageResult(await tx.repositories.keys.list(page), page.limit);
-      return { data: result.data.map(apiKeyMetadata), nextCursor: result.nextCursor };
+      const data = result.data.map((key) => {
+        const metadata = apiKeyMetadata(key);
+        return principal?.kind === 'secret_key' ? { ...metadata, publicToken: null } : metadata;
+      });
+      return { data, nextCursor: result.nextCursor };
     },
     async create(tx: TenantTransaction, input: ApiKeyCreate, requestId?: string) {
       const principal = managementSession(tx);

@@ -71,3 +71,9 @@ const { count, average, distribution } = await backbricks.reviews.stats('testimo
 ```
 
 Browser submissions use the same proof of work as Forms. Use a secret key with `reviews:submit` for server-side submissions. An administrator approves and publishes the review in separate steps. The public methods return published reviews and aggregate ratings. Pass `nextCursor` to `reviews.list` with the same sort to read the next page.
+
+## Transport and PoW
+
+The public entry offers `client.request()` for JSON endpoints under the configured API base. Bodyless responses resolve to `undefined`. Safe reads can retry once on a transient failure. Writes, direct-storage transfers and proof issuance keep their existing attempt behavior. A request can opt out with `retry: false`.
+
+The browser client starts the proof-of-work worker only when needed. The separate `@backbricks/sdk/pow` entry also exposes the solver. The Node and Bun clients load the WebCrypto solver on demand. The management entry remains separate at `@backbricks/sdk/admin`.

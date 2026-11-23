@@ -41,10 +41,14 @@ export function createConfigurationService(
 ) {
   const tokens = configPlanTokens(deps.appSecret);
   function binding(tx: TenantTransaction, document: ConfigDocument, rows: ModuleInstance[]) {
+    const principal = tx.context.principal;
     return configDigest({
       organization: tx.context.organizationId,
       project: tx.context.projectId,
-      principal: tx.context.principal,
+      principal:
+        principal?.kind === 'secret_key'
+          ? { kind: principal.kind, id: principal.id, scopes: principal.scopes }
+          : principal,
       desired: document,
       current: rows.map((row) => ({
         id: row.id,
