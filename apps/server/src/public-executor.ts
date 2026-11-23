@@ -9,6 +9,11 @@ import {
 } from '@backbricks/core';
 import { z } from 'zod';
 
+import {
+  conditionalPublicResponse,
+  IF_NONE_MATCH,
+  isConditionalPublicRead,
+} from './http/conditional-public-read.ts';
 import type { ModulePublicExecutor } from './routes/modules.ts';
 import type { ServerServices } from './services.ts';
 
@@ -107,6 +112,10 @@ export function createPublicExecutor(
     }
     // A route may allow caching (e.g. a public form schema); everything else stays uncached.
     c.header('Cache-Control', response.headers.get('cache-control') ?? 'no-store');
-    return c.newResponse(response.body, response);
+    const output =
+      response.status === 200 && isConditionalPublicRead(route)
+        ? await conditionalPublicResponse(response, c.req.header(IF_NONE_MATCH))
+        : response;
+    return c.newResponse(output.body, output);
   };
 }

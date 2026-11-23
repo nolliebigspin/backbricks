@@ -560,6 +560,150 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/projects/{projectId}/review-collections': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['reviews.instance.list'];
+    put?: never;
+    post: operations['reviews.instance.create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/review-collections/{key}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['reviews.instance.read'];
+    put: operations['reviews.instance.replace'];
+    post?: never;
+    delete: operations['reviews.instance.archive'];
+    options?: never;
+    head?: never;
+    patch: operations['reviews.instance.update'];
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/review-collections/{key}/migrate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['reviews.instance.migrate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/review-collections/{key}/revisions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['reviews.instance.revisions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/review-collections/{key}/revisions/{version}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['reviews.instance.revision'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/review-collections/{key}/revisions/{version}/rollback': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['reviews.instance.rollback'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/review-collections/{key}/stats': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['reviews.collection.stats'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/reviews': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['reviews.records.list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/projects/{projectId}/reviews/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['reviews.records.read'];
+    put?: never;
+    post?: never;
+    delete: operations['reviews.records.delete'];
+    options?: never;
+    head?: never;
+    patch: operations['reviews.records.moderate'];
+    trace?: never;
+  };
   '/v1/projects/{projectId}/storage-usage': {
     parameters: {
       query?: never;
@@ -764,6 +908,38 @@ export interface paths {
     post: operations['forms.public.submit'];
     delete?: never;
     options: operations['forms.preflight.1'];
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/public/review-collections/{key}/reviews': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['reviews.public.list'];
+    put?: never;
+    post: operations['reviews.public.submit'];
+    delete?: never;
+    options: operations['reviews.preflight.0'];
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/public/review-collections/{key}/stats': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['reviews.public.stats'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options: operations['reviews.preflight.1'];
     head?: never;
     patch?: never;
     trace?: never;
@@ -4051,6 +4227,1003 @@ export interface operations {
       };
     };
   };
+  'reviews.instance.list': {
+    parameters: {
+      query?: {
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Active and paused instance configurations. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data: {
+              config: unknown;
+              configVersion: number;
+              /** Format: date-time */
+              createdAt: string;
+              id: string;
+              key: string;
+              moduleType: string;
+              moduleVersion: number;
+              name: string;
+              organizationId: string;
+              projectId: string;
+              /** @enum {string} */
+              status: 'active' | 'paused' | 'archived';
+              storedModuleVersion?: number;
+              /** Format: date-time */
+              updatedAt: string;
+            }[];
+            nextCursor: string | null;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'reviews.instance.create': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          config?: unknown;
+          key: string;
+          name: string;
+          /**
+           * @default active
+           * @enum {string}
+           */
+          status?: 'active' | 'paused';
+          template?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Instance created with its initial revision. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            config: unknown;
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            key: string;
+            moduleType: string;
+            moduleVersion: number;
+            name: string;
+            organizationId: string;
+            projectId: string;
+            /** @enum {string} */
+            status: 'active' | 'paused' | 'archived';
+            storedModuleVersion?: number;
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'reviews.instance.read': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Instance configuration. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            config: unknown;
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            key: string;
+            moduleType: string;
+            moduleVersion: number;
+            name: string;
+            organizationId: string;
+            projectId: string;
+            /** @enum {string} */
+            status: 'active' | 'paused' | 'archived';
+            storedModuleVersion?: number;
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'reviews.instance.replace': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          config: unknown;
+          configVersion: number;
+          name?: string;
+          /**
+           * @default active
+           * @enum {string}
+           */
+          status?: 'active' | 'paused';
+        };
+      };
+    };
+    responses: {
+      /** @description Full configuration replace (null values are kept, unlike a merge patch); destructive changes additionally require config:destructive. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            config: unknown;
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            key: string;
+            moduleType: string;
+            moduleVersion: number;
+            name: string;
+            organizationId: string;
+            projectId: string;
+            /** @enum {string} */
+            status: 'active' | 'paused' | 'archived';
+            storedModuleVersion?: number;
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'reviews.instance.archive': {
+    parameters: {
+      query: {
+        configVersion: number;
+      };
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Configuration archived, key reserved, revisions retained. Requires config:write and config:destructive; personal records are not erased. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'reviews.instance.update': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          config?: unknown;
+          configVersion: number;
+          name?: string;
+          /** @enum {string} */
+          status?: 'active' | 'paused';
+        };
+      };
+    };
+    responses: {
+      /** @description Configuration merge patch; destructive changes additionally require config:destructive. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            config: unknown;
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            key: string;
+            moduleType: string;
+            moduleVersion: number;
+            name: string;
+            organizationId: string;
+            projectId: string;
+            /** @enum {string} */
+            status: 'active' | 'paused' | 'archived';
+            storedModuleVersion?: number;
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'reviews.instance.migrate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          configVersion: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Persist the current format with transactional revision and audit. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            config: unknown;
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            key: string;
+            moduleType: string;
+            moduleVersion: number;
+            name: string;
+            organizationId: string;
+            projectId: string;
+            /** @enum {string} */
+            status: 'active' | 'paused' | 'archived';
+            storedModuleVersion?: number;
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'reviews.instance.revisions': {
+    parameters: {
+      query?: {
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Immutable revision history. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data: {
+              /** @enum {string} */
+              actorType: 'user' | 'api_key' | 'mcp' | 'system';
+              config?: unknown;
+              configVersion: number;
+              /** Format: date-time */
+              createdAt: string;
+              id: string;
+              instanceId: string;
+              moduleVersion: number;
+              organizationId: string;
+              projectId: string;
+            }[];
+            nextCursor: string | null;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'reviews.instance.revision': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+        version: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Stored format and configuration of one revision. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            actorType: 'user' | 'api_key' | 'mcp' | 'system';
+            config?: unknown;
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            instanceId: string;
+            moduleVersion: number;
+            organizationId: string;
+            projectId: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'reviews.instance.rollback': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+        key: string;
+        version: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          configVersion: number;
+        };
+      };
+    };
+    responses: {
+      /** @description New revision restoring the selected historical configuration. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            config: unknown;
+            configVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            key: string;
+            moduleType: string;
+            moduleVersion: number;
+            name: string;
+            organizationId: string;
+            projectId: string;
+            /** @enum {string} */
+            status: 'active' | 'paused' | 'archived';
+            storedModuleVersion?: number;
+            /** Format: date-time */
+            updatedAt: string;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'reviews.collection.stats': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Published statistics and moderation counts. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            average: number | null;
+            count: number;
+            distribution: {
+              count: number;
+              rating: number;
+            }[];
+            moderation: {
+              approved: number;
+              pending: number;
+              published: number;
+              rejected: number;
+            };
+            ratingScale: number;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'reviews.records.list': {
+    parameters: {
+      query: {
+        limit?: number;
+        cursor?: string;
+        collection: string;
+        status?: 'pending' | 'approved' | 'published' | 'rejected' | 'to_review';
+      };
+      header?: never;
+      path: {
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Private queue for a review collection. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data: {
+              authorName: string;
+              body: string | null;
+              collectionId: string;
+              /** Format: date-time */
+              createdAt: string;
+              id: string;
+              isTest: boolean;
+              /** @enum {string} */
+              moderationStatus: 'pending' | 'approved' | 'rejected';
+              /** Format: date-time */
+              publishedAt: string | null;
+              rating: number;
+              title: string | null;
+            }[];
+            nextCursor: string | null;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'reviews.records.read': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Private review detail. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            authorName: string;
+            body: string | null;
+            collectionId: string;
+            /** Format: date-time */
+            createdAt: string;
+            email: string | null;
+            /** Format: date-time */
+            expiresAt: string | null;
+            id: string;
+            isTest: boolean;
+            /** Format: date-time */
+            moderatedAt: string | null;
+            /** @enum {string} */
+            moderationStatus: 'pending' | 'approved' | 'rejected';
+            privateFields: {
+              [key: string]: string;
+            };
+            publicFields: {
+              [key: string]: string;
+            };
+            /** Format: date-time */
+            publishedAt: string | null;
+            rating: number;
+            /** @enum {string} */
+            spamVerdict: 'clean' | 'suspect' | 'spam';
+            title: string | null;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'reviews.records.delete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The review was permanently deleted. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'reviews.records.moderate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          action: 'approve' | 'reject' | 'publish' | 'unpublish';
+        };
+      };
+    };
+    responses: {
+      /** @description Current state of the review after moderation. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            id: string;
+            /** @enum {string} */
+            moderationStatus: 'pending' | 'approved' | 'rejected';
+            /** Format: date-time */
+            publishedAt: string | null;
+          };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
   'uploads.storage.usage': {
     parameters: {
       query?: never;
@@ -5313,6 +6486,320 @@ export interface operations {
     };
   };
   'forms.preflight.1': {
+    parameters: {
+      query: {
+        key: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Permitted public request preflight. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'reviews.public.list': {
+    parameters: {
+      query?: {
+        limit?: number;
+        cursor?: string;
+        sort?: 'newest' | 'rating_desc' | 'rating_asc';
+        key?: string;
+      };
+      header?: {
+        'if-none-match'?: string;
+      };
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A page of published reviews. */
+      200: {
+        headers: {
+          /** @description Validator for the selected public representation. */
+          ETag?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data: {
+              body: string | null;
+              displayName: string;
+              fields: {
+                [key: string]: string;
+              };
+              id: string;
+              /** Format: date-time */
+              publishedAt: string;
+              rating: number;
+              title: string | null;
+            }[];
+            nextCursor: string | null;
+          };
+        };
+      };
+      /** @description The current public representation matches the validator. */
+      304: {
+        headers: {
+          /** @description Validator for the selected public representation. */
+          ETag?: string;
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'reviews.public.submit': {
+    parameters: {
+      query?: {
+        key?: string;
+      };
+      header?: {
+        'idempotency-key'?: string;
+      };
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          data: {
+            authorName: string;
+            body?: string;
+            email?: string;
+            fields?: {
+              [key: string]: string;
+            };
+            rating: number;
+            title?: string;
+          };
+          honeypot?: string;
+          proof?: unknown;
+        };
+      };
+    };
+    responses: {
+      /** @description Accepted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json':
+            | {
+                id: string;
+              }
+            | {
+                /** @enum {boolean} */
+                accepted: true;
+              };
+        };
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'reviews.preflight.0': {
+    parameters: {
+      query: {
+        key: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Permitted public request preflight. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'reviews.public.stats': {
+    parameters: {
+      query?: {
+        key?: string;
+      };
+      header?: {
+        'if-none-match'?: string;
+      };
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Statistics for published reviews. */
+      200: {
+        headers: {
+          /** @description Validator for the selected public representation. */
+          ETag?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            average: number | null;
+            count: number;
+            distribution: {
+              count: number;
+              rating: number;
+            }[];
+            ratingScale: number;
+          };
+        };
+      };
+      /** @description The current public representation matches the validator. */
+      304: {
+        headers: {
+          /** @description Validator for the selected public representation. */
+          ETag?: string;
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A structured API error. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': {
+            code: string;
+            detail?: string;
+            errors?: {
+              code: string;
+              message: string;
+              meta?: {
+                [key: string]: unknown;
+              };
+              path: string;
+            }[];
+            hint?: string;
+            requestId: string;
+            status: number;
+            title: string;
+            type: string;
+          };
+        };
+      };
+    };
+  };
+  'reviews.preflight.1': {
     parameters: {
       query: {
         key: string;

@@ -11,6 +11,7 @@ import { available, scenario } from '../test/auth-fixture.ts';
 import { createFormFixture, validAnswers } from '../test/forms-fixture.ts';
 import { prepareIsolationFixture } from '../test/isolation/setup.ts';
 import { issueKey } from '../test/platform-read-fixture.ts';
+import { createReviewFixture, reviewAnswers } from '../test/reviews-fixture.ts';
 import { uploadsAvailable } from '../test/uploads-fixture.ts';
 
 /** The SDK's root entry bundled for Node, as a website build would ship it. */
@@ -193,4 +194,58 @@ test.skipIf(!uploadsAvailable)(
     );
   },
   120_000,
+);
+
+test.skipIf(!available)(
+  'the Reviews SDK submits, lists and reads stats against the same contract on Bun and Node',
+  async () => {
+    await scenario(
+      async (base) => {
+        const f = await prepareIsolationFixture(base);
+        const r = await createReviewFixture(f);
+        const client = createClient({ baseUrl: f.origin, publishableKey: r.publishable.token });
+        const receipt = await client.reviews.submit(r.collection.key, reviewAnswers);
+        if (!('id' in receipt)) throw new Error('Expected a review receipt.');
+        expect((await r.moderate(receipt.id, 'approve')).status).toBe(200);
+        expect((await r.moderate(receipt.id, 'publish')).status).toBe(200);
+        expect(
+          (await client.reviews.list(r.collection.key, { limit: 1, sort: 'rating_asc' })).data[0]
+            ?.id,
+        ).toBe(receipt.id);
+        expect((await client.reviews.stats(r.collection.key)).count).toBe(1);
+        const directory = await mkdtemp(join(tmpdir(), 'backbricks-review-sdk-'));
+        try {
+          const sdk = await bundleForNode(directory);
+          const child = Bun.spawn(
+            [
+              'node',
+              '--input-type=module',
+              '-e',
+              `const { createClient } = await import(process.argv[1]);
+           const [baseUrl, publishableKey, key] = process.argv.slice(2);
+           const { reviews } = createClient({baseUrl, publishableKey});
+           const { id } = await reviews.submit(key, JSON.parse(process.argv[5]));
+           const page = await reviews.list(key, { sort: 'rating_desc', limit: 1 });
+           const stats = await reviews.stats(key);
+           if (!/^rev_/.test(id) || page.data.length !== 1 || stats.count !== 1) process.exit(2);`,
+              sdk,
+              f.origin,
+              r.publishable.token,
+              r.collection.key,
+              JSON.stringify(reviewAnswers),
+            ],
+            { stdout: 'pipe', stderr: 'pipe' },
+          );
+          expect({
+            exited: await child.exited,
+            stderr: await new Response(child.stderr).text(),
+          }).toEqual({ exited: 0, stderr: '' });
+        } finally {
+          await rm(directory, { recursive: true, force: true });
+        }
+      },
+      { BACKBRICKS_MODULES: 'reviews' },
+    );
+  },
+  45_000,
 );

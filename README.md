@@ -4,7 +4,7 @@
 
 Your AI agent builds the frontend. Backbricks handles the functionality behind it: data processing, storage, security and a dashboard where non-technical site owners manage what comes in. No database, backend or storage to configure. Bring your own UI; Backbricks ships no widgets, iframes or CSS.
 
-> **Status: M3 developer preview in source; v0.2.0 release preparation.** Forms and private file uploads work end to end, including malware scanning, form attachments and privacy cleanup. The latest published image is **v0.1.0 (Forms/M2)**. Reviews follow in M4. The public `/v1` API changes additively; internal configuration may change before 1.0. See [`docs/MILESTONES.md`](docs/MILESTONES.md).
+> **Status: M4 developer preview in source.** Forms, private uploads and reviews work end to end from this checkout. The latest published image is **v0.1.0 (Forms/M2)**. Uploads and Reviews are prepared for distinct preview releases. The public `/v1` API changes additively; internal configuration may change before 1.0. See [`docs/MILESTONES.md`](docs/MILESTONES.md).
 
 ## What it does (v1 scope)
 
@@ -58,6 +58,8 @@ For **Uploads without malware scanning**, explicitly select the unscanned upload
 BACKBRICKS_MODULES=forms,uploads SCANNER=none mise run dev
 ```
 
+To try **Reviews with PostgreSQL only**, run `BACKBRICKS_MODULES=reviews docker compose up`. Create a collection under **Reviews**, then open its **Embed** tab or use the [testimonials example](examples/html/README.md#testimonials-and-ratings). Approve a submission and publish it to make it visible on the example site.
+
 For **scanned uploads**, start ClamAV first (allow time and memory for signature loading):
 
 ```bash
@@ -86,7 +88,7 @@ docker run -d --env-file .env -p 3000:3000 ghcr.io/nolliebigspin/backbricks:0.1.
 
 The variables are documented in [`.env.example`](.env.example); set `BACKBRICKS_MODULES=forms`, a real `APP_SECRET` and the HTTPS `PUBLIC_URL`. Production Compose files and first-admin setup arrive with M6; until then the first owner signs up with `SIGNUP_POLICY=open`, after which you switch it back to `invite_only`.
 
-The published 0.1.0 image contains Forms only. To try M3 before its release, build this checkout and supply uploads/scanner settings from [`.env.example`](.env.example):
+The published 0.1.0 image contains Forms only. To try Uploads and Reviews from source, build this checkout and supply uploads/scanner settings from [`.env.example`](.env.example):
 
 ```bash
 docker build -t backbricks/server:local .
@@ -98,7 +100,7 @@ Container endpoint addresses must be reachable from inside the container; `local
 
 **Migrations and cleanup:** back up Postgres and private storage, stop the old workers, and run the new `migrate` role before starting the new version. It applies pending forward migrations under a lock and exits. Keep workers and the same storage provider available until deletion finishes: file deletion revokes access immediately, then durable jobs abort upload sessions and delete both objects. Outstanding upload deadlines may defer physical completion. Orphans expire after 24 hours; claimed files also follow owner and area retention. Subject/project erasure reports completion only after physical cleanup settles. Do not remove a provider or disable a module while it still owns retained files. See the implemented [Uploads module](packages/modules/uploads/src/index.ts), [storage contracts](docs/storage-contracts.md), and [M3 evidence](docs/progress/phase-3.md).
 
-The 0.2.0 changeset is prepared; package versioning, a fresh review, PR/CI and an authorized signed release tag remain separate release steps. Release notes: [`apps/server/CHANGELOG.md`](apps/server/CHANGELOG.md) (generated on release).
+Cut the Uploads 0.2.0 preview from a revision before M4. After that version consumes its changeset, move the [Reviews changeset](docs/releases/reviews-developer-preview.changeset.md) into `.changeset/` to prepare 0.3.0. Each preview follows the review, PR, CI and authorized signed-tag steps. Release notes: [`apps/server/CHANGELOG.md`](apps/server/CHANGELOG.md) (generated on release).
 
 ## Development
 

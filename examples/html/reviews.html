@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Testimonials</title>
+<script type="importmap">{ "imports": { "@backbricks/sdk": "./dist/backbricks-sdk.js" } }</script>
+</head>
+<body>
+<h1>Testimonials</h1>
+<p id="review-stats" role="status"></p>
+<ul id="published-reviews"></ul>
+<button id="more-reviews" type="button" hidden>More reviews</button>
+
+<h2>Leave a review</h2>
+<form id="review-form">
+  <p><label>Rating <input name="rating" type="number" min="1" step="1" required></label></p>
+  <p><label>Name <input name="authorName" required autocomplete="name"></label></p>
+  <p><label>Email <input name="email" type="email" autocomplete="email"></label></p>
+  <p><label>Title <input name="title"></label></p>
+  <p><label>Review <textarea name="body"></textarea></label></p>
+  <div hidden><input name="_gotcha" tabindex="-1" autocomplete="off"></div>
+  <button type="submit">Send review</button>
+  <output></output>
+</form>
+<script type="module" src="reviews.js"></script>
+</body>
+</html>

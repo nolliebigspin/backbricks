@@ -529,5 +529,87 @@
       "failed": "The application could not be sent. Please try again."
     },
     "summary": "Files people uploaded, scanned and stored privately."
+  },
+  "reviews": {
+    "title": "Reviews",
+    "summary": "Collect, moderate and publish reviews for your website.",
+    "unavailable": "Reviews is unavailable for this installation.",
+    "noCollections": "No review collections yet",
+    "start": "Create a collection to receive reviews from your website.",
+    "create": "Create collection",
+    "scale": "Maximum rating (optional, defaults to 5)",
+    "back": "All review collections",
+    "fixedScale": "This collection uses a {{scale}}-point scale.",
+    "cardLabel": "Review by {{author}}",
+    "score": "{{rating}} / {{scale}}",
+    "details": "Details",
+    "untitled": "Untitled review",
+    "shortcuts": "Focus Details on a review, then press A to approve or R to reject.",
+    "test": "Test review",
+    "publicFields": "Public fields",
+    "privateFields": "Private fields",
+    "deleteTitle": "Delete this review?",
+    "deleteHint": "This permanently removes the review from the dashboard and your website.",
+    "tabs": {
+      "to_review": "To review",
+      "published": "Published",
+      "rejected": "Rejected",
+      "stats": "Stats",
+      "embed": "Embed",
+      "settings": "Settings"
+    },
+    "empty": {
+      "to_review": "You’re all caught up",
+      "published": "No published reviews",
+      "rejected": "No rejected reviews"
+    },
+    "hint": {
+      "to_review": "New reviews and approved drafts appear here.",
+      "published": "Publish an approved review to make it visible on your website.",
+      "rejected": "Reviews you reject appear here."
+    },
+    "states": {
+      "pending": "Needs review",
+      "approved": "Approved draft",
+      "published": "Published",
+      "rejected": "Rejected"
+    },
+    "actions": {
+      "approve": "Approve",
+      "reject": "Reject",
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "delete": "Delete review"
+    },
+    "spam": {
+      "spam": "Marked as spam",
+      "suspect": "Possible spam"
+    },
+    "average": "Average rating",
+    "noRating": "No rating yet",
+    "distribution": "Rating distribution",
+    "required": {
+      "label": "Required review fields",
+      "titleRequired": "Title",
+      "bodyRequired": "Review text",
+      "emailRequired": "Email address"
+    },
+    "titleLimit": "Maximum title length",
+    "bodyLimit": "Maximum review length",
+    "authorDisplay": "Show the author as",
+    "firstName": "First name and last initial",
+    "initials": "Initials",
+    "verificationMethod": "Verification method to disclose",
+    "extraFields": "Extra fields",
+    "fieldLabel": "Label",
+    "fieldRequired": "Required",
+    "fieldPublic": "Show on published reviews",
+    "addField": "Add field",
+    "removeField": "Remove field",
+    "confirmSettings": "Change published review fields?",
+    "confirmHint": "This can change which information your website displays from existing reviews.",
+    "transparency": "Before publishing reviews, ask legal counsel to verify which disclosures your website needs about how reviews are collected and verified.",
+    "embedSubmit": "Submit a review",
+    "embedDisplay": "Display reviews and ratings"
   }
 }

@@ -529,5 +529,87 @@
       "failed": "Die Bewerbung konnte nicht gesendet werden. Bitte versuche es erneut."
     },
     "summary": "Hochgeladene Dateien, geprüft und privat gespeichert."
+  },
+  "reviews": {
+    "title": "Bewertungen",
+    "summary": "Bewertungen für deine Website sammeln, moderieren und veröffentlichen.",
+    "unavailable": "Bewertungen sind in dieser Installation nicht verfügbar.",
+    "noCollections": "Noch keine Bewertungssammlungen",
+    "start": "Erstelle eine Sammlung für Bewertungen von deiner Website.",
+    "create": "Sammlung erstellen",
+    "scale": "Höchstbewertung (optional, Standard 5)",
+    "back": "Alle Bewertungssammlungen",
+    "fixedScale": "Diese Sammlung verwendet eine Skala bis {{scale}}.",
+    "cardLabel": "Bewertung von {{author}}",
+    "score": "{{rating}} / {{scale}}",
+    "details": "Details",
+    "untitled": "Bewertung ohne Titel",
+    "shortcuts": "Fokussiere Details bei einer Bewertung. Drücke A zum Freigeben oder R zum Ablehnen.",
+    "test": "Testbewertung",
+    "publicFields": "Öffentliche Felder",
+    "privateFields": "Private Felder",
+    "deleteTitle": "Diese Bewertung löschen?",
+    "deleteHint": "Die Bewertung wird dauerhaft aus dem Dashboard und von deiner Website entfernt.",
+    "tabs": {
+      "to_review": "Zu prüfen",
+      "published": "Veröffentlicht",
+      "rejected": "Abgelehnt",
+      "stats": "Statistik",
+      "embed": "Einbinden",
+      "settings": "Einstellungen"
+    },
+    "empty": {
+      "to_review": "Alles erledigt",
+      "published": "Keine veröffentlichten Bewertungen",
+      "rejected": "Keine abgelehnten Bewertungen"
+    },
+    "hint": {
+      "to_review": "Neue Bewertungen und freigegebene Entwürfe erscheinen hier.",
+      "published": "Veröffentliche eine freigegebene Bewertung, damit sie auf deiner Website erscheint.",
+      "rejected": "Abgelehnte Bewertungen erscheinen hier."
+    },
+    "states": {
+      "pending": "Zu prüfen",
+      "approved": "Freigegebener Entwurf",
+      "published": "Veröffentlicht",
+      "rejected": "Abgelehnt"
+    },
+    "actions": {
+      "approve": "Freigeben",
+      "reject": "Ablehnen",
+      "publish": "Veröffentlichen",
+      "unpublish": "Veröffentlichung zurücknehmen",
+      "delete": "Bewertung löschen"
+    },
+    "spam": {
+      "spam": "Als Spam markiert",
+      "suspect": "Möglicher Spam"
+    },
+    "average": "Durchschnittsbewertung",
+    "noRating": "Noch keine Bewertung",
+    "distribution": "Verteilung der Bewertungen",
+    "required": {
+      "label": "Pflichtfelder",
+      "titleRequired": "Titel",
+      "bodyRequired": "Bewertungstext",
+      "emailRequired": "E-Mail-Adresse"
+    },
+    "titleLimit": "Maximale Titellänge",
+    "bodyLimit": "Maximale Textlänge",
+    "authorDisplay": "Name anzeigen als",
+    "firstName": "Vorname und Nachnamensinitiale",
+    "initials": "Initialen",
+    "verificationMethod": "Offenzulegendes Prüfverfahren",
+    "extraFields": "Zusätzliche Felder",
+    "fieldLabel": "Beschriftung",
+    "fieldRequired": "Pflichtfeld",
+    "fieldPublic": "In veröffentlichten Bewertungen anzeigen",
+    "addField": "Feld hinzufügen",
+    "removeField": "Feld entfernen",
+    "confirmSettings": "Öffentliche Bewertungsfelder ändern?",
+    "confirmHint": "Das kann ändern, welche Informationen aus bestehenden Bewertungen auf deiner Website erscheinen.",
+    "transparency": "Lass vor der Veröffentlichung rechtlich prüfen, welche Angaben deine Website zur Erhebung und Prüfung von Bewertungen machen muss.",
+    "embedSubmit": "Bewertung senden",
+    "embedDisplay": "Bewertungen und Punkte anzeigen"
   }
 }

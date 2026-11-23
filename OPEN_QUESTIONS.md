@@ -130,6 +130,34 @@ Decisions for the maintainer, started in P0 planning (2026-11-04), extended for 
 - **Needed by:** P3.0a, before P3.1a application code (`docs/MODULES.md`, rule 4).
 - **Answer (2026-11-15):** Approved by the maintainer ("Approved") in response to the module plan, ADRs 0063–0065 and execution-envelope approval request.
 
+## P4 planning: approval gates
+
+### Q21 – Approve typed composite cursors?
+
+- **Context:** Review rating sorts need rating, publication time and ID to resume a page after the last visible row is removed. Existing shared cursors carry creation time and ID.
+- **Recommendation:** Approve [ADR-0076](docs/adr/0076-typed-page-cursors.md). Reuse one bounded codec with module-owned cursor schemas, and preserve the existing format for current callers.
+- **Needed by:** P4.3b. Approve with the module plan before application code.
+- **Answer (2026-11-22):** Approved by the maintainer (“Okay accept and implement”).
+
+### Q22 – Approve conditional public reads with mandatory revalidation?
+
+- **Context:** Cached review data can outlive unpublication, expiry or changes in the requester's authorization. The HTTP bridge already owns public credential and origin handling.
+- **Recommendation:** Approve [ADR-0077](docs/adr/0077-conditional-public-review-reads.md). Build validators from the scoped, projected response after the public read guard and require revalidation before cache reuse.
+- **Needed by:** P4.3c. Approve with the module plan before application code.
+- **Answer (2026-11-22):** Approved by the maintainer (“Okay accept and implement”).
+
+### Q23 – Approve the Reviews plan and revised estimate?
+
+- **Context:** The [module plan](docs/modules/reviews.md) covers the milestone exits plus required tenant isolation, retention and privacy. The detailed estimate is 66 h (8.25 PD) plus a 12 h reserve, compared with the original 5–7 PD allowance. M3 is merged. The local tag history ends at `v0.1.0`.
+- **Recommendation:** Approve the full module plan and Q21–Q22. Choose each collection's scale at creation and keep it fixed so existing ratings keep their meaning. Use explicit publication after approval, keep the release version steps separate, and run DCO sign-off after the relevant human review under `CONTRIBUTING.md`.
+- **Needed by:** P4.0a, before application code under `docs/MODULES.md` rule 4.
+- **Answer (2026-11-22):** Approved by the maintainer (“Okay accept and implement”).
+
+## Decided during P4 execution, please confirm
+
+- **D69 / P4.3c:** Public list reads confirm the collection revision after fetching rows. A concurrent settings change returns a retryable `409` before serializing data under an obsolete field policy. [ADR-0077](docs/adr/0077-conditional-public-review-reads.md)
+- **D70 / P4.6c:** Keep the Reviews minor changeset outside the active Changesets directory until an Uploads-only revision is versioned as 0.2.0. The isolated versioning run verified the two distinct minor bumps. [Phase report](docs/progress/phase-4.md)
+
 ## Decided in planning, please confirm
 
 - **D0 – TypeScript:** stay on TypeScript 7 if it works; TypeScript 6.0.3 is an acceptable fallback (maintainer guidance in the planning session). The decision rule in `PLAN.md` applies: tool-local fallback first, repo-wide TS 6 only as a last resort, recorded in ADR-0020.

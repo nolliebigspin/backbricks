@@ -40,3 +40,7 @@ The hidden `_gotcha` input is the honeypot: people never see it, bots fill it, a
 5. Open `upload.html`, choose a PDF and send. The SDK uploads once, waits for inspection, then claims its temporary reference with the form. The owner sees it in **Files** and **Inbox**, with private audited downloads.
 
 Correcting a form validation error reuses the ready upload in memory; the form's idempotency key prevents a duplicate accepted submission. Cancel stops proof solving, transfer or polling. Unclaimed uploads expire after 24 hours. References and signed URLs are temporary credentials: never log them or put them in persistent browser storage. No-JavaScript forms remain available at `index.html`; file uploads require JavaScript.
+
+## Testimonials and ratings
+
+Create a review collection with short name `testimonials`. Put your publishable key and API address in [`reviews.js`](reviews.js), add the example site's origin to the project, then build and serve this folder as above. Open [`reviews.html`](reviews.html) and submit a review. In the dashboard, approve it and then publish it. Reload the example to see the review and updated rating. Deleting or unpublishing it removes it from the next public read.

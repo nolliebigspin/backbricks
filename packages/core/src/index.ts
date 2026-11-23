@@ -48,6 +48,8 @@ export {
   pageQuerySchema,
   repositoryPage,
   encodePageCursor,
+  encodePagePosition,
+  decodePagePosition,
   pageResult,
 } from './http/pagination.ts';
 export { AUTH_BASE_PATH } from './http/auth-path.ts';
@@ -137,6 +139,7 @@ export {
   expiresAfterDays,
   MILLISECONDS_PER_DAY,
   MODULE_RETENTION_DAYS,
+  SPAM_RETENTION_DAYS,
   retentionDaysSchema,
 } from './time/retention.ts';
 export {
@@ -198,6 +201,7 @@ export {
   apiKeyKindSchema,
   emailAddressSchema,
   moduleInstanceStatusSchema,
+  reviewModerationStatusSchema,
   notificationChannelSchema,
 } from './platform/values.ts';
 export {

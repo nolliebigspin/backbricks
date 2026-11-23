@@ -26,3 +26,12 @@ export { BackbricksError, type FieldError } from './errors.ts';
 
 export type { UploadDeclaration, UploadOptions, UploadResult, UploadsClient } from './uploads.ts';
 export type { UploadProgress } from './upload-put.ts';
+
+export type {
+  ReviewListOptions,
+  ReviewPage,
+  ReviewReceipt,
+  ReviewStats,
+  ReviewValues,
+  ReviewsClient,
+} from './reviews.ts';

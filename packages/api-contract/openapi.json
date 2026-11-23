@@ -8880,6 +8880,2720 @@
         }
       }
     },
+    "/v1/projects/{projectId}/review-collections": {
+      "get": {
+        "operationId": "reviews.instance.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "config": {},
+                          "configVersion": {
+                            "exclusiveMinimum": 0,
+                            "type": "integer"
+                          },
+                          "createdAt": {
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "key": {
+                            "type": "string"
+                          },
+                          "moduleType": {
+                            "type": "string"
+                          },
+                          "moduleVersion": {
+                            "exclusiveMinimum": 0,
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "organizationId": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "projectId": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "status": {
+                            "enum": ["active", "paused", "archived"],
+                            "type": "string"
+                          },
+                          "storedModuleVersion": {
+                            "exclusiveMinimum": 0,
+                            "maximum": 2147483647,
+                            "type": "integer"
+                          },
+                          "updatedAt": {
+                            "format": "date-time",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "organizationId",
+                          "projectId",
+                          "moduleType",
+                          "key",
+                          "name",
+                          "status",
+                          "config",
+                          "configVersion",
+                          "moduleVersion",
+                          "createdAt",
+                          "updatedAt"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "nextCursor": {
+                      "type": ["string", "null"]
+                    }
+                  },
+                  "required": ["data", "nextCursor"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Active and paused instance configurations."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      },
+      "post": {
+        "operationId": "reviews.instance.create",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "config": {},
+                  "key": {
+                    "maxLength": 63,
+                    "minLength": 1,
+                    "pattern": "^[a-z0-9][a-z0-9-]*$",
+                    "type": "string"
+                  },
+                  "name": {
+                    "maxLength": 120,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "status": {
+                    "default": "active",
+                    "enum": ["active", "paused"],
+                    "type": "string"
+                  },
+                  "template": {
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": ["key", "name"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {},
+                    "configVersion": {
+                      "exclusiveMinimum": 0,
+                      "type": "integer"
+                    },
+                    "createdAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "key": {
+                      "type": "string"
+                    },
+                    "moduleType": {
+                      "type": "string"
+                    },
+                    "moduleVersion": {
+                      "exclusiveMinimum": 0,
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "organizationId": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "projectId": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "status": {
+                      "enum": ["active", "paused", "archived"],
+                      "type": "string"
+                    },
+                    "storedModuleVersion": {
+                      "exclusiveMinimum": 0,
+                      "maximum": 2147483647,
+                      "type": "integer"
+                    },
+                    "updatedAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organizationId",
+                    "projectId",
+                    "moduleType",
+                    "key",
+                    "name",
+                    "status",
+                    "config",
+                    "configVersion",
+                    "moduleVersion",
+                    "createdAt",
+                    "updatedAt"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Instance created with its initial revision."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      }
+    },
+    "/v1/projects/{projectId}/review-collections/{key}": {
+      "delete": {
+        "operationId": "reviews.instance.archive",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "configVersion",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Configuration archived, key reserved, revisions retained. Requires config:write and config:destructive; personal records are not erased."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      },
+      "get": {
+        "operationId": "reviews.instance.read",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {},
+                    "configVersion": {
+                      "exclusiveMinimum": 0,
+                      "type": "integer"
+                    },
+                    "createdAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "key": {
+                      "type": "string"
+                    },
+                    "moduleType": {
+                      "type": "string"
+                    },
+                    "moduleVersion": {
+                      "exclusiveMinimum": 0,
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "organizationId": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "projectId": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "status": {
+                      "enum": ["active", "paused", "archived"],
+                      "type": "string"
+                    },
+                    "storedModuleVersion": {
+                      "exclusiveMinimum": 0,
+                      "maximum": 2147483647,
+                      "type": "integer"
+                    },
+                    "updatedAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organizationId",
+                    "projectId",
+                    "moduleType",
+                    "key",
+                    "name",
+                    "status",
+                    "config",
+                    "configVersion",
+                    "moduleVersion",
+                    "createdAt",
+                    "updatedAt"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Instance configuration."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      },
+      "patch": {
+        "operationId": "reviews.instance.update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "config": {},
+                  "configVersion": {
+                    "exclusiveMinimum": 0,
+                    "maximum": 2147483647,
+                    "type": "integer"
+                  },
+                  "name": {
+                    "maxLength": 120,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "status": {
+                    "enum": ["active", "paused"],
+                    "type": "string"
+                  }
+                },
+                "required": ["configVersion"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {},
+                    "configVersion": {
+                      "exclusiveMinimum": 0,
+                      "type": "integer"
+                    },
+                    "createdAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "key": {
+                      "type": "string"
+                    },
+                    "moduleType": {
+                      "type": "string"
+                    },
+                    "moduleVersion": {
+                      "exclusiveMinimum": 0,
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "organizationId": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "projectId": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "status": {
+                      "enum": ["active", "paused", "archived"],
+                      "type": "string"
+                    },
+                    "storedModuleVersion": {
+                      "exclusiveMinimum": 0,
+                      "maximum": 2147483647,
+                      "type": "integer"
+                    },
+                    "updatedAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organizationId",
+                    "projectId",
+                    "moduleType",
+                    "key",
+                    "name",
+                    "status",
+                    "config",
+                    "configVersion",
+                    "moduleVersion",
+                    "createdAt",
+                    "updatedAt"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Configuration merge patch; destructive changes additionally require config:destructive."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      },
+      "put": {
+        "operationId": "reviews.instance.replace",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "config": {},
+                  "configVersion": {
+                    "exclusiveMinimum": 0,
+                    "maximum": 2147483647,
+                    "type": "integer"
+                  },
+                  "name": {
+                    "maxLength": 120,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "status": {
+                    "default": "active",
+                    "enum": ["active", "paused"],
+                    "type": "string"
+                  }
+                },
+                "required": ["config", "configVersion"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {},
+                    "configVersion": {
+                      "exclusiveMinimum": 0,
+                      "type": "integer"
+                    },
+                    "createdAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "key": {
+                      "type": "string"
+                    },
+                    "moduleType": {
+                      "type": "string"
+                    },
+                    "moduleVersion": {
+                      "exclusiveMinimum": 0,
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "organizationId": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "projectId": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "status": {
+                      "enum": ["active", "paused", "archived"],
+                      "type": "string"
+                    },
+                    "storedModuleVersion": {
+                      "exclusiveMinimum": 0,
+                      "maximum": 2147483647,
+                      "type": "integer"
+                    },
+                    "updatedAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organizationId",
+                    "projectId",
+                    "moduleType",
+                    "key",
+                    "name",
+                    "status",
+                    "config",
+                    "configVersion",
+                    "moduleVersion",
+                    "createdAt",
+                    "updatedAt"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Full configuration replace (null values are kept, unlike a merge patch); destructive changes additionally require config:destructive."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      }
+    },
+    "/v1/projects/{projectId}/review-collections/{key}/migrate": {
+      "post": {
+        "operationId": "reviews.instance.migrate",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "configVersion": {
+                    "exclusiveMinimum": 0,
+                    "maximum": 2147483647,
+                    "type": "integer"
+                  }
+                },
+                "required": ["configVersion"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {},
+                    "configVersion": {
+                      "exclusiveMinimum": 0,
+                      "type": "integer"
+                    },
+                    "createdAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "key": {
+                      "type": "string"
+                    },
+                    "moduleType": {
+                      "type": "string"
+                    },
+                    "moduleVersion": {
+                      "exclusiveMinimum": 0,
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "organizationId": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "projectId": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "status": {
+                      "enum": ["active", "paused", "archived"],
+                      "type": "string"
+                    },
+                    "storedModuleVersion": {
+                      "exclusiveMinimum": 0,
+                      "maximum": 2147483647,
+                      "type": "integer"
+                    },
+                    "updatedAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organizationId",
+                    "projectId",
+                    "moduleType",
+                    "key",
+                    "name",
+                    "status",
+                    "config",
+                    "configVersion",
+                    "moduleVersion",
+                    "createdAt",
+                    "updatedAt"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Persist the current format with transactional revision and audit."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      }
+    },
+    "/v1/projects/{projectId}/review-collections/{key}/revisions": {
+      "get": {
+        "operationId": "reviews.instance.revisions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "actorType": {
+                            "enum": ["user", "api_key", "mcp", "system"],
+                            "type": "string"
+                          },
+                          "config": {},
+                          "configVersion": {
+                            "exclusiveMinimum": 0,
+                            "type": "integer"
+                          },
+                          "createdAt": {
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "instanceId": {
+                            "type": "string"
+                          },
+                          "moduleVersion": {
+                            "exclusiveMinimum": 0,
+                            "type": "integer"
+                          },
+                          "organizationId": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "projectId": {
+                            "minLength": 1,
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "organizationId",
+                          "projectId",
+                          "instanceId",
+                          "configVersion",
+                          "moduleVersion",
+                          "actorType",
+                          "createdAt"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "nextCursor": {
+                      "type": ["string", "null"]
+                    }
+                  },
+                  "required": ["data", "nextCursor"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Immutable revision history."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      }
+    },
+    "/v1/projects/{projectId}/review-collections/{key}/revisions/{version}": {
+      "get": {
+        "operationId": "reviews.instance.revision",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "actorType": {
+                      "enum": ["user", "api_key", "mcp", "system"],
+                      "type": "string"
+                    },
+                    "config": {},
+                    "configVersion": {
+                      "exclusiveMinimum": 0,
+                      "type": "integer"
+                    },
+                    "createdAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "instanceId": {
+                      "type": "string"
+                    },
+                    "moduleVersion": {
+                      "exclusiveMinimum": 0,
+                      "type": "integer"
+                    },
+                    "organizationId": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "projectId": {
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organizationId",
+                    "projectId",
+                    "instanceId",
+                    "configVersion",
+                    "moduleVersion",
+                    "actorType",
+                    "createdAt"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Stored format and configuration of one revision."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      }
+    },
+    "/v1/projects/{projectId}/review-collections/{key}/revisions/{version}/rollback": {
+      "post": {
+        "operationId": "reviews.instance.rollback",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "configVersion": {
+                    "exclusiveMinimum": 0,
+                    "maximum": 2147483647,
+                    "type": "integer"
+                  }
+                },
+                "required": ["configVersion"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "config": {},
+                    "configVersion": {
+                      "exclusiveMinimum": 0,
+                      "type": "integer"
+                    },
+                    "createdAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "key": {
+                      "type": "string"
+                    },
+                    "moduleType": {
+                      "type": "string"
+                    },
+                    "moduleVersion": {
+                      "exclusiveMinimum": 0,
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "organizationId": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "projectId": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "status": {
+                      "enum": ["active", "paused", "archived"],
+                      "type": "string"
+                    },
+                    "storedModuleVersion": {
+                      "exclusiveMinimum": 0,
+                      "maximum": 2147483647,
+                      "type": "integer"
+                    },
+                    "updatedAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organizationId",
+                    "projectId",
+                    "moduleType",
+                    "key",
+                    "name",
+                    "status",
+                    "config",
+                    "configVersion",
+                    "moduleVersion",
+                    "createdAt",
+                    "updatedAt"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "New revision restoring the selected historical configuration."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      }
+    },
+    "/v1/projects/{projectId}/review-collections/{key}/stats": {
+      "get": {
+        "operationId": "reviews.collection.stats",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "average": {
+                      "type": ["number", "null"]
+                    },
+                    "count": {
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "distribution": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "count": {
+                            "minimum": 0,
+                            "type": "integer"
+                          },
+                          "rating": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": ["rating", "count"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "moderation": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "approved": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "pending": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "published": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "rejected": {
+                          "minimum": 0,
+                          "type": "integer"
+                        }
+                      },
+                      "required": ["pending", "approved", "published", "rejected"],
+                      "type": "object"
+                    },
+                    "ratingScale": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": ["ratingScale", "count", "average", "distribution", "moderation"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Published statistics and moderation counts."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      }
+    },
+    "/v1/projects/{projectId}/reviews": {
+      "get": {
+        "operationId": "reviews.records.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "collection",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "enum": ["pending", "approved", "published", "rejected", "to_review"],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "authorName": {
+                            "type": "string"
+                          },
+                          "body": {
+                            "type": ["string", "null"]
+                          },
+                          "collectionId": {
+                            "type": "string"
+                          },
+                          "createdAt": {
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "isTest": {
+                            "type": "boolean"
+                          },
+                          "moderationStatus": {
+                            "enum": ["pending", "approved", "rejected"],
+                            "type": "string"
+                          },
+                          "publishedAt": {
+                            "format": "date-time",
+                            "type": ["string", "null"]
+                          },
+                          "rating": {
+                            "type": "integer"
+                          },
+                          "title": {
+                            "type": ["string", "null"]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "rating",
+                          "title",
+                          "body",
+                          "collectionId",
+                          "authorName",
+                          "moderationStatus",
+                          "publishedAt",
+                          "createdAt",
+                          "isTest"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "nextCursor": {
+                      "type": ["string", "null"]
+                    }
+                  },
+                  "required": ["data", "nextCursor"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Private queue for a review collection."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      }
+    },
+    "/v1/projects/{projectId}/reviews/{id}": {
+      "delete": {
+        "operationId": "reviews.records.delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The review was permanently deleted."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      },
+      "get": {
+        "operationId": "reviews.records.read",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "authorName": {
+                      "type": "string"
+                    },
+                    "body": {
+                      "type": ["string", "null"]
+                    },
+                    "collectionId": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": ["string", "null"]
+                    },
+                    "expiresAt": {
+                      "format": "date-time",
+                      "type": ["string", "null"]
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "isTest": {
+                      "type": "boolean"
+                    },
+                    "moderatedAt": {
+                      "format": "date-time",
+                      "type": ["string", "null"]
+                    },
+                    "moderationStatus": {
+                      "enum": ["pending", "approved", "rejected"],
+                      "type": "string"
+                    },
+                    "privateFields": {
+                      "additionalProperties": {
+                        "maxLength": 250,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "type": "object"
+                    },
+                    "publicFields": {
+                      "additionalProperties": {
+                        "maxLength": 250,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "type": "object"
+                    },
+                    "publishedAt": {
+                      "format": "date-time",
+                      "type": ["string", "null"]
+                    },
+                    "rating": {
+                      "type": "integer"
+                    },
+                    "spamVerdict": {
+                      "enum": ["clean", "suspect", "spam"],
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": ["string", "null"]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "rating",
+                    "title",
+                    "body",
+                    "collectionId",
+                    "authorName",
+                    "moderationStatus",
+                    "publishedAt",
+                    "createdAt",
+                    "isTest",
+                    "email",
+                    "publicFields",
+                    "privateFields",
+                    "moderatedAt",
+                    "expiresAt",
+                    "spamVerdict"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Private review detail."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      },
+      "patch": {
+        "operationId": "reviews.records.moderate",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "action": {
+                    "enum": ["approve", "reject", "publish", "unpublish"],
+                    "type": "string"
+                  }
+                },
+                "required": ["action"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "moderationStatus": {
+                      "enum": ["pending", "approved", "rejected"],
+                      "type": "string"
+                    },
+                    "publishedAt": {
+                      "format": "date-time",
+                      "type": ["string", "null"]
+                    }
+                  },
+                  "required": ["id", "moderationStatus", "publishedAt"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Current state of the review after moderation."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      }
+    },
     "/v1/projects/{projectId}/storage-usage": {
       "get": {
         "operationId": "uploads.storage.usage",
@@ -12296,6 +15010,812 @@
               "text/html": {
                 "schema": {
                   "type": "string"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      }
+    },
+    "/v1/public/review-collections/{key}/reviews": {
+      "get": {
+        "operationId": "reviews.public.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "newest",
+              "enum": ["newest", "rating_desc", "rating_asc"],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "if-none-match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "body": {
+                            "type": ["string", "null"]
+                          },
+                          "displayName": {
+                            "type": "string"
+                          },
+                          "fields": {
+                            "additionalProperties": {
+                              "maxLength": 250,
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "type": "object"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "publishedAt": {
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "rating": {
+                            "type": "integer"
+                          },
+                          "title": {
+                            "type": ["string", "null"]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "rating",
+                          "title",
+                          "body",
+                          "displayName",
+                          "fields",
+                          "publishedAt"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "nextCursor": {
+                      "type": ["string", "null"]
+                    }
+                  },
+                  "required": ["data", "nextCursor"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A page of published reviews.",
+            "headers": {
+              "ETag": {
+                "description": "Validator for the selected public representation.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "The current public representation matches the validator.",
+            "headers": {
+              "ETag": {
+                "description": "Validator for the selected public representation.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      },
+      "options": {
+        "operationId": "reviews.preflight.0",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Permitted public request preflight."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      },
+      "post": {
+        "operationId": "reviews.public.submit",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "idempotency-key",
+            "required": false,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[\\x21-\\x7e]+$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "data": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "authorName": {
+                        "maxLength": 160,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "body": {
+                        "maxLength": 6000,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                      "fields": {
+                        "additionalProperties": {
+                          "maxLength": 250,
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "propertyNames": {
+                          "pattern": "^[a-z][a-z0-9_]*$",
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "rating": {
+                        "maximum": 10,
+                        "minimum": 1,
+                        "type": "integer"
+                      },
+                      "title": {
+                        "maxLength": 200,
+                        "minLength": 1,
+                        "type": "string"
+                      }
+                    },
+                    "required": ["rating", "authorName"],
+                    "type": "object"
+                  },
+                  "honeypot": {
+                    "maxLength": 1024,
+                    "type": "string"
+                  },
+                  "proof": {}
+                },
+                "required": ["data"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        }
+                      },
+                      "required": ["id"],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "accepted": {
+                          "enum": [true],
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["accepted"],
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "Accepted."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      }
+    },
+    "/v1/public/review-collections/{key}/stats": {
+      "get": {
+        "operationId": "reviews.public.stats",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 1,
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "if-none-match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "average": {
+                      "type": ["number", "null"]
+                    },
+                    "count": {
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "distribution": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "count": {
+                            "minimum": 0,
+                            "type": "integer"
+                          },
+                          "rating": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": ["rating", "count"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "ratingScale": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": ["ratingScale", "count", "average", "distribution"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Statistics for published reviews.",
+            "headers": {
+              "ETag": {
+                "description": "Validator for the selected public representation.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "The current public representation matches the validator.",
+            "headers": {
+              "ETag": {
+                "description": "Validator for the selected public representation.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A structured API error."
+          }
+        }
+      },
+      "options": {
+        "operationId": "reviews.preflight.1",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Permitted public request preflight."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-extensible-enum": [
+                        "internal_error",
+                        "invalid_request",
+                        "conflict",
+                        "module_not_enabled",
+                        "not_found",
+                        "method_not_allowed",
+                        "unauthorized",
+                        "forbidden",
+                        "secret_key_exposed",
+                        "validation_failed",
+                        "payload_too_large",
+                        "unsupported_media_type",
+                        "service_unavailable",
+                        "rate_limited",
+                        "proof_invalid",
+                        "quota_exceeded",
+                        "capability_unavailable"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "meta": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["path", "code", "message"],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "hint": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "maximum": 599,
+                      "minimum": 100,
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type", "title", "status", "code", "requestId"],
+                  "type": "object"
                 }
               }
             },

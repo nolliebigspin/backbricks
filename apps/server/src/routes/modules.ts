@@ -18,6 +18,7 @@ import type { Context } from 'hono';
 
 import type { AppEnv } from '../context.ts';
 import type { ApiRoutes } from '../http/api-routes.ts';
+import { IF_NONE_MATCH, isConditionalPublicRead } from '../http/conditional-public-read.ts';
 import { requireTenantContext } from '../middleware/authorization.ts';
 import type { ServerServices } from '../services.ts';
 import { publicPreflight } from './public-cors.ts';
@@ -64,6 +65,21 @@ function responses(route: RegisteredRoute): RouteConfig['responses'] {
       },
     };
   }
+  if (isConditionalPublicRead(route)) {
+    for (const status of [200, 304]) {
+      const declaration = declarations[status];
+      if (declaration)
+        declarations[status] = {
+          ...declaration,
+          headers: {
+            ETag: {
+              description: 'Validator for the selected public representation.',
+              schema: { type: 'string' },
+            },
+          },
+        };
+    }
+  }
   return declarations;
 }
 
@@ -79,16 +95,19 @@ export function moduleRoutes(
       const paths = new Map(
         module.publicRoutes.map((route) => [`${route.resource}${route.path}`, route]),
       );
-      for (const [index, { resource, path }] of [...paths.values()].entries())
+      for (const [index, { resource, path }] of [...paths.values()].entries()) {
+        const routes = module.publicRoutes.filter(
+          (route) => route.resource === resource && route.path === path,
+        );
         publicPreflight(api, {
           path: `/v1/public/${resource}${path === '/' ? '' : path}`,
           operationId: `${module.type}.preflight.${index}`,
-          methods: module.publicRoutes
-            .filter((route) => route.resource === resource && route.path === path)
-            .map((route) => route.method),
+          methods: routes.map((route) => route.method),
+          conditionalRead: routes.some(isConditionalPublicRead),
           resolve: resolvePublic,
           withTenant: services.withTenant,
         });
+      }
     }
     for (const route of [...module.adminRoutes, ...module.publicRoutes]) {
       if (/\{(?:projectId|organizationId)\}/.test(route.path))
@@ -110,7 +129,9 @@ export function moduleRoutes(
         request: {
           ...(!management && hasBody
             ? { headers: z.object({ 'idempotency-key': idempotencyKeySchema.optional() }) }
-            : {}),
+            : isConditionalPublicRead(route)
+              ? { headers: z.object({ [IF_NONE_MATCH]: z.string().optional() }) }
+              : {}),
           params: management
             ? route.input.shape.params.extend({ projectId: z.string() })
             : route.input.shape.params,

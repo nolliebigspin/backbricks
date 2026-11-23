@@ -10,3 +10,6 @@ export const moduleInstanceStatusSchema = z.enum(['active', 'paused', 'archived'
 export const emailAddressSchema = z.email().max(320);
 /** Notification delivery channel implemented in the first release. */
 export const notificationChannelSchema = z.enum(['email']);
+
+/** Persisted moderation states shared by Reviews and its database schema (ADR-0055). */
+export const reviewModerationStatusSchema = z.enum(['pending', 'approved', 'rejected']);

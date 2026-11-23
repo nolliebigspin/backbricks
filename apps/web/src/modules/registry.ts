@@ -6,6 +6,12 @@
 export const dashboardModules = [
   { type: 'forms', labelKey: 'forms.inbox', summaryKey: 'forms.summary', resource: 'forms' },
   { type: 'uploads', labelKey: 'uploads.title', summaryKey: 'uploads.summary', resource: 'files' },
+  {
+    type: 'reviews',
+    labelKey: 'reviews.title',
+    summaryKey: 'reviews.summary',
+    resource: 'reviews',
+  },
 ] as const;
 
 export type ModuleAvailability = { type: string; resourceName: { plural: string } };

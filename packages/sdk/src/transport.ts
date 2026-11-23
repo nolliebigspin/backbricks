@@ -45,7 +45,9 @@ export function createTransport(options: ClientOptions): Transport {
     throw new TypeError('createClient needs a publishableKey or a secretKey.');
   const send = options.fetch ?? ((url: string, init: RequestInit) => fetch(url, init));
   const url = (path: string) =>
-    publishableKey ? `${base}${path}?key=${encodeURIComponent(publishableKey)}` : `${base}${path}`;
+    publishableKey
+      ? `${base}${path}${path.includes('?') ? '&' : '?'}key=${encodeURIComponent(publishableKey)}`
+      : `${base}${path}`;
   return {
     publishable: Boolean(publishableKey),
     send,

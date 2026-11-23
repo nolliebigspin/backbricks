@@ -1,0 +1,1109 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "cfacd069-b0f0-4b71-a22e-4295645b5aee",
+  "prevIds": [
+    "d892e575-8983-46e1-b300-9074c47d4212"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "review_moderation_status"
+      ],
+      "writes": [
+        "s|enum|public.review_moderation_status",
+        "n|enum|public.review_moderation_status",
+        "e|enum|public.review_moderation_status",
+        "n|type|public.review_moderation_status"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "reviews"
+      ],
+      "writes": [
+        "s|tbl|public.reviews",
+        "n|tbl|public.reviews",
+        "e|tbl|public.reviews",
+        "n|rel|public.reviews",
+        "n|type|public.reviews",
+        "n|rel|public.reviews_pkey"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.review_moderation_status",
+        "n|enum|public.spam_verdict"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "reviews",
+        "reviews_queue_idx"
+      ],
+      "writes": [
+        "s|idx|public.reviews_queue_idx",
+        "n|idx|public.reviews_queue_idx",
+        "e|idx|public.reviews_queue_idx",
+        "n|rel|public.reviews_queue_idx"
+      ],
+      "reads": [
+        "n|tbl|public.reviews",
+        "n|sch|public",
+        "n|col|public.reviews.organization_id",
+        "n|col|public.reviews.project_id",
+        "n|col|public.reviews.instance_id",
+        "n|col|public.reviews.created_at",
+        "n|col|public.reviews.id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "reviews",
+        "reviews_public_newest_idx"
+      ],
+      "writes": [
+        "s|idx|public.reviews_public_newest_idx",
+        "n|idx|public.reviews_public_newest_idx",
+        "e|idx|public.reviews_public_newest_idx",
+        "n|rel|public.reviews_public_newest_idx"
+      ],
+      "reads": [
+        "n|tbl|public.reviews",
+        "n|sch|public",
+        "n|col|public.reviews.organization_id",
+        "n|col|public.reviews.project_id",
+        "n|col|public.reviews.instance_id",
+        "n|col|public.reviews.published_at",
+        "n|col|public.reviews.id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "reviews",
+        "reviews_public_rating_asc_idx"
+      ],
+      "writes": [
+        "s|idx|public.reviews_public_rating_asc_idx",
+        "n|idx|public.reviews_public_rating_asc_idx",
+        "e|idx|public.reviews_public_rating_asc_idx",
+        "n|rel|public.reviews_public_rating_asc_idx"
+      ],
+      "reads": [
+        "n|tbl|public.reviews",
+        "n|sch|public",
+        "n|col|public.reviews.organization_id",
+        "n|col|public.reviews.project_id",
+        "n|col|public.reviews.instance_id",
+        "n|col|public.reviews.rating",
+        "n|col|public.reviews.published_at",
+        "n|col|public.reviews.id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "reviews",
+        "reviews_public_rating_desc_idx"
+      ],
+      "writes": [
+        "s|idx|public.reviews_public_rating_desc_idx",
+        "n|idx|public.reviews_public_rating_desc_idx",
+        "e|idx|public.reviews_public_rating_desc_idx",
+        "n|rel|public.reviews_public_rating_desc_idx"
+      ],
+      "reads": [
+        "n|tbl|public.reviews",
+        "n|sch|public",
+        "n|col|public.reviews.organization_id",
+        "n|col|public.reviews.project_id",
+        "n|col|public.reviews.instance_id",
+        "n|col|public.reviews.rating",
+        "n|col|public.reviews.published_at",
+        "n|col|public.reviews.id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "reviews",
+        "reviews_subject_idx"
+      ],
+      "writes": [
+        "s|idx|public.reviews_subject_idx",
+        "n|idx|public.reviews_subject_idx",
+        "e|idx|public.reviews_subject_idx",
+        "n|rel|public.reviews_subject_idx"
+      ],
+      "reads": [
+        "n|tbl|public.reviews",
+        "n|sch|public",
+        "n|col|public.reviews.organization_id",
+        "n|col|public.reviews.project_id",
+        "n|col|public.reviews.subject_email"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "reviews",
+        "reviews_expiry_idx"
+      ],
+      "writes": [
+        "s|idx|public.reviews_expiry_idx",
+        "n|idx|public.reviews_expiry_idx",
+        "e|idx|public.reviews_expiry_idx",
+        "n|rel|public.reviews_expiry_idx"
+      ],
+      "reads": [
+        "n|tbl|public.reviews",
+        "n|sch|public",
+        "n|col|public.reviews.organization_id",
+        "n|col|public.reviews.project_id",
+        "n|col|public.reviews.expires_at"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "reviews"
+      ],
+      "writes": [
+        "s|fk|public.reviews.reviews_organization_id_organization_id_fkey",
+        "n|fk|public.reviews.reviews_organization_id_organization_id_fkey",
+        "e|fk|public.reviews.reviews_organization_id_organization_id_fkey",
+        "n|con|public.reviews.reviews_organization_id_organization_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.reviews",
+        "n|sch|public",
+        "n|tbl|public.organization",
+        "n|sch|public",
+        "n|col|public.reviews.organization_id",
+        "n|col|public.organization.id",
+        "e|uniqueness|public.organization.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "reviews"
+      ],
+      "writes": [
+        "s|fk|public.reviews.reviews_9feraKcVaKDo_fkey",
+        "n|fk|public.reviews.reviews_9feraKcVaKDo_fkey",
+        "e|fk|public.reviews.reviews_9feraKcVaKDo_fkey",
+        "n|con|public.reviews.reviews_9feraKcVaKDo_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.reviews",
+        "n|sch|public",
+        "n|tbl|public.projects",
+        "n|sch|public",
+        "n|col|public.reviews.organization_id",
+        "n|col|public.reviews.project_id",
+        "n|col|public.projects.organization_id",
+        "n|col|public.projects.id",
+        "e|uniqueness|public.projects.id.organization_id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "reviews"
+      ],
+      "writes": [
+        "s|fk|public.reviews.reviews_nZ1hmt0t5ms7_fkey",
+        "n|fk|public.reviews.reviews_nZ1hmt0t5ms7_fkey",
+        "e|fk|public.reviews.reviews_nZ1hmt0t5ms7_fkey",
+        "n|con|public.reviews.reviews_nZ1hmt0t5ms7_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.reviews",
+        "n|sch|public",
+        "n|tbl|public.module_instances",
+        "n|sch|public",
+        "n|col|public.reviews.organization_id",
+        "n|col|public.reviews.project_id",
+        "n|col|public.reviews.instance_id",
+        "n|col|public.reviews.module_type",
+        "n|col|public.module_instances.organization_id",
+        "n|col|public.module_instances.project_id",
+        "n|col|public.module_instances.id",
+        "n|col|public.module_instances.module_type",
+        "e|uniqueness|public.module_instances.id.module_type.organization_id.project_id"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "reviews",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "review_moderation_status",
+        "values": [
+          "pending",
+          "approved",
+          "rejected"
+        ],
+        "entityType": "enums"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "id",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "organization_id",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "project_id",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "instance_id",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "module_type",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'reviews'",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "config_version",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "rating",
+        "type": "smallint",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "title",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "body",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "author_name",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "subject_email",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "public_fields",
+        "type": "jsonb",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'{}'",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "private_fields",
+        "type": "jsonb",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'{}'",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "moderation_status",
+        "type": "review_moderation_status",
+        "typeSchema": "public",
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'pending'",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "published_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "moderated_by",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "moderated_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "spam_verdict",
+        "type": "spam_verdict",
+        "typeSchema": "public",
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'clean'",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "is_test",
+        "type": "boolean",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "false",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "source",
+        "type": "jsonb",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "expires_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "reviews_queue_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "organization_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "project_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "instance_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "created_at",
+            "isExpression": false,
+            "asc": false,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "id",
+            "isExpression": false,
+            "asc": false,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "reviews_public_newest_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "organization_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "project_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "instance_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "published_at",
+            "isExpression": false,
+            "asc": false,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "id",
+            "isExpression": false,
+            "asc": false,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": "\"moderation_status\" = 'approved' and \"published_at\" is not null and not \"is_test\"",
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "reviews_public_rating_asc_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "organization_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "project_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "instance_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "rating",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "published_at",
+            "isExpression": false,
+            "asc": false,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "id",
+            "isExpression": false,
+            "asc": false,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": "\"moderation_status\" = 'approved' and \"published_at\" is not null and not \"is_test\"",
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "reviews_public_rating_desc_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "organization_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "project_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "instance_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "rating",
+            "isExpression": false,
+            "asc": false,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "published_at",
+            "isExpression": false,
+            "asc": false,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "id",
+            "isExpression": false,
+            "asc": false,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": "\"moderation_status\" = 'approved' and \"published_at\" is not null and not \"is_test\"",
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "reviews_subject_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "organization_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "project_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "subject_email",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": "\"subject_email\" is not null",
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "reviews_expiry_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "organization_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "project_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "expires_at",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": "\"expires_at\" is not null",
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "reviews_organization_id_organization_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "organization_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "organization",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "reviews_9feraKcVaKDo_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "organization_id",
+          "project_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "projects",
+        "columnsTo": [
+          "organization_id",
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "reviews_nZ1hmt0t5ms7_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "organization_id",
+          "project_id",
+          "instance_id",
+          "module_type"
+        ],
+        "schemaTo": "public",
+        "tableTo": "module_instances",
+        "columnsTo": [
+          "organization_id",
+          "project_id",
+          "id",
+          "module_type"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "RESTRICT",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "reviews_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "reviews_module_type",
+        "value": "\"module_type\" = 'reviews'",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "reviews_rating",
+        "value": "\"rating\" between 1 and 10",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "reviews_positive_version",
+        "value": "\"config_version\" > 0",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "reviews_publication",
+        "value": "\"published_at\" is null or \"moderation_status\" = 'approved'",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "reviews_expiry_after_creation",
+        "value": "\"expires_at\" is null or \"expires_at\" > \"created_at\"",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "reviews_spam_expires",
+        "value": "\"spam_verdict\" <> 'spam' or \"expires_at\" is not null",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reviews",
+        "name": "reviews_subject_normalized",
+        "value": "\"subject_email\" is null or \"subject_email\" = lower(\"subject_email\")",
+        "entityType": "checks"
+      }
+    }
+  ]
+}
