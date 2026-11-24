@@ -1,0 +1,12 @@
+# Self-hosting threat model
+
+| Boundary | Risk | Control and verification |
+| --- | --- | --- |
+| Operator bootstrap | Concurrent first-owner creation or unauthenticated setup | Setup runs inside the deployment with private stdin. A database transaction lock and marker make it single-use. Scenario C runs two setups concurrently and signs in as the winner. |
+| Dashboard and CLI | Credential forwarding, cross-tenant access or unauthorized key creation | TLS, session cookies, origin/CSRF checks, explicit CLI target selection and existing route policies. Tests exercise rate limits, tenant isolation, default-agent denial, session-only operations and audit. |
+| Public uploads | Oversized content, forged storage tickets, SSRF and post-scan overwrite | The issued ticket binds method, expiry, provider origin, byte length and content type. Transfers use a fixed path-style provider and cannot redirect. The app streams the bounded part, then the existing completion path copies to a new private object before inspection. |
+| Private reads | Stored active content or disclosure through a stale download URL | The existing scoped signer and audit gate control ticket issuance. The proxy enforces attachment and octet-stream unless an approved, detected image is explicitly requested. Responses are private and uncacheable. |
+| Release runtime | A compromised container writes into its application filesystem or changes network topology | The app and worker run as non-root, read-only with dropped capabilities. Database and storage stay on the private network. The dashboard uses CSP and the TLS ingress uses HSTS. |
+| Recovery | Missing data, corrupted backups or indefinite retention of deleted records | Stop writers and Garage, keep independent protected settings, snapshot the database and any retained object volumes, and verify a fresh restore. Rotate each deployment's encrypted backup history on a 30-day window. |
+
+Use the [private reporting process](../SECURITY.md) for vulnerabilities. The production dependency scan reported no high or critical advisories at M6 implementation. The audit also reported two moderate advisories in tooling. The site uses static Astro output and does not ship the affected Node image endpoint. The reported minimatch version is used by shadcn's tooling. Recheck both before publication. [Astro advisory](https://github.com/advisories/GHSA-r3h5-4585-7x3w) · [Minimatch advisory](https://github.com/advisories/GHSA-g3hv-75wg-m249)

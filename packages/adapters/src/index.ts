@@ -8,3 +8,4 @@ export {
 } from './abuse/altcha.ts';
 export { createMemoryRateLimiter } from './abuse/memory-rate-limiter.ts';
 export { createClamavScanner } from './scanner/clamav.ts';
+export { initGarage, type GarageSettings } from './storage/garage-init.ts';

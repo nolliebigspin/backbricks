@@ -113,6 +113,9 @@ jobs:
           mise run scan
       - name: Smoke test (real worker consumption, non-root/read-only roles)
         run: bun scripts/image/smoke.ts backbricks/server:ci
+      - run: bun run --cwd packages/cli build
+      - name: Production Compose and recovery (Scenario C)
+        run: bun scripts/deploy/scenario-c.ts backbricks/server:ci --baseline=ghcr.io/nolliebigspin/backbricks:0.1.0
 
   dco:
     name: DCO sign-off

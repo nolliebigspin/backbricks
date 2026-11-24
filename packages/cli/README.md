@@ -25,3 +25,5 @@ Use `diff` before `push`. A destructive change requires `--allow-destructive`, c
 Use `--json` for machine-readable command output. The MCP command uses JSON-RPC on stdout.
 
 For local development, build the binary with `bun run --cwd packages/cli build` and run `node packages/cli/dist/backbricks.js --help`. The first use of an environment-provided key needs an explicit API URL from `--base-url` or `BACKBRICKS_BASE_URL`. A successful explicit `init` records the destination and a fingerprint in user-local settings so subsequent commands in the linked site can use the same environment key.
+
+Use [dashboard administration](ADMIN.md) for scoped reads, private downloads and session-only operations. `backbricks deploy configure` prepares the [production Compose deployment](../../deploy/compose/README.md).

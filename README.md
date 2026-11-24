@@ -49,7 +49,9 @@ docker run --rm --env-file .env ghcr.io/nolliebigspin/backbricks:0.1.0 migrate
 docker run -d --env-file .env -p 3000:3000 ghcr.io/nolliebigspin/backbricks:0.1.0 all
 ```
 
-Until M6 ships first-run setup, use `SIGNUP_POLICY=open` to create and verify the first owner account, then switch back to `invite_only`. To try current modules, build the checkout with `docker build -t backbricks/server:local .` and use that image in the commands above. The verified target is Linux amd64. See [deployment architecture](docs/ARCHITECTURE.md#g4-self-hosting-docker-compose) and [storage operations](docs/storage-contracts.md#operations).
+For this published preview image, use `SIGNUP_POLICY=open` to create and verify the first owner account, then switch back to `invite_only`. To try current modules, build the checkout with `docker build -t backbricks/server:local .` and use that image in the commands above. The verified target is Linux amd64. See [deployment architecture](docs/ARCHITECTURE.md#g4-self-hosting-docker-compose) and [storage operations](docs/storage-contracts.md#operations).
+
+For the production Compose candidate from source, follow the [self-hosting guide](deploy/compose/README.md). It covers first-owner setup, TLS, optional services, backups and upgrades.
 
 ## Contribute
 

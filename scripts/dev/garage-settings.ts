@@ -1,21 +1,11 @@
+import type { GarageSettings } from '@backbricks/adapters';
+
 /**
  * Settings for the dev Garage instance. Defaults match compose.yaml and
  * docker/garage/garage.toml; env variables override them (host runs use localhost URLs).
  * These are fixed dev values, never used outside the local environment.
  */
-export type GarageDevSettings = {
-  adminUrl: string;
-  adminToken: string;
-  s3Endpoint: string;
-  region: string;
-  bucket: string;
-  accessKeyId: string;
-  secretAccessKey: string;
-  corsOrigins: string[];
-  capacityBytes: number;
-};
-
-export function garageDevSettings(env: Record<string, string | undefined>): GarageDevSettings {
+export function garageDevSettings(env: Record<string, string | undefined>): GarageSettings {
   return {
     adminUrl: env['GARAGE_ADMIN_URL'] ?? 'http://localhost:3903',
     adminToken: env['GARAGE_ADMIN_TOKEN'] ?? 'backbricks-dev-admin-token',

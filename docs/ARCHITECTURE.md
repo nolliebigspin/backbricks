@@ -410,7 +410,7 @@ sequenceDiagram
 - Object keys **never** contain the original file name.
 - Dashboard downloads: presigned GET, 60 s, `response-content-disposition=attachment`, `response-content-type=application/octet-stream`. Inline preview only for detected `image/png|jpeg|webp|gif`, **never SVG/HTML**. Every download is audited (`files.downloaded`).
 - `pending` and unclaimed files are deleted automatically after 24 h.
-- **Planned for M6:** `UPLOAD_MODE=proxy` will support bounded streaming when object storage has no public endpoint.
+- `UPLOAD_MODE=proxy` supports bounded streaming to private path-style storage. The application issues authenticated transfer tickets for its own provider-signed URLs. [ADR-0082](adr/0082-production-bootstrap-and-storage-proxy.md)
 
 ### D.7 TypeScript SDK
 
@@ -438,7 +438,7 @@ Implementation: the public root entry in [`packages/sdk/src`](../packages/sdk/sr
 
 The [config document schema](../packages/core/src/configuration/schemas.ts) and [planner](../packages/core/src/configuration/planner.ts) implement ADR-0042. Each existing instance requires its current config-version precondition. Omitted module sections preserve remote state, while empty sections request archival. Config documents exclude credentials, notification recipients and personal records.
 
-The current CLI focuses on integration. Read access to real entries and private downloads requires an explicit server-side grant. [M6 CLI parity](../PLAN.md#p6--open-source-10) adds dashboard administrative workflows under the same policies.
+The CLI exposes the dashboard management operations through the generated administration catalog. Use an explicit scoped key for automation or sign in with a dashboard user session. The integration preset still excludes real entries and private downloads. [CLI administration](../packages/cli/ADMIN.md)
 
 ### D.9 MCP server
 
@@ -600,7 +600,7 @@ See §B.6 and invariants I1–I3.
 
 ### F.5 Backup and restore (self-host)
 
-M6 adds `pg_dump` and restic backup/restore, a written operator procedure and a CI restore smoke test. See [P6](../PLAN.md#p6--open-source-10) and the separate [cloud recovery design](CLOUD.md).
+Production Compose uses `pg_dump` and restic for backups. The operator runbook describes a quiesced backup and a restore into a fresh deployment. Scenario C verifies stored objects and data after restoration. [Runbook](../deploy/compose/README.md#backup-and-restore) · [Cloud recovery design](CLOUD.md)
 
 ### F.6 Audit logging
 
@@ -634,7 +634,7 @@ AGPL-3.0-only for `apps/*`, `packages/{core,db,auth,adapters,modules,ui,api-cont
 
 ### G.4 Self-hosting (Docker Compose)
 
-Use the [preview image instructions](../README.md#run-the-preview-image) today. The [M6 plan](../PLAN.md#p6--open-source-10) covers the production Compose design below.
+Use the [production Compose runbook](../deploy/compose/README.md) to deploy from source. The [preview image instructions](../README.md#run-the-preview-image) install the last published image.
 
 Services: `caddy` (TLS, routes the app and, if needed, the storage domain), `app` (`serve`), `worker`, `migrate` (one-shot), `postgres:18`, `garage` (profile `storage`), `clamav` (profile `scan`), `backup` (profile `backup`, `pg_dump` + `restic`).
 
@@ -642,7 +642,7 @@ Services: `caddy` (TLS, routes the app and, if needed, the storage domain), `app
 2. `docker compose up -d` starts only the services the selected modules need (plus `--profile backup` if wanted)
 3. If storage is enabled, `garage-init` creates bucket, key and CORS rule (one-shot)
 4. `migrate` runs before `app`/`worker` (`depends_on: condition: service_completed_successfully`)
-5. A setup wizard on first visit creates the instance admin; afterwards sign-up is invite-only by default (`SIGNUP_POLICY=invite_only`)
+5. The one-shot setup role creates the first verified dashboard account; afterwards sign-up is invite-only by default (`SIGNUP_POLICY=invite_only`)
 
 **Configuration** only via environment variables, validated with Zod at startup (clear error, exit). Docker secrets via `*_FILE` variants. **Updates:** semver-tagged images, `docker compose pull && docker compose up -d`, migrations run automatically; breaking changes only in majors with an upgrade guide. **Telemetry:** off, optional opt-in.
 

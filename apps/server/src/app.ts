@@ -11,17 +11,21 @@ import { ApiRoutes, type ApiAuthorization, createOpenApiApp } from './http/api-r
 import { apiDocument } from './http/openapi-document.ts';
 import { clientIdentity } from './middleware/client-identity.ts';
 import { requestContext } from './middleware/request-context.ts';
+import { storageTransferPath } from './storage-proxy.ts';
 
 /** The HTTP app. Wiring only: routes and services come from the composition root. */
 export function createApp(
   deps: AppDependencies,
   configureApi: (api: ApiRoutes) => void = () => {},
   authorize?: ApiAuthorization,
+  storageTransfer?: (request: Request) => Promise<Response>,
 ) {
   const app = createOpenApiApp();
 
   app.use(requestContext(deps.log, deps.ids));
   if (deps.ipIdentity) app.use(clientIdentity(deps.ipIdentity));
+  if (storageTransfer)
+    app.on(['PUT', 'GET', 'OPTIONS'], storageTransferPath, (c) => storageTransfer(c.req.raw));
   app.use(
     bodyLimit({
       maxSize: DEFAULT_BODY_LIMIT_BYTES,

@@ -30,3 +30,5 @@ export {
   maintenanceOrganizationIds,
   securityRecipientsForTenant,
 } from './repositories/maintenance-identity.ts';
+
+export { completeInstanceSetup } from './repositories/instance-setup.ts';

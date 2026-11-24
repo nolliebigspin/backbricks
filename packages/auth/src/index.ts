@@ -5,3 +5,4 @@ export type { AuthPersistence, AuthTransactions, DashboardAuthOptions } from './
 export { AUTH_BODY_LIMIT_BYTES } from './constants.ts';
 export { authLogPath } from './http.ts';
 export { organizationRouteManifest } from './organizations/policies.ts';
+export { createSetupOwner, setupOwnerSchema } from './bootstrap.ts';

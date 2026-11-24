@@ -12,6 +12,7 @@ test('drift checks fail on an edited generated artifact without overwriting it',
     contract: join(directory, 'openapi.json'),
     types: join(directory, 'generated.ts'),
     configSchema: join(directory, 'config-schema.json'),
+    adminCommands: join(directory, 'admin-commands.json'),
   };
   try {
     const real = apiArtifacts();
@@ -19,6 +20,7 @@ test('drift checks fail on an edited generated artifact without overwriting it',
       Bun.write(paths.contract, Bun.file(real.contract)),
       Bun.write(paths.types, Bun.file(real.types)),
       Bun.write(paths.configSchema, Bun.file(real.configSchema)),
+      Bun.write(paths.adminCommands, Bun.file(real.adminCommands)),
     ]);
     await checkApiDrift(paths);
     const changed = `${await Bun.file(paths.types).text()}\n// deliberate fixture drift\n`;

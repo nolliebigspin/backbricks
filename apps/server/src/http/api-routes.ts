@@ -137,6 +137,13 @@ export class ApiRoutes {
       throw new Error('Only public body validation may be deferred to AbuseGuard.');
     const declared = {
       ...route,
+      ...(parsed.kind === 'management' && {
+        'x-backbricks-management': {
+          ...(parsed.session && { role: parsed.session.role }),
+          ...(parsed.secretKey && { scope: parsed.secretKey.scope }),
+          ...(parsed.secretKey?.channel && { channel: parsed.secretKey.channel }),
+        },
+      }),
       responses: {
         default: {
           description: 'A structured API error.',

@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 /**
- * Entry point and composition root: `bun apps/server/src/main.ts <serve|worker|all|migrate>`.
+ * Entry point and composition root: `bun apps/server/src/main.ts <serve|worker|all|migrate|setup>`.
  * One image, several roles (ARCHITECTURE §A.1, ADR-0002); `all` runs serve and worker in one
- * process for the smallest installs. The `setup` role arrives with P6.2 (DEV-7).
+ * process for the smallest installs. The `setup` role provisions the first owner.
  */
 import {
   formatConfigIssues,
@@ -21,6 +21,7 @@ import {
   startServe,
   startWorker,
 } from './roles.ts';
+import { setupInstance } from './setup.ts';
 
 const role = process.argv[2];
 if (!isRole(role)) {
@@ -35,6 +36,16 @@ if (!result.ok) {
 }
 const { config } = result;
 const log = createLogger(config.logLevel).child({ role });
+
+if (role === 'setup') {
+  try {
+    await setupInstance(config, log);
+    process.exit(0);
+  } catch {
+    log.fatal('Setup could not complete. Use a migrated, empty instance and a valid owner input.');
+    process.exit(1);
+  }
+}
 
 if (role === 'migrate') {
   try {

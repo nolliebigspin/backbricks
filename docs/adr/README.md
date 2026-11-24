@@ -91,3 +91,5 @@ Short documents that record significant decisions: deviations from or refinement
 - [ADR-0078](0078-scoped-key-inventory.md) · Scoped key inventory
 - [ADR-0079](0079-test-form-submissions.md) · Scoped test form submissions
 - [ADR-0080](0080-mcp-audit-channel.md) · MCP audit channel
+| [0081](0081-cli-dashboard-authorization.md) | CLI admin operations through existing dashboard sessions and scoped keys |
+| [0082](0082-production-bootstrap-and-storage-proxy.md) | Production bootstrap, private storage proxy and backup |

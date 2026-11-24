@@ -691,6 +691,9 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin"
         }
       }
     },
@@ -818,6 +821,9 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "owner"
         }
       }
     },
@@ -994,6 +1000,9 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member"
         }
       },
       "post": {
@@ -1173,6 +1182,9 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin"
         }
       }
     },
@@ -1272,6 +1284,9 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin"
         }
       },
       "get": {
@@ -1420,6 +1435,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "integration:read"
         }
       },
       "patch": {
@@ -1606,6 +1625,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin",
+          "scope": "project:write"
         }
       }
     },
@@ -1899,6 +1922,9 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin"
         }
       }
     },
@@ -2051,6 +2077,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "config:read"
         }
       },
       "put": {
@@ -2368,6 +2398,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "config:read"
         }
       }
     },
@@ -2650,6 +2684,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "data:read"
         }
       }
     },
@@ -2788,6 +2826,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin",
+          "scope": "data:delete"
         }
       }
     },
@@ -2896,6 +2938,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "data:delete"
         }
       },
       "get": {
@@ -3103,6 +3149,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "data:read"
         }
       }
     },
@@ -3247,6 +3297,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "data:read"
         }
       }
     },
@@ -3450,6 +3504,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "config:read"
         }
       },
       "post": {
@@ -3653,6 +3711,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin",
+          "scope": "config:write"
         }
       }
     },
@@ -3771,6 +3833,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin",
+          "scope": "config:write"
         }
       },
       "get": {
@@ -3949,6 +4015,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "config:read"
         }
       },
       "patch": {
@@ -4156,6 +4226,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin",
+          "scope": "config:write"
         }
       },
       "put": {
@@ -4364,6 +4438,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin",
+          "scope": "config:write"
         }
       }
     },
@@ -4544,6 +4622,9 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin"
         }
       }
     },
@@ -4684,6 +4765,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "channel": "mcp",
+          "scope": "test:write"
         }
       }
     },
@@ -4883,6 +4968,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin",
+          "scope": "config:write"
         }
       }
     },
@@ -5077,6 +5166,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "config:read"
         }
       }
     },
@@ -5245,6 +5338,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "config:read"
         }
       }
     },
@@ -5452,6 +5549,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin",
+          "scope": "config:write"
         }
       }
     },
@@ -5714,6 +5815,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "data:read"
         }
       }
     },
@@ -5866,6 +5971,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "data:write"
         }
       }
     },
@@ -6014,6 +6123,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin",
+          "scope": "data:delete"
         }
       }
     },
@@ -6157,6 +6270,9 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin"
         }
       }
     },
@@ -6276,6 +6392,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "data:delete"
         }
       },
       "get": {
@@ -6648,6 +6768,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "data:read"
         }
       },
       "patch": {
@@ -6803,6 +6927,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "data:write"
         }
       }
     },
@@ -6935,6 +7063,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "stats:read"
         }
       }
     },
@@ -7075,6 +7207,9 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "scope": "test:write"
         }
       }
     },
@@ -7299,6 +7434,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "integration:read"
         }
       }
     },
@@ -7495,6 +7634,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin",
+          "scope": "keys:read"
         }
       },
       "post": {
@@ -7757,6 +7900,9 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin"
         }
       }
     },
@@ -7864,6 +8010,9 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin"
         }
       }
     },
@@ -8099,6 +8248,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "channel": "mcp",
+          "scope": "config:write"
         }
       }
     },
@@ -8233,6 +8386,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "channel": "mcp",
+          "scope": "project:write"
         }
       }
     },
@@ -8432,6 +8589,9 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin"
         }
       },
       "post": {
@@ -8643,6 +8803,9 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin"
         }
       }
     },
@@ -8810,6 +8973,9 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin"
         }
       }
     },
@@ -8919,6 +9085,9 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin"
         }
       },
       "patch": {
@@ -9135,6 +9304,9 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin"
         }
       }
     },
@@ -9268,6 +9440,9 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin"
         }
       }
     },
@@ -9401,6 +9576,9 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin"
         }
       }
     },
@@ -9527,6 +9705,9 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin"
         }
       }
     },
@@ -9730,6 +9911,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "config:read"
         }
       },
       "post": {
@@ -9933,6 +10118,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin",
+          "scope": "config:write"
         }
       }
     },
@@ -10051,6 +10240,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin",
+          "scope": "config:write"
         }
       },
       "get": {
@@ -10229,6 +10422,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "config:read"
         }
       },
       "patch": {
@@ -10436,6 +10633,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin",
+          "scope": "config:write"
         }
       },
       "put": {
@@ -10644,6 +10845,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin",
+          "scope": "config:write"
         }
       }
     },
@@ -10843,6 +11048,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin",
+          "scope": "config:write"
         }
       }
     },
@@ -11037,6 +11246,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "config:read"
         }
       }
     },
@@ -11205,6 +11418,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "config:read"
         }
       }
     },
@@ -11412,6 +11629,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin",
+          "scope": "config:write"
         }
       }
     },
@@ -11583,6 +11804,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "stats:read"
         }
       }
     },
@@ -11792,6 +12017,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "data:read"
         }
       }
     },
@@ -11899,6 +12128,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "data:delete"
         }
       },
       "get": {
@@ -12096,6 +12329,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "data:read"
         }
       },
       "patch": {
@@ -12241,6 +12478,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "data:write"
         }
       }
     },
@@ -12363,6 +12604,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "stats:read"
         }
       }
     },
@@ -12479,6 +12724,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "config:read"
         }
       }
     },
@@ -12682,6 +12931,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "config:read"
         }
       },
       "post": {
@@ -12885,6 +13138,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin",
+          "scope": "config:write"
         }
       }
     },
@@ -13003,6 +13260,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin",
+          "scope": "config:write"
         }
       },
       "get": {
@@ -13181,6 +13442,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "config:read"
         }
       },
       "patch": {
@@ -13388,6 +13653,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin",
+          "scope": "config:write"
         }
       },
       "put": {
@@ -13596,6 +13865,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin",
+          "scope": "config:write"
         }
       }
     },
@@ -13795,6 +14068,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin",
+          "scope": "config:write"
         }
       }
     },
@@ -13989,6 +14266,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "config:read"
         }
       }
     },
@@ -14157,6 +14438,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "config:read"
         }
       }
     },
@@ -14364,6 +14649,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "admin",
+          "scope": "config:write"
         }
       }
     },
@@ -14504,6 +14793,10 @@
             },
             "description": "A structured API error."
           }
+        },
+        "x-backbricks-management": {
+          "role": "member",
+          "scope": "stats:read"
         }
       }
     },

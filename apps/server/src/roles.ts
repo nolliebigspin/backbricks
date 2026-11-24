@@ -23,7 +23,7 @@ import { createServerServices } from './services.ts';
 /** A started role; `stop` drains it for a graceful shutdown. */
 export type RunningRole = { stop: () => Promise<void> };
 
-export const ROLES = ['serve', 'worker', 'all', 'migrate'] as const;
+export const ROLES = ['serve', 'worker', 'all', 'migrate', 'setup'] as const;
 export type Role = (typeof ROLES)[number];
 
 export function isRole(value: string | undefined): value is Role {
@@ -97,6 +97,7 @@ async function startRuntime(
           auth: dashboardAuth,
           resolveKey: keys.resolveKey,
         }),
+        runtime.storageTransfer,
       );
       server = Bun.serve({ port: config.port, fetch: app.fetch, development: false });
       log.info(
