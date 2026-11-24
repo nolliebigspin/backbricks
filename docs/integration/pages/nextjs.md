@@ -3,7 +3,7 @@ title: Next.js quickstart
 description: Connect a Next.js App Router site with Backbricks.
 ---
 
-Run [the CLI setup](/docs/cli) from your App Router project. It writes `NEXT_PUBLIC_BACKBRICKS_KEY` and `NEXT_PUBLIC_BACKBRICKS_URL`.
+[Install the preview SDK and CLI](/docs/cli#install-the-preview-tools). From your App Router project, [link the website](/docs/cli#link-a-website) with `init --framework nextjs`. Start Next.js after `init` writes `NEXT_PUBLIC_BACKBRICKS_KEY` and `NEXT_PUBLIC_BACKBRICKS_URL` to `.env.local`.
 
 ```ts
 import { createClient } from '@backbricks/sdk';
@@ -14,4 +14,6 @@ export const backbricks = createClient({
 });
 ```
 
-Use the browser client in a client component. If you submit through a server action, use a separate server-only secret with the relevant submission scope. Store it as `BACKBRICKS_SECRET_KEY` with no public prefix.
+Import the browser client into a `'use client'` component and follow the [Forms SDK example](/docs/forms#submit-with-the-sdk) in your submit handler. Add development and production origins in **Allowed websites** before testing in the browser.
+
+When you submit through a server action, create the SDK client in server-only code. Pass `secretKey: process.env.BACKBRICKS_SECRET_KEY` with the grant for that operation. Public `NEXT_PUBLIC_` variables should contain only the publishable settings.

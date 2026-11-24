@@ -3,7 +3,9 @@ title: Astro quickstart
 description: Connect an Astro site with Backbricks.
 ---
 
-Run [the CLI setup](/docs/cli) from your Astro project. Import the SDK from a browser script and use the variables that `init` writes.
+[Install the preview SDK and CLI](/docs/cli#install-the-preview-tools). From your Astro project, [link the website](/docs/cli#link-a-website) with `init --framework astro`. Start Astro after `init` writes `PUBLIC_BACKBRICKS_URL` and `PUBLIC_BACKBRICKS_KEY` to `.env.local`.
+
+Create the browser client inside a bundled `<script>` in your `.astro` component.
 
 ```ts
 import { createClient } from '@backbricks/sdk';
@@ -14,4 +16,4 @@ const backbricks = createClient({
 });
 ```
 
-Add your built site's origin to Project Embed. Run `doctor --origin` with the exact origin before deploying.
+Call the client in your submit handler using the [Forms SDK example](/docs/forms#submit-with-the-sdk). Add both your dev and production origins in **Allowed websites**. Run `npx backbricks doctor --origin https://www.example.com` with the production origin before deploying.

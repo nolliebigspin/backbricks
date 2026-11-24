@@ -1,0 +1,22 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+
+import catalog from '../../../generated/errors.json';
+
+export function getStaticPaths() {
+  return Object.entries(catalog).map(([code, error]) => ({ params: { code }, props: { error } }));
+}
+
+const { code } = Astro.params;
+const { error } = Astro.props;
+---
+<StarlightPage
+  frontmatter={{ title: error.title, description: `HTTP ${error.status} · ${code}`, prev: false, next: false }}
+>
+  <p>HTTP {error.status} · <code>{code}</code></p>
+  <p>
+    Check the response's <code>detail</code> and <code>errors</code> fields for context. Include the
+    <code>requestId</code> when reporting the issue to your deployment operator.
+  </p>
+  <p><a href="/docs/errors">All API errors</a> · <a href="/docs/api">API reference</a></p>
+</StarlightPage>

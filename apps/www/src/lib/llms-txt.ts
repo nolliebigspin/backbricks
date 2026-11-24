@@ -1,5 +1,5 @@
 import {
-  brickStatusLabel,
+  brickAvailability,
   bricks,
   faq,
   links,
@@ -13,10 +13,6 @@ import {
  * from the same data as the landing page so the two can't drift apart.
  */
 export function llmsTxt(): string {
-  const status = bricks
-    .map((brick) => `${brick.name} ${brickStatusLabel(brick).toLowerCase()}`)
-    .join('; ');
-
   return [
     `# ${site.name}`,
     '',
@@ -24,13 +20,13 @@ export function llmsTxt(): string {
     '',
     `${site.tagline} Integrate through plain HTML forms, the TypeScript SDK, the REST API (OpenAPI), the CLI with config-as-code or the MCP server for AI coding agents. The server is AGPL-3.0; the SDK and CLI you embed in a website are MIT. Backbricks is headless: it ships no widgets, iframes or CSS.`,
     '',
-    `Status: ${site.status}. ${status}. APIs may change until 1.0.`,
+    `Status: ${site.status}. APIs may change until 1.0.`,
     '',
     '## Bricks',
     '',
     ...bricks.map(
       (brick) =>
-        `- **${brick.name}** (${brickStatusLabel(brick)}). For the website: ${brick.forWebsite} For the site owner: ${brick.forOwner}`,
+        `- **${brick.name}** (${brickAvailability}). For the website: ${brick.forWebsite} For the site owner: ${brick.forOwner}`,
     ),
     `- Candidates after 1.0: ${upcomingBricks.join(', ')}.`,
     '',
@@ -41,6 +37,8 @@ export function llmsTxt(): string {
     '',
     `- [Documentation](${siteUrl}/docs): quickstarts and CLI setup`,
     `- [API reference](${siteUrl}/docs/api): OpenAPI operations and schema`,
+    `- [API errors](${siteUrl}/docs/errors): problem codes and troubleshooting`,
+    `- [Self-hosting](${siteUrl}/docs/self-host): local and production Compose setup`,
     `- [Full documentation for agents](${siteUrl}/llms-full.txt): expanded Markdown guides`,
     `- [Source code](${links.repo}): repository, README and issues`,
     `- [Architecture](${links.architecture}): decisions, data model, API, SDK and CLI`,

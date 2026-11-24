@@ -2,21 +2,30 @@
 
 Use an HTTPS origin and Docker Compose v2. Point the hostname at this host and allow inbound TCP 80 and 443 for Caddy. The app's direct port binds to loopback. For another TLS proxy, add `--no-tls` to configuration and set `TRUSTED_PROXIES` to that proxy's exact address in the app's Compose environment.
 
-## Install from this checkout
+## Prepare the source preview
 
-From the repository root:
+The current source includes Forms, Uploads and Reviews. The published `0.1.0` image is the Forms preview.
+
+Generate the deployment settings from a development checkout with Bun, Node.js and the workspace dependencies installed. Use the CLI's [source build instructions](../../packages/cli/README.md).
 
 ```sh
-mise install && mise run setup
-docker build -t backbricks/server:local .
 bun run --cwd packages/cli build
 node packages/cli/dist/backbricks.js deploy configure \
   --public-url https://backbricks.example.com --modules forms,uploads,reviews --scan --backup
-cd deploy/compose
-docker compose up -d --wait
 ```
 
-The last command runs migrations before starting the app. The configuration command generates private settings and refuses to replace existing files. Use `--modules forms` for a minimal install. For Uploads without ClamAV, omit `--scan` and choose an explicitly unscanned upload area. The default upload mode streams through the app to private Garage. For presigned browser uploads use `UPLOAD_MODE=presigned`, set an HTTPS `S3_PUBLIC_ENDPOINT` pointing at your storage, and configure `S3_CORS_ORIGINS`.
+The configuration command generates private settings and refuses to replace existing files. Use `--modules forms` and omit `--scan` for a minimal install. For Uploads without ClamAV, omit `--scan` and choose an explicitly unscanned upload area. The default upload mode streams through the app to private Garage. For presigned browser uploads use `UPLOAD_MODE=presigned`, set an HTTPS `S3_PUBLIC_ENDPOINT` pointing at your storage, and configure `S3_CORS_ORIGINS`.
+
+## Start on the Docker host
+
+Use a checkout of the same revision. Place the generated `.env` and any generated `garage.toml` or `restic-password` files in `deploy/compose` on the host. Keep them private. From the repository root, build the image and start the stack with Docker.
+
+```sh
+docker build -t backbricks/server:local .
+docker compose --env-file deploy/compose/.env -f deploy/compose/compose.yaml up -d --wait
+```
+
+Compose runs migrations before starting the app. Run the remaining Compose commands from `deploy/compose` on your Docker host.
 
 For the first dashboard account, place the chosen name, email and a long password in a mode-0600 JSON file with the keys `name`, `email` and `password`. Feed it directly to the one-shot setup process from your trusted server terminal.
 
@@ -64,7 +73,5 @@ Verify sign-in, an existing form entry, private file bytes, and published review
 2. Stop the app and worker. Set `BACKBRICKS_IMAGE` to the reviewed image and pull it or build it locally.
 3. Run `docker compose run --rm migrate` before restarting. Migrations are forward-only.
 4. Start the stack and check `/readyz`, dashboard sign-in, and one workflow per enabled module. Recover with the previous image and the corresponding backup if needed.
-
-Run the production smoke locally with `bun scripts/deploy/scenario-c.ts backbricks/server:local` from the repository root after building the CLI. It uses isolated Compose projects and verifies the encrypted restore path.
 
 See the [self-hosting threat model](../../docs/SECURITY-MODEL.md) for deployment assumptions and the [private reporting process](../../SECURITY.md).

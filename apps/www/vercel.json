@@ -6,6 +6,9 @@
   "ignoreCommand": "bunx turbo-ignore@2.11.10 @backbricks/www",
   "cleanUrls": true,
   "trailingSlash": false,
+  "redirects": [
+    { "source": "/errors/:path*", "destination": "/docs/errors/:path*", "permanent": true }
+  ],
   "headers": [
     {
       "source": "/(.*)",

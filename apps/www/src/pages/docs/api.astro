@@ -1,23 +1,48 @@
 ---
-import BaseLayout from '../../layouts/base-layout.astro';
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 ---
-<BaseLayout title="Backbricks API reference" description="OpenAPI reference for the Backbricks v1 API.">
-  <section class="mx-auto max-w-7xl px-4 py-8">
-    <a href="/docs">Back to documentation</a>
-    <h1 class="text-3xl font-semibold">API reference</h1>
-    <a href="/schema/openapi.json">Download OpenAPI JSON</a>
-    <div id="api-reference"></div>
-  </section>
-</BaseLayout>
+<StarlightPage
+  frontmatter={{
+    title: 'API reference',
+    description: 'OpenAPI reference for the Backbricks v1 API.',
+    tableOfContents: false,
+  }}
+>
+  <p>
+    Send requests to your Backbricks deployment under <code>/v1</code>. The reference describes the
+    current source build. Your deployment's enabled modules and version determine which operations
+    are available.
+  </p>
+  <ul>
+    <li>
+      Public routes accept a project's publishable key in the <code>key</code> query parameter. The
+      SDK handles proof of work for browser writes.
+    </li>
+    <li>
+      Server integrations send a scoped secret key as <code>Authorization: Bearer …</code>.
+      Operations such as creating a key require a dashboard session.
+    </li>
+  </ul>
+  <p>To check which modules your deployment has enabled, replace the example host and request its metadata.</p>
+  <pre><code>curl https://backbricks.example.com/v1/meta</code></pre>
+  <p><a href="/schema/openapi.json">Download OpenAPI JSON</a> · <a href="/docs/errors">Interpret API errors</a></p>
+  <div id="api-reference" class="not-content"></div>
+</StarlightPage>
 
 <script>
   import { createApiReference } from '@scalar/api-reference';
   import '@scalar/api-reference/style.css';
 
   createApiReference('#api-reference', {
-    url: '/schema/openapi.json',
+    sources: [{ url: '/schema/openapi.json', agent: { disabled: true } }],
     telemetry: false,
+    layout: 'classic',
+    showSidebar: false,
+    searchHotKey: 'i',
+    withDefaultFonts: false,
+    documentDownloadType: 'none',
     hideTestRequestButton: true,
+    hideClientButton: true,
     showDeveloperTools: 'never',
     persistAuth: false,
     defaultOpenAllTags: false,

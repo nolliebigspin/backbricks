@@ -3,7 +3,7 @@ import '../styles/global.css';
 
 import { SiteFooter } from '../components/site-footer.tsx';
 import { SiteHeader } from '../components/site-header.tsx';
-import { ogImage, site } from '../content/site.ts';
+import { ogImage, publicPageUrl, site } from '../content/site.ts';
 import { type JsonLdNode, siteNodes, toJsonLd } from '../lib/structured-data.ts';
 
 type Props = {
@@ -17,8 +17,7 @@ type Props = {
 
 const { title, description = site.description, noindex = false, structuredData = [] } = Astro.props;
 const pageTitle = title ? `${title} · ${site.name}` : site.title;
-// Built pages are files (`build.format: 'file'`); public URLs are clean (`/privacy`, not `/privacy.html`).
-const canonical = new URL(Astro.url.pathname.replace(/(index)?\.html$/, ''), Astro.site);
+const canonical = publicPageUrl(Astro.url.pathname);
 const ogImageUrl = new URL(ogImage.path, Astro.site);
 // Allow large image previews and full-length snippets (search and AI overviews quote from them).
 const robots = noindex ? 'noindex' : 'index, follow, max-image-preview:large, max-snippet:-1';

@@ -2,25 +2,25 @@ import { Section } from './section.tsx';
 
 const steps = [
   {
-    title: 'Your agent connects',
-    text: 'Claude Code, Codex or any MCP-capable agent reads the integration guide, defines forms and upload areas as config-as-code and wires them into your site.',
+    title: 'Set up the project',
+    text: 'Create a project in the dashboard, add your website origin, and choose the bricks you need. Use the CLI or MCP to manage the setup as code.',
   },
   {
-    title: 'Your site keeps its look',
-    text: 'Backbricks is headless: no widgets, iframes or CSS. Use plain HTML forms, the TypeScript SDK or the REST API from any framework.',
+    title: 'Connect your website',
+    text: 'Use a plain HTML form, the TypeScript SDK, or the REST API. Start with a publishable key and submit a test entry from your site.',
   },
   {
-    title: 'Owners run the rest',
-    text: 'Entries, files and reviews land in a dashboard written for non-technical people, with notifications, exports and moderation.',
+    title: 'Work from the dashboard',
+    text: 'Site owners track entries, download private attachments, and choose which reviews to publish. Scoped CLI credentials support the same workflows in scripts.',
   },
 ] as const;
 
-const agentSession = [
-  { prompt: true, text: 'claude mcp add backbricks -- npx backbricks mcp' },
-  { prompt: false, text: '> Add a contact form with a CV upload to the site.' },
-  { prompt: true, text: 'npx backbricks push' },
-  { prompt: true, text: 'npx backbricks test submit forms/contact' },
-  { prompt: false, text: '✓ Test entry is in the dashboard inbox' },
+const cliCommands = [
+  'npx backbricks validate',
+  'npx backbricks diff',
+  'npx backbricks push --yes',
+  'npx backbricks codegen',
+  'npx backbricks doctor --origin https://www.example.com',
 ] as const;
 
 export function HowItWorks() {
@@ -28,8 +28,8 @@ export function HowItWorks() {
     <Section
       id="how-it-works"
       tone="mortar"
-      title="Your agent builds it. The owner runs it."
-      intro="No database, backend or storage to set up. The integration happens in code; the people who own the site never have to touch it."
+      title="From website to dashboard"
+      intro="Connect your site once. Keep the integration in your code and give site owners a workspace for the day-to-day."
     >
       <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
         <ol className="space-y-8">
@@ -49,16 +49,23 @@ export function HowItWorks() {
           ))}
         </ol>
         <figure className="min-w-0 self-start">
-          <pre className="code-block" aria-label="Example agent session">
-            {agentSession.map((line) => (
-              <div key={line.text}>
-                {line.prompt ? <span className="token keyword select-none">$ </span> : null}
-                <span className={line.prompt ? undefined : 'token comment'}>{line.text}</span>
-              </div>
-            ))}
+          <pre className="code-block" aria-label="CLI workflow">
+            <code>
+              {cliCommands.map((command) => (
+                <span key={command} className="block">
+                  <span aria-hidden="true" className="token keyword select-none">
+                    ${' '}
+                  </span>
+                  {command}
+                </span>
+              ))}
+            </code>
           </pre>
           <figcaption className="mt-3 text-sm text-muted-foreground">
-            The planned CLI and MCP flow, arriving in v0.4.
+            Preview changes, apply them, and check your integration from a linked project.{' '}
+            <a href="/docs/cli" className="text-brand underline underline-offset-4">
+              CLI and MCP guide
+            </a>
           </figcaption>
         </figure>
       </div>

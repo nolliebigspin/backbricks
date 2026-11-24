@@ -1,5 +1,4 @@
-import { Button } from '@backbricks/ui';
-import { Logo } from '@backbricks/ui';
+import { Button, Logo } from '@backbricks/ui';
 
 import { links, nav } from '../content/site.ts';
 import { ExternalLink } from './external-link.tsx';
@@ -23,12 +22,17 @@ export function SiteHeader() {
             </a>
           ))}
         </nav>
-        <Button asChild variant="outline">
-          <ExternalLink href={links.repo}>
-            <GitHubIcon data-icon="inline-start" />
-            GitHub
-          </ExternalLink>
-        </Button>
+        <div className="flex items-center gap-2 sm:gap-4">
+          <Button asChild variant="ghost">
+            <a href="/docs">Docs</a>
+          </Button>
+          <Button asChild variant="outline" className="hidden sm:inline-flex">
+            <ExternalLink href={links.repo}>
+              <GitHubIcon data-icon="inline-start" />
+              GitHub
+            </ExternalLink>
+          </Button>
+        </div>
       </div>
     </header>
   );

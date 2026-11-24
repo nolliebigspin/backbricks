@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 
-import { brickStatusLabel, bricks, faq, links, site } from '../content/site.ts';
+import { bricks, faq, links, site } from '../content/site.ts';
 import { llmsTxt } from './llms-txt.ts';
 
 describe('llms.txt', () => {
@@ -13,9 +13,8 @@ describe('llms.txt', () => {
     expect(summary).toBe(`> ${site.description}`);
   });
 
-  test('states the same release status as the landing page', () => {
-    for (const brick of bricks)
-      expect(text).toContain(`${brick.name} ${brickStatusLabel(brick).toLowerCase()}`);
+  test('describes all three bricks as self-hostable in the developer preview', () => {
+    for (const brick of bricks) expect(text).toContain(`**${brick.name}** (Self-hostable)`);
     expect(text).toContain(`Status: ${site.status}.`);
   });
 

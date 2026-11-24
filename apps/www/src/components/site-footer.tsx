@@ -12,7 +12,7 @@ export function SiteFooter({ year }: SiteFooterProps) {
         <div className="max-w-sm">
           <Logo />
           <p className="mt-3 text-sm text-muted-foreground">
-            {site.tagline} Open source under AGPL-3.0; SDK and CLI under MIT.
+            {site.tagline} The platform is AGPL-3.0. The SDK and CLI are MIT-licensed.
           </p>
         </div>
         <nav aria-label="Footer">

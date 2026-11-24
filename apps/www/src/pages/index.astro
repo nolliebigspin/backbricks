@@ -21,8 +21,8 @@ const tabs = integrationSamples.map(({ id, label }) => ({ id, label }));
   <Bricks />
   <HowItWorks />
   <Section
-    title="A few lines, any framework"
-    intro="Start with a plain HTML form, then move to the SDK when you want typed calls, uploads and reviews. Examples show the planned API."
+    title="Start with your own markup"
+    intro="Post a form directly or use the TypeScript SDK for inline validation, private attachments, and published reviews."
   >
     <IntegrationExamples client:visible tabs={tabs}>
       {
@@ -31,6 +31,10 @@ const tabs = integrationSamples.map(({ id, label }) => ({ id, label }));
         ))
       }
     </IntegrationExamples>
+    <p class="mt-5 text-sm text-muted-foreground">
+      <a href="/docs/html" class="text-brand underline underline-offset-4">Set up a plain HTML form</a>
+      or follow the <a href="/docs/forms#submit-with-the-sdk" class="text-brand underline underline-offset-4">SDK quickstart</a>.
+    </p>
   </Section>
   <SafeDefaults />
   <OpenSource />

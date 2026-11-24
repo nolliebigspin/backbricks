@@ -11,16 +11,35 @@ export default defineConfig({
   // Matches Vercel's `cleanUrls` + `trailingSlash: false` (vercel.json): /privacy, not /privacy/.
   trailingSlash: 'never',
   build: { format: 'file' },
+  redirects: {
+    '/errors': '/docs/errors',
+    '/errors/[code]': '/docs/errors/[code]',
+  },
   integrations: [
     react(),
     sitemap(),
     starlight({
       title: 'Backbricks Docs',
+      favicon: '/favicon.svg',
       disable404Route: true,
       expressiveCode: false,
       components: { Head: './src/components/docs-head.astro' },
       sidebar: [
-        { label: 'Start here', link: '/docs' },
+        {
+          label: 'Get started',
+          items: [
+            { label: 'Overview', link: '/docs' },
+            { label: 'Self-host with Docker', link: '/docs/self-host' },
+          ],
+        },
+        {
+          label: 'Add a brick',
+          items: [
+            { label: 'Forms', link: '/docs/forms' },
+            { label: 'Private uploads', link: '/docs/uploads' },
+            { label: 'Reviews', link: '/docs/reviews' },
+          ],
+        },
         { label: 'CLI and MCP', link: '/docs/cli' },
         {
           label: 'Quickstarts',
@@ -31,8 +50,13 @@ export default defineConfig({
             { label: 'HTML', link: '/docs/html' },
           ],
         },
-        { label: 'API reference', link: '/docs/api' },
-        { label: 'Errors', link: '/errors' },
+        {
+          label: 'Reference',
+          items: [
+            { label: 'API reference', link: '/docs/api' },
+            { label: 'API errors', link: '/docs/errors' },
+          ],
+        },
       ],
     }),
   ],

@@ -1,15 +1,11 @@
 import { cn } from '@backbricks/ui';
 
-import { bricks, upcomingBricks, type BrickStatus } from '../content/site.ts';
+import { brickAvailability, bricks, upcomingBricks } from '../content/site.ts';
 
-type WallBrick = { name: string; kind: BrickStatus | 'candidate' | 'blank'; note?: string };
+type WallBrick = { name: string; kind: 'available' | 'candidate' | 'blank' };
 
 const candidates: WallBrick[] = upcomingBricks.map((name) => ({ name, kind: 'candidate' }));
-const v1: WallBrick[] = bricks.map((brick) => ({
-  name: brick.name,
-  kind: brick.status,
-  note: brick.status === 'available' ? `Since ${brick.release}` : `Coming in ${brick.release}`,
-}));
+const available: WallBrick[] = bricks.map(({ name }) => ({ name, kind: 'available' }));
 
 /** Unlabelled bricks so every course is wide enough to run off both edges of the screen. */
 const COURSE_LENGTH = 11;
@@ -34,18 +30,17 @@ function pad(course: WallBrick[], courseIndex: number): WallBrick[] {
 const side = Math.floor((candidates.length - 2) / 2);
 const courses: WallBrick[][] = [
   candidates.slice(0, side),
-  [...candidates.slice(side, side + 1), ...v1, ...candidates.slice(side + 1, side + 2)],
+  [...candidates.slice(side, side + 1), ...available, ...candidates.slice(side + 1, side + 2)],
   candidates.slice(side + 2),
 ].map(pad);
 
 const brickStyles: Record<WallBrick['kind'], string> = {
   available: 'border-brand bg-brand text-brand-foreground',
-  roadmap: 'border-brand bg-background text-foreground',
   candidate: 'border-border bg-background text-muted-foreground',
   blank: 'border-border bg-muted',
 };
 
-/** The website hero's wall: what you can use today, what is next and what may come after 1.0. */
+/** The website hero's wall shows the available modules and candidates for after 1.0. */
 export function ModuleWall() {
   return (
     <figure className="relative">
@@ -65,7 +60,7 @@ export function ModuleWall() {
                 key={brick.name}
                 aria-hidden={brick.kind === 'blank' || undefined}
                 className={cn(
-                  'flex h-14 w-28 shrink-0 flex-col justify-center rounded-md border-2 px-3 sm:h-20 sm:w-48 sm:px-4',
+                  'flex h-14 w-25 shrink-0 flex-col justify-center rounded-md border-2 px-2.5 sm:h-20 sm:w-48 sm:px-4',
                   brickStyles[brick.kind],
                 )}
               >
@@ -81,15 +76,8 @@ export function ModuleWall() {
                     {brick.name}
                   </span>
                 )}
-                {brick.note ? (
-                  <span
-                    className={cn(
-                      'truncate text-xs',
-                      brick.kind === 'available' ? 'opacity-90' : 'text-muted-foreground',
-                    )}
-                  >
-                    {brick.note}
-                  </span>
+                {brick.kind === 'available' ? (
+                  <span className="truncate text-xs opacity-90">{brickAvailability}</span>
                 ) : null}
               </li>
             ))}
@@ -99,11 +87,7 @@ export function ModuleWall() {
       <figcaption className="mx-auto mt-6 flex max-w-6xl flex-wrap gap-x-6 gap-y-2 px-6 text-sm text-muted-foreground">
         <span className="flex items-center gap-2">
           <span aria-hidden="true" className="h-2.5 w-5 rounded-xs bg-brand" />
-          Available now
-        </span>
-        <span className="flex items-center gap-2">
-          <span aria-hidden="true" className="h-2.5 w-5 rounded-xs border-2 border-brand" />
-          Before 1.0
+          {brickAvailability}
         </span>
         <span className="flex items-center gap-2">
           <span aria-hidden="true" className="h-2.5 w-5 rounded-xs border-2 border-border" />

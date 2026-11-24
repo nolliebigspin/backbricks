@@ -1,0 +1,56 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+
+import catalog from '../../../generated/errors.json';
+
+const errors = Object.entries(catalog).toSorted(([, a], [, b]) => a.status - b.status);
+---
+<StarlightPage
+  frontmatter={{
+    title: 'API errors',
+    description: 'Understand Backbricks error responses and find each error by code.',
+  }}
+>
+  <p>
+    The JSON API describes failures as <code>application/problem+json</code>. Branch on <code>code</code>
+    in your integration. Read <code>detail</code> and <code>errors</code> when present, and include
+    <code>requestId</code> when asking a deployment operator for help.
+  </p>
+  <h2 id="common-failures">Common failures</h2>
+  <ul>
+    <li>
+      For validation failures, use <code>errors[].path</code> to find the field and
+      <code>errors[].code</code> to choose a message. If a plain HTML form reports an error on
+      <code>key</code>, copy the current action URL from <strong>Embed</strong> and check that the
+      project has an active publishable key.
+    </li>
+    <li>
+      If a request is denied, check the website's exact origin for browser requests or the key's
+      scopes for server requests. Rotate a key reported as exposed and remove it from website code.
+    </li>
+    <li>For rate limits, wait for the time in <code>Retry-After</code> before trying again.</li>
+  </ul>
+  <p>
+    The SDK exposes <code>code</code>, <code>status</code>, <code>fieldErrors</code>, and
+    <code>requestId</code> on <code>BackbricksError</code>.
+  </p>
+  <h2 id="error-catalog">Error catalog</h2>
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Status</th>
+        <th scope="col">Code</th>
+        <th scope="col">Meaning</th>
+      </tr>
+    </thead>
+    <tbody>
+      {errors.map(([code, { status, title }]) => (
+        <tr>
+          <td>{status}</td>
+          <td><a href={`/docs/errors/${code}`}><code>{code}</code></a></td>
+          <td>{title}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</StarlightPage>

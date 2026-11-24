@@ -2,6 +2,11 @@
 
 export const siteUrl = 'https://backbricks.app';
 
+/** Vercel serves the static HTML output at extensionless URLs. */
+export function publicPageUrl(pathname: string) {
+  return new URL(pathname.replace(/(?:\/index)?\.html$/, '') || '/', siteUrl);
+}
+
 const repoUrl = 'https://github.com/nolliebigspin/backbricks';
 
 export const links = {
@@ -37,54 +42,40 @@ export const logoPath = '/logo.png';
 export const nav = [
   { label: 'Bricks', href: '/#bricks' },
   { label: 'How it works', href: '/#how-it-works' },
-  { label: 'Open source', href: '/#open-source' },
-  { label: 'FAQ', href: '/#faq' },
+  { label: 'Self-host', href: '/#open-source' },
 ] as const;
 
-/** `available`: released and usable. `roadmap`: scheduled for a pre-1.0 release. */
-export type BrickStatus = 'available' | 'roadmap';
+export const brickAvailability = 'Self-hostable';
 
 export type Brick = {
   name: string;
-  status: BrickStatus;
-  /** The release that ships (or shipped) the brick, from docs/MILESTONES.md. */
-  release: string;
+  guide: string;
   forWebsite: string;
   forOwner: string;
 };
 
-/** The v1 modules (README "What it does"). */
+/** The modules available when self-hosting from source (README "What it does"). */
 export const bricks: readonly Brick[] = [
   {
     name: 'Forms',
-    status: 'available',
-    release: 'v0.1',
+    guide: '/docs/forms',
     forWebsite:
       'Headless form API with server-side validation, spam protection and plain-HTML support.',
     forOwner: 'An inbox with search, status, CSV export, notifications and retention rules.',
   },
   {
     name: 'Uploads',
-    status: 'roadmap',
-    release: 'v0.2',
-    forWebsite: 'Direct-to-storage uploads with type and size limits and malware scanning.',
+    guide: '/docs/uploads',
+    forWebsite: 'Private file uploads with type and size limits and optional malware scanning.',
     forOwner: 'Browse, download and delete files, and keep an eye on storage usage.',
   },
   {
     name: 'Reviews',
-    status: 'roadmap',
-    release: 'v0.3',
+    guide: '/docs/reviews',
     forWebsite: 'Collect reviews and show the published ones through a public read API.',
     forOwner: 'A moderation queue, publishing controls and rating stats.',
   },
 ];
-
-/** "Available in v0.1" / "Coming in v0.2", the same wording on the page and for crawlers. */
-export function brickStatusLabel(brick: Brick): string {
-  return brick.status === 'available'
-    ? `Available in ${brick.release}`
-    : `Coming in ${brick.release}`;
-}
 
 /** Candidate modules after 1.0 (docs/MODULES.md). Candidates, not commitments. */
 export const upcomingBricks = [
@@ -119,22 +110,22 @@ export const faq: readonly FaqItem[] = [
   {
     question: 'Can I use Backbricks today?',
     answer:
-      'As a developer preview. Forms shipped in v0.1; uploads and reviews follow before 1.0, and APIs may still change until then. Star or watch the GitHub repository to follow along.',
+      'Yes. Build the developer preview from source to self-host Forms, Uploads and Reviews. The packaged v0.1.0 release includes Forms. APIs may still change before 1.0.',
   },
   {
     question: 'Do I need an AI coding agent?',
     answer:
-      'No. The REST API, TypeScript SDK and CLI work just as well by hand. Agents get first-class support on top: an MCP server, config-as-code and an integration guide written for them.',
+      'Use the API, SDK, or CLI directly, or connect an agent through MCP. Keep form, upload area, and review collection settings in versioned configuration when you want to review changes before applying them.',
   },
   {
     question: 'Which frameworks does it work with?',
     answer:
-      'Any. Plain HTML forms work without JavaScript, and the SDK runs in browsers, Node, Bun and Deno. Next.js, Astro, Vue, SvelteKit or a static site all integrate the same way.',
+      'Use a native HTML form on a static site or connect any framework over HTTP. The TypeScript SDK works in browsers, Node.js, and Bun. The docs include Next.js, Astro, Vue, and HTML quickstarts.',
   },
   {
     question: 'Will it change how my website looks?',
     answer:
-      'No. Backbricks is headless and ships no widgets, iframes or CSS. Your website keeps its own design.',
+      'Your website keeps its own HTML, CSS, and components. Backbricks sends and receives data behind your existing design.',
   },
   {
     question: 'How is Backbricks different from a form backend or Firebase?',
@@ -149,7 +140,7 @@ export const faq: readonly FaqItem[] = [
   {
     question: 'What does it cost?',
     answer:
-      'Self-hosting is free and complete, with no feature lock. Pricing for the managed EU cloud will be announced closer to its launch after 1.0.',
+      'The software is free to self-host on infrastructure you provide. Managed EU hosting is planned after 1.0.',
   },
   {
     question: 'Why AGPL?',
@@ -159,6 +150,8 @@ export const faq: readonly FaqItem[] = [
 ];
 
 export const footerLinks = [
+  { label: 'Docs', href: '/docs' },
+  { label: 'API reference', href: '/docs/api' },
   { label: 'GitHub', href: links.repo },
   { label: 'Roadmap', href: links.roadmap },
   { label: 'Architecture', href: links.architecture },

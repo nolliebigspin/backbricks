@@ -9,7 +9,7 @@ Two pages with the same contact form (MIT). The code is exactly what the dashboa
 
 ## Try it
 
-1. Start Backbricks (`mise run dev`) and open the dashboard at <http://localhost:5173>.
+1. From the repository root, run `docker compose --profile storage up -d` and open the dashboard at <http://localhost:5173>.
 2. In a project, create the two forms above from the **Contact form** template (it has exactly the fields in `form.json`), and adjust their settings as listed.
 3. On the project's **Embed** page, create a publishable key and add the address you serve this folder from (e.g. `http://localhost:8080`) as an allowed website.
 4. Replace `YOUR_PUBLISHABLE_KEY` in `index.html` and `sdk.js` with the key. If your API is not at `http://localhost:5173/v1`, replace that too.
@@ -28,7 +28,7 @@ The hidden `_gotcha` input is the honeypot: people never see it, bots fill it, a
 
 [`upload.html`](upload.html) and [`upload.js`](upload.js) add a CV upload, readiness/progress and cancellation. Their code is also shown on an upload area's **Embed → Form attachment example** tab; a test keeps the files synchronized.
 
-1. Enable `forms,uploads` and configure storage as described in the [uploads quickstart](../../README.md#modules-and-storage). For virus checking, start `mise run scan` and choose `SCANNER=clamav`. A protected area refuses files when scanning is unavailable. Choosing `SCANNER=none` requires an explicitly unscanned area and accepts files without virus checking.
+1. Enable `forms,uploads` with the storage and scanner profiles shown in [Modules and storage](../../README.md#modules-and-storage). A protected area refuses files when scanning is unavailable. When using `SCANNER=none`, choose an explicitly unscanned area.
 2. Create a **CV (PDF)** upload area with short name `cv` (the settings in [`upload-zone.json`](upload-zone.json)). Its default requires virus checking. If you deliberately use no scanner, choose the named unscanned template and understand its warning.
 3. Create a form named `application` with the fields in [`application.json`](application.json): an identifying email and one required `cv` file field linked to that area.
 4. Put your publishable key and API address in `upload.js`, then build/serve this folder as above. Storage must allow your site's origin too. For the development Garage bucket and the example on port 8080, configure its CORS through the existing initializer:

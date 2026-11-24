@@ -1,5 +1,4 @@
-// Code samples for the landing page. They show the planned API (docs/ARCHITECTURE.md §D).
-// Keep them in sync with the SDK once it exists.
+// Examples of the current public API and TypeScript SDK.
 
 export type CodeSample = { id: string; label: string; lang: string; code: string };
 
@@ -9,11 +8,13 @@ export const integrationSamples: readonly CodeSample[] = [
     label: 'HTML form',
     lang: 'html',
     code: `<form method="post"
-  action="https://backbricks.example.com/v1/public/forms/contact/submissions?key=bb_pk_…">
-  <input name="name" required>
-  <input name="email" type="email" required>
-  <textarea name="message"></textarea>
-  <button>Send</button>
+  action="https://backbricks.example.com/v1/public/forms/contact/submissions?key=YOUR_PUBLISHABLE_KEY">
+  <label>Name <input name="name" required></label>
+  <label>Email <input name="email" type="email" required></label>
+  <label>Message <textarea name="message" required></textarea></label>
+  <label><input name="privacy" type="checkbox" required> I agree to be contacted.</label>
+  <div hidden><input name="_gotcha" tabindex="-1" autocomplete="off"></div>
+  <button type="submit">Send</button>
 </form>`,
   },
   {
@@ -23,21 +24,24 @@ export const integrationSamples: readonly CodeSample[] = [
     code: `import { createClient } from '@backbricks/sdk';
 
 const backbricks = createClient({
-  publishableKey: import.meta.env.PUBLIC_BACKBRICKS_KEY,
+  baseUrl: 'https://backbricks.example.com',
+  publishableKey: 'YOUR_PUBLISHABLE_KEY',
 });
 
-await backbricks.forms.submit('contact', { name, email, message });`,
+await backbricks.forms.submit('contact', {
+  name, email, message, privacy: consentChecked,
+});`,
   },
   {
     id: 'uploads',
     label: 'Uploads',
     lang: 'ts',
-    code: `const cv = await backbricks.uploads.upload(file, {
-  zone: 'cv',
-  onProgress: (p) => setProgress(p.percent),
-});
+    code: `const upload = await backbricks.uploads.upload('cv', selectedFile);
 
-await backbricks.forms.submit('application', { name, email, cv: [cv.ref] });`,
+await backbricks.forms.submit('application', {
+  email,
+  cv: [upload.fileRef],
+});`,
   },
   {
     id: 'reviews',

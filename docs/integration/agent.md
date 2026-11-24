@@ -2,7 +2,7 @@
 
 Ask the site owner for the deployment URL, project ID and an AI agent key. The owner sets the site's allowed origin and creates an active publishable credential in Project Embed. Supply the secret through the local environment as `BACKBRICKS_SECRET_KEY`.
 
-Use the installed CLI from the site directory. The `npx` examples assume public npm availability. For a source preview, use the built CLI binary in place of `npx backbricks`.
+Use the installed CLI from the site directory. [Install the preview SDK and CLI](https://backbricks.app/docs/cli#install-the-preview-tools) from the Backbricks checkout, or use its built CLI binary in place of `npx backbricks`.
 
 ```sh
 npx backbricks init --base-url https://backbricks.example.com --project "$BACKBRICKS_PROJECT_ID" --yes

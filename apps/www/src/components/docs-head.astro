@@ -1,6 +1,14 @@
 ---
 import Head from '@astrojs/starlight/components/Head.astro';
 
+import { publicPageUrl } from '../content/site.ts';
+
+const canonical = publicPageUrl(Astro.url.pathname).href;
+for (const { attrs } of Astro.locals.starlightRoute.head) {
+  if (attrs?.['rel'] === 'canonical') attrs['href'] = canonical;
+  if (attrs?.['property'] === 'og:url') attrs['content'] = canonical;
+}
+
 // Starlight's theme, search and sidebar include static inline scripts. Authorize
 // their exact pinned bytes on documentation pages without changing marketing CSP.
 for (const hash of [

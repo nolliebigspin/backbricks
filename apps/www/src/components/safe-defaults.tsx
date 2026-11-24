@@ -3,19 +3,19 @@ import { CheckIcon } from 'lucide-react';
 import { Section } from './section.tsx';
 
 const defaults = [
-  'Proof-of-work spam protection instead of third-party captchas',
+  'Built-in proof-of-work spam protection for browser submissions',
   'IP addresses stored only as rotating hashes',
-  'Retention rules on every record with personal data',
-  'GDPR export and erasure built in',
-  'Private files, scanned for malware, downloaded via short-lived links',
+  'Configurable retention for entries, files, and reviews',
+  'Built-in export and erasure for a person’s data',
+  'Private files with optional malware scanning and short-lived download links',
   'Notification emails without submission content by default',
 ] as const;
 
 export function SafeDefaults() {
   return (
     <Section
-      title="Privacy and security by default"
-      intro="Public endpoints are built for the open internet: validated, rate limited and designed so that a leaked key can't expose your data."
+      title="Keep submitted data private"
+      intro="Backbricks validates and rate-limits public requests. Dashboard roles and scoped secret keys control who can access private records."
     >
       <ul className="grid gap-4 sm:grid-cols-2">
         {defaults.map((item) => (

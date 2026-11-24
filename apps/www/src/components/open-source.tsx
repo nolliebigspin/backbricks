@@ -1,17 +1,17 @@
+import { Button } from '@backbricks/ui';
+
 import { links } from '../content/site.ts';
 import { ExternalLink } from './external-link.tsx';
 import { Section } from './section.tsx';
 
 const options = [
   {
-    title: 'Self-hosted',
-    terms: 'Free, AGPL-3.0, available now',
-    text: 'Run everything with Docker Compose on your own Postgres and S3-compatible storage. Modules are optional: only the services your enabled bricks need are deployed.',
+    title: 'Run Backbricks on your server',
+    text: 'Build the current preview from source. Production Compose supports HTTPS, first-owner setup, and encrypted backups. Run Forms alone or enable Uploads and Reviews as well.',
   },
   {
-    title: 'Managed EU cloud',
-    terms: 'Planned after 1.0',
-    text: 'The same code, operated for you in the EU. No separate edition and no features held back from self-hosters.',
+    title: 'Open-source platform and tools',
+    text: 'The server and dashboard use AGPL-3.0. The SDK and CLI you use in your own project are MIT-licensed. Managed EU hosting is planned after 1.0.',
   },
 ] as const;
 
@@ -19,8 +19,8 @@ export function OpenSource() {
   return (
     <Section
       id="open-source"
-      title="Self-host it, or let us run it"
-      intro="The complete platform is open source. No calls home, no feature lock."
+      title="Self-host Backbricks"
+      intro="Keep your form entries, private files, and reviews on infrastructure you control."
     >
       <div className="grid border-y md:grid-cols-2">
         {options.map((option, index) => (
@@ -31,18 +31,18 @@ export function OpenSource() {
             }
           >
             <h3 className="text-2xl font-semibold tracking-tight">{option.title}</h3>
-            <p className="mt-1 text-sm text-muted-foreground">{option.terms}</p>
             <p className="mt-4 max-w-prose text-pretty">{option.text}</p>
           </div>
         ))}
       </div>
-      <p className="mt-8 max-w-2xl text-sm text-muted-foreground">
-        The SDK and CLI are MIT-licensed, so integrating Backbricks never puts AGPL obligations on
-        your website.{' '}
+      <div className="mt-8 flex flex-wrap items-center gap-5">
+        <Button asChild>
+          <a href="/docs/self-host">Read the self-hosting guide</a>
+        </Button>
         <ExternalLink href={links.licensing} className="text-brand underline underline-offset-4">
           Licensing details
         </ExternalLink>
-      </p>
+      </div>
     </Section>
   );
 }

@@ -1,5 +1,5 @@
 import {
-  brickStatusLabel,
+  brickAvailability,
   bricks,
   faq,
   links,
@@ -56,7 +56,7 @@ export function landingNodes(): JsonLdNode[] {
       applicationCategory: 'DeveloperApplication',
       applicationSubCategory: 'Backend as a service',
       operatingSystem: 'Linux, macOS, Windows (Docker)',
-      softwareHelp: links.architecture,
+      softwareHelp: url('/docs'),
       license: 'https://www.gnu.org/licenses/agpl-3.0.html',
       isAccessibleForFree: true,
       offers: {
@@ -66,7 +66,7 @@ export function landingNodes(): JsonLdNode[] {
         priceCurrency: 'EUR',
       },
       featureList: bricks.map(
-        (brick) => `${brick.name} (${brickStatusLabel(brick)}): ${brick.forWebsite}`,
+        (brick) => `${brick.name} (${brickAvailability}): ${brick.forWebsite}`,
       ),
       sameAs: [links.repo],
       publisher: { '@id': ids.organization },

@@ -10,16 +10,12 @@ See [milestones](docs/MILESTONES.md) for the current source and release status. 
 | Uploads | Direct uploads with content checks and optional malware scanning | Private downloads, deletions and storage usage |
 | Reviews | Submit reviews and read published ratings | Moderation, publishing and statistics |
 
-## Try from source
+## Try locally with Docker
 
-Install [mise](https://mise.jdx.dev) and Docker with Compose.
+Install Docker with Compose v2. From a checkout, start the local preview. Compose installs the application dependencies inside containers.
 
 ```sh
-git clone https://github.com/nolliebigspin/backbricks.git
-cd backbricks
-mise install
-mise run setup
-mise run dev
+docker compose --profile storage up -d
 ```
 
 1. Sign up with a local test address at <http://localhost:5173/signup>. Open the verification email at <http://localhost:8025>.
@@ -27,15 +23,14 @@ mise run dev
 3. Create a Contact form in **Inbox**. Use its **Embed** tab and a publishable key to submit from your page. For a plain HTML form, turn off the browser check and configure a success redirect in the form settings.
 4. Find the result under **Entries**. To try an agent integration, open **Project Embed → Connect an AI agent**.
 
-Follow the [integration docs](docs/integration/pages/index.md) and [examples](examples/html/README.md). The [CLI README](packages/cli/README.md) includes source-build commands while the npm preview is pending.
+Follow the [published integration docs](https://backbricks.app/docs) and [HTML examples](examples/html/README.md). The [CLI and MCP guide](https://backbricks.app/docs/cli) includes source-build commands and dashboard administration examples.
 
 ### Modules and storage
 
 ```sh
-BACKBRICKS_MODULES=forms docker compose up
-BACKBRICKS_MODULES=reviews docker compose up
-mise run scan
-BACKBRICKS_MODULES=forms,uploads SCANNER=clamav mise run dev
+BACKBRICKS_MODULES=forms docker compose up -d
+BACKBRICKS_MODULES=reviews docker compose up -d
+BACKBRICKS_MODULES=forms,uploads SCANNER=clamav docker compose --profile storage --profile scan up -d
 ```
 
 For unscanned uploads, run the Uploads-enabled stack with `SCANNER=none` and explicitly choose an unscanned upload area. A protected area fails closed if scanning is unavailable. The dashboard proxies the API on the development `PUBLIC_URL` (`http://localhost:5173`). See [Compose](compose.yaml) for ports and [storage setup](docs/storage-contracts.md) for browser origins and provider checks.
@@ -49,9 +44,9 @@ docker run --rm --env-file .env ghcr.io/nolliebigspin/backbricks:0.1.0 migrate
 docker run -d --env-file .env -p 3000:3000 ghcr.io/nolliebigspin/backbricks:0.1.0 all
 ```
 
-For this published preview image, use `SIGNUP_POLICY=open` to create and verify the first owner account, then switch back to `invite_only`. To try current modules, build the checkout with `docker build -t backbricks/server:local .` and use that image in the commands above. The verified target is Linux amd64. See [deployment architecture](docs/ARCHITECTURE.md#g4-self-hosting-docker-compose) and [storage operations](docs/storage-contracts.md#operations).
+For this published preview image, use `SIGNUP_POLICY=open` to create and verify the first owner account, then switch back to `invite_only`. The verified target is Linux amd64. See [deployment architecture](docs/ARCHITECTURE.md#g4-self-hosting-docker-compose) and [storage operations](docs/storage-contracts.md#operations).
 
-For the production Compose candidate from source, follow the [self-hosting guide](deploy/compose/README.md). It covers first-owner setup, TLS, optional services, backups and upgrades.
+For all three modules, run the local Compose preview above. The [source deployment runbook](deploy/compose/README.md) covers the pre-release production setup, including TLS, first-owner setup and backups.
 
 ## Contribute
 
