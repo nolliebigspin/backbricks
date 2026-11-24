@@ -10,6 +10,7 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import {
   AppError,
+  storageContentDisposition,
   storagePutSchema,
   storageGetSchema,
   storageKeySchema,
@@ -22,14 +23,6 @@ import {
 
 import { isMissing, unavailable, STORAGE_IO_TIMEOUTS } from './s3-io.ts';
 import { createS3UploadSessions } from './s3-sessions.ts';
-
-function disposition(inline: boolean, name = 'download') {
-  const encoded = encodeURIComponent(name).replaceAll(
-    /['()*]/g,
-    (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`,
-  );
-  return `${inline ? 'inline' : 'attachment'}; filename="download"; filename*=UTF-8''${encoded}`;
-}
 
 /** Private S3 port. Signing uses the public endpoint; all server-side I/O uses the internal endpoint. */
 export function createS3Storage(config: StorageConfig, clock: Clock = systemClock) {
@@ -79,7 +72,7 @@ export function createS3Storage(config: StorageConfig, clock: Clock = systemCloc
           Key: data.key,
           ResponseContentType: data.inlineImageType ?? 'application/octet-stream',
           ResponseCacheControl: 'private, no-store',
-          ResponseContentDisposition: disposition(
+          ResponseContentDisposition: storageContentDisposition(
             data.inlineImageType !== undefined,
             data.downloadName,
           ),

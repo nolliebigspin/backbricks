@@ -13,7 +13,7 @@ playwright-report/
 test-results/
 blob-report/
 
-# Local code graph (rebuilt via `mise run setup`)
+# Optional local CodeGraph index
 .codegraph/
 
 # Environment and secrets
@@ -39,3 +39,8 @@ CLAUDE.local.md
 /apps/www/public/schema/
 /apps/www/src/generated/
 /apps/www/src/content/docs/docs/
+
+# Generated production deployment credentials and recovery data.
+/deploy/compose/garage.toml
+/deploy/compose/restic-password
+/deploy/compose/backup-repository/

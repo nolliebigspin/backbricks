@@ -556,3 +556,5 @@ export {
 
 export type { ModulePrivacyHooks } from './modules/privacy.ts';
 export type { SubjectAttachmentPage } from './privacy/attachments.ts';
+
+export { storageContentDisposition } from './storage/disposition.ts';

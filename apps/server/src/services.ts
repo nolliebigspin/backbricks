@@ -45,6 +45,7 @@ import {
 import { moduleJobs } from './module-jobs.ts';
 import { moduleRepositories } from './module-repositories.ts';
 import { moduleCatalog } from './modules.ts';
+import { createStorageProxy } from './storage-proxy.ts';
 
 /** One provider/service lifetime per server runtime. Modules receive only the core's restricted views. */
 export function createServerServices(
@@ -67,7 +68,17 @@ export function createServerServices(
   const ids = createIds(clock);
   const activity = { clock, ids };
   const mailer = config.mailer ? createSmtpMailer(config.mailer) : null;
-  const storage = config.storage ? createS3Storage(config.storage, clock) : null;
+  const storageConfig = config.storage;
+  const proxy =
+    storageConfig?.uploadMode === 'proxy'
+      ? createStorageProxy(config.publicUrl, storageConfig.endpoint, config.appSecret, clock)
+      : null;
+  const storage = storageConfig
+    ? createS3Storage(
+        proxy ? { ...storageConfig, publicEndpoint: storageConfig.endpoint } : storageConfig,
+        clock,
+      )
+    : null;
   const scanner = config.scanner?.kind === 'clamav' ? createClamavScanner(config.scanner) : null;
   const captcha = createAltchaProvider({
     appSecret: config.appSecret,
@@ -83,7 +94,13 @@ export function createServerServices(
       entitlements: options.entitlements ?? createUnlimitedEntitlements(),
       rateLimiter: createRateLimiter(createPostgresRateLimitStore(db), clock),
     },
-    { mailer, storage, scanner, captcha, queue: options.queue },
+    {
+      mailer,
+      storage: proxy && storage ? proxy.wrap(storage) : storage,
+      scanner,
+      captcha,
+      queue: options.queue,
+    },
   );
   const withTenant = createWithTenant(
     db,
@@ -97,6 +114,7 @@ export function createServerServices(
   });
   return Object.freeze({
     container,
+    storageTransfer: proxy?.handle,
     authCapabilities: authCapabilities(config),
     captcha,
     readinessChecks: [

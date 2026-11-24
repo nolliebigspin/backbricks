@@ -69,7 +69,7 @@ describe('entry point', () => {
   test('an unknown role prints the usage and exits with 2', async () => {
     const proc = spawnRole('serv');
     expect(await proc.exited).toBe(2);
-    expect(await new Response(proc.stderr).text()).toContain('<serve|worker|all|migrate>');
+    expect(await new Response(proc.stderr).text()).toContain('<serve|worker|all|migrate|setup>');
   });
 
   test('invalid configuration lists the problems without values and exits with 1', async () => {

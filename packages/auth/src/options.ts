@@ -17,6 +17,7 @@ export function createDashboardAuthOptions(
   pending: MailMessage[],
   ipHash?: string,
   invitation?: AuthInvitation,
+  operatorSetup = false,
 ) {
   const { config } = options;
   const secure = config.nodeEnv === 'production' || new URL(config.publicUrl).protocol === 'https:';
@@ -40,8 +41,8 @@ export function createDashboardAuthOptions(
     verification: { storeIdentifier: 'hashed' },
     emailAndPassword: {
       enabled: true,
-      disableSignUp: !invitation && config.signupPolicy !== 'open',
-      requireEmailVerification: !invitation,
+      disableSignUp: !operatorSetup && !invitation && config.signupPolicy !== 'open',
+      requireEmailVerification: !operatorSetup && !invitation,
       autoSignIn: Boolean(invitation),
       minPasswordLength: AUTH_MIN_PASSWORD_LENGTH,
       resetPasswordTokenExpiresIn: AUTH_TOKEN_LIFETIME_SECONDS,
@@ -61,7 +62,7 @@ export function createDashboardAuthOptions(
     },
     emailVerification: {
       expiresIn: AUTH_TOKEN_LIFETIME_SECONDS,
-      sendOnSignUp: !invitation,
+      sendOnSignUp: !operatorSetup && !invitation,
       sendOnSignIn: false,
       autoSignInAfterVerification: false,
       sendVerificationEmail: async ({ user, url }) => {
@@ -73,7 +74,9 @@ export function createDashboardAuthOptions(
     databaseHooks: {
       user: {
         create: {
-          before: async (user) => ({ data: invitation ? { ...user, emailVerified: true } : user }),
+          before: async (user) => ({
+            data: invitation || operatorSetup ? { ...user, emailVerified: true } : user,
+          }),
         },
       },
       session: {

@@ -8,7 +8,7 @@ Resolve these at their task gates. Record approved architecture decisions in [AD
 
 ## Q28
 
-**Which interactive sign-in should the CLI use for session-only administration?** Prefer browser-mediated user authorization that preserves the existing role and session checks and the authenticated user in the audit trail. Project keys remain the automation credential for scoped operations. I7 requires a dashboard session for key creation, so the CLI must preserve that requirement, including an authenticated browser step if the design needs one. Decide the credential lifetime, local storage, logout/revocation, and unattended behavior in an ADR before P6.9c. [Authorization baseline](docs/adr/0028-management-principals-and-permissions.md)
+**Which interactive sign-in should the CLI use for session-only administration?** Prefer browser-mediated user authorization that preserves the existing role and session checks and the authenticated user in the audit trail. Project keys remain the automation credential for scoped operations. I7 requires a dashboard session for key creation, so the CLI must preserve that requirement, including an authenticated browser step if the design needs one. P6.9 implements the existing dashboard sign-in endpoint and private per-deployment session storage. The server controls expiration and revocation. Review the terminal flow decision in [ADR-0081](docs/adr/0081-cli-dashboard-authorization.md). [Authorization baseline](docs/adr/0028-management-principals-and-permissions.md)
 
 ## Q29
 

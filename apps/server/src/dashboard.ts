@@ -16,7 +16,7 @@ export function findDashboard(dir: string = DASHBOARD_DIR): string | null {
 }
 
 // Paths that belong to the API; a missing route there is a 404 problem, never the SPA.
-const API_PREFIX = /^\/(v1|api)(\/|$)/;
+const API_PREFIX = /^\/(v1|api|_backbricks)(\/|$)/;
 
 async function fileResponse(path: string): Promise<Response | null> {
   const file = Bun.file(path);
@@ -32,6 +32,25 @@ async function fileResponse(path: string): Promise<Response | null> {
  */
 export function dashboardRoutes(dir: string): Hono<AppEnv> {
   const routes = new Hono<AppEnv>();
+  routes.use('*', async (c, next) => {
+    c.header(
+      'Content-Security-Policy',
+      [
+        "default-src 'self'",
+        "script-src 'self'",
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data: blob: https:",
+        "object-src 'none'",
+        "base-uri 'none'",
+        "form-action 'self'",
+        "frame-ancestors 'none'",
+      ].join('; '),
+    );
+    c.header('X-Content-Type-Options', 'nosniff');
+    c.header('Referrer-Policy', 'no-referrer');
+    c.header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    await next();
+  });
   const files = serveStatic<AppEnv>({ root: dir, join, getContent: fileResponse });
 
   routes.use('/assets/*', async (c, next) => {

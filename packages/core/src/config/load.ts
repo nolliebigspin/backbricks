@@ -21,6 +21,7 @@ export type Env = Readonly<Record<string, string | undefined>>;
 export type ConfigIssue = { variable: string; message: string };
 
 export type StorageConfig = {
+  uploadMode?: 'presigned' | 'proxy';
   endpoint: string;
   publicEndpoint?: string;
   region: string;
@@ -182,6 +183,7 @@ export function loadConfig(env: Env, modules: AvailableModules, readFile?: ReadF
           ? { smtpUrl: base.SMTP_URL, from: base.MAIL_FROM }
           : null,
       storage: storage && {
+        uploadMode: storage.UPLOAD_MODE,
         endpoint: storage.S3_ENDPOINT,
         publicEndpoint: storage.S3_PUBLIC_ENDPOINT ?? storage.S3_ENDPOINT,
         region: storage.S3_REGION,

@@ -5,14 +5,17 @@ import { Writable } from 'node:stream';
 
 import { Command, CommanderError, Option } from 'commander';
 
+import { registerAdmin } from './admin.ts';
 import { codegen } from './codegen.ts';
 import { plan, pull, push, readConfig } from './configuration.ts';
+import { registerDeploy } from './deploy.ts';
 import { doctor } from './doctor.ts';
 import { CliError, exit, redact } from './errors.ts';
 import { integrationGuide } from './integration-guide.ts';
 import { asRecord, readJson } from './local-files.ts';
 import { integration, listKeys, testSubmit } from './management.ts';
 import { frameworks, initialize, type Framework } from './project-files.ts';
+import { explicitBase, signIn, signOut } from './session.ts';
 import {
   assertCredentialTarget,
   isSecret,
@@ -93,6 +96,32 @@ async function main(args: string[]) {
       await integration(selected, credential);
       await saveSecret(selected, credential);
       report({ project: selected.project, stored: true });
+    });
+
+  registerAdmin(program, { root, options, report, confirm });
+  registerDeploy(program, report);
+  const session = program.command('session').description('Use an authenticated dashboard session');
+  session
+    .command('login')
+    .description('Sign in with a verified dashboard account')
+    .action(async () => {
+      const baseUrl = explicitBase(options().baseUrl);
+      if (!stdin.isTTY || options().json || options().yes)
+        throw new CliError(
+          'interactive_login_required',
+          'Dashboard sign-in requires an interactive terminal.',
+        );
+      const email = (await prompt('Dashboard email: ')).trim();
+      const password = await prompt('Dashboard password: ', true);
+      await signIn(baseUrl, email, password);
+      report({ signedIn: true });
+    });
+  session
+    .command('logout')
+    .description('Revoke and remove the stored dashboard session')
+    .action(async () => {
+      await signOut(explicitBase(options().baseUrl));
+      report({ signedOut: true });
     });
 
   program

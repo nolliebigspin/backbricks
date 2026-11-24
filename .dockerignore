@@ -7,8 +7,10 @@
 .git
 .codegraph
 .claude
-.env
-.env.*
+**/.env
+**/.env.*
+/deploy
+/umami-preview
 **/*.pem
 coverage
 playwright-report

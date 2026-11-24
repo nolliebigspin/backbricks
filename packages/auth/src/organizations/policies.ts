@@ -121,6 +121,7 @@ export const organizationRouteManifest = Object.freeze(
     Object.freeze({
       path: `${AUTH_BASE_PATH}${path}`,
       method: policy.method,
+      organizationSelector: Object.hasOwn(policy.input.shape, 'organizationId'),
       requirement: Object.freeze({ ...policy.requirement }),
       isolationCase: policy.isolationCase,
       bodyLimitBytes: AUTH_BODY_LIMIT_BYTES,

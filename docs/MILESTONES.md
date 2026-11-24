@@ -32,7 +32,7 @@ Merged in [PR #20](https://github.com/nolliebigspin/backbricks/pull/20). Config-
 
 ### M6 · Open Source 1.0 → `v1.0.0`
 
-**Status** — [P6 plan](../PLAN.md#p6--open-source-10) awaiting approval. Resolve CLI session auth and release access at the gates in [OPEN_QUESTIONS.md](../OPEN_QUESTIONS.md).
+**Status** — [P6 implementation](progress/phase-6.md) is ready for review. The source candidate has been tested locally. The maintainer will review product documentation and dashboard UI before authorizing the `v1.0.0` tag or publication. [Open release decisions](../OPEN_QUESTIONS.md)
 
 **Exit criteria**
 

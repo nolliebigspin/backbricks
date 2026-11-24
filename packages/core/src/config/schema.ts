@@ -73,15 +73,21 @@ const storageEndpoint = httpUrl.refine((value) => {
   const url = new URL(value);
   return !url.username && !url.password && !url.search && !url.hash;
 }, 'must not contain credentials, query parameters or fragments');
-export const storageEnvSchema = z.object({
-  S3_ENDPOINT: storageEndpoint,
-  S3_PUBLIC_ENDPOINT: storageEndpoint.optional(),
-  S3_REGION: z.string({ error: 'is required' }).min(1, 'is required'),
-  S3_BUCKET: z.string({ error: 'is required' }).min(1, 'is required'),
-  S3_ACCESS_KEY_ID: z.string({ error: 'is required' }).min(1, 'is required'),
-  S3_SECRET_ACCESS_KEY: z.string({ error: 'is required' }).min(1, 'is required'),
-  S3_FORCE_PATH_STYLE: z.stringbool({ error: 'must be true or false' }).default(false),
-});
+export const storageEnvSchema = z
+  .object({
+    UPLOAD_MODE: z.enum(['presigned', 'proxy']).default('presigned'),
+    S3_ENDPOINT: storageEndpoint,
+    S3_PUBLIC_ENDPOINT: storageEndpoint.optional(),
+    S3_REGION: z.string({ error: 'is required' }).min(1, 'is required'),
+    S3_BUCKET: z.string({ error: 'is required' }).min(1, 'is required'),
+    S3_ACCESS_KEY_ID: z.string({ error: 'is required' }).min(1, 'is required'),
+    S3_SECRET_ACCESS_KEY: z.string({ error: 'is required' }).min(1, 'is required'),
+    S3_FORCE_PATH_STYLE: z.stringbool({ error: 'must be true or false' }).default(false),
+  })
+  .refine((config) => config.UPLOAD_MODE !== 'proxy' || config.S3_FORCE_PATH_STYLE, {
+    path: ['S3_FORCE_PATH_STYLE'],
+    error: 'must be true for proxy uploads',
+  });
 
 export const scannerEnvSchema = z.discriminatedUnion(
   'SCANNER',

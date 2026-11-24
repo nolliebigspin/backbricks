@@ -5,9 +5,9 @@
 import { describe, expect, test } from 'bun:test';
 
 import { HeadBucketCommand, S3Client } from '@aws-sdk/client-s3';
+import { initGarage } from '@backbricks/adapters';
 
 import { garageAvailable, garageTestSettings as settings } from '../test/garage.ts';
-import { initGarage } from './garage-init.ts';
 
 const available = await garageAvailable();
 

@@ -1,0 +1,698 @@
+[
+  {
+    "id": "archiveProject",
+    "method": "DELETE",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}",
+    "role": "admin",
+    "scope": null
+  },
+  {
+    "id": "createKey",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/keys",
+    "role": "admin",
+    "scope": null
+  },
+  {
+    "id": "createProject",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/v1/projects",
+    "role": "admin",
+    "scope": null
+  },
+  {
+    "id": "eraseProject",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/v1/project-erasures",
+    "role": "owner",
+    "scope": null
+  },
+  {
+    "id": "forms.instance.archive",
+    "method": "DELETE",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/forms/{key}",
+    "role": "admin",
+    "scope": "config:write"
+  },
+  {
+    "id": "forms.instance.create",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/forms",
+    "role": "admin",
+    "scope": "config:write"
+  },
+  {
+    "id": "forms.instance.list",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/forms",
+    "role": "member",
+    "scope": "config:read"
+  },
+  {
+    "id": "forms.instance.migrate",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/forms/{key}/migrate",
+    "role": "admin",
+    "scope": "config:write"
+  },
+  {
+    "id": "forms.instance.read",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/forms/{key}",
+    "role": "member",
+    "scope": "config:read"
+  },
+  {
+    "id": "forms.instance.replace",
+    "method": "PUT",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/forms/{key}",
+    "role": "admin",
+    "scope": "config:write"
+  },
+  {
+    "id": "forms.instance.revision",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/forms/{key}/revisions/{version}",
+    "role": "member",
+    "scope": "config:read"
+  },
+  {
+    "id": "forms.instance.revisions",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/forms/{key}/revisions",
+    "role": "member",
+    "scope": "config:read"
+  },
+  {
+    "id": "forms.instance.rollback",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/forms/{key}/revisions/{version}/rollback",
+    "role": "admin",
+    "scope": "config:write"
+  },
+  {
+    "id": "forms.instance.update",
+    "method": "PATCH",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/forms/{key}",
+    "role": "admin",
+    "scope": "config:write"
+  },
+  {
+    "id": "forms.submissions.bulk",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/forms/{key}/submissions/bulk",
+    "role": "member",
+    "scope": "data:write"
+  },
+  {
+    "id": "forms.submissions.bulk_delete",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/forms/{key}/submissions/bulk-delete",
+    "role": "admin",
+    "scope": "data:delete"
+  },
+  {
+    "id": "forms.submissions.delete",
+    "method": "DELETE",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/forms/{key}/submissions/{id}",
+    "role": "member",
+    "scope": "data:delete"
+  },
+  {
+    "id": "forms.submissions.delete_all",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/forms/{key}/submissions/delete-all",
+    "role": "admin",
+    "scope": null
+  },
+  {
+    "id": "forms.submissions.export",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/forms/{key}/export.csv",
+    "role": "admin",
+    "scope": null
+  },
+  {
+    "id": "forms.submissions.list",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/forms/{key}/submissions",
+    "role": "member",
+    "scope": "data:read"
+  },
+  {
+    "id": "forms.submissions.read",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/forms/{key}/submissions/{id}",
+    "role": "member",
+    "scope": "data:read"
+  },
+  {
+    "id": "forms.submissions.update",
+    "method": "PATCH",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/forms/{key}/submissions/{id}",
+    "role": "member",
+    "scope": "data:write"
+  },
+  {
+    "id": "forms.summary",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/forms/{key}/summary",
+    "role": "member",
+    "scope": "stats:read"
+  },
+  {
+    "id": "forms.test.submit.cli",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/forms/{key}/test-submissions",
+    "role": null,
+    "scope": "test:write"
+  },
+  {
+    "id": "getProject",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}",
+    "role": "member",
+    "scope": "integration:read"
+  },
+  {
+    "id": "getProjectConfig",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/config",
+    "role": "member",
+    "scope": "config:read"
+  },
+  {
+    "id": "getProjectIntegration",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/integration",
+    "role": "member",
+    "scope": "integration:read"
+  },
+  {
+    "id": "getProjectTypes",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/types",
+    "role": "member",
+    "scope": "config:read"
+  },
+  {
+    "id": "getProjectUsage",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/usage",
+    "role": "member",
+    "scope": "stats:read"
+  },
+  {
+    "id": "invitation.accept",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/api/auth/organization/accept-invitation",
+    "role": "authenticated",
+    "scope": null
+  },
+  {
+    "id": "invitation.cancel",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/api/auth/organization/cancel-invitation",
+    "role": "admin",
+    "scope": null
+  },
+  {
+    "id": "invitation.create",
+    "method": "POST",
+    "organizationSelector": true,
+    "path": "/api/auth/organization/invite-member",
+    "role": "admin",
+    "scope": null
+  },
+  {
+    "id": "invitation.list",
+    "method": "GET",
+    "organizationSelector": true,
+    "path": "/api/auth/organization/list-invitations",
+    "role": "admin",
+    "scope": null
+  },
+  {
+    "id": "listKeys",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/keys",
+    "role": "admin",
+    "scope": "keys:read"
+  },
+  {
+    "id": "listOrganizationActivity",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/organizations/{organizationId}/audit-logs",
+    "role": "admin",
+    "scope": null
+  },
+  {
+    "id": "listProjectActivity",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/audit-logs",
+    "role": "admin",
+    "scope": null
+  },
+  {
+    "id": "listProjects",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects",
+    "role": "member",
+    "scope": null
+  },
+  {
+    "id": "membership.list",
+    "method": "GET",
+    "organizationSelector": true,
+    "path": "/api/auth/organization/list-members",
+    "role": "admin",
+    "scope": null
+  },
+  {
+    "id": "membership.read_own",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/api/auth/organization/get-active-member",
+    "role": "member",
+    "scope": null
+  },
+  {
+    "id": "membership.remove",
+    "method": "POST",
+    "organizationSelector": true,
+    "path": "/api/auth/organization/remove-member",
+    "role": "admin",
+    "scope": null
+  },
+  {
+    "id": "membership.role",
+    "method": "POST",
+    "organizationSelector": true,
+    "path": "/api/auth/organization/update-member-role",
+    "role": "admin",
+    "scope": null
+  },
+  {
+    "id": "notifications.create",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/notification-rules",
+    "role": "admin",
+    "scope": null
+  },
+  {
+    "id": "notifications.delete",
+    "method": "DELETE",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/notification-rules/{ruleId}",
+    "role": "admin",
+    "scope": null
+  },
+  {
+    "id": "notifications.list",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/notification-rules",
+    "role": "admin",
+    "scope": null
+  },
+  {
+    "id": "notifications.options",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/notification-rules/options",
+    "role": "admin",
+    "scope": null
+  },
+  {
+    "id": "notifications.update",
+    "method": "PATCH",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/notification-rules/{ruleId}",
+    "role": "admin",
+    "scope": null
+  },
+  {
+    "id": "organization.create",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/api/auth/organization/create",
+    "role": "authenticated",
+    "scope": null
+  },
+  {
+    "id": "organization.list",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/api/auth/organization/list",
+    "role": "authenticated",
+    "scope": null
+  },
+  {
+    "id": "organization.read",
+    "method": "GET",
+    "organizationSelector": true,
+    "path": "/api/auth/organization/get-organization",
+    "role": "member",
+    "scope": null
+  },
+  {
+    "id": "organization.select",
+    "method": "POST",
+    "organizationSelector": true,
+    "path": "/api/auth/organization/set-active",
+    "role": "member",
+    "scope": null
+  },
+  {
+    "id": "planProjectConfig",
+    "method": "PUT",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/config",
+    "role": "member",
+    "scope": "config:read"
+  },
+  {
+    "id": "privacy.subjectDelete",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/privacy/subject-delete",
+    "role": "admin",
+    "scope": null
+  },
+  {
+    "id": "privacy.subjectExport",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/privacy/subject-export",
+    "role": "admin",
+    "scope": null
+  },
+  {
+    "id": "privacy.subjectExportZip",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/privacy/subject-export.zip",
+    "role": "admin",
+    "scope": null
+  },
+  {
+    "id": "reviews.collection.stats",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/review-collections/{key}/stats",
+    "role": "member",
+    "scope": "stats:read"
+  },
+  {
+    "id": "reviews.instance.archive",
+    "method": "DELETE",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/review-collections/{key}",
+    "role": "admin",
+    "scope": "config:write"
+  },
+  {
+    "id": "reviews.instance.create",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/review-collections",
+    "role": "admin",
+    "scope": "config:write"
+  },
+  {
+    "id": "reviews.instance.list",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/review-collections",
+    "role": "member",
+    "scope": "config:read"
+  },
+  {
+    "id": "reviews.instance.migrate",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/review-collections/{key}/migrate",
+    "role": "admin",
+    "scope": "config:write"
+  },
+  {
+    "id": "reviews.instance.read",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/review-collections/{key}",
+    "role": "member",
+    "scope": "config:read"
+  },
+  {
+    "id": "reviews.instance.replace",
+    "method": "PUT",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/review-collections/{key}",
+    "role": "admin",
+    "scope": "config:write"
+  },
+  {
+    "id": "reviews.instance.revision",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/review-collections/{key}/revisions/{version}",
+    "role": "member",
+    "scope": "config:read"
+  },
+  {
+    "id": "reviews.instance.revisions",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/review-collections/{key}/revisions",
+    "role": "member",
+    "scope": "config:read"
+  },
+  {
+    "id": "reviews.instance.rollback",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/review-collections/{key}/revisions/{version}/rollback",
+    "role": "admin",
+    "scope": "config:write"
+  },
+  {
+    "id": "reviews.instance.update",
+    "method": "PATCH",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/review-collections/{key}",
+    "role": "admin",
+    "scope": "config:write"
+  },
+  {
+    "id": "reviews.records.delete",
+    "method": "DELETE",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/reviews/{id}",
+    "role": "member",
+    "scope": "data:delete"
+  },
+  {
+    "id": "reviews.records.list",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/reviews",
+    "role": "member",
+    "scope": "data:read"
+  },
+  {
+    "id": "reviews.records.moderate",
+    "method": "PATCH",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/reviews/{id}",
+    "role": "member",
+    "scope": "data:write"
+  },
+  {
+    "id": "reviews.records.read",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/reviews/{id}",
+    "role": "member",
+    "scope": "data:read"
+  },
+  {
+    "id": "revokeKey",
+    "method": "DELETE",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/keys/{keyId}",
+    "role": "admin",
+    "scope": null
+  },
+  {
+    "id": "updateProject",
+    "method": "PATCH",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}",
+    "role": "admin",
+    "scope": "project:write"
+  },
+  {
+    "id": "uploads.files.bulk_delete",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/files/bulk-delete",
+    "role": "admin",
+    "scope": "data:delete"
+  },
+  {
+    "id": "uploads.files.delete",
+    "method": "DELETE",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/files/{id}",
+    "role": "member",
+    "scope": "data:delete"
+  },
+  {
+    "id": "uploads.files.download",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/files/{id}/download-url",
+    "role": "member",
+    "scope": "data:read"
+  },
+  {
+    "id": "uploads.files.list",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/files",
+    "role": "member",
+    "scope": "data:read"
+  },
+  {
+    "id": "uploads.files.read",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/files/{id}",
+    "role": "member",
+    "scope": "data:read"
+  },
+  {
+    "id": "uploads.instance.archive",
+    "method": "DELETE",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/upload-zones/{key}",
+    "role": "admin",
+    "scope": "config:write"
+  },
+  {
+    "id": "uploads.instance.create",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/upload-zones",
+    "role": "admin",
+    "scope": "config:write"
+  },
+  {
+    "id": "uploads.instance.list",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/upload-zones",
+    "role": "member",
+    "scope": "config:read"
+  },
+  {
+    "id": "uploads.instance.migrate",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/upload-zones/{key}/migrate",
+    "role": "admin",
+    "scope": "config:write"
+  },
+  {
+    "id": "uploads.instance.read",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/upload-zones/{key}",
+    "role": "member",
+    "scope": "config:read"
+  },
+  {
+    "id": "uploads.instance.replace",
+    "method": "PUT",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/upload-zones/{key}",
+    "role": "admin",
+    "scope": "config:write"
+  },
+  {
+    "id": "uploads.instance.revision",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/upload-zones/{key}/revisions/{version}",
+    "role": "member",
+    "scope": "config:read"
+  },
+  {
+    "id": "uploads.instance.revisions",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/upload-zones/{key}/revisions",
+    "role": "member",
+    "scope": "config:read"
+  },
+  {
+    "id": "uploads.instance.rollback",
+    "method": "POST",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/upload-zones/{key}/revisions/{version}/rollback",
+    "role": "admin",
+    "scope": "config:write"
+  },
+  {
+    "id": "uploads.instance.update",
+    "method": "PATCH",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/upload-zones/{key}",
+    "role": "admin",
+    "scope": "config:write"
+  },
+  {
+    "id": "uploads.storage.usage",
+    "method": "GET",
+    "organizationSelector": false,
+    "path": "/v1/projects/{projectId}/storage-usage",
+    "role": "member",
+    "scope": "stats:read"
+  }
+]

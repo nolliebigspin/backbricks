@@ -67,6 +67,7 @@ export async function packageClients(releaseVersion?: string) {
     copyFile(join(cli, 'LICENSE'), join(cliStage, 'LICENSE')),
     copyFile(join(sdk, 'README.md'), join(sdkStage, 'README.md')),
     copyFile(join(cli, 'README.md'), join(cliStage, 'README.md')),
+    copyFile(join(cli, 'ADMIN.md'), join(cliStage, 'ADMIN.md')),
   ]);
   const types = join(sdkStage, 'dist/types');
   await Promise.all([

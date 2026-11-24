@@ -168,6 +168,7 @@ export async function scenario(
           auth,
           resolveKey: apiOptions.resolveKey ?? keyAuth.resolveKey,
         }),
+        runtime.storageTransfer,
       );
     };
     await mount(result.config);

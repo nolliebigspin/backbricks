@@ -15,6 +15,7 @@ export async function checkApiDrift(committed = apiArtifacts()) {
       contract: join(directory, 'openapi.json'),
       types: join(directory, 'generated.ts'),
       configSchema: join(directory, 'config-schema.json'),
+      adminCommands: join(directory, 'admin-commands.json'),
     };
     await generateApi(fresh);
     const outputs = await Promise.all(Object.values(fresh).map((path) => Bun.file(path).text()));
