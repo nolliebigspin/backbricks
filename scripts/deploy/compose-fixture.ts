@@ -45,6 +45,8 @@ export async function deployment(image: string, modules: string, tls: boolean, s
   const httpsPort = freePort();
   const origin = tls ? `https://localhost:${httpsPort}` : 'https://backbricks.example.invalid';
   const env = join(directory, '.env');
+  const backupVolume = tls ? `${project}-backup` : undefined;
+  const backupOverride = join(directory, 'backup.override.yaml');
   await cp('deploy/compose', directory, {
     recursive: true,
     filter: (source) =>
@@ -71,6 +73,17 @@ export async function deployment(image: string, modules: string, tls: boolean, s
   await writeFile(env, `BACKBRICKS_LOCAL_PORT=${localPort}\nHTTP_PORT=${freePort()}\n`, {
     flag: 'a',
   });
+  if (backupVolume) {
+    // Keep root-owned repository files off the runner and preserve the volume across down -v.
+    await writeFile(
+      backupOverride,
+      JSON.stringify({
+        services: { backup: { volumes: ['scenario-backup:/repository'] } },
+        volumes: { 'scenario-backup': { external: true, name: backupVolume } },
+      }),
+    );
+    await run(['docker', 'volume', 'create', backupVolume]);
+  }
   const args = (name: string, rest: string[]) => [
     'docker',
     'compose',
@@ -80,6 +93,7 @@ export async function deployment(image: string, modules: string, tls: boolean, s
     env,
     '-f',
     join(directory, 'compose.yaml'),
+    ...(backupVolume ? ['-f', backupOverride] : []),
     ...rest,
   ];
   const runCompose = (name: string, rest: string[], input?: string) => run(args(name, rest), input);
@@ -101,12 +115,15 @@ export async function deployment(image: string, modules: string, tls: boolean, s
     command: (rest: string[], input?: string) => command(args(project, rest), input),
     restore: (rest: string[], input?: string) => runCompose(`${project}-restore`, rest, input),
     async cleanup() {
-      try {
-        await stop(project);
-        await stop(`${project}-restore`);
-      } finally {
-        await rm(directory, { recursive: true, force: true });
-      }
+      const stopped = await Promise.allSettled([stop(project), stop(`${project}-restore`)]);
+      const removed = await Promise.allSettled([
+        rm(directory, { recursive: true, force: true }),
+        ...(backupVolume ? [run(['docker', 'volume', 'rm', backupVolume])] : []),
+      ]);
+      const failures = [...stopped, ...removed].flatMap((result) =>
+        result.status === 'rejected' ? [result.reason] : [],
+      );
+      if (failures.length) throw new AggregateError(failures, 'Scenario C cleanup failed.');
     },
   };
 }

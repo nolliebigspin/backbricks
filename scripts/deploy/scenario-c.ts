@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { randomBytes } from 'node:crypto';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 import { z } from 'zod';
 
@@ -225,6 +227,8 @@ try {
   await fixture.compose(['stop', 'caddy', 'app', 'garage']);
   await fixture.compose(['run', '--rm', 'backup', 'init']);
   await fixture.compose(['run', '--rm', 'backup', 'backup']);
+  if (existsSync(join(fixture.directory, 'backup-repository')))
+    throw new Error('Scenario C created a bind-mounted backup repository.');
   const snapshots = z
     .array(z.object({ id: z.string() }))
     .parse(JSON.parse(await fixture.compose(['run', '--rm', 'backup', 'snapshots', '--json'])));
@@ -246,12 +250,12 @@ try {
   await recovered.login();
   recovered.select(org);
   await verifyRecovered(recovered);
-  process.stdout.write(
-    'Scenario C passed production TLS, first-owner bootstrap, proxy uploads, forms, reviews and encrypted restore.\n',
-  );
 } finally {
   await fixture.cleanup();
 }
+process.stdout.write(
+  'Scenario C passed production TLS, first-owner bootstrap, proxy uploads, forms, reviews, encrypted restore and cleanup.\n',
+);
 
 for (const modules of ['forms', 'uploads']) {
   // oxlint-disable-next-line no-await-in-loop -- Both fixtures use the default private subnet and run sequentially.
